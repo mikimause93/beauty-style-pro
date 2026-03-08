@@ -49,6 +49,7 @@ export default function HomePage() {
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [stylists, setStylists] = useState(fallbackStylists);
+  const [sharePost, setSharePost] = useState<Post | null>(null);
 
   useEffect(() => { fetchData(); }, []);
 
