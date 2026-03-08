@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, MessageCircle, Share2, Music2, Plus, Bookmark, ArrowLeft, Play } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRadio } from "@/contexts/RadioContext";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import beauty1 from "@/assets/beauty-1.jpg";
@@ -77,11 +78,13 @@ const fallbackShorts: Short[] = [
 export default function ShortsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { pause: pauseRadio } = useRadio();
   const [shorts, setShorts] = useState(fallbackShorts);
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    pauseRadio();
     loadShorts();
   }, []);
 

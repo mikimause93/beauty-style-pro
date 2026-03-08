@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Video, Coins, Target, Clock, Users, Globe, Lock, Sparkles, Scissors, Palette, Droplets, BookOpen, Paintbrush, Gem, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
+import { useRadio } from "@/contexts/RadioContext";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -20,6 +21,7 @@ const DURATIONS = [15, 30, 45, 60, 90, 120];
 export default function GoLivePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { pause: pauseRadio } = useRadio();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("tutorial");
@@ -30,6 +32,7 @@ export default function GoLivePage() {
   const [loading, setLoading] = useState(false);
 
   const startLive = async () => {
+    pauseRadio();
     if (!title.trim()) {
       toast.error("Inserisci un titolo per la live");
       return;

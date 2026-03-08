@@ -1,7 +1,7 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { useRadioPlayer } from "@/hooks/useRadioPlayer";
+import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import { toast } from "sonner";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -12,7 +12,7 @@ import stylist2 from "@/assets/stylist-2.jpg";
 const coverImages = [beauty2, stylist1, stylist2, beauty3];
 
 export default function RadioPage() {
-  const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadioPlayer();
+  const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadio();
   const [liked, setLiked] = useState(false);
   const { awardCoins } = useQRCoinRewards();
 

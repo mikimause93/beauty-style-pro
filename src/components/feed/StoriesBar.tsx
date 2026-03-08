@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useRadio } from "@/contexts/RadioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -33,6 +34,7 @@ const fallbackStories: GroupedStory[] = [
 export default function StoriesBar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { pause: pauseRadio } = useRadio();
   const [groups, setGroups] = useState<GroupedStory[]>([]);
   const [viewingGroup, setViewingGroup] = useState<GroupedStory | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -128,6 +130,7 @@ export default function StoriesBar() {
   };
 
   const openStory = (group: GroupedStory) => {
+    pauseRadio();
     setViewingGroup(group);
     setCurrentIndex(0);
     setProgress(0);

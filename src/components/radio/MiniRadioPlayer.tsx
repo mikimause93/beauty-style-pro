@@ -1,6 +1,6 @@
 import { Play, Pause, SkipForward, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useRadioPlayer } from "@/hooks/useRadioPlayer";
+import { useRadio } from "@/contexts/RadioContext";
 import { forwardRef } from "react";
 import beauty2 from "@/assets/beauty-2.jpg";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -17,7 +17,7 @@ interface MiniRadioPlayerProps {
 const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
   ({ visible, onClose }, ref) => {
     const navigate = useNavigate();
-    const { isPlaying, loading, currentStation, toggle, nextStation, stations } = useRadioPlayer();
+    const { isPlaying, loading, currentStation, toggle, nextStation, stations } = useRadio();
 
     if (!visible) return null;
 
