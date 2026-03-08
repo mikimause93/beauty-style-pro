@@ -203,7 +203,7 @@ export default function HomePage() {
           {[
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
-            { Icon: Map, label: "Mappa", path: "/map-search" },
+            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
