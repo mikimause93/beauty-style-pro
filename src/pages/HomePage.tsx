@@ -323,15 +323,14 @@ export default function HomePage() {
         {activeTab === "Stream" && (
           <div className="space-y-4 fade-in">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Live & Scheduled</h3>
+              <h3 className="text-sm font-semibold">Dirette & Programmate</h3>
               <button onClick={() => navigate("/live")} className="text-xs text-primary font-semibold">Apri Live</button>
             </div>
 
-            {/* Quick stream actions */}
             <div className="grid grid-cols-3 gap-2">
               <button onClick={() => navigate("/events")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">📅</span>
-                <span className="text-[10px] text-muted-foreground">Events</span>
+                <span className="text-[10px] text-muted-foreground">Eventi</span>
               </button>
               <button onClick={() => navigate("/radio")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">📻</span>
@@ -339,7 +338,7 @@ export default function HomePage() {
               </button>
               <button onClick={() => navigate("/challenges")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">🏆</span>
-                <span className="text-[10px] text-muted-foreground">Challenges</span>
+                <span className="text-[10px] text-muted-foreground">Sfide</span>
               </button>
             </div>
 
