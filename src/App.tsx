@@ -53,6 +53,7 @@ import SearchPage from "./pages/SearchPage";
 import ManageProductsPage from "./pages/ManageProductsPage";
 import WalletPage from "./pages/WalletPage";
 import AdminPage from "./pages/AdminPage";
+import CreatorApplicationPage from "./pages/CreatorApplicationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -114,6 +115,7 @@ const App = () => {
             <Route path="/manage-products" element={<ManageProductsPage />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/become-creator" element={<CreatorApplicationPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />

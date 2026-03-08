@@ -2,6 +2,7 @@ import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, 
 import TrendingClips from "@/components/feed/TrendingClips";
 import ReelsSection from "@/components/feed/ReelsSection";
 import SponsorBanner from "@/components/feed/SponsorBanner";
+import AIMatchBanner from "@/components/feed/AIMatchBanner";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
@@ -158,6 +159,9 @@ export default function HomePage() {
           </button>
         ))}
       </div>
+
+      {/* AI Smart Match */}
+      {activeTab === "Nuovi" && <AIMatchBanner />}
 
       {/* Reels */}
       {activeTab === "Nuovi" && <ReelsSection />}
