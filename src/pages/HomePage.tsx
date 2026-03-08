@@ -1,4 +1,5 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag } from "lucide-react";
+import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
