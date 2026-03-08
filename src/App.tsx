@@ -54,6 +54,8 @@ import ManageProductsPage from "./pages/ManageProductsPage";
 import WalletPage from "./pages/WalletPage";
 import AdminPage from "./pages/AdminPage";
 import CreatorApplicationPage from "./pages/CreatorApplicationPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import BoostProfilePage from "./pages/BoostProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
