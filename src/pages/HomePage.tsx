@@ -61,6 +61,8 @@ const tabs = ["New", "Stylists", "Most", "Stream"];
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("New");
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const toggleLike = (id: number) => {
     setLikedPosts(prev => 
