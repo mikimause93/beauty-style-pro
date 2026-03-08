@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      ar_filters: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          featured: boolean
+          filter_data: Json
+          id: string
+          name: string
+          preview_image: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          featured?: boolean
+          filter_data?: Json
+          id?: string
+          name: string
+          preview_image: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          featured?: boolean
+          filter_data?: Json
+          id?: string
+          name?: string
+          preview_image?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          criteria: Json | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          rarity: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          criteria?: Json | null
+          description: string
+          icon: string
+          id?: string
+          name: string
+          rarity?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          criteria?: Json | null
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          rarity?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_date: string
@@ -332,6 +410,113 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard: {
+        Row: {
+          created_at: string
+          id: string
+          leaderboard_type: string
+          metadata: Json | null
+          period: string
+          rank: number | null
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leaderboard_type: string
+          metadata?: Json | null
+          period?: string
+          rank?: number | null
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leaderboard_type?: string
+          metadata?: Json | null
+          period?: string
+          rank?: number | null
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      live_streams: {
+        Row: {
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          id: string
+          peak_viewers: number
+          professional_id: string | null
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+          stream_key: string | null
+          stream_url: string | null
+          thumbnail_url: string | null
+          title: string
+          total_earnings: number
+          total_tips: number
+          total_views: number
+          updated_at: string
+          viewer_count: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          peak_viewers?: number
+          professional_id?: string | null
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          stream_key?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          total_earnings?: number
+          total_tips?: number
+          total_views?: number
+          updated_at?: string
+          viewer_count?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          peak_viewers?: number
+          professional_id?: string | null
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          stream_key?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          total_earnings?: number
+          total_tips?: number
+          total_views?: number
+          updated_at?: string
+          viewer_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_streams_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -405,6 +590,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      playlists: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          station_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          station_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          station_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlists_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "radio_stations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_likes: {
         Row: {
@@ -621,6 +844,51 @@ export type Database = {
         }
         Relationships: []
       }
+      radio_stations: {
+        Row: {
+          active: boolean
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          genre: string
+          id: string
+          language: string
+          listener_count: number
+          name: string
+          stream_url: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          genre: string
+          id?: string
+          language?: string
+          listener_count?: number
+          name: string
+          stream_url: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          genre?: string
+          id?: string
+          language?: string
+          listener_count?: number
+          name?: string
+          stream_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           active: boolean | null
@@ -656,6 +924,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          claimed_at: string | null
+          code_id: string
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+          reward_claimed: boolean
+        }
+        Insert: {
+          claimed_at?: string | null
+          code_id: string
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+          reward_claimed?: boolean
+        }
+        Update: {
+          claimed_at?: string | null
+          code_id?: string
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+          reward_claimed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -772,6 +1078,216 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      stream_comments: {
+        Row: {
+          created_at: string
+          id: string
+          is_pinned: boolean
+          message: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          message: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          message?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_comments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_reactions_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_tips: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          message: string | null
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          message?: string | null
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          message?: string | null
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_tips_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_viewers: {
+        Row: {
+          duration: number | null
+          id: string
+          joined_at: string
+          left_at: string | null
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          duration?: number | null
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          duration?: number | null
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_viewers_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          artist: string
+          audio_url: string
+          cover_image: string | null
+          created_at: string
+          duration: number
+          id: string
+          play_count: number
+          playlist_id: string
+          title: string
+        }
+        Insert: {
+          artist: string
+          audio_url: string
+          cover_image?: string | null
+          created_at?: string
+          duration: number
+          id?: string
+          play_count?: number
+          playlist_id: string
+          title: string
+        }
+        Update: {
+          artist?: string
+          audio_url?: string
+          cover_image?: string | null
+          created_at?: string
+          duration?: number
+          id?: string
+          play_count?: number
+          playlist_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
