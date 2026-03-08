@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords, Scissors, Palette, Heart, Droplets, BookOpen, Paintbrush, Gem, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
 import LiveShopPanel from "@/components/live/LiveShopPanel";
@@ -88,8 +89,9 @@ export default function LiveStreamPage() {
   const chatRef = useRef<HTMLDivElement>(null);
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
+  const { pause: pauseRadio } = useRadio();
 
-  useEffect(() => { fetchStreams(); }, []);
+  useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
   useEffect(() => {
     if (selectedCategory === "all") {
