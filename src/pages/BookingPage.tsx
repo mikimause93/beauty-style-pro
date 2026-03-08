@@ -15,6 +15,12 @@ const services = [
   { id: "5", name: "Trattamento Keratina", price: 80, duration: 60 },
 ];
 
+const locationOptions = [
+  { id: "center", label: "In Salone", icon: "🏢" },
+  { id: "home", label: "A Domicilio", icon: "🏠" },
+  { id: "online", label: "Online", icon: "💻" },
+];
+
 const timeSlots = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
   "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00",
@@ -33,6 +39,7 @@ export default function BookingPage() {
   });
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState("Sportivo");
+  const [selectedLocation, setSelectedLocation] = useState("center");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -204,6 +211,29 @@ export default function BookingPage() {
                 }`}
               >
                 {time}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Location Selection */}
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <MapPin className="w-4 h-4 inline mr-1" /> Luogo
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            {locationOptions.map(loc => (
+              <button
+                key={loc.id}
+                onClick={() => setSelectedLocation(loc.id)}
+                className={`flex flex-col items-center py-3 px-2 rounded-xl transition-all ${
+                  selectedLocation === loc.id
+                    ? "gradient-primary text-primary-foreground"
+                    : "bg-card hover:bg-muted"
+                }`}
+              >
+                <span className="text-2xl mb-1">{loc.icon}</span>
+                <span className="text-xs font-medium">{loc.label}</span>
               </button>
             ))}
           </div>
