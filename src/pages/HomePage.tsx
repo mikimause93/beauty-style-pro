@@ -143,24 +143,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Stories — clean circles */}
-      <div className="flex gap-4 px-5 py-4 overflow-x-auto no-scrollbar">
-        <button onClick={() => navigate("/create-post")} className="flex flex-col items-center gap-1.5 min-w-[64px]">
-          <div className="w-[60px] h-[60px] rounded-full bg-muted flex items-center justify-center border border-dashed border-muted-foreground/20">
-            <Plus className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <span className="text-[10px] text-muted-foreground">Aggiungi</span>
-        </button>
-        {displayStories.map(story => (
-          <button key={story.id} onClick={() => story.isLive ? navigate("/live") : navigate(`/stylist/${story.id}`)} className="flex flex-col items-center gap-1.5 min-w-[64px]">
-            <div className={`w-[60px] h-[60px] rounded-full p-[2px] ${story.isLive ? "bg-gradient-to-br from-primary to-accent" : "bg-border"}`}>
-              <img src={story.avatar} alt={story.name} className="w-full h-full rounded-full object-cover border-2 border-background"
-                onError={(e) => { (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${story.id}`; }} />
-            </div>
-            <span className="text-[10px] text-muted-foreground truncate w-14 text-center">{story.name}</span>
-            {story.isLive && <span className="text-[8px] font-bold text-primary-foreground bg-primary px-1.5 py-0.5 rounded-full -mt-1 uppercase tracking-wider">Live</span>}
-          </button>
-        ))}
+      {/* Stories */}
+      <div className="px-5 py-4">
+        <StoriesBar />
       </div>
 
       {/* AI Smart Match */}
