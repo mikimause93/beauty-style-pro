@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import PostCardActions from "./PostCardActions";
 
 interface PostCardProps {
   post: {
@@ -129,6 +130,9 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         </div>
 
         {post.caption && <p className="text-sm leading-relaxed">{post.caption}</p>}
+
+        {/* Contextual Action Buttons */}
+        <PostCardActions postType={post.post_type} postId={post.id} userId={post.user_id} userType={post.profileData?.user_type} />
 
         {comments.length > 0 && (
           <div className="space-y-1.5">
