@@ -136,6 +136,19 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Quick Actions */}
+      <div className="flex gap-2 px-4 mb-4">
+        <button onClick={() => navigate("/create-post")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
+          <Plus className="w-3.5 h-3.5" /> Nuovo Post
+        </button>
+        <button onClick={() => navigate("/stylists")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
+          <Users className="w-3.5 h-3.5" /> Stilisti
+        </button>
+        <button onClick={() => navigate("/events")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
+          <Calendar className="w-3.5 h-3.5" /> Eventi
+        </button>
+      </div>
+
       {/* Feed */}
       <div className="flex flex-col gap-4 px-4 pb-4">
         {feedPosts.map(post => (
