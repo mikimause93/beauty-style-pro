@@ -47,6 +47,7 @@ import ShortsPage from "./pages/ShortsPage";
 import GoLivePage from "./pages/GoLivePage";
 import TransformationChallengePage from "./pages/TransformationChallengePage";
 import LiveBattlePage from "./pages/LiveBattlePage";
+import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

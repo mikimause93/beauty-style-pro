@@ -103,6 +103,9 @@ export default function HomePage() {
         <div className="flex items-center justify-between px-5 py-3">
           <h1 className="text-xl font-display font-bold tracking-tight">STYLE</h1>
           <div className="flex items-center gap-1.5">
+            <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <Search className="w-[20px] h-[20px] text-muted-foreground" />
+            </button>
             <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-xs font-semibold">
               <Coins className="w-3.5 h-3.5 text-accent" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>

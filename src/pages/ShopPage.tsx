@@ -101,7 +101,7 @@ export default function ShopPage() {
     const discount = appliedPromo ? (product.price * appliedPromo.discount / 100) : 0;
     const finalPrice = product.price - discount;
     // Record purchase
-    await (supabase as any).from("product_purchases").insert({
+    await supabase.from("product_purchases").insert({
       buyer_id: user.id,
       product_id: product.id,
       unit_price: product.price,
