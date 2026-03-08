@@ -89,7 +89,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <p className="text-[10px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
         <button onClick={() => navigate("/booking")} className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
-          <Calendar className="w-3 h-3 inline mr-0.5" /> Book
+          <Calendar className="w-3 h-3 inline mr-0.5" /> Prenota
         </button>
       </div>
 

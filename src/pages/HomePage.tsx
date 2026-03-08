@@ -27,7 +27,7 @@ interface Post {
   profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
 }
 
-const tabs = ["New", "Stylists", "Most", "Stream"];
+const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
 
 const fallbackStylists = [
   { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, avatar: stylist2, hourly_rate: 45 },
@@ -45,7 +45,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
-  const [activeTab, setActiveTab] = useState("New");
+  const [activeTab, setActiveTab] = useState("Nuovi");
   const [posts, setPosts] = useState<Post[]>(fallbackPosts);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
@@ -156,7 +156,7 @@ export default function HomePage() {
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border-2 border-dashed border-muted-foreground/30">
             <Plus className="w-6 h-6 text-muted-foreground" />
           </div>
-          <span className="text-[11px] text-muted-foreground font-medium">Add</span>
+          <span className="text-[11px] text-muted-foreground font-medium">Aggiungi</span>
         </button>
         {displayStories.map(story => (
           <button key={story.id} onClick={() => story.isLive ? navigate("/live") : navigate(`/stylist/${story.id}`)} className="flex flex-col items-center gap-1.5 min-w-[72px]">
@@ -171,7 +171,7 @@ export default function HomePage() {
       </div>
 
       {/* Live Now Banner */}
-      {activeTab !== "Stylists" && (
+      {activeTab !== "Stilisti" && (
         <div className="px-4 mb-4">
           <button onClick={() => navigate("/live")} className="w-full rounded-2xl overflow-hidden relative h-32">
             <div className="absolute inset-0 bg-gradient-to-r from-live/90 via-primary/80 to-secondary/70" />
@@ -191,7 +191,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   <p className="text-lg font-bold text-primary-foreground">Beauty streaming</p>
-                  <p className="text-xs text-primary-foreground/70">Tap to watch beauty tutorials</p>
+                  <p className="text-xs text-primary-foreground/70">Guarda i tutorial beauty in diretta</p>
                 </div>
                 <Play className="w-10 h-10 text-primary-foreground" />
               </div>
@@ -201,11 +201,11 @@ export default function HomePage() {
       )}
 
       {/* Quick Actions */}
-      {activeTab === "New" && (
+      {activeTab === "Nuovi" && (
         <div className="grid grid-cols-4 gap-2 px-4 mb-4">
           {[
-            { icon: "💇‍♀️", label: "Stylists", path: "/stylists" },
-            { icon: "📅", label: "Booking", path: "/booking" },
+            { icon: "💇‍♀️", label: "Stilisti", path: "/stylists" },
+            { icon: "📅", label: "Prenota", path: "/booking" },
             { icon: "🗺️", label: "Mappa AI", path: "/map-search" },
             { icon: "🏠", label: "Domicilio", path: "/map-search" },
           ].map(item => (
@@ -221,7 +221,7 @@ export default function HomePage() {
       {/* Content */}
       <div className="space-y-4 px-4 pb-4">
         {/* NEW TAB - Feed */}
-        {activeTab === "New" && (
+        {activeTab === "Nuovi" && (
           <div className="space-y-4 fade-in">
             {posts.map(post => (
               <PostCard
@@ -235,7 +235,7 @@ export default function HomePage() {
         )}
 
         {/* STYLISTS TAB */}
-        {activeTab === "Stylists" && (
+        {activeTab === "Stilisti" && (
           <div className="space-y-3 fade-in">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">Professionisti</h3>
@@ -258,7 +258,7 @@ export default function HomePage() {
                 <div className="text-right shrink-0">
                   <p className="text-sm font-bold text-primary">€{stylist.hourly_rate || 40}</p>
                   <button onClick={(e) => { e.stopPropagation(); navigate("/booking"); }} className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
-                    Book
+                    Prenota
                   </button>
                 </div>
               </button>
@@ -267,7 +267,7 @@ export default function HomePage() {
         )}
 
         {/* MOST TAB - Popular / Trending */}
-        {activeTab === "Most" && (
+        {activeTab === "Popolari" && (
           <div className="space-y-4 fade-in">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">🔥 Trending</h3>
@@ -323,15 +323,14 @@ export default function HomePage() {
         {activeTab === "Stream" && (
           <div className="space-y-4 fade-in">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Live & Scheduled</h3>
+              <h3 className="text-sm font-semibold">Dirette & Programmate</h3>
               <button onClick={() => navigate("/live")} className="text-xs text-primary font-semibold">Apri Live</button>
             </div>
 
-            {/* Quick stream actions */}
             <div className="grid grid-cols-3 gap-2">
               <button onClick={() => navigate("/events")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">📅</span>
-                <span className="text-[10px] text-muted-foreground">Events</span>
+                <span className="text-[10px] text-muted-foreground">Eventi</span>
               </button>
               <button onClick={() => navigate("/radio")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">📻</span>
@@ -339,7 +338,7 @@ export default function HomePage() {
               </button>
               <button onClick={() => navigate("/challenges")} className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/30">
                 <span className="text-xl">🏆</span>
-                <span className="text-[10px] text-muted-foreground">Challenges</span>
+                <span className="text-[10px] text-muted-foreground">Sfide</span>
               </button>
             </div>
 
