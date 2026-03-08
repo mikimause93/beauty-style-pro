@@ -41,6 +41,9 @@ import ReferralPage from "./pages/ReferralPage";
 import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 import InstallmentsPage from "./pages/InstallmentsPage";
 import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
+import MissionsPage from "./pages/MissionsPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import ShortsPage from "./pages/ShortsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +91,9 @@ const App = () => (
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/missions" element={<MissionsPage />} />
+            <Route path="/ai-assistant" element={<AIAssistantPage />} />
+            <Route path="/shorts" element={<ShortsPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />
