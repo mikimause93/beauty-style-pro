@@ -416,6 +416,9 @@ export default function LiveStreamPage() {
             />
           )}
           {showMusic && <LiveMusicSelector isStreamer={false} onClose={() => setShowMusic(false)} />}
+          {showGuestPanel && (
+            <LiveGuestPanel streamId={selectedStream.id} isHost={false} onClose={() => setShowGuestPanel(false)} />
+          )}
 
           {/* Tip Modal */}
           {showTipModal && (
