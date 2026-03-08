@@ -65,10 +65,7 @@ export default function HomePage() {
       // Fetch posts with profiles
       const { data: postsData } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profile:profiles!posts_user_id_fkey(display_name, avatar_url, user_type)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
 
