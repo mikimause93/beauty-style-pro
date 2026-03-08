@@ -384,8 +384,9 @@ export default function LiveStreamPage() {
               <button onClick={() => setShowStyleReplicator(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <Wand2 className="w-4 h-4 text-primary" />
               </button>
-              <button onClick={() => setShowMusic(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
-                <Music className="w-4 h-4 text-muted-foreground" />
+              <button onClick={() => setShowMusic(true)} className="flex items-center gap-1.5 px-3 h-10 rounded-full glass">
+                <Music className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-semibold text-primary">Sottofondo</span>
               </button>
               <BattleChallengeButton
                 streamId={selectedStream.id}
