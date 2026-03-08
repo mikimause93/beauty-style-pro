@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -42,6 +42,9 @@ export default function AuthPage() {
   const [birthDate, setBirthDate] = useState("");
   const [bio, setBio] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
+  const [instagram, setInstagram] = useState("");
+  const [tiktok, setTiktok] = useState("");
+  const [facebook, setFacebook] = useState("");
 
   // Professional fields
   const [whatsapp, setWhatsapp] = useState("");
@@ -137,6 +140,9 @@ export default function AuthPage() {
       latitude, longitude,
       interests: interests.length > 0 ? interests : null,
       birth_date: birthDate || null,
+      instagram: instagram || null,
+      tiktok: tiktok || null,
+      facebook: facebook || null,
     };
     await supabase.from("profiles").update(profileUpdate).eq("user_id", userId);
 
@@ -182,7 +188,7 @@ export default function AuthPage() {
   };
 
   // ─── Step logic per account type ─────────────────────
-  const totalSteps = accountType === "client" ? 2 : accountType === "professional" ? 3 : accountType === "business" ? 3 : 0;
+  const totalSteps = accountType === "client" ? 3 : accountType === "professional" ? 3 : accountType === "business" ? 3 : 0;
 
   const canProceed = () => {
     if (step === 0) return !!accountType;
@@ -191,6 +197,7 @@ export default function AuthPage() {
       if (accountType === "professional") return !!name && !!email && !!password;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
+    if (step === 2 && accountType === "client") return !!city && !!birthDate;
     return true;
   };
 
@@ -300,7 +307,7 @@ export default function AuthPage() {
           <h2 className="text-lg font-display font-bold">I tuoi dati</h2>
           <div className="grid grid-cols-2 gap-3">
             <InputField icon={<User className="w-4 h-4" />} placeholder="Nome *" value={name} onChange={setName} />
-            <InputField placeholder="Cognome" value={surname} onChange={setSurname} />
+            <InputField placeholder="Cognome *" value={surname} onChange={setSurname} />
           </div>
           <InputField placeholder="Username" value={username} onChange={setUsername} />
           <InputField icon={<Mail className="w-4 h-4" />} placeholder="Email *" value={email} onChange={setEmail} type="email" />
@@ -314,21 +321,21 @@ export default function AuthPage() {
             </button>
           </div>
           <InputField icon={<Phone className="w-4 h-4" />} placeholder="Telefono" value={phone} onChange={setPhone} type="tel" />
-          <InputField icon={<Calendar className="w-4 h-4" />} placeholder="Data di nascita" value={birthDate} onChange={setBirthDate} type="date" />
+          <InputField icon={<Calendar className="w-4 h-4" />} placeholder="Data di nascita *" value={birthDate} onChange={setBirthDate} type="date" />
         </div>
       )}
 
-      {/* ═══ CLIENT STEP 2: Location & Bio ═══ */}
+      {/* ═══ CLIENT STEP 2: Città, Bio & Interessi ═══ */}
       {step === 2 && accountType === "client" && (
         <div className="space-y-4 fade-in">
-          <h2 className="text-lg font-display font-bold">Posizione e profilo</h2>
+          <h2 className="text-lg font-display font-bold">Dove ti trovi</h2>
           <LocationPicker city={city} setCity={setCity} country={country} setCountry={setCountry}
             locating={locating} requestLocation={requestLocation} latitude={latitude} />
-          <InputField placeholder="Bio (opzionale)" value={bio} onChange={setBio} multiline />
+          <InputField placeholder="Parlaci di te... *" value={bio} onChange={setBio} multiline />
           <div>
-            <p className="text-xs font-semibold mb-2 text-muted-foreground">Interessi (opzionale)</p>
+            <p className="text-xs font-semibold mb-2 text-muted-foreground">I tuoi interessi</p>
             <div className="flex flex-wrap gap-2">
-              {["Hair", "Makeup", "Nails", "Skin", "Tattoo", "Fashion", "Fitness"].map(i => (
+              {["Hair", "Makeup", "Nails", "Skin", "Tattoo", "Fashion", "Fitness", "Barber", "Wellness"].map(i => (
                 <button key={i} type="button" onClick={() => setInterests(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     interests.includes(i) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
@@ -336,6 +343,17 @@ export default function AuthPage() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ═══ CLIENT STEP 3: Social Links ═══ */}
+      {step === 3 && accountType === "client" && (
+        <div className="space-y-4 fade-in">
+          <h2 className="text-lg font-display font-bold">I tuoi social</h2>
+          <p className="text-xs text-muted-foreground">Aggiungi i tuoi profili social per farti trovare più facilmente</p>
+          <InputField icon={<Instagram className="w-4 h-4" />} placeholder="@instagram" value={instagram} onChange={setInstagram} />
+          <InputField icon={<AtSign className="w-4 h-4" />} placeholder="@tiktok" value={tiktok} onChange={setTiktok} />
+          <InputField icon={<Globe className="w-4 h-4" />} placeholder="Facebook (link o username)" value={facebook} onChange={setFacebook} />
         </div>
       )}
 
