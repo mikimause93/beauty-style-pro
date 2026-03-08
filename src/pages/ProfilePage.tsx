@@ -1,12 +1,37 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posts" | "analytics" | "referral">("posts");
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
+          <LogIn className="w-12 h-12 text-primary mb-4" />
+          <h2 className="text-xl font-display font-bold mb-2">Accedi a Stayle</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Registrati o accedi per gestire il tuo profilo
+          </p>
+          <button
+            onClick={() => navigate("/auth")}
+            className="px-8 py-3 rounded-full gradient-primary text-primary-foreground font-semibold shadow-glow"
+          >
+            Accedi / Registrati
+          </button>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   const stats = [
     { label: "Followers", value: "12.4K", icon: Users },
