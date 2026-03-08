@@ -183,12 +183,26 @@ export default function HomePage() {
 
       {/* Quick Actions — minimal grid */}
       {activeTab === "Nuovi" && (
-        <div className="grid grid-cols-4 gap-2 px-5 mb-5">
+        <div className="grid grid-cols-4 gap-2 px-5 mb-3">
           {[
             { icon: "💇‍♀️", label: "Stilisti", path: "/stylists" },
             { icon: "📅", label: "Prenota", path: "/booking" },
             { icon: "🗺️", label: "Mappa", path: "/map-search" },
             { icon: "🏠", label: "Domicilio", path: "/map-search" },
+          ].map(item => (
+            <button key={item.label} onClick={() => navigate(item.path)}
+              className="flex flex-col items-center gap-1.5 py-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
+              <span className="text-xl">{item.icon}</span>
+              <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="grid grid-cols-4 gap-2 px-5 mb-5">
+          {[
+            { icon: "🎯", label: "Missioni", path: "/missions" },
+            { icon: "✨", label: "AI Beauty", path: "/ai-assistant" },
+            { icon: "🎬", label: "Shorts", path: "/shorts" },
+            { icon: "🎡", label: "Gira&Vinci", path: "/spin" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
               className="flex flex-col items-center gap-1.5 py-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
