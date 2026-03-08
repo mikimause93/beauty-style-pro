@@ -1742,10 +1742,12 @@ export type Database = {
           display_name: string | null
           document_urls: string[] | null
           experience_years: number | null
+          facebook: string | null
           follower_count: number
           following_count: number
           iban: string | null
           id: string
+          instagram: string | null
           interests: string[] | null
           latitude: number | null
           longitude: number | null
@@ -1757,6 +1759,7 @@ export type Database = {
           qr_coins: number
           skills: string[] | null
           surname: string | null
+          tiktok: string | null
           updated_at: string
           user_id: string
           user_type: string
@@ -1779,10 +1782,12 @@ export type Database = {
           display_name?: string | null
           document_urls?: string[] | null
           experience_years?: number | null
+          facebook?: string | null
           follower_count?: number
           following_count?: number
           iban?: string | null
           id?: string
+          instagram?: string | null
           interests?: string[] | null
           latitude?: number | null
           longitude?: number | null
@@ -1794,6 +1799,7 @@ export type Database = {
           qr_coins?: number
           skills?: string[] | null
           surname?: string | null
+          tiktok?: string | null
           updated_at?: string
           user_id: string
           user_type?: string
@@ -1816,10 +1822,12 @@ export type Database = {
           display_name?: string | null
           document_urls?: string[] | null
           experience_years?: number | null
+          facebook?: string | null
           follower_count?: number
           following_count?: number
           iban?: string | null
           id?: string
+          instagram?: string | null
           interests?: string[] | null
           latitude?: number | null
           longitude?: number | null
@@ -1831,6 +1839,7 @@ export type Database = {
           qr_coins?: number
           skills?: string[] | null
           surname?: string | null
+          tiktok?: string | null
           updated_at?: string
           user_id?: string
           user_type?: string
