@@ -245,8 +245,20 @@ export default function HomePage() {
           <div className="space-y-4 fade-in">
             {/* Sponsor Banner */}
             <SponsorBanner />
-            {posts.map(post => (
-              <PostCard key={post.id} post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
+            {posts.map((post, index) => (
+              <div key={post.id}>
+                <PostCard post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
+                {/* Insert a job post card after every 2nd post */}
+                {index > 0 && index % 2 === 1 && jobPosts[Math.floor(index / 2)] && (
+                  <div className="mt-4">
+                    <FeedJobCard job={jobPosts[Math.floor(index / 2)]} />
+                  </div>
+                )}
+              </div>
+            ))}
+            {/* Show remaining job posts at the end if any */}
+            {jobPosts.length > 0 && posts.length < 3 && jobPosts.map(job => (
+              <FeedJobCard key={job.id} job={job} />
             ))}
           </div>
         )}
