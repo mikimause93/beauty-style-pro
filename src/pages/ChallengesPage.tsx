@@ -8,11 +8,11 @@ import beauty2 from "@/assets/beauty-2.jpg";
 import beauty3 from "@/assets/beauty-3.jpg";
 
 const fallbackChallenges = [
-  { id: "1", title: "Consumo Smart", description: "5 prenotazioni questo mese", progress: 3, target_value: 5, reward_qr_coin: 50, icon: "🎯", featured: true },
-  { id: "2", title: "Social Star", description: "Condividi 10 post", progress: 7, target_value: 10, reward_qr_coin: 30, icon: "⭐", featured: false },
-  { id: "3", title: "Invita Amici", description: "Invita 3 amici", progress: 1, target_value: 3, reward_qr_coin: 100, icon: "👥", featured: false },
-  { id: "4", title: "Spettatore Live", description: "Guarda 5 live", progress: 4, target_value: 5, reward_qr_coin: 25, icon: "📹", featured: false },
-  { id: "5", title: "Recensore", description: "Lascia 3 recensioni", progress: 0, target_value: 3, reward_qr_coin: 40, icon: "📝", featured: false },
+  { id: "1", title: "Consumo Smart", description: "5 prenotazioni questo mese", progress: 3, target_value: 5, reward_qr_coin: 50, icon: "target", featured: true },
+  { id: "2", title: "Social Star", description: "Condividi 10 post", progress: 7, target_value: 10, reward_qr_coin: 30, icon: "star", featured: false },
+  { id: "3", title: "Invita Amici", description: "Invita 3 amici", progress: 1, target_value: 3, reward_qr_coin: 100, icon: "users", featured: false },
+  { id: "4", title: "Spettatore Live", description: "Guarda 5 live", progress: 4, target_value: 5, reward_qr_coin: 25, icon: "video", featured: false },
+  { id: "5", title: "Recensore", description: "Lascia 3 recensioni", progress: 0, target_value: 3, reward_qr_coin: 40, icon: "edit", featured: false },
 ];
 
 export default function ChallengesPage() {
@@ -75,13 +75,13 @@ export default function ChallengesPage() {
             className={`flex-1 py-2 rounded-xl text-xs font-semibold ${
               activeTab === "challenges" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}>
-            🎯 Sfide
+            Sfide
           </button>
           <button onClick={() => { setActiveTab("leaderboard"); navigate("/leaderboard"); }}
             className={`flex-1 py-2 rounded-xl text-xs font-semibold ${
               activeTab === "leaderboard" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}>
-            🏆 Classifica
+            Classifica
           </button>
         </div>
       </header>

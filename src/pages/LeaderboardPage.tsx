@@ -53,7 +53,7 @@ export default function LeaderboardPage() {
         name: (Array.isArray(d.profiles) ? d.profiles[0]?.display_name : d.profiles?.display_name) || `Utente ${i + 1}`,
         subtitle: "",
         score: d.score,
-        badge: i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "",
+        badge: "",
         avatar_url: (Array.isArray(d.profiles) ? d.profiles[0]?.avatar_url : d.profiles?.avatar_url),
         user_id: d.user_id,
       })));

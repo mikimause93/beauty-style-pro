@@ -261,7 +261,7 @@ export default function HRPage() {
                             </div>
                             {job.featured && (
                               <span className="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-bold flex-shrink-0">
-                                ⭐ Featured
+                                Featured
                               </span>
                             )}
                           </div>

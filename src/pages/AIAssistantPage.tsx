@@ -28,7 +28,7 @@ export default function AIAssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Ciao! ✨ Sono il tuo assistente beauty AI. Chiedimi qualsiasi cosa su tagli, colori, skincare, trattamenti o prodotti. Sono qui per aiutarti! 💇‍♀️",
+      content: "Ciao! Sono il tuo assistente beauty AI. Chiedimi qualsiasi cosa su tagli, colori, skincare, trattamenti o prodotti. Sono qui per aiutarti!",
     },
   ]);
   const [input, setInput] = useState("");

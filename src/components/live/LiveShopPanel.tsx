@@ -13,9 +13,9 @@ const mockServices = [
 ];
 
 const mockProducts = [
-  { id: "1", name: "Olaplex N°3", price: 28, discount: 10, image: "💆‍♀️" },
-  { id: "2", name: "Shampoo Bio", price: 18, discount: 0, image: "🧴" },
-  { id: "3", name: "Maschera Capelli", price: 22, discount: 5, image: "✨" },
+  { id: "1", name: "Olaplex N°3", price: 28, discount: 10, image: "" },
+  { id: "2", name: "Shampoo Bio", price: 18, discount: 0, image: "" },
+  { id: "3", name: "Maschera Capelli", price: 22, discount: 5, image: "" },
 ];
 
 export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanelProps) {
