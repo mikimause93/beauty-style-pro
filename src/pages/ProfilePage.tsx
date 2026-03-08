@@ -440,6 +440,11 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Vetrina Tab */}
+        {activeTab === "vetrina" && targetUserId && (
+          <ProfileShowcasePanel isOwnProfile={isOwnProfile} userId={targetUserId} />
+        )}
+
         {/* Saved Tab */}
         {activeTab === "saved" && isOwnProfile && (
           <div className="text-center py-16 fade-in">
