@@ -183,6 +183,7 @@ export default function HomePage() {
 
       {/* Quick Actions — minimal grid */}
       {activeTab === "Nuovi" && (
+        <>
         <div className="grid grid-cols-4 gap-2 px-5 mb-3">
           {[
             { icon: "💇‍♀️", label: "Stilisti", path: "/stylists" },
@@ -211,6 +212,7 @@ export default function HomePage() {
             </button>
           ))}
         </div>
+        </>
       )}
 
       {/* Content */}
