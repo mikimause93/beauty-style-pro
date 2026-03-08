@@ -45,6 +45,7 @@ import MissionsPage from "./pages/MissionsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import ShortsPage from "./pages/ShortsPage";
 import GoLivePage from "./pages/GoLivePage";
+import TransformationChallengePage from "./pages/TransformationChallengePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -96,6 +97,7 @@ const App = () => (
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/go-live" element={<GoLivePage />} />
+            <Route path="/transformation-challenge" element={<TransformationChallengePage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />
