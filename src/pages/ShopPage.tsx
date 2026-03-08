@@ -185,12 +185,12 @@ export default function ShopPage() {
           </div>
         </div>
 
-        <div className="flex gap-2 mt-3">
-          {sections.map(s => {
+        <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+          {sections.filter(s => s.key !== 'my_products' || isSeller).map(s => {
             const Icon = s.icon;
             return (
               <button key={s.key} onClick={() => setActiveSection(s.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                   activeSection === s.key ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 }`}>
                 <Icon className="w-3.5 h-3.5" />{s.label}
