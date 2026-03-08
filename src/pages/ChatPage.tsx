@@ -56,6 +56,7 @@ export default function ChatPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioPlayRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (user) loadConversations();
