@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle, Bell } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle, Bell, Cog } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -53,6 +53,7 @@ export default function ProfilePage() {
     { icon: Trophy, label: "Challenges", path: "/challenges" },
     { icon: Gift, label: "Spin & Win", path: "/spin" },
     { icon: MessageCircle, label: "Chat", path: "/chat" },
+    { icon: Cog, label: "Impostazioni", path: "/settings" },
   ];
 
   return (
