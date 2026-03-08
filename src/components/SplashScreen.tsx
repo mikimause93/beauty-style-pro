@@ -5,9 +5,9 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
   const [phase, setPhase] = useState<"logo" | "text" | "fade">("logo");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("text"), 800);
-    const t2 = setTimeout(() => setPhase("fade"), 2200);
-    const t3 = setTimeout(onComplete, 2800);
+    const t1 = setTimeout(() => setPhase("text"), 1000);
+    const t2 = setTimeout(() => setPhase("fade"), 3800);
+    const t3 = setTimeout(onComplete, 4500);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
