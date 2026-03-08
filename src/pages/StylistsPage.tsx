@@ -50,11 +50,15 @@ export default function StylistsPage() {
   }, []);
 
   const loadProfessionals = async () => {
-    const { data } = await supabase.from("professionals").select("*");
+    const { data } = await supabase
+      .from("professionals")
+      .select("*, profiles:user_id(avatar_url)")
+      .order("rating", { ascending: false });
     if (data && data.length > 0) {
-      setStylists(data.map((p, i) => ({
+      setStylists(data.map((p: any, i: number) => ({
         ...p,
-        avatar: fallbackStylists[i % fallbackStylists.length].avatar,
+        avatar: (Array.isArray(p.profiles) ? p.profiles[0]?.avatar_url : p.profiles?.avatar_url)
+          || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
       })));
     }
   };
