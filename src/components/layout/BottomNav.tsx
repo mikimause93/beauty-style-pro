@@ -1,12 +1,12 @@
-import { Home, Radio, ShoppingBag, User, Video } from "lucide-react";
+import { Home, Radio, ShoppingBag, User, Video, Compass } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
+  { path: "/explore", icon: Compass, label: "Esplora" },
   { path: "/live", icon: Video, label: "Live" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
-  { path: "/radio", icon: Radio, label: "Radio" },
   { path: "/profile", icon: User, label: "Profilo" },
 ];
 

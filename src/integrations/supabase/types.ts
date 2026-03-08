@@ -1921,6 +1921,85 @@ export type Database = {
         }
         Relationships: []
       }
+      stories: {
+        Row: {
+          booking_id: string | null
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          link_label: string | null
+          link_url: string | null
+          media_type: string
+          media_url: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          booking_id?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          link_label?: string | null
+          link_url?: string | null
+          media_type?: string
+          media_url: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          booking_id?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          link_label?: string | null
+          link_url?: string | null
+          media_type?: string
+          media_url?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          created_at: string
+          id: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stream_comments: {
         Row: {
           created_at: string

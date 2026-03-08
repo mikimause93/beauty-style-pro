@@ -424,25 +424,25 @@ export default function ChatPage() {
               />
             )}
             <div className="flex items-center gap-2">
-            <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-              <Paperclip className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <input
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyPress={e => e.key === "Enter" && sendMessage()}
-              placeholder="Scrivi un messaggio..."
-              className="flex-1 h-10 rounded-full bg-muted px-4 text-sm focus:outline-none"
-            />
-            {newMessage.trim() ? (
-              <button onClick={sendMessage} className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-                <Send className="w-4 h-4 text-primary-foreground" />
+              <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                <Paperclip className="w-4 h-4 text-muted-foreground" />
               </button>
-            ) : (
-              <button onMouseDown={startRecording} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <Mic className="w-4 h-4 text-muted-foreground" />
-              </button>
-            )}
+              <input
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                onKeyPress={e => e.key === "Enter" && sendMessage()}
+                placeholder="Scrivi un messaggio..."
+                className="flex-1 h-10 rounded-full bg-muted px-4 text-sm focus:outline-none"
+              />
+              {newMessage.trim() ? (
+                <button onClick={sendMessage} className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+                  <Send className="w-4 h-4 text-primary-foreground" />
+                </button>
+              ) : (
+                <button onMouseDown={startRecording} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Mic className="w-4 h-4 text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
         )}

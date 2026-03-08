@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, Calendar } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -113,6 +113,16 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
             <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
           <div className="flex-1" />
+          {post.profileData?.user_type === "professional" && (
+            <>
+              <button onClick={() => navigate(`/booking`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                Prenota
+              </button>
+              <button onClick={() => navigate(`/chat`)} className="w-[22px] h-[22px]">
+                <Phone className="w-[18px] h-[18px] text-muted-foreground" />
+              </button>
+            </>
+          )}
           <button onClick={() => setSaved(!saved)}>
             <Bookmark className={`w-[22px] h-[22px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
           </button>
