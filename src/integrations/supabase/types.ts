@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_campaigns: {
+        Row: {
+          active: boolean
+          advertiser_id: string
+          budget: number
+          campaign_type: string
+          clicks: number
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          impressions: number
+          spent: number
+          start_date: string
+          target_url: string | null
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          advertiser_id: string
+          budget?: number
+          campaign_type?: string
+          clicks?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          spent?: number
+          start_date?: string
+          target_url?: string | null
+          title: string
+        }
+        Update: {
+          active?: boolean
+          advertiser_id?: string
+          budget?: number
+          campaign_type?: string
+          clicks?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          spent?: number
+          start_date?: string
+          target_url?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       ar_filters: {
         Row: {
           active: boolean
@@ -1149,6 +1203,51 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          min_order: number | null
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number | null
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number | null
+          used_count?: number
+        }
+        Relationships: []
+      }
       radio_stations: {
         Row: {
           active: boolean
@@ -1650,6 +1749,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_badges: {
         Row: {
