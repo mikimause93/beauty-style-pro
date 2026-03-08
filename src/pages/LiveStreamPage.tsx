@@ -1,123 +1,201 @@
-import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, ThumbsUp, Flame, Star as StarIcon, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import beauty1 from "@/assets/beauty-1.jpg";
-import beauty2 from "@/assets/beauty-2.jpg";
-import beauty3 from "@/assets/beauty-3.jpg";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import { useState, useEffect } from "react";
+import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import MobileLayout from "@/components/layout/MobileLayout";
+import { toast } from "sonner";
 
-const liveStreams = [
-  {
-    id: 1,
-    title: "Earning QRCoins ✨",
-    streamer: "Beauty Rossi",
-    avatar: stylist1,
-    thumbnail: beauty1,
-    viewers: 1340,
-    earnings: 358,
-    tips: 88,
-    isLive: true,
-  },
-  {
-    id: 2,
-    title: "Balayage Tutorial",
-    streamer: "Martina Rossi",
-    avatar: stylist2,
-    thumbnail: beauty2,
-    viewers: 890,
-    earnings: 125,
-    tips: 42,
-    isLive: true,
-  },
-  {
-    id: 3,
-    title: "Evening Glow Routine",
-    streamer: "Salon Luxe",
-    avatar: beauty3,
-    thumbnail: beauty3,
-    viewers: 456,
-    earnings: 67,
-    tips: 15,
-    isLive: true,
-  },
+interface LiveStream {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  viewer_count: number;
+  total_tips: number;
+  total_earnings: number;
+  status: string;
+  professional?: {
+    id: string;
+    business_name: string;
+    rating: number | null;
+  };
+}
+
+interface ChatMessage {
+  id: string;
+  user: string;
+  message: string;
+  type: 'chat' | 'tip' | 'join';
+  amount?: number;
+}
+
+interface FloatingReaction {
+  id: number;
+  emoji: string;
+  x: number;
+}
+
+const reactionEmojis = [
+  { emoji: "❤️", label: "Love" },
+  { emoji: "🔥", label: "Fire" },
+  { emoji: "👏", label: "Applause" },
+  { emoji: "😍", label: "Wow" },
+  { emoji: "⭐", label: "Star" },
 ];
 
-const reactions = [
-  { icon: "❤️", label: "Love" },
-  { icon: "🔥", label: "Fire" },
-  { icon: "👏", label: "Applause" },
-  { icon: "😍", label: "Wow" },
-  { icon: "⭐", label: "Star" },
-];
-
-const chatMessages = [
-  { user: "Anna_Style", message: "Bellissimo! 😍", color: "text-primary" },
-  { user: "Marco88", message: "Sent 10 QRCoins! 🎉", color: "text-gold" },
-  { user: "LauraBeauty", message: "How do you do that?", color: "text-secondary" },
-  { user: "GiuliaHair", message: "Amazing technique! 🔥", color: "text-primary" },
-];
-
-const tipAmounts = [5, 10, 25, 50, 100];
+const tipAmounts = [5, 10, 25, 50, 100, 500];
 
 export default function LiveStreamPage() {
   const navigate = useNavigate();
-  const [selectedStream, setSelectedStream] = useState<number | null>(null);
+  const { user, profile } = useAuth();
+  const [streams, setStreams] = useState<LiveStream[]>([]);
+  const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null);
   const [chatMessage, setChatMessage] = useState("");
-  const [floatingReactions, setFloatingReactions] = useState<{ id: number; emoji: string; x: number }[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [floatingReactions, setFloatingReactions] = useState<FloatingReaction[]>([]);
   const [showTipModal, setShowTipModal] = useState(false);
-  const [liveChatMsgs, setLiveChatMsgs] = useState(chatMessages);
-  const [viewerCounts, setViewerCounts] = useState<Record<number, number>>({});
+  const [selectedTip, setSelectedTip] = useState<number>(10);
+  const [loading, setLoading] = useState(true);
+  const chatRef = useRef<HTMLDivElement>(null);
 
-  // Simulate viewer count changes
   useEffect(() => {
-    if (selectedStream === null) return;
-    const interval = setInterval(() => {
-      setViewerCounts(prev => ({
-        ...prev,
-        [selectedStream]: (prev[selectedStream] || liveStreams.find(s => s.id === selectedStream)!.viewers) + Math.floor(Math.random() * 5 - 2),
-      }));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [selectedStream]);
+    fetchStreams();
+  }, []);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const fetchStreams = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('live_streams')
+      .select(`
+        *,
+        professional:professionals(id, business_name, rating)
+      `)
+      .in('status', ['live', 'scheduled'])
+      .order('viewer_count', { ascending: false });
+
+    if (data) {
+      setStreams(data.map(s => ({
+        ...s,
+        professional: Array.isArray(s.professional) ? s.professional[0] : s.professional
+      })));
+    }
+    setLoading(false);
+  };
 
   const sendReaction = (emoji: string) => {
+    if (!selectedStream) return;
+    
     const id = Date.now() + Math.random();
-    const x = 10 + Math.random() * 30;
+    const x = 20 + Math.random() * 60;
     setFloatingReactions(prev => [...prev, { id, emoji, x }]);
+    
     setTimeout(() => {
       setFloatingReactions(prev => prev.filter(r => r.id !== id));
     }, 2500);
+
+    // Save reaction to database
+    if (user) {
+      supabase.from('stream_reactions').insert({
+        stream_id: selectedStream.id,
+        user_id: user.id,
+        reaction_type: emoji
+      });
+    }
   };
 
-  const sendChat = () => {
-    if (!chatMessage.trim()) return;
-    setLiveChatMsgs(prev => [...prev, { user: "Tu", message: chatMessage, color: "text-success" }]);
+  const sendChat = async () => {
+    if (!chatMessage.trim() || !selectedStream || !user) return;
+
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      user: profile?.display_name || 'You',
+      message: chatMessage,
+      type: 'chat'
+    };
+
+    setChatMessages(prev => [...prev, newMessage]);
     setChatMessage("");
+
+    // Save to database
+    await supabase.from('stream_comments').insert({
+      stream_id: selectedStream.id,
+      user_id: user.id,
+      message: chatMessage
+    });
   };
 
-  // Stream viewer
-  if (selectedStream !== null) {
-    const stream = liveStreams.find(s => s.id === selectedStream)!;
-    const currentViewers = viewerCounts[selectedStream] || stream.viewers;
+  const sendTip = async () => {
+    if (!selectedStream || !user) {
+      toast.error("Login required to send tips");
+      return;
+    }
 
+    const qrCoins = profile?.qr_coins || 0;
+    if (qrCoins < selectedTip) {
+      toast.error("Insufficient QR Coins");
+      navigate("/qr-coins");
+      return;
+    }
+
+    try {
+      // Save tip
+      await supabase.from('stream_tips').insert({
+        stream_id: selectedStream.id,
+        user_id: user.id,
+        amount: selectedTip
+      });
+
+      // Deduct from wallet
+      await supabase
+        .from('profiles')
+        .update({ qr_coins: qrCoins - selectedTip })
+        .eq('user_id', user.id);
+
+      const tipMessage: ChatMessage = {
+        id: Date.now().toString(),
+        user: profile?.display_name || 'You',
+        message: `Sent ${selectedTip} QRCoins! 🎉`,
+        type: 'tip',
+        amount: selectedTip
+      };
+
+      setChatMessages(prev => [...prev, tipMessage]);
+      setShowTipModal(false);
+      toast.success(`Sent ${selectedTip} QRCoins!`);
+    } catch (error) {
+      toast.error("Failed to send tip");
+    }
+  };
+
+  // Watch Stream View
+  if (selectedStream) {
     return (
       <MobileLayout>
-        <div className="relative min-h-screen">
-          <img src={stream.thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background/90" />
+        <div className="relative min-h-screen bg-background">
+          {/* Video Background */}
+          <div className="absolute inset-0">
+            <img 
+              src={selectedStream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} 
+              alt="" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/95" />
+          </div>
 
-          {/* Floating reactions */}
-          <div className="absolute right-4 bottom-44 flex flex-col-reverse gap-2 pointer-events-none">
+          {/* Floating Reactions */}
+          <div className="absolute right-4 bottom-56 flex flex-col-reverse gap-1 pointer-events-none z-20">
             {floatingReactions.map(r => (
               <span
                 key={r.id}
-                className="text-3xl opacity-90"
-                style={{
-                  animation: "float-up 2.5s ease-out forwards",
-                  marginRight: `${r.x}px`,
-                }}
+                className="text-3xl animate-float-up"
+                style={{ marginLeft: `${r.x - 50}px` }}
               >
                 {r.emoji}
               </span>
@@ -126,62 +204,92 @@ export default function LiveStreamPage() {
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between p-4">
-            <button onClick={() => setSelectedStream(null)} className="w-9 h-9 rounded-full glass flex items-center justify-center">
+            <button 
+              onClick={() => setSelectedStream(null)} 
+              className="w-10 h-10 rounded-full glass flex items-center justify-center"
+            >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-live text-primary-foreground text-xs font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" /> LIVE
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
+                <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" />
+                LIVE
               </span>
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full glass text-xs">
-                <Eye className="w-3 h-3" /> {currentViewers.toLocaleString()}
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm">
+                <Eye className="w-4 h-4" />
+                {selectedStream.viewer_count.toLocaleString()}
               </span>
             </div>
           </div>
 
-          {/* Streamer info + QRCoin earned */}
-          <div className="relative z-10 px-4 mt-2">
-            <div className="flex items-center gap-3 glass rounded-2xl p-3">
-              <img src={stream.avatar} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-primary" />
-              <div className="flex-1">
-                <p className="font-semibold">{stream.streamer}</p>
-                <p className="text-xs text-muted-foreground">{stream.title}</p>
+          {/* Streamer Info */}
+          <div className="relative z-10 px-4 mt-4">
+            <div className="flex items-center gap-4 glass rounded-2xl p-4">
+              <div className="relative">
+                <img 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedStream.professional?.id}`}
+                  alt=""
+                  className="w-14 h-14 rounded-full object-cover border-2 border-primary"
+                />
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-live border-2 border-background flex items-center justify-center">
+                  <Crown className="w-3 h-3 text-primary-foreground" />
+                </div>
               </div>
-              <button className="px-3 py-1.5 rounded-full gradient-primary text-primary-foreground text-xs font-bold">
+              <div className="flex-1">
+                <p className="font-bold text-lg">{selectedStream.professional?.business_name || 'Beauty Streamer'}</p>
+                <p className="text-sm text-muted-foreground">{selectedStream.title}</p>
+              </div>
+              <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">
                 Follow
               </button>
             </div>
 
-            {/* QRCoin Earned Banner */}
-            <div className="flex items-center justify-between mt-3 glass rounded-xl p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center">
-                  <Coins className="w-4 h-4 text-gold-foreground" />
+            {/* QRCoin Earnings Banner */}
+            <div className="flex items-center justify-between mt-3 glass rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
+                  <Coins className="w-5 h-5 text-gold-foreground" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">QRCoin Earned</p>
-                  <p className="text-sm font-bold text-gradient-gold">{stream.earnings}</p>
+                  <p className="text-xs text-muted-foreground">QRCoin Earned</p>
+                  <p className="text-xl font-bold text-gradient-gold">
+                    {selectedStream.total_earnings.toLocaleString()}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 rounded-full gradient-gold text-gold-foreground text-xs font-bold">
+                <button 
+                  onClick={() => setShowTipModal(true)}
+                  className="px-4 py-2 rounded-full gradient-gold text-gold-foreground text-sm font-bold flex items-center gap-1.5"
+                >
+                  <Gift className="w-4 h-4" />
                   Send Gift
-                </button>
-                <button className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-bold">
-                  Tip €{stream.tips}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Bottom controls */}
-          <div className="absolute bottom-20 left-0 right-0 z-10 px-4">
-            {/* Chat messages */}
-            <div className="mb-3 space-y-2 max-h-32 overflow-y-auto no-scrollbar">
-              {liveChatMsgs.slice(-5).map((msg, i) => (
-                <div key={i} className="glass rounded-xl px-3 py-2 max-w-[80%] fade-in">
-                  <p className="text-xs">
-                    <span className={`font-semibold ${msg.color}`}>{msg.user}:</span> {msg.message}
+          {/* Bottom Controls */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pb-24">
+            {/* Chat Messages */}
+            <div 
+              ref={chatRef}
+              className="mb-4 space-y-2 max-h-40 overflow-y-auto no-scrollbar"
+            >
+              {chatMessages.slice(-8).map(msg => (
+                <div 
+                  key={msg.id} 
+                  className={`glass rounded-xl px-3 py-2 max-w-[85%] fade-in ${
+                    msg.type === 'tip' ? 'border border-gold/30' : ''
+                  }`}
+                >
+                  <p className="text-sm">
+                    <span className={`font-semibold ${
+                      msg.type === 'tip' ? 'text-gold' : 'text-primary'
+                    }`}>
+                      {msg.user}:
+                    </span>{' '}
+                    {msg.message}
                   </p>
                 </div>
               ))}
@@ -189,58 +297,91 @@ export default function LiveStreamPage() {
 
             {/* Reactions */}
             <div className="flex items-center gap-2 mb-3">
-              {reactions.map(r => (
+              {reactionEmojis.map(r => (
                 <button
                   key={r.label}
-                  onClick={() => sendReaction(r.icon)}
-                  className="w-10 h-10 rounded-full glass flex items-center justify-center text-lg hover:scale-125 transition-transform active:scale-90"
+                  onClick={() => sendReaction(r.emoji)}
+                  className="w-11 h-11 rounded-full glass flex items-center justify-center text-xl hover:scale-125 transition-transform active:scale-90"
                 >
-                  {r.icon}
+                  {r.emoji}
                 </button>
               ))}
               <button
                 onClick={() => setShowTipModal(true)}
-                className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center"
+                className="w-11 h-11 rounded-full gradient-gold flex items-center justify-center shadow-lg"
               >
                 <Gift className="w-5 h-5 text-gold-foreground" />
               </button>
+              <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
+                <Share2 className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Chat input */}
+            {/* Chat Input */}
             <div className="flex gap-2">
               <input
                 value={chatMessage}
                 onChange={e => setChatMessage(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && sendChat()}
-                placeholder="Say something..."
-                className="flex-1 h-10 rounded-full glass px-4 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
+                placeholder="Say something nice..."
+                className="flex-1 h-12 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
               />
-              <button onClick={sendChat} className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-                <Send className="w-4 h-4 text-primary-foreground" />
+              <button 
+                onClick={sendChat}
+                className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-glow"
+              >
+                <Send className="w-5 h-5 text-primary-foreground" />
               </button>
             </div>
           </div>
 
           {/* Tip Modal */}
           {showTipModal && (
-            <div className="absolute inset-0 z-30 flex items-end">
-              <div className="absolute inset-0 bg-background/60" onClick={() => setShowTipModal(false)} />
+            <div className="absolute inset-0 z-40 flex items-end">
+              <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={() => setShowTipModal(false)} />
               <div className="relative w-full glass rounded-t-3xl p-6 slide-up">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-display font-bold text-lg">Send a Tip 💰</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
+                      <Gift className="w-5 h-5 text-gold-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-lg">Send a Gift</h3>
+                      <p className="text-xs text-muted-foreground">Support your favorite creator</p>
+                    </div>
+                  </div>
                   <button onClick={() => setShowTipModal(false)}>
-                    <X className="w-5 h-5 text-muted-foreground" />
+                    <X className="w-6 h-6 text-muted-foreground" />
                   </button>
                 </div>
-                <div className="flex gap-2 mb-4">
+
+                <p className="text-sm text-muted-foreground mb-3">
+                  Your balance: <span className="text-gold font-bold">{profile?.qr_coins?.toLocaleString() || 0} QRC</span>
+                </p>
+
+                <div className="grid grid-cols-3 gap-3 mb-6">
                   {tipAmounts.map(amt => (
-                    <button key={amt} className="flex-1 py-3 rounded-xl bg-card border border-border text-center hover:border-primary/50 transition-all">
-                      <p className="text-sm font-bold">€{amt}</p>
+                    <button 
+                      key={amt} 
+                      onClick={() => setSelectedTip(amt)}
+                      className={`py-4 rounded-xl text-center transition-all ${
+                        selectedTip === amt
+                          ? "gradient-gold text-gold-foreground scale-105 shadow-lg"
+                          : "bg-card border border-border hover:border-gold/50"
+                      }`}
+                    >
+                      <p className="text-lg font-bold">{amt}</p>
+                      <p className="text-[10px] opacity-70">QRC</p>
                     </button>
                   ))}
                 </div>
-                <button className="w-full py-3 rounded-xl gradient-primary text-primary-foreground font-bold shadow-glow">
-                  Send Tip
+
+                <button 
+                  onClick={sendTip}
+                  className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg shadow-glow flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Send {selectedTip} QRCoins
                 </button>
               </div>
             </div>
@@ -250,58 +391,89 @@ export default function LiveStreamPage() {
     );
   }
 
+  // Streams List View
   return (
     <MobileLayout>
-      <header className="sticky top-0 z-40 glass px-4 py-3">
+      <header className="sticky top-0 z-40 glass px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-display font-bold">Live Beauty Stream</h1>
-          <button className="px-4 py-2 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-1.5">
+          <div>
+            <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
+            <p className="text-sm text-muted-foreground">Watch tutorials & earn QRCoins</p>
+          </div>
+          <button className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
             📹 Go Live
           </button>
         </div>
       </header>
 
       <div className="p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Live Now · {liveStreams.length} streams
-        </h2>
-
-        {liveStreams.map(stream => (
-          <button
-            key={stream.id}
-            onClick={() => setSelectedStream(stream.id)}
-            className="w-full rounded-2xl overflow-hidden bg-card shadow-card relative aspect-[3/4] block"
-          >
-            <img src={stream.thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/40 to-background/80" />
-
-            <div className="absolute top-3 left-3 flex gap-2">
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-live text-primary-foreground text-xs font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" /> LIVE
-              </span>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-[3/4] rounded-2xl bg-card animate-pulse" />
+            ))}
+          </div>
+        ) : streams.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+              <Users className="w-10 h-10 text-muted-foreground" />
             </div>
-            <div className="absolute top-3 right-3 flex items-center gap-1 glass px-2 py-1 rounded-full">
-              <Eye className="w-3 h-3" />
-              <span className="text-xs font-medium">{stream.viewers.toLocaleString()}</span>
-            </div>
+            <h3 className="text-lg font-semibold mb-2">No Live Streams</h3>
+            <p className="text-muted-foreground text-sm">Be the first to go live!</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {streams.map(stream => (
+              <button
+                key={stream.id}
+                onClick={() => setSelectedStream(stream)}
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-card shadow-card group"
+              >
+                <img 
+                  src={stream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/90" />
 
-            {/* Earnings badge */}
-            <div className="absolute top-12 right-3 flex items-center gap-1 px-2 py-1 rounded-full gradient-gold">
-              <Coins className="w-3 h-3 text-gold-foreground" />
-              <span className="text-[10px] font-bold text-gold-foreground">€{stream.earnings}</span>
-            </div>
-
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <div className="flex items-center gap-3">
-                <img src={stream.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
-                <div className="flex-1 text-left">
-                  <p className="font-semibold text-sm">{stream.streamer}</p>
-                  <p className="text-xs text-muted-foreground">{stream.title}</p>
+                {/* Live Badge */}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
+                    <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" />
+                    LIVE
+                  </span>
                 </div>
-              </div>
-            </div>
-          </button>
-        ))}
+
+                {/* Viewer Count */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm font-medium">
+                    <Eye className="w-4 h-4" />
+                    {stream.viewer_count.toLocaleString()}
+                  </span>
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold text-gold-foreground text-xs font-bold">
+                    <Coins className="w-3.5 h-3.5" />
+                    €{stream.total_earnings}
+                  </span>
+                </div>
+
+                {/* Streamer Info */}
+                <div className="absolute bottom-0 inset-x-0 p-4">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.professional?.id}`}
+                      alt=""
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary"
+                    />
+                    <div className="flex-1 text-left">
+                      <p className="font-bold">{stream.professional?.business_name || 'Beauty Streamer'}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{stream.title}</p>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </MobileLayout>
   );
