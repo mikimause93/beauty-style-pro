@@ -62,6 +62,9 @@ import CreateServiceRequestPage from "./pages/CreateServiceRequestPage";
 import CreateCastingPage from "./pages/CreateCastingPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ReceiptsPage from "./pages/ReceiptsPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import VerifyAccountPage from "./pages/VerifyAccountPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -134,6 +137,9 @@ const App = () => {
             <Route path="/marketplace/create-casting" element={<CreateCastingPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/receipts" element={<ReceiptsPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/verify-account" element={<VerifyAccountPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />

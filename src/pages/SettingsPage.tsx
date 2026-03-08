@@ -206,9 +206,10 @@ export default function SettingsPage() {
         <section>
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Supporto</p>
           <div className="space-y-1.5">
+            <SettingRow icon={Shield} label="Verifica Account" onClick={() => navigate("/verify-account")} />
             <SettingRow icon={HelpCircle} label="Centro Assistenza" />
-            <SettingRow icon={FileText} label="Termini e Condizioni" />
-            <SettingRow icon={Shield} label="Privacy Policy" />
+            <SettingRow icon={FileText} label="Termini e Condizioni" onClick={() => navigate("/terms")} />
+            <SettingRow icon={Shield} label="Privacy Policy" onClick={() => navigate("/privacy")} />
           </div>
         </section>
 

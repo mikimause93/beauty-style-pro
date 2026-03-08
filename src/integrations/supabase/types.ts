@@ -2776,6 +2776,69 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_reports: {
+        Row: {
+          admin_notes: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          id: string
+          reason: string
+          reported_content_id: string | null
+          reported_user_id: string | null
+          reporter_id: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason: string
+          reported_content_id?: string | null
+          reported_user_id?: string | null
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          reason?: string
+          reported_content_id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string
@@ -2822,6 +2885,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      verification_requests: {
+        Row: {
+          address: string | null
+          admin_notes: string | null
+          created_at: string
+          document_type: string | null
+          document_urls: string[] | null
+          full_name: string | null
+          id: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+          verification_type: string
+        }
+        Insert: {
+          address?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          document_type?: string | null
+          document_urls?: string[] | null
+          full_name?: string | null
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+          verification_type?: string
+        }
+        Update: {
+          address?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          document_type?: string | null
+          document_urls?: string[] | null
+          full_name?: string | null
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+          verification_type?: string
+        }
+        Relationships: []
       }
       wallet_transactions: {
         Row: {
