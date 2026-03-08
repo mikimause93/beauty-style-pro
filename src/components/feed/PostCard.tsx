@@ -84,9 +84,11 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <p className="text-sm font-semibold truncate">{post.profileData?.display_name || "Beauty Pro"}</p>
           <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
-        <button onClick={() => navigate("/booking")} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors">
-          Prenota
-        </button>
+        {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
+          <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors">
+            Prenota
+          </button>
+        )}
       </div>
 
       {/* Image */}
@@ -114,9 +116,9 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
             <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
           <div className="flex-1" />
-          {post.profileData?.user_type === "professional" && (
+          {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
             <>
-              <button onClick={() => navigate(`/booking`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                 Prenota
               </button>
               <button onClick={() => navigate(`/chat`)} className="w-[22px] h-[22px]">
