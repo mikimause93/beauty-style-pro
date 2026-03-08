@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -10,6 +10,8 @@ import LivePollWidget from "@/components/live/LivePollWidget";
 import LiveBadges from "@/components/live/LiveBadges";
 import PostLiveStats from "@/components/live/PostLiveStats";
 import WeeklyLiveTracker from "@/components/live/WeeklyLiveTracker";
+import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
+import LiveMusicSelector from "@/components/live/LiveMusicSelector";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -74,6 +76,8 @@ export default function LiveStreamPage() {
   const [selectedTip, setSelectedTip] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const [showShop, setShowShop] = useState(false);
+  const [showStyleReplicator, setShowStyleReplicator] = useState(false);
+  const [showMusic, setShowMusic] = useState(false);
   const [interactionScore, setInteractionScore] = useState(0);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [showPostStats, setShowPostStats] = useState(false);
@@ -372,6 +376,12 @@ export default function LiveStreamPage() {
               <button onClick={shareInvite} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <UserPlus className="w-4 h-4 text-primary" />
               </button>
+              <button onClick={() => setShowStyleReplicator(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Wand2 className="w-4 h-4 text-primary" />
+              </button>
+              <button onClick={() => setShowMusic(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Music className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* Chat Input */}
@@ -386,6 +396,15 @@ export default function LiveStreamPage() {
           </div>
 
           {showShop && <LiveShopPanel professionalId={selectedStream.professional?.id} onClose={() => setShowShop(false)} />}
+          {showStyleReplicator && (
+            <StyleReplicatorPanel
+              streamTitle={selectedStream.title}
+              streamCategory={selectedStream.category}
+              professionalName={selectedStream.professional?.business_name}
+              onClose={() => setShowStyleReplicator(false)}
+            />
+          )}
+          {showMusic && <LiveMusicSelector isStreamer={false} onClose={() => setShowMusic(false)} />}
 
           {/* Tip Modal */}
           {showTipModal && (
