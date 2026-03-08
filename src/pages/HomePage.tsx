@@ -119,8 +119,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Stayle" className="w-8 h-8 rounded-lg" />
-            <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
+            <img src={logo} alt="STYLE" className="w-8 h-8 rounded-lg" />
+            <h1 className="text-xl font-display font-bold text-gradient-primary">STYLE</h1>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold">

@@ -73,7 +73,7 @@ export default function PWAInstallPrompt() {
             <Smartphone className="w-8 h-8 text-primary" />
           </div>
           
-          <h2 className="text-xl font-bold text-white mb-1">Installa Stayle</h2>
+          <h2 className="text-xl font-bold text-white mb-1">Installa STYLE</h2>
           <p className="text-white/80 text-sm">Aggiungi alla schermata home</p>
         </div>
         

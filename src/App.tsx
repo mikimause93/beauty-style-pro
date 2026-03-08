@@ -35,6 +35,8 @@ import CreateJobPostPage from "./pages/CreateJobPostPage";
 import JobDetailPage from "./pages/JobDetailPage";
 import MapSearchPage from "./pages/MapSearchPage";
 import HomeServicePage from "./pages/HomeServicePage";
+import SettingsPage from "./pages/SettingsPage";
+import ReviewPage from "./pages/ReviewPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,7 @@ const App = () => (
             <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/my-bookings" element={<MyBookingsPage />} />
             <Route path="/my-bookings/:id" element={<BookingDetailPage />} />
+            <Route path="/my-bookings/:id/review" element={<ReviewPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/stylists" element={<StylistsPage />} />
@@ -72,6 +75,7 @@ const App = () => (
             <Route path="/before-after" element={<BeforeAfterPage />} />
             <Route path="/map-search" element={<MapSearchPage />} />
             <Route path="/home-service/:id" element={<HomeServicePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/qr-coins" element={<QRCoinsPage />} />
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />

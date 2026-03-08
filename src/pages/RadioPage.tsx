@@ -13,7 +13,7 @@ const stations = [
 ];
 
 const tracks = [
-  { id: 1, title: "Feel the Beat", artist: "Stayle Music", duration: "3:24", cover: stylist2 },
+  { id: 1, title: "Feel the Beat", artist: "STYLE Music", duration: "3:24", cover: stylist2 },
   { id: 2, title: "Beauty Hour", artist: "Frequency Cosmetics", duration: "4:12", cover: beauty3 },
   { id: 3, title: "Praduy Hossi", artist: "Set crutons Neoleeen", duration: "3:55", cover: stylist1 },
   { id: 4, title: "Salon Dreams", artist: "Beauty Waves", duration: "4:30", cover: beauty2 },
