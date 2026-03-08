@@ -100,12 +100,12 @@ export default function HRPage() {
   });
 
   const categories = [
-    { key: "hair", label: "Hair", emoji: "💇‍♀️" },
-    { key: "beauty", label: "Beauty", emoji: "💄" },
-    { key: "nails", label: "Nails", emoji: "💅" },
-    { key: "massage", label: "Massage", emoji: "💆" },
-    { key: "barbershop", label: "Barber", emoji: "💈" },
-    { key: "spa", label: "SPA", emoji: "🧖‍♀️" },
+    { key: "hair", label: "Hair" },
+    { key: "beauty", label: "Beauty" },
+    { key: "nails", label: "Nails" },
+    { key: "massage", label: "Massage" },
+    { key: "barbershop", label: "Barber" },
+    { key: "spa", label: "SPA" },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -215,7 +215,7 @@ export default function HRPage() {
                     selectedCategory === cat.key ? "gradient-primary text-primary-foreground" : "bg-card border border-border"
                   }`}
                 >
-                  {cat.emoji} {cat.label}
+                  {cat.label}
                 </button>
               ))}
             </div>

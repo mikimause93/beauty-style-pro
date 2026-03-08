@@ -14,9 +14,9 @@ const tabs = ["Guadagni", "Prenotazioni", "Recensioni", "Follower"];
 const fallbackAvatars = [stylist1, beauty2, beauty1, stylist2, beauty3, stylist1, beauty2];
 
 const fallbackData = [
-  { rank: 1, name: "Beauty Master", subtitle: "Hairstylist · Milano", score: 3100, badge: "🥇" },
-  { rank: 2, name: "Glow Studio", subtitle: "Colorist · Roma", score: 2800, badge: "🥈" },
-  { rank: 3, name: "Style Pro", subtitle: "Estetista · Napoli", score: 2300, badge: "🥉" },
+  { rank: 1, name: "Beauty Master", subtitle: "Hairstylist · Milano", score: 3100, badge: "" },
+  { rank: 2, name: "Glow Studio", subtitle: "Colorist · Roma", score: 2800, badge: "" },
+  { rank: 3, name: "Style Pro", subtitle: "Estetista · Napoli", score: 2300, badge: "" },
   { rank: 4, name: "Hair Queen", subtitle: "Hairstylist · Torino", score: 2100, badge: "" },
   { rank: 5, name: "Beauty Star", subtitle: "Stilista · Milano", score: 1900, badge: "" },
   { rank: 6, name: "Nail Art Pro", subtitle: "Nail Artist · Roma", score: 1750, badge: "" },

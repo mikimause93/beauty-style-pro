@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Share2, X, MessageCircle, Copy, Check } from "lucide-react";
+import { Share2, X, MessageCircle, Copy, Check, Phone, Facebook, Instagram, Music2, Briefcase, Search, AtSign } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMenuProps {
@@ -11,13 +11,13 @@ interface ShareMenuProps {
 }
 
 const socials = [
-  { id: "whatsapp", label: "WhatsApp", icon: "💬", color: "bg-green-600", getUrl: (url: string, text: string) => `https://wa.me/?text=${encodeURIComponent(text + " " + url)}` },
-  { id: "facebook", label: "Facebook", icon: "📘", color: "bg-blue-600", getUrl: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
-  { id: "instagram", label: "Instagram", icon: "📸", color: "bg-pink-600", getUrl: () => `https://www.instagram.com/` },
-  { id: "tiktok", label: "TikTok", icon: "🎵", color: "bg-foreground", getUrl: () => `https://www.tiktok.com/` },
-  { id: "linkedin", label: "LinkedIn", icon: "💼", color: "bg-blue-700", getUrl: (url: string, text: string) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
-  { id: "indeed", label: "Indeed", icon: "🔍", color: "bg-blue-500", getUrl: () => `https://www.indeed.com/` },
-  { id: "twitter", label: "X/Twitter", icon: "🐦", color: "bg-foreground", getUrl: (url: string, text: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
+  { id: "whatsapp", label: "WhatsApp", Icon: Phone, color: "bg-green-600", getUrl: (url: string, text: string) => `https://wa.me/?text=${encodeURIComponent(text + " " + url)}` },
+  { id: "facebook", label: "Facebook", Icon: Facebook, color: "bg-blue-600", getUrl: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
+  { id: "instagram", label: "Instagram", Icon: Instagram, color: "bg-pink-600", getUrl: () => `https://www.instagram.com/` },
+  { id: "tiktok", label: "TikTok", Icon: Music2, color: "bg-foreground", getUrl: () => `https://www.tiktok.com/` },
+  { id: "linkedin", label: "LinkedIn", Icon: Briefcase, color: "bg-blue-700", getUrl: (url: string, text: string) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
+  { id: "indeed", label: "Indeed", Icon: Search, color: "bg-blue-500", getUrl: () => `https://www.indeed.com/` },
+  { id: "twitter", label: "X/Twitter", Icon: AtSign, color: "bg-foreground", getUrl: (url: string, text: string) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}` },
 ];
 
 export default function ShareMenu({ url, title, description, onClose, onChatShare }: ShareMenuProps) {
@@ -93,8 +93,8 @@ export default function ShareMenu({ url, title, description, onClose, onChatShar
         <div className="grid grid-cols-4 gap-3">
           {socials.map(social => (
             <button key={social.id} onClick={() => handleShare(social.id)} className="flex flex-col items-center gap-1.5">
-              <div className={`w-12 h-12 rounded-full ${social.color} flex items-center justify-center text-lg`}>
-                {social.icon}
+              <div className={`w-12 h-12 rounded-full ${social.color} flex items-center justify-center`}>
+                <social.Icon className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="text-[10px] font-medium text-muted-foreground">{social.label}</span>
             </button>

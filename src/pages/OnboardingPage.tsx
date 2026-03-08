@@ -230,7 +230,7 @@ export default function OnboardingPage() {
                         : "bg-background border-border text-muted-foreground"
                     }`}
                   >
-                    {t === "center" ? "🏢 Centro" : t === "barbershop" ? "💈 Barbershop" : t === "spa" ? "🧖 Spa" : "👤 Individuale"}
+                    {t === "center" ? "Centro" : t === "barbershop" ? "Barbershop" : t === "spa" ? "Spa" : "Individuale"}
                   </button>
                 ))}
               </div>

@@ -42,7 +42,7 @@ export default function ReviewPage() {
     if (error) {
       toast.error("Errore nell'invio della recensione");
     } else {
-      toast.success("Recensione inviata! ⭐");
+      toast.success("Recensione inviata!");
       navigate(-1);
     }
     setLoading(false);
