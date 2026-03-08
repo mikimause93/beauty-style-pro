@@ -73,19 +73,6 @@ export default function CheckoutPage() {
         status: "paid",
       });
 
-      // Create receipt
-      if (tx) {
-        await supabase.from("receipts").insert({
-          user_id: user.id,
-          transaction_id: tx.id,
-          receipt_type: type,
-          service_name: description,
-          amount,
-          payment_method: selected,
-          status: "paid",
-        });
-      }
-
       toast.success("Pagamento completato!");
       navigate(`/wallet`);
     } catch (e) {
