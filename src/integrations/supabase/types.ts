@@ -152,6 +152,126 @@ export type Database = {
           },
         ]
       }
+      businesses: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          bio: string | null
+          branding_theme: Json | null
+          business_name: string
+          business_type: string
+          categories: string[] | null
+          certifications: Json | null
+          city: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          documents: Json | null
+          email: string | null
+          employee_count: number | null
+          facebook: string | null
+          featured: boolean | null
+          id: string
+          instagram: string | null
+          latitude: number | null
+          legal_name: string
+          logo_url: string | null
+          longitude: number | null
+          metadata: Json | null
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          tax_code: string | null
+          updated_at: string
+          user_id: string
+          vat_number: string
+          verification_status: string | null
+          verified: boolean | null
+          website: string | null
+          working_hours: Json | null
+          zip_code: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          bio?: string | null
+          branding_theme?: Json | null
+          business_name: string
+          business_type?: string
+          categories?: string[] | null
+          certifications?: Json | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          documents?: Json | null
+          email?: string | null
+          employee_count?: number | null
+          facebook?: string | null
+          featured?: boolean | null
+          id?: string
+          instagram?: string | null
+          latitude?: number | null
+          legal_name: string
+          logo_url?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug: string
+          tax_code?: string | null
+          updated_at?: string
+          user_id: string
+          vat_number: string
+          verification_status?: string | null
+          verified?: boolean | null
+          website?: string | null
+          working_hours?: Json | null
+          zip_code?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          bio?: string | null
+          branding_theme?: Json | null
+          business_name?: string
+          business_type?: string
+          categories?: string[] | null
+          certifications?: Json | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          documents?: Json | null
+          email?: string | null
+          employee_count?: number | null
+          facebook?: string | null
+          featured?: boolean | null
+          id?: string
+          instagram?: string | null
+          latitude?: number | null
+          legal_name?: string
+          logo_url?: string | null
+          longitude?: number | null
+          metadata?: Json | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string
+          tax_code?: string | null
+          updated_at?: string
+          user_id?: string
+          vat_number?: string
+          verification_status?: string | null
+          verified?: boolean | null
+          website?: string | null
+          working_hours?: Json | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       challenge_participations: {
         Row: {
           challenge_id: string
@@ -409,6 +529,173 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      job_applications: {
+        Row: {
+          ai_analysis: Json | null
+          ai_match_score: number | null
+          ai_recommended: boolean | null
+          applicant_id: string
+          cover_letter: string | null
+          created_at: string
+          cv_url: string | null
+          employer_notes: string | null
+          id: string
+          interview_date: string | null
+          job_post_id: string
+          metadata: Json | null
+          portfolio_urls: string[] | null
+          rejection_reason: string | null
+          responded_at: string | null
+          status: string | null
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          ai_match_score?: number | null
+          ai_recommended?: boolean | null
+          applicant_id: string
+          cover_letter?: string | null
+          created_at?: string
+          cv_url?: string | null
+          employer_notes?: string | null
+          id?: string
+          interview_date?: string | null
+          job_post_id: string
+          metadata?: Json | null
+          portfolio_urls?: string[] | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          status?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          ai_match_score?: number | null
+          ai_recommended?: boolean | null
+          applicant_id?: string
+          cover_letter?: string | null
+          created_at?: string
+          cv_url?: string | null
+          employer_notes?: string | null
+          id?: string
+          interview_date?: string | null
+          job_post_id?: string
+          metadata?: Json | null
+          portfolio_urls?: string[] | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          status?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_post_id_fkey"
+            columns: ["job_post_id"]
+            isOneToOne: false
+            referencedRelation: "job_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_posts: {
+        Row: {
+          application_count: number | null
+          benefits: string[] | null
+          business_id: string | null
+          category: string
+          created_at: string
+          description: string
+          employment_type: string
+          expiration_date: string
+          featured: boolean | null
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          metadata: Json | null
+          professional_id: string | null
+          required_skills: string[] | null
+          salary_currency: string | null
+          salary_max: number | null
+          salary_min: number | null
+          start_date: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          application_count?: number | null
+          benefits?: string[] | null
+          business_id?: string | null
+          category: string
+          created_at?: string
+          description: string
+          employment_type: string
+          expiration_date: string
+          featured?: boolean | null
+          id?: string
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          metadata?: Json | null
+          professional_id?: string | null
+          required_skills?: string[] | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          start_date?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          application_count?: number | null
+          benefits?: string[] | null
+          business_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          employment_type?: string
+          expiration_date?: string
+          featured?: boolean | null
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          metadata?: Json | null
+          professional_id?: string | null
+          required_skills?: string[] | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          start_date?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_posts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_posts_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leaderboard: {
         Row: {
@@ -798,46 +1085,64 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: Json | null
           avatar_url: string | null
           bio: string | null
           city: string | null
           created_at: string
+          cv_url: string | null
+          desired_categories: string[] | null
           display_name: string | null
+          experience_years: number | null
           follower_count: number
           following_count: number
           id: string
           phone: string | null
+          portfolio_urls: string[] | null
           qr_coins: number
+          skills: string[] | null
           updated_at: string
           user_id: string
           user_type: string
         }
         Insert: {
+          availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_url?: string | null
+          desired_categories?: string[] | null
           display_name?: string | null
+          experience_years?: number | null
           follower_count?: number
           following_count?: number
           id?: string
           phone?: string | null
+          portfolio_urls?: string[] | null
           qr_coins?: number
+          skills?: string[] | null
           updated_at?: string
           user_id: string
           user_type?: string
         }
         Update: {
+          availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_url?: string | null
+          desired_categories?: string[] | null
           display_name?: string | null
+          experience_years?: number | null
           follower_count?: number
           following_count?: number
           id?: string
           phone?: string | null
+          portfolio_urls?: string[] | null
           qr_coins?: number
+          skills?: string[] | null
           updated_at?: string
           user_id?: string
           user_type?: string
@@ -1212,6 +1517,92 @@ export type Database = {
             columns: ["stream_id"]
             isOneToOne: false
             referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          accepted_at: string | null
+          accepts_bookings: boolean | null
+          active: boolean | null
+          avatar: string | null
+          business_id: string
+          can_manage_bookings: boolean | null
+          can_manage_hr: boolean | null
+          can_manage_services: boolean | null
+          can_manage_team: boolean | null
+          can_view_analytics: boolean | null
+          created_at: string
+          departments: string[] | null
+          email: string | null
+          id: string
+          invited_at: string | null
+          live_call_active: boolean | null
+          metadata: Json | null
+          name: string
+          phone: string | null
+          position: string | null
+          role: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepts_bookings?: boolean | null
+          active?: boolean | null
+          avatar?: string | null
+          business_id: string
+          can_manage_bookings?: boolean | null
+          can_manage_hr?: boolean | null
+          can_manage_services?: boolean | null
+          can_manage_team?: boolean | null
+          can_view_analytics?: boolean | null
+          created_at?: string
+          departments?: string[] | null
+          email?: string | null
+          id?: string
+          invited_at?: string | null
+          live_call_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          phone?: string | null
+          position?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepts_bookings?: boolean | null
+          active?: boolean | null
+          avatar?: string | null
+          business_id?: string
+          can_manage_bookings?: boolean | null
+          can_manage_hr?: boolean | null
+          can_manage_services?: boolean | null
+          can_manage_team?: boolean | null
+          can_view_analytics?: boolean | null
+          created_at?: string
+          departments?: string[] | null
+          email?: string | null
+          id?: string
+          invited_at?: string | null
+          live_call_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          phone?: string | null
+          position?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
