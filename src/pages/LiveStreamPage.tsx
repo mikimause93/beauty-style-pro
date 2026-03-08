@@ -93,6 +93,15 @@ export default function LiveStreamPage() {
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
+  // Auto-select stream from URL param
+  useEffect(() => {
+    const streamId = searchParams.get("stream");
+    if (streamId && streams.length > 0 && !selectedStream) {
+      const found = streams.find(s => s.id === streamId);
+      if (found) setSelectedStream(found);
+    }
+  }, [streams, searchParams]);
+
   useEffect(() => {
     if (selectedCategory === "all") {
       setFilteredStreams(streams);

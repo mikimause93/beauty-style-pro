@@ -35,39 +35,31 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
 
   const fetchData = async () => {
     setLoading(true);
-    const promises: Promise<any>[] = [];
+    try {
+      let svcData: any[] = [];
+      let prodData: any[] = [];
 
-    // Fetch services for this professional
-    if (professionalId) {
-      promises.push(
-        supabase.from("services").select("id, name, price, duration").eq("professional_id", professionalId).limit(5).then(r => r.data)
-      );
-    } else {
-      promises.push(Promise.resolve([]));
-    }
+      if (professionalId) {
+        const { data: svc } = await supabase.from("services").select("id, name, price, duration").eq("professional_id", professionalId).limit(5);
+        svcData = svc || [];
 
-    // Fetch products (from the professional's seller_id or general)
-    if (professionalId) {
-      // Get user_id from professional
-      const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).single();
-      if (pro) {
-        promises.push(
-          supabase.from("products").select("id, name, price, image_url, rating").eq("seller_id", pro.user_id).eq("active", true).limit(5).then(r => r.data)
-        );
-      } else {
-        promises.push(
-          supabase.from("products").select("id, name, price, image_url, rating").eq("active", true).order("rating", { ascending: false }).limit(5).then(r => r.data)
-        );
+        const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).single();
+        if (pro) {
+          const { data: prods } = await supabase.from("products").select("id, name, price, image_url, rating").eq("seller_id", pro.user_id).eq("active", true).limit(5);
+          prodData = prods || [];
+        }
       }
-    } else {
-      promises.push(
-        supabase.from("products").select("id, name, price, image_url, rating").eq("active", true).order("rating", { ascending: false }).limit(5).then(r => r.data)
-      );
-    }
 
-    const [svcData, prodData] = await Promise.all(promises);
-    setServices(svcData || []);
-    setProducts(prodData || []);
+      if (prodData.length === 0) {
+        const { data: prods } = await supabase.from("products").select("id, name, price, image_url, rating").eq("active", true).order("rating", { ascending: false }).limit(5);
+        prodData = prods || [];
+      }
+
+      setServices(svcData);
+      setProducts(prodData);
+    } catch (e) {
+      console.error("Error fetching shop data:", e);
+    }
     setLoading(false);
   };
 
