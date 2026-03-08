@@ -14,6 +14,11 @@ import BookingPage from "./pages/BookingPage";
 import EventsPage from "./pages/EventsPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import StylistsPage from "./pages/StylistsPage";
+import StylistDetailPage from "./pages/StylistDetailPage";
+import ChatPage from "./pages/ChatPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import EditProfilePage from "./pages/EditProfilePage";
+import BeforeAfterPage from "./pages/BeforeAfterPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,10 +37,15 @@ const App = () => (
             <Route path="/radio" element={<RadioPage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<EditProfilePage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/stylists" element={<StylistsPage />} />
+            <Route path="/stylist/:id" element={<StylistDetailPage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/before-after" element={<BeforeAfterPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
