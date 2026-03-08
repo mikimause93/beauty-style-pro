@@ -1,9 +1,10 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle, Bell, Cog } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { supabase } from "@/integrations/supabase/client";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -15,6 +16,55 @@ export default function ProfilePage() {
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
+
+  const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralStats, setReferralStats] = useState({ invites: 0, earned: 0 });
+  const [analyticsData, setAnalyticsData] = useState({ bookings: 0, revenue: 0, followers: 0, engagement: 0 });
+
+  useEffect(() => {
+    if (user) {
+      loadMyPosts();
+      loadReferral();
+      loadAnalytics();
+    }
+  }, [user]);
+
+  const loadMyPosts = async () => {
+    const { data } = await supabase
+      .from("posts")
+      .select("id, image_url, like_count, comment_count")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(12);
+    setMyPosts(data || []);
+  };
+
+  const loadReferral = async () => {
+    const { data: code } = await supabase
+      .from("referral_codes")
+      .select("*")
+      .eq("user_id", user!.id)
+      .single();
+    if (code) {
+      setReferralCode(code.code);
+      setReferralStats({ invites: code.usage_count || 0, earned: (code.usage_count || 0) * (code.reward_qr_coin || 10) });
+    }
+  };
+
+  const loadAnalytics = async () => {
+    const [{ count: bookingsCount }, { data: transactions }] = await Promise.all([
+      supabase.from("bookings").select("*", { count: "exact", head: true }).eq("client_id", user!.id),
+      supabase.from("transactions").select("amount").eq("user_id", user!.id).eq("type", "credit"),
+    ]);
+    const revenue = transactions?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+    setAnalyticsData({
+      bookings: bookingsCount || 0,
+      revenue,
+      followers: profile?.follower_count || 0,
+      engagement: myPosts.length > 0 ? Math.round((myPosts.reduce((s, p) => s + (p.like_count || 0), 0) / myPosts.length) * 10) / 10 : 0,
+    });
+  };
 
   if (!user) {
     return (
@@ -55,6 +105,8 @@ export default function ProfilePage() {
     { icon: MessageCircle, label: "Chat", path: "/chat" },
     { icon: Cog, label: "Impostazioni", path: "/settings" },
   ];
+
+  const fallbackImages = [beauty1, beauty2, stylist2, beauty3, beauty1, beauty2];
 
   return (
     <MobileLayout>
@@ -152,56 +204,55 @@ export default function ProfilePage() {
           {(["posts", "analytics", "referral"] as const).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all capitalize ${activeTab === tab ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              {tab === "posts" ? "Post" : tab === "analytics" ? "Analytics" : "Referral"}
+              {tab === "posts" ? "Post" : tab === "analytics" ? "Statistiche" : "Referral"}
             </button>
           ))}
         </div>
 
         {activeTab === "posts" && (
-          <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden fade-in">
-            {[beauty1, beauty2, stylist2, beauty3, beauty1, beauty2].map((img, i) => (
-              <div key={i} className="aspect-square">
-                <img src={img} alt="" className="w-full h-full object-cover" />
+          <div className="fade-in">
+            {myPosts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">
+                {myPosts.map((post, i) => (
+                  <div key={post.id} className="aspect-square relative">
+                    <img src={post.image_url || fallbackImages[i % fallbackImages.length]} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute bottom-1 left-1 flex items-center gap-1 bg-background/60 rounded-full px-1.5 py-0.5">
+                      <Heart className="w-2.5 h-2.5 text-primary" />
+                      <span className="text-[9px] font-bold">{post.like_count}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-4xl mb-2">📸</p>
+                <p className="text-sm text-muted-foreground">Nessun post ancora</p>
+                <button onClick={() => navigate("/create-post")} className="mt-3 px-4 py-2 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
+                  Crea il primo post
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === "analytics" && (
           <div className="space-y-3 fade-in">
-            <div className="rounded-xl gradient-card border border-border p-4 shadow-card">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-semibold">Guadagni del Mese</h3>
-                <span className="px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold">Totale</span>
-              </div>
-              <p className="text-3xl font-display font-bold text-gradient-gold">€ 4,280</p>
-            </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Total Viewers", value: "20.8K", change: "+8%" },
-                { label: "Followers Growth", value: "19+", change: "+15%" },
-                { label: "Engagement Rate", value: "50.10%", change: "+2%" },
-                { label: "Revenue", value: "€4,280", change: "+12%" },
-              ].map(data => (
-                <div key={data.label} className="p-3 rounded-xl bg-card shadow-card">
-                  <p className="text-[10px] text-muted-foreground">{data.label}</p>
-                  <p className="text-lg font-bold">{data.value}</p>
-                  <span className="text-[10px] font-semibold text-success">{data.change}</span>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-xl bg-card p-4 shadow-card">
-              <p className="text-xs text-muted-foreground mb-3">Revenue Trend</p>
-              <div className="flex items-end gap-1 h-24">
-                {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t-md gradient-primary" style={{ height: `${h}%` }} />
-                ))}
-              </div>
-              <div className="flex justify-between mt-1">
-                {["L", "M", "M", "G", "V", "S", "D"].map((d, i) => (
-                  <span key={i} className="text-[9px] text-muted-foreground flex-1 text-center">{d}</span>
-                ))}
-              </div>
+                { label: "Prenotazioni", value: analyticsData.bookings.toString(), icon: Calendar },
+                { label: "Follower", value: analyticsData.followers.toLocaleString(), icon: Users },
+                { label: "QR Coins guadagnati", value: analyticsData.revenue.toLocaleString(), icon: Coins },
+                { label: "Like medi/post", value: analyticsData.engagement.toString(), icon: Heart },
+              ].map(data => {
+                const Icon = data.icon;
+                return (
+                  <div key={data.label} className="p-3 rounded-xl bg-card shadow-card">
+                    <Icon className="w-4 h-4 text-primary mb-1" />
+                    <p className="text-lg font-bold">{data.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{data.label}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -212,26 +263,35 @@ export default function ProfilePage() {
               <span className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold">Invita & Guadagna</span>
               <h3 className="font-display font-bold text-lg mt-3">Il tuo Codice Referral</h3>
               <div className="flex items-center gap-2 p-3 rounded-xl bg-muted mt-3">
-                <code className="flex-1 text-lg font-mono text-primary font-bold tracking-widest">AB39-KD75</code>
-                <button onClick={() => { navigator.clipboard.writeText("AB39-KD75"); toast.success("Codice copiato!"); }}
-                  className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-                  <Copy className="w-4 h-4 text-primary-foreground" />
-                </button>
+                <code className="flex-1 text-lg font-mono text-primary font-bold tracking-widest">{referralCode || "—"}</code>
+                {referralCode && (
+                  <button onClick={() => { navigator.clipboard.writeText(referralCode); toast.success("Codice copiato!"); }}
+                    className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
+                    <Copy className="w-4 h-4 text-primary-foreground" />
+                  </button>
+                )}
               </div>
+              {!referralCode && (
+                <button onClick={() => navigate("/referral")} className="mt-3 px-4 py-2 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
+                  Genera il tuo codice
+                </button>
+              )}
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="p-3 rounded-xl bg-card">
-                  <p className="text-xl font-bold text-gradient-gold">12</p>
+                  <p className="text-xl font-bold text-gradient-gold">{referralStats.invites}</p>
                   <p className="text-[10px] text-muted-foreground">Inviti accettati</p>
                 </div>
                 <div className="p-3 rounded-xl bg-card">
-                  <p className="text-xl font-bold text-gradient-gold">160 QRC</p>
+                  <p className="text-xl font-bold text-gradient-gold">{referralStats.earned} QRC</p>
                   <p className="text-[10px] text-muted-foreground">Guadagnati</p>
                 </div>
               </div>
-              <button onClick={() => { navigator.clipboard.writeText("AB39-KD75"); toast.success("Link copiato!"); }}
-                className="w-full mt-4 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold shadow-glow flex items-center justify-center gap-2">
-                <Share2 className="w-4 h-4" /> Condividi Codice
-              </button>
+              {referralCode && (
+                <button onClick={() => { navigator.clipboard.writeText(referralCode); toast.success("Link copiato!"); }}
+                  className="w-full mt-4 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold shadow-glow flex items-center justify-center gap-2">
+                  <Share2 className="w-4 h-4" /> Condividi Codice
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -54,10 +54,51 @@ export default function BusinessDashboardPage() {
     enabled: !!business,
   });
 
+  // Fetch bookings count for the business professional
+  const { data: bookingsCount } = useQuery({
+    queryKey: ["business_bookings_count", business?.id],
+    queryFn: async () => {
+      if (!business) return 0;
+      // Get professionals linked to this business owner
+      const { data: prof } = await supabase
+        .from("professionals")
+        .select("id")
+        .eq("user_id", business.user_id)
+        .single();
+      if (!prof) return 0;
+      const { count } = await supabase
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("professional_id", prof.id);
+      return count || 0;
+    },
+    enabled: !!business,
+  });
+
+  // Fetch revenue
+  const { data: revenue } = useQuery({
+    queryKey: ["business_revenue", user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      const { data } = await supabase
+        .from("transactions")
+        .select("amount")
+        .eq("user_id", user.id)
+        .eq("type", "credit");
+      return data?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+    },
+    enabled: !!user,
+  });
+
+  const formatRevenue = (val: number) => {
+    if (val >= 1000) return `€${(val / 1000).toFixed(1)}K`;
+    return `€${val}`;
+  };
+
   const stats = [
     { label: "Dipendenti", value: teamMembers?.length || 0, icon: Users, color: "text-primary" },
-    { label: "Prenotazioni", value: 127, icon: Calendar, color: "text-gold" },
-    { label: "Fatturato", value: "€12.4K", icon: TrendingUp, color: "text-success" },
+    { label: "Prenotazioni", value: bookingsCount || 0, icon: Calendar, color: "text-gold" },
+    { label: "Fatturato", value: formatRevenue(revenue || 0), icon: TrendingUp, color: "text-success" },
     { label: "Annunci Attivi", value: jobPosts?.filter(j => j.status === "active").length || 0, icon: Briefcase, color: "text-live" },
   ];
 
