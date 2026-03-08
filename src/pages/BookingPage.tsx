@@ -15,6 +15,12 @@ const services = [
   { id: "5", name: "Trattamento Keratina", price: 80, duration: 60 },
 ];
 
+const locationOptions = [
+  { id: "center", label: "In Salone", icon: "🏢" },
+  { id: "home", label: "A Domicilio", icon: "🏠" },
+  { id: "online", label: "Online", icon: "💻" },
+];
+
 const timeSlots = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
   "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00",
@@ -33,6 +39,7 @@ export default function BookingPage() {
   });
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState("Sportivo");
+  const [selectedLocation, setSelectedLocation] = useState("center");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
