@@ -328,6 +328,11 @@ export default function WalletPage() {
           </div>
         </div>
       )}
+      {/* QR Transfer Modal */}
+      <QRTransferModal open={showQRTransfer} onClose={() => setShowQRTransfer(false)} onComplete={() => { loadTransactions(); refreshProfile(); }} />
+
+      {/* Share App Modal */}
+      <ShareAppModal open={showShareApp} onClose={() => setShowShareApp(false)} />
     </MobileLayout>
   );
 }
