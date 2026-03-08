@@ -100,8 +100,7 @@ export default function ShopPage() {
     if (!user) { navigate("/auth"); return; }
     const discount = appliedPromo ? (product.price * appliedPromo.discount / 100) : 0;
     const finalPrice = product.price - discount;
-    // Record purchase
-    await supabase.from("product_purchases").insert({
+    const { error } = await supabase.from("product_purchases").insert({
       buyer_id: user.id,
       product_id: product.id,
       unit_price: product.price,
@@ -109,16 +108,11 @@ export default function ShopPage() {
       discount_amount: discount,
       payment_method: "wallet",
     });
-    // Record transaction
-    await supabase.from("transactions").insert({
-      user_id: user.id,
-      type: "spend",
-      amount: finalPrice,
-      description: `Acquisto: ${product.name}`,
-      reference_type: "product",
-      reference_id: product.id,
-    });
-    toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}! ✨`);
+    if (error) {
+      toast.error("Errore nell'acquisto");
+    } else {
+      toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}! ✨`);
+    }
   };
 
   const applyPromoCode = async () => {
