@@ -1,11 +1,11 @@
-import { Home, Radio, ShoppingBag, User, Video, Trophy, Heart, Sparkles } from "lucide-react";
+import { Home, Radio, ShoppingBag, User, Video, Briefcase } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/live", icon: Video, label: "Live" },
-  { path: "/radio", icon: Radio, label: "Radio" },
+  { path: "/hr", icon: Briefcase, label: "Jobs" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
@@ -18,7 +18,8 @@ export default function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border safe-area-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {tabs.map((tab) => {
-          const isActive = location.pathname === tab.path;
+          const isActive = location.pathname === tab.path || 
+            (tab.path === "/hr" && location.pathname.startsWith("/hr"));
           const Icon = tab.icon;
           return (
             <button
