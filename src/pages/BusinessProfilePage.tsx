@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useFollowUser } from "@/hooks/useFollow";
+import { useFollow } from "@/hooks/useFollow";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, MapPin, Star, MessageCircle, Phone, Globe, Users, CheckCircle } from "lucide-react";
 import beauty1 from "@/assets/beauty-1.jpg";
@@ -17,7 +17,7 @@ export default function BusinessProfilePage() {
   const [activeTab, setActiveTab] = useState<"services" | "shop" | "reviews">("services");
   const [loading, setLoading] = useState(true);
 
-  const { isFollowing, toggleFollow } = useFollowUser(business?.user_id);
+  const { isFollowing, toggleFollow } = useFollow(business?.user_id);
 
   useEffect(() => {
     if (id) fetchBusiness();
