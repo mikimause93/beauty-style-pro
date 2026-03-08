@@ -240,7 +240,7 @@ export default function HomePage() {
                       <MessageCircle className="w-5 h-5 text-muted-foreground" />
                       <span className="text-xs font-medium">{post.comment_count}</span>
                     </button>
-                    <button className="flex items-center gap-1.5">
+                    <button onClick={() => setSharePost(post)} className="flex items-center gap-1.5">
                       <Share2 className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <div className="flex-1" />
