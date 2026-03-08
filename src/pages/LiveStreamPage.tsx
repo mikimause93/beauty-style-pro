@@ -139,6 +139,9 @@ export default function LiveStreamPage() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [selectedStream?.id]);
+
+  // Auto-earn + badge checks
+  useEffect(() => {
     if (selectedStream) {
       watchTimerRef.current = window.setInterval(() => {
         awardCoins("watch_live", true);
