@@ -117,7 +117,9 @@ export default function LiveStreamPage() {
       setFloatingReactions(prev => prev.filter(r => r.id !== id));
     }, 2500);
 
-    // Save reaction to database
+    // Award QRCoin for reacting
+    awardCoins("react_live", true);
+
     if (user) {
       supabase.from('stream_reactions').insert({
         stream_id: selectedStream.id,
@@ -140,7 +142,9 @@ export default function LiveStreamPage() {
     setChatMessages(prev => [...prev, newMessage]);
     setChatMessage("");
 
-    // Save to database
+    // Award QRCoin for commenting
+    awardCoins("comment_live", true);
+
     await supabase.from('stream_comments').insert({
       stream_id: selectedStream.id,
       user_id: user.id,
