@@ -1635,11 +1635,17 @@ export type Database = {
           hourly_rate: number | null
           id: string
           is_verified: boolean | null
+          latitude: number | null
+          longitude: number | null
+          portfolio_images: string[] | null
+          price_max: number | null
+          price_min: number | null
           rating: number | null
           review_count: number | null
           specialty: string | null
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
           address?: string | null
@@ -1650,11 +1656,17 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_verified?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          portfolio_images?: string[] | null
+          price_max?: number | null
+          price_min?: number | null
           rating?: number | null
           review_count?: number | null
           specialty?: string | null
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
           address?: string | null
@@ -1665,11 +1677,17 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_verified?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          portfolio_images?: string[] | null
+          price_max?: number | null
+          price_min?: number | null
           rating?: number | null
           review_count?: number | null
           specialty?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -1715,7 +1733,9 @@ export type Database = {
           avatar_url: string | null
           bank_holder_name: string | null
           bio: string | null
+          birth_date: string | null
           city: string | null
+          country: string | null
           created_at: string
           cv_url: string | null
           desired_categories: string[] | null
@@ -1726,6 +1746,9 @@ export type Database = {
           following_count: number
           iban: string | null
           id: string
+          interests: string[] | null
+          latitude: number | null
+          longitude: number | null
           otp_code: string | null
           otp_expires_at: string | null
           phone: string | null
@@ -1733,18 +1756,23 @@ export type Database = {
           portfolio_urls: string[] | null
           qr_coins: number
           skills: string[] | null
+          surname: string | null
           updated_at: string
           user_id: string
           user_type: string
+          username: string | null
           verification_notes: string | null
           verification_status: string
+          whatsapp: string | null
         }
         Insert: {
           availability?: Json | null
           avatar_url?: string | null
           bank_holder_name?: string | null
           bio?: string | null
+          birth_date?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
@@ -1755,6 +1783,9 @@ export type Database = {
           following_count?: number
           iban?: string | null
           id?: string
+          interests?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
           otp_code?: string | null
           otp_expires_at?: string | null
           phone?: string | null
@@ -1762,18 +1793,23 @@ export type Database = {
           portfolio_urls?: string[] | null
           qr_coins?: number
           skills?: string[] | null
+          surname?: string | null
           updated_at?: string
           user_id: string
           user_type?: string
+          username?: string | null
           verification_notes?: string | null
           verification_status?: string
+          whatsapp?: string | null
         }
         Update: {
           availability?: Json | null
           avatar_url?: string | null
           bank_holder_name?: string | null
           bio?: string | null
+          birth_date?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
@@ -1784,6 +1820,9 @@ export type Database = {
           following_count?: number
           iban?: string | null
           id?: string
+          interests?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
           otp_code?: string | null
           otp_expires_at?: string | null
           phone?: string | null
@@ -1791,11 +1830,14 @@ export type Database = {
           portfolio_urls?: string[] | null
           qr_coins?: number
           skills?: string[] | null
+          surname?: string | null
           updated_at?: string
           user_id?: string
           user_type?: string
+          username?: string | null
           verification_notes?: string | null
           verification_status?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
