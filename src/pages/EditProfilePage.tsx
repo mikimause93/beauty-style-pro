@@ -26,6 +26,8 @@ export default function EditProfilePage() {
   const [skills, setSkills] = useState<string[]>(profile?.skills || []);
   const [desiredCategories, setDesiredCategories] = useState<string[]>(profile?.desired_categories || []);
   const [locating, setLocating] = useState(false);
+  const [iban, setIban] = useState(profile?.iban || "");
+  const [bankHolderName, setBankHolderName] = useState(profile?.bank_holder_name || "");
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
