@@ -8,6 +8,7 @@ import AIGrowthSuggestions from "@/components/feed/AIGrowthSuggestions";
 import AutoOffersBanner from "@/components/feed/AutoOffersBanner";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
+import FeedJobCard from "@/components/feed/FeedJobCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
