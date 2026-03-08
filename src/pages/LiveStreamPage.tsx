@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
+import LiveShopPanel from "@/components/live/LiveShopPanel";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -57,7 +59,10 @@ export default function LiveStreamPage() {
   const [showTipModal, setShowTipModal] = useState(false);
   const [selectedTip, setSelectedTip] = useState<number>(10);
   const [loading, setLoading] = useState(true);
+  const [showShop, setShowShop] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const watchTimerRef = useRef<number | null>(null);
+  const { awardCoins } = useQRCoinRewards();
 
   useEffect(() => {
     fetchStreams();
