@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, MoreHorizontal } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, MoreHorizontal, Briefcase } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +42,7 @@ interface LiveStream {
   };
 }
 
-const tabs = ["New", "Stylists", "Most", "Stream"];
+const tabs = ["New", "Stylists", "Jobs", "Stream"];
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -52,6 +52,7 @@ export default function HomePage() {
   const [liveStreams, setLiveStreams] = useState<LiveStream[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -105,6 +106,16 @@ export default function HomePage() {
           hasStory: true,
         })));
       }
+
+      // Fetch job posts for Jobs tab
+      const { data: jobsData } = await supabase
+        .from('job_posts')
+        .select('*, professionals(business_name, city), businesses(business_name, logo_url)')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (jobsData) setJobPosts(jobsData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
