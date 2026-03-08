@@ -184,48 +184,28 @@ export default function ProfilePage() {
       )}
 
       <div className="px-4 pb-6">
-        {/* Profile Info — Instagram style */}
-        <div className="flex items-start gap-5 py-5">
-          {/* Avatar */}
-          <div className="shrink-0 relative">
-            <div className={`w-20 h-20 rounded-full p-[2px] ${isProfessional || isBusiness ? "bg-gradient-to-br from-primary to-accent" : "bg-border"}`}>
+        {/* Profile Info — STYLE unique layout: centered avatar */}
+        <div className="flex flex-col items-center pt-6 pb-4">
+          {/* Centered Avatar */}
+          <div className="relative mb-4">
+            <div className={`w-24 h-24 rounded-full p-[2.5px] ${isProfessional || isBusiness ? "bg-gradient-to-br from-primary via-accent to-primary" : "bg-border"}`}>
               <img
                 src={displayProfile?.avatar_url || stylist2}
                 alt=""
-                className="w-full h-full rounded-full object-cover border-2 border-background"
+                className="w-full h-full rounded-full object-cover border-[3px] border-background"
               />
             </div>
             {isOwnProfile && (
               <button onClick={() => navigate("/profile/edit")}
-                className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary flex items-center justify-center border-2 border-background">
-                <Camera className="w-3 h-3 text-primary-foreground" />
+                className="absolute -bottom-1 right-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-lg">
+                <Camera className="w-3.5 h-3.5 text-primary-foreground" />
               </button>
             )}
           </div>
 
-          {/* Stats Row */}
-          <div className="flex-1 pt-1">
-            <div className="flex justify-around text-center">
-              <button onClick={() => setActiveTab("grid")} className="flex flex-col items-center">
-                <span className="text-lg font-bold">{postCount}</span>
-                <span className="text-[10px] text-muted-foreground">Post</span>
-              </button>
-              <div className="flex flex-col items-center">
-                <span className="text-lg font-bold">{followerDisplay > 9999 ? `${(followerDisplay / 1000).toFixed(1)}K` : followerDisplay}</span>
-                <span className="text-[10px] text-muted-foreground">Follower</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-lg font-bold">{followingDisplay}</span>
-                <span className="text-[10px] text-muted-foreground">Seguiti</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Name, Bio, Links */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold">{displayProfile?.display_name || 'Utente STYLE'}</h2>
+          {/* Name & Badge — centered */}
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-base font-bold tracking-tight">{displayProfile?.display_name || 'Utente STYLE'}</h2>
             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
               isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
             }`}>
@@ -233,11 +213,13 @@ export default function ProfilePage() {
             </span>
           </div>
 
+          {/* Bio — centered */}
           {displayProfile?.bio && (
-            <p className="text-xs text-foreground mt-1 leading-relaxed whitespace-pre-line">{displayProfile.bio}</p>
+            <p className="text-xs text-muted-foreground text-center max-w-[280px] leading-relaxed mb-2">{displayProfile.bio}</p>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 mt-2">
+          {/* Location & skills — centered */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-3">
             {displayProfile?.city && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> {displayProfile.city}
@@ -250,9 +232,27 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* QR Coins badge */}
+          {/* Stats — horizontal pill style, centered */}
+          <div className="flex items-center gap-1 rounded-2xl bg-muted/50 border border-border/30 px-2 py-1.5 mb-4">
+            <button onClick={() => setActiveTab("grid")} className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-background/50 transition-colors">
+              <span className="text-sm font-bold">{postCount}</span>
+              <span className="text-[10px] text-muted-foreground">post</span>
+            </button>
+            <div className="w-px h-4 bg-border/50" />
+            <div className="flex items-center gap-1.5 px-3 py-1">
+              <span className="text-sm font-bold">{followerDisplay > 9999 ? `${(followerDisplay / 1000).toFixed(1)}K` : followerDisplay}</span>
+              <span className="text-[10px] text-muted-foreground">follower</span>
+            </div>
+            <div className="w-px h-4 bg-border/50" />
+            <div className="flex items-center gap-1.5 px-3 py-1">
+              <span className="text-sm font-bold">{followingDisplay}</span>
+              <span className="text-[10px] text-muted-foreground">seguiti</span>
+            </div>
+          </div>
+
+          {/* QR Coins badge — centered */}
           {isOwnProfile && (
-            <button onClick={() => navigate("/qr-coins")} className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-semibold">
+            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-muted/60 border border-border/30 text-xs font-semibold mb-1">
               <Coins className="w-3 h-3 text-accent" />
               {displayProfile?.qr_coins?.toLocaleString() || '0'} QR Coins
             </button>
