@@ -293,18 +293,16 @@ export default function ChatPage() {
   );
 
   // Voice bubble with real audio playback
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const toggleVoicePlay = (msg: Message) => {
     if (playingVoice === msg.id) {
-      audioRef.current?.pause();
+      audioPlayRef.current?.pause();
       setPlayingVoice(null);
     } else {
-      if (audioRef.current) audioRef.current.pause();
+      if (audioPlayRef.current) audioPlayRef.current.pause();
       const audio = new Audio(msg.mediaUrl);
       audio.onended = () => setPlayingVoice(null);
       audio.play().catch(() => toast.error("Impossibile riprodurre audio"));
-      audioRef.current = audio;
+      audioPlayRef.current = audio;
       setPlayingVoice(msg.id);
     }
   };
