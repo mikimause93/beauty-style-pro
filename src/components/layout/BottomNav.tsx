@@ -1,4 +1,4 @@
-import { Home, Radio, ShoppingBag, User, Video } from "lucide-react";
+import { Home, Radio, ShoppingBag, User, Video, Trophy, Heart, Sparkles } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ export default function BottomNav() {
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-16 h-full transition-all",
+                "flex flex-col items-center justify-center gap-1 w-16 h-full transition-all relative",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >

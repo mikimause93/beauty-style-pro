@@ -19,6 +19,10 @@ import ChatPage from "./pages/ChatPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import BeforeAfterPage from "./pages/BeforeAfterPage";
+import QRCoinsPage from "./pages/QRCoinsPage";
+import ChallengesPage from "./pages/ChallengesPage";
+import SpinWheelPage from "./pages/SpinWheelPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +50,10 @@ const App = () => (
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/before-after" element={<BeforeAfterPage />} />
+            <Route path="/qr-coins" element={<QRCoinsPage />} />
+            <Route path="/challenges" element={<ChallengesPage />} />
+            <Route path="/spin" element={<SpinWheelPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
