@@ -1,10 +1,12 @@
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2, Send, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
+import QRTransferModal from "@/components/wallet/QRTransferModal";
+import ShareAppModal from "@/components/wallet/ShareAppModal";
 
 export default function WalletPage() {
   const { user, profile, refreshProfile } = useAuth();
@@ -16,6 +18,8 @@ export default function WalletPage() {
   const [cardForm, setCardForm] = useState({ number: "", expiry: "", cvv: "", name: "" });
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [showQRTransfer, setShowQRTransfer] = useState(false);
+  const [showShareApp, setShowShareApp] = useState(false);
 
   useEffect(() => {
     if (user) { loadTransactions(); loadPaymentMethods(); }
@@ -165,15 +169,28 @@ export default function WalletPage() {
               ))}
             </div>
 
-            {/* QR Code Pay */}
-            <button onClick={() => toast.info("Scansione QR in arrivo!")}
+            {/* QR Coin Exchange */}
+            <button onClick={() => setShowQRTransfer(true)}
               className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-primary" />
+                <Send className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold">Paga con QR Code</p>
-                <p className="text-[11px] text-muted-foreground">Scansiona per pagare o ricevere</p>
+                <p className="text-sm font-semibold">Scambia QR Coins</p>
+                <p className="text-[11px] text-muted-foreground">Invia o ricevi tramite codice QR</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+
+            {/* Download & Share App */}
+            <button onClick={() => setShowShareApp(true)}
+              className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <Download className="w-5 h-5 text-green-500" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-semibold">Scarica & Condividi App</p>
+                <p className="text-[11px] text-muted-foreground">Installa o invia agli amici</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -311,6 +328,11 @@ export default function WalletPage() {
           </div>
         </div>
       )}
+      {/* QR Transfer Modal */}
+      <QRTransferModal open={showQRTransfer} onClose={() => setShowQRTransfer(false)} onComplete={() => { loadTransactions(); refreshProfile(); }} />
+
+      {/* Share App Modal */}
+      <ShareAppModal open={showShareApp} onClose={() => setShowShareApp(false)} />
     </MobileLayout>
   );
 }
