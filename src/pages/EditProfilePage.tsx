@@ -111,6 +111,8 @@ export default function EditProfilePage() {
       avatar_url: avatarUrl,
       skills,
       desired_categories: desiredCategories,
+      iban: iban || null,
+      bank_holder_name: bankHolderName || null,
     }).eq("user_id", user.id);
 
     if (error) {
@@ -236,6 +238,20 @@ export default function EditProfilePage() {
             </div>
           </section>
         )}
+
+        {/* Banking / IBAN */}
+        <section className="space-y-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1">Dati Bancari (per prelievi)</p>
+          <input value={bankHolderName} onChange={e => setBankHolderName(e.target.value)} placeholder="Intestatario conto"
+            className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+          <input value={iban} onChange={e => setIban(e.target.value.toUpperCase())} placeholder="IBAN (es. IT60X0542811101000000123456)"
+            className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary/30" maxLength={34} />
+          {iban && (
+            <p className={`text-[11px] px-1 ${iban.length >= 15 ? "text-green-500" : "text-yellow-500"}`}>
+              {iban.length >= 15 ? "✓ IBAN inserito" : "IBAN troppo corto"}
+            </p>
+          )}
+        </section>
       </div>
     </MobileLayout>
   );
