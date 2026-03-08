@@ -50,7 +50,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
       <p className={`absolute bottom-12 text-[10px] text-white/20 italic tracking-wide transition-all duration-500 ${phase === "text" || phase === "fade" ? "opacity-100" : "opacity-0"}`}
         style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}
       >
-        Founded by Michele Peschechera
+        Founded by Michele Peschechera ®
       </p>
     </div>
   );
