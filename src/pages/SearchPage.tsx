@@ -30,37 +30,26 @@ export default function SearchPage() {
     setLoading(true);
     const q = `%${query}%`;
 
-    const promises: Promise<any>[] = [];
-
     if (tab === "tutti" || tab === "stilisti") {
-      promises.push(
-        supabase.from("professionals").select("*").or(`business_name.ilike.${q},specialty.ilike.${q},city.ilike.${q}`).limit(10)
-      );
-    } else promises.push(Promise.resolve({ data: null }));
+      const { data } = await supabase.from("professionals").select("*").or(`business_name.ilike.${q},specialty.ilike.${q},city.ilike.${q}`).limit(10);
+      if (data) setStylists(data);
+    }
 
     if (tab === "tutti" || tab === "servizi") {
-      promises.push(
-        supabase.from("services").select("*, professionals(business_name)").or(`name.ilike.${q},category.ilike.${q}`).limit(10)
-      );
-    } else promises.push(Promise.resolve({ data: null }));
+      const { data } = await supabase.from("services").select("*, professionals(business_name)").or(`name.ilike.${q},category.ilike.${q}`).limit(10);
+      if (data) setServices(data);
+    }
 
     if (tab === "tutti" || tab === "prodotti") {
-      promises.push(
-        supabase.from("products").select("*").or(`name.ilike.${q},category.ilike.${q}`).eq("active", true).limit(10)
-      );
-    } else promises.push(Promise.resolve({ data: null }));
+      const { data } = await supabase.from("products").select("*").or(`name.ilike.${q},category.ilike.${q}`).eq("active", true).limit(10);
+      if (data) setProducts(data);
+    }
 
     if (tab === "tutti" || tab === "lavoro") {
-      promises.push(
-        supabase.from("job_posts").select("*").or(`title.ilike.${q},category.ilike.${q},location.ilike.${q}`).eq("status", "active").limit(10)
-      );
-    } else promises.push(Promise.resolve({ data: null }));
+      const { data } = await supabase.from("job_posts").select("*").or(`title.ilike.${q},category.ilike.${q},location.ilike.${q}`).eq("status", "active").limit(10);
+      if (data) setJobs(data);
+    }
 
-    const [styRes, srvRes, prodRes, jobRes] = await Promise.all(promises);
-    if (styRes.data) setStylists(styRes.data);
-    if (srvRes.data) setServices(srvRes.data);
-    if (prodRes.data) setProducts(prodRes.data);
-    if (jobRes.data) setJobs(jobRes.data);
     setLoading(false);
   };
 
