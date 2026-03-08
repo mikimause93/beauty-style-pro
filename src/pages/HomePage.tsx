@@ -1,6 +1,7 @@
 import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -48,6 +49,7 @@ export default function HomePage() {
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [stylists, setStylists] = useState(fallbackStylists);
+  const [sharePost, setSharePost] = useState<Post | null>(null);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -238,7 +240,7 @@ export default function HomePage() {
                       <MessageCircle className="w-5 h-5 text-muted-foreground" />
                       <span className="text-xs font-medium">{post.comment_count}</span>
                     </button>
-                    <button className="flex items-center gap-1.5">
+                    <button onClick={() => setSharePost(post)} className="flex items-center gap-1.5">
                       <Share2 className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <div className="flex-1" />
@@ -392,6 +394,14 @@ export default function HomePage() {
           </div>
         )}
       </div>
+      {sharePost && (
+        <ShareMenu
+          title={sharePost.caption || "Post su Style"}
+          description={`di ${sharePost.profileData?.display_name || "Style User"}`}
+          onClose={() => setSharePost(null)}
+          onChatShare={() => { navigate("/chat"); setSharePost(null); }}
+        />
+      )}
     </MobileLayout>
   );
 }
