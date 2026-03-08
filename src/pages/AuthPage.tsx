@@ -17,9 +17,9 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   const profileTypes = [
-    { key: "client", label: "Cliente", icon: "👤", desc: "Prenota servizi beauty" },
-    { key: "professional", label: "Professionista", icon: "💇‍♀️", desc: "Offri i tuoi servizi" },
-    { key: "business", label: "Business", icon: "🏢", desc: "Gestisci il tuo salone" },
+    { key: "client", label: "Cliente", icon: "👤", desc: "Prenota servizi" },
+    { key: "professional", label: "Pro", icon: "💇‍♀️", desc: "Offri servizi" },
+    { key: "business", label: "Business", icon: "🏢", desc: "Gestisci salone" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,24 +28,13 @@ export default function AuthPage() {
 
     if (isLogin) {
       const { error } = await signIn(email, password);
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Benvenuto!");
-        navigate("/");
-      }
+      if (error) { toast.error(error.message); }
+      else { toast.success("Benvenuto!"); navigate("/"); }
     } else {
-      if (!displayName.trim()) {
-        toast.error("Inserisci il tuo nome");
-        setLoading(false);
-        return;
-      }
+      if (!displayName.trim()) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
       const { error } = await signUp(email, password, displayName, userType);
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Account creato! Controlla la tua email per confermare.");
-      }
+      if (error) { toast.error(error.message); }
+      else { toast.success("Account creato! Controlla la tua email."); }
     }
     setLoading(false);
   };
@@ -54,131 +43,83 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
       <div className="w-full">
         {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <img src={logo} alt="STYLE" className="w-20 h-20 mb-3" />
-          <h1 className="text-3xl font-display font-bold text-gradient-primary">STYLE</h1>
-          <p className="text-sm text-muted-foreground mt-1">La piattaforma beauty</p>
+        <div className="flex flex-col items-center mb-10">
+          <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
+          <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+          <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              isLogin ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            }`}
-          >
+        <div className="flex gap-1 mb-6 bg-muted rounded-xl p-1">
+          <button onClick={() => setIsLogin(true)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              isLogin ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}>
             Accedi
           </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              !isLogin ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            }`}
-          >
+          <button onClick={() => setIsLogin(false)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              !isLogin ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            }`}>
             Registrati
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {!isLogin && (
             <>
-              {/* Profile Type Selector */}
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
-                  Tipo di account
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {profileTypes.map((t) => (
-                    <button
-                      key={t.key}
-                      type="button"
-                      onClick={() => setUserType(t.key)}
-                      className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all border ${
-                        userType === t.key
-                          ? "gradient-primary text-primary-foreground border-transparent shadow-glow"
-                          : "bg-card border-border text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <span className="text-lg">{t.icon}</span>
-                      <span>{t.label}</span>
-                      <span className={`text-[10px] font-normal ${userType === t.key ? "text-primary-foreground/80" : "text-muted-foreground/60"}`}>
-                        {t.desc}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+              {/* Profile Type */}
+              <div className="grid grid-cols-3 gap-1.5 mb-2">
+                {profileTypes.map(t => (
+                  <button key={t.key} type="button" onClick={() => setUserType(t.key)}
+                    className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all duration-200 border ${
+                      userType === t.key
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card border-border/50 text-muted-foreground"
+                    }`}>
+                    <span className="text-base">{t.icon}</span>
+                    <span>{t.label}</span>
+                    <span className={`text-[9px] font-normal ${userType === t.key ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>{t.desc}</span>
+                  </button>
+                ))}
               </div>
 
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Nome completo"
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
-                  className="w-full h-12 rounded-xl bg-card border border-border pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="text" placeholder="Nome completo" value={displayName} onChange={e => setDisplayName(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
               </div>
             </>
           )}
 
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full h-12 rounded-xl bg-card border border-border pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
+              className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
           </div>
 
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full h-12 rounded-xl bg-card border border-border pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <Eye className="w-5 h-5 text-muted-foreground" />
-              )}
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
+              onChange={e => setPassword(e.target.value)} required minLength={6}
+              className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
             </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm shadow-glow disabled:opacity-50 transition-all hover:scale-[1.02]"
-          >
+          <button type="submit" disabled={loading}
+            className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 transition-all duration-200">
             {loading ? "Caricamento..." : isLogin ? "Accedi" : "Crea Account"}
           </button>
         </form>
 
         {isLogin && (
-          <button className="w-full text-center mt-4 text-sm text-primary">
-            Password dimenticata?
-          </button>
+          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
         )}
 
-        <p className="text-center text-xs text-muted-foreground mt-8">
-          Continuando accetti i{" "}
-          <span className="text-primary">Termini di Servizio</span> e la{" "}
-          <span className="text-primary">Privacy Policy</span>
+        <p className="text-center text-[10px] text-muted-foreground mt-8">
+          Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
         </p>
       </div>
     </div>

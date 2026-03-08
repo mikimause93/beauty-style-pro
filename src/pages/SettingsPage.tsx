@@ -1,16 +1,30 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, User, Lock, Bell, Mail, Moon, Globe, HelpCircle, FileText, Shield, LogOut } from "lucide-react";
+import { ArrowLeft, User, Lock, Bell, Mail, Moon, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, profile, signOut, refreshProfile } = useAuth();
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
+  const [shareLocation, setShareLocation] = useState(false);
+  const [searchDistance, setSearchDistance] = useState(25);
+  const [locating, setLocating] = useState(false);
+  const [currentCoords, setCurrentCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (profile?.availability) {
+      const prefs = profile.availability as any;
+      if (prefs.share_location) setShareLocation(prefs.share_location);
+      if (prefs.search_distance) setSearchDistance(prefs.search_distance);
+      if (prefs.latitude && prefs.longitude) setCurrentCoords({ lat: prefs.latitude, lng: prefs.longitude });
+    }
+  }, [profile]);
 
   const handleLogout = async () => {
     await signOut();
@@ -18,106 +32,193 @@ export default function SettingsPage() {
     navigate("/auth");
   };
 
-  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
+  const handleShareLocation = async () => {
+    if (!user) return;
+    if (!shareLocation) {
+      // Enable location sharing
+      setLocating(true);
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
+        });
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setCurrentCoords(coords);
+        setShareLocation(true);
+
+        await supabase.from("profiles").update({
+          availability: {
+            ...(profile?.availability as any || {}),
+            share_location: true,
+            latitude: coords.lat,
+            longitude: coords.lng,
+            search_distance: searchDistance,
+          },
+        }).eq("user_id", user.id);
+
+        await refreshProfile();
+        toast.success("Posizione condivisa!");
+      } catch {
+        toast.error("Impossibile ottenere la posizione. Controlla i permessi.");
+      } finally {
+        setLocating(false);
+      }
+    } else {
+      setShareLocation(false);
+      setCurrentCoords(null);
+      await supabase.from("profiles").update({
+        availability: {
+          ...(profile?.availability as any || {}),
+          share_location: false,
+          latitude: null,
+          longitude: null,
+        },
+      }).eq("user_id", user.id);
+      await refreshProfile();
+      toast.success("Posizione disattivata");
+    }
+  };
+
+  const handleDistanceChange = async (val: number) => {
+    setSearchDistance(val);
+    if (!user) return;
+    await supabase.from("profiles").update({
+      availability: {
+        ...(profile?.availability as any || {}),
+        search_distance: val,
+      },
+    }).eq("user_id", user.id);
+  };
+
+  const Toggle = ({ value, onChange, loading: l }: { value: boolean; onChange: () => void; loading?: boolean }) => (
     <button
-      onClick={() => onChange(!value)}
-      className={`w-11 h-6 rounded-full transition-all relative ${value ? "bg-primary" : "bg-muted"}`}
+      onClick={onChange}
+      disabled={l}
+      className={`w-11 h-6 rounded-full transition-all duration-200 relative ${value ? "bg-primary" : "bg-muted"} ${l ? "opacity-50" : ""}`}
     >
-      <div className={`w-5 h-5 rounded-full bg-primary-foreground absolute top-0.5 transition-all ${value ? "left-[22px]" : "left-0.5"}`} />
+      <div className={`w-5 h-5 rounded-full bg-foreground absolute top-0.5 transition-all duration-200 ${value ? "left-[22px]" : "left-0.5"}`} />
+    </button>
+  );
+
+  const SettingRow = ({ icon: Icon, label, children, onClick }: { icon: any; label: string; children?: React.ReactNode; onClick?: () => void }) => (
+    <button onClick={onClick} className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 text-left">
+      <Icon className="w-4 h-4 text-muted-foreground" />
+      <span className="flex-1 text-sm">{label}</span>
+      {children || <ChevronRight className="w-4 h-4 text-muted-foreground/50" />}
     </button>
   );
 
   return (
     <MobileLayout>
-      <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+      <header className="sticky top-0 z-40 glass px-5 py-3 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-display font-bold">Impostazioni</h1>
       </header>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Account */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Account</p>
-          <div className="space-y-2">
-            <button onClick={() => navigate("/profile/edit")} className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <User className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Modifica Profilo</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
-            <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <Lock className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Cambia Password</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
+        <section>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Account</p>
+          <div className="space-y-1.5">
+            <SettingRow icon={User} label="Modifica Profilo" onClick={() => navigate("/profile/edit")} />
+            <SettingRow icon={Lock} label="Cambia Password" />
           </div>
-        </div>
+        </section>
+
+        {/* Location & Search */}
+        <section>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <Navigation className="w-4 h-4 text-muted-foreground" />
+              <div className="flex-1">
+                <span className="text-sm">Condividi posizione</span>
+                {currentCoords && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    📍 {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}
+                  </p>
+                )}
+              </div>
+              <Toggle value={shareLocation} onChange={handleShareLocation} loading={locating} />
+            </div>
+
+            <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="flex items-center gap-3 mb-3">
+                <Ruler className="w-4 h-4 text-muted-foreground" />
+                <span className="flex-1 text-sm">Distanza di ricerca</span>
+                <span className="text-xs font-bold text-primary">{searchDistance} km</span>
+              </div>
+              <input
+                type="range"
+                min={5}
+                max={200}
+                step={5}
+                value={searchDistance}
+                onChange={(e) => handleDistanceChange(Number(e.target.value))}
+                className="w-full accent-primary h-1"
+              />
+              <div className="flex justify-between mt-1">
+                <span className="text-[10px] text-muted-foreground">5 km</span>
+                <span className="text-[10px] text-muted-foreground">200 km</span>
+              </div>
+            </div>
+
+            <SettingRow icon={MapPin} label={`Città: ${profile?.city || 'Non impostata'}`} onClick={() => navigate("/profile/edit")} />
+          </div>
+        </section>
 
         {/* Notifications */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Notifiche</p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-card">
-              <Bell className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Push Notifications</span>
-              <Toggle value={pushNotif} onChange={setPushNotif} />
+        <section>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Notifiche</p>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <Bell className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1 text-sm">Push Notifications</span>
+              <Toggle value={pushNotif} onChange={() => setPushNotif(!pushNotif)} />
             </div>
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-card">
-              <Mail className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Email Notifications</span>
-              <Toggle value={emailNotif} onChange={setEmailNotif} />
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1 text-sm">Email Notifications</span>
+              <Toggle value={emailNotif} onChange={() => setEmailNotif(!emailNotif)} />
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Preferences */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Preferenze</p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-card">
-              <Moon className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Dark Mode</span>
-              <Toggle value={darkMode} onChange={setDarkMode} />
+        <section>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Preferenze</p>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <Moon className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1 text-sm">Dark Mode</span>
+              <Toggle value={darkMode} onChange={() => setDarkMode(!darkMode)} />
             </div>
-            <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <Globe className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Lingua</span>
-              <span className="text-sm text-muted-foreground mr-1">Italiano</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+              <Globe className="w-4 h-4 text-muted-foreground" />
+              <span className="flex-1 text-sm">Lingua</span>
+              <span className="text-xs text-muted-foreground mr-1">Italiano</span>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Support */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Supporto</p>
-          <div className="space-y-2">
-            <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <HelpCircle className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Centro Assistenza</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
-            <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <FileText className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Termini e Condizioni</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
-            <button className="w-full flex items-center gap-3 p-4 rounded-xl bg-card text-left">
-              <Shield className="w-5 h-5 text-primary" />
-              <span className="flex-1 text-sm font-medium">Privacy Policy</span>
-              <span className="text-muted-foreground">→</span>
-            </button>
+        <section>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Supporto</p>
+          <div className="space-y-1.5">
+            <SettingRow icon={HelpCircle} label="Centro Assistenza" />
+            <SettingRow icon={FileText} label="Termini e Condizioni" />
+            <SettingRow icon={Shield} label="Privacy Policy" />
           </div>
-        </div>
+        </section>
 
         {/* Logout */}
-        <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-destructive text-destructive font-semibold">
-          <LogOut className="w-5 h-5" />
+        <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border border-destructive/30 text-destructive text-sm font-semibold hover:bg-destructive/5 transition-colors">
+          <LogOut className="w-4 h-4" />
           Logout
         </button>
 
-        <p className="text-center text-xs text-muted-foreground">Version 1.0.0</p>
+        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v1.0.0</p>
       </div>
     </MobileLayout>
   );
