@@ -52,6 +52,12 @@ export default function ProfilePage() {
         <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
         <div className="flex gap-2">
           <button
+            onClick={() => navigate("/profile/edit")}
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+          >
+            <Edit3 className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
             onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }}
             className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
           >
