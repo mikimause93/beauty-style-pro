@@ -74,7 +74,7 @@ const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{chil
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("splash_shown");
+    return !localStorage.getItem("style_splash_shown");
   });
   return (
   <QueryClientProvider client={queryClient}>

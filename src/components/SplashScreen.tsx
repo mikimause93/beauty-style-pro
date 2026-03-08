@@ -13,17 +13,16 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    // Load Playfair Display font
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,300;1,400&display=swap";
     link.rel = "stylesheet";
     document.head.appendChild(link);
 
     const timers = [
-      setTimeout(() => setPhase("logo"), 2000),
-      setTimeout(() => setPhase("text"), 3200),
-      setTimeout(() => setPhase("fade"), 5200),
-      setTimeout(() => setPhase("done"), 5900),
+      setTimeout(() => setPhase("logo"), 2500),
+      setTimeout(() => setPhase("text"), 3700),
+      setTimeout(() => setPhase("fade"), 5700),
+      setTimeout(() => setPhase("done"), 6400),
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -44,20 +43,40 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     >
       {/* Founder name — phase 1 */}
       <div
-        className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ${
+        className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-all duration-700 ${
           phase === "founder" ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
         <p
-          className="text-lg tracking-[0.15em] text-center"
+          className="text-[10px] tracking-[0.25em] uppercase"
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            color: "rgba(255,255,255,0.4)",
+            letterSpacing: "0.25em",
+          }}
+        >
+          Founder
+        </p>
+        <p
+          className="text-2xl tracking-[0.12em] text-center"
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontStyle: "italic",
             fontWeight: 300,
-            color: "rgba(255,255,255,0.85)",
+            color: "rgba(255,255,255,0.9)",
           }}
         >
           Michele Peschechera
+        </p>
+        <p
+          className="text-[10px] mt-1"
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontStyle: "italic",
+            color: "rgba(255,255,255,0.25)",
+          }}
+        >
+          Michele Peschechera ®
         </p>
       </div>
 
@@ -118,7 +137,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           className="h-full rounded-full"
           style={{
             backgroundColor: "rgba(255,255,255,0.3)",
-            animation: "splash-load 5.2s ease-in-out forwards",
+            animation: "splash-load 5.7s ease-in-out forwards",
           }}
         />
       </div>
