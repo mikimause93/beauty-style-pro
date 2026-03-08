@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, History, Plus, Wallet } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -112,6 +112,3 @@ export default function WalletPage() {
     </MobileLayout>
   );
 }
-
-// Need Gift import
-import { Gift } from "lucide-react";

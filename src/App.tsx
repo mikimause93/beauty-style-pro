@@ -51,6 +51,8 @@ import TransformationChallengePage from "./pages/TransformationChallengePage";
 import LiveBattlePage from "./pages/LiveBattlePage";
 import SearchPage from "./pages/SearchPage";
 import ManageProductsPage from "./pages/ManageProductsPage";
+import WalletPage from "./pages/WalletPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -110,6 +112,8 @@ const App = () => {
             <Route path="/live-battle" element={<LiveBattlePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/manage-products" element={<ManageProductsPage />} />
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />
