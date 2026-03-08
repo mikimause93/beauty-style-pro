@@ -54,5 +54,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Google Analytics GA4 - Replace G-XXXXXXXXXX with your Measurement ID -->
+    <script id="ga4-script">
+      // GA4 will be activated when you add your Measurement ID
+      window.GA_MEASUREMENT_ID = '';
+      if (window.GA_MEASUREMENT_ID) {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.GA_MEASUREMENT_ID;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', window.GA_MEASUREMENT_ID);
+      }
+    </script>
   </body>
 </html>

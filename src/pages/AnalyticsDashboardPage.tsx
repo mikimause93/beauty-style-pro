@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3, Target, Trophy, Gift, Sparkles } from "lucide-react";
+import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3, Target, Trophy, Gift, Sparkles, Globe, Smartphone, Monitor, TabletSmartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +77,39 @@ export default function AnalyticsDashboardPage() {
       if (!user) return null;
       const { data } = await supabase.from("leaderboard").select("rank, score").eq("user_id", user.id).eq("leaderboard_type", "earnings").eq("period", "monthly").single();
       return data;
+    },
+    enabled: !!user,
+  });
+
+  // Page views analytics
+  const { data: viewStats } = useQuery({
+    queryKey: ["analytics-pageviews", period],
+    queryFn: async () => {
+      const { data, count } = await (supabase.from("page_views") as any)
+        .select("*", { count: "exact" })
+        .gte("created_at", startDate);
+
+      const views = data || [];
+      const uniqueSessions = new Set(views.map((v: any) => v.session_id)).size;
+      const devices: Record<string, number> = {};
+      const pages: Record<string, number> = {};
+
+      views.forEach((v: any) => {
+        devices[v.device_type || "desktop"] = (devices[v.device_type || "desktop"] || 0) + 1;
+        pages[v.page_path] = (pages[v.page_path] || 0) + 1;
+      });
+
+      const topPages = Object.entries(pages)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([path, count]) => ({ path, count }));
+
+      return {
+        totalViews: count || views.length,
+        uniqueVisitors: uniqueSessions,
+        devices,
+        topPages,
+      };
     },
     enabled: !!user,
   });
@@ -160,6 +193,59 @@ export default function AnalyticsDashboardPage() {
               <div className="text-center"><p className="text-2xl font-bold text-gold">{streamStats.totalEarnings}</p><p className="text-[10px] text-muted-foreground">QRC Guadagnati</p></div>
               <div className="text-center"><p className="text-2xl font-bold text-primary">{streamStats.peakViewers}</p><p className="text-[10px] text-muted-foreground">Picco Spettatori</p></div>
             </div>
+          </div>
+        )}
+
+        {/* Visitor Analytics */}
+        {viewStats && (
+          <div className="rounded-xl bg-card border border-border p-5">
+            <div className="flex items-center gap-2 mb-4"><Globe className="w-5 h-5 text-primary" /><h3 className="font-semibold">Visite al Sito</h3></div>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold">{viewStats.totalViews}</p>
+                <p className="text-[10px] text-muted-foreground">Pagine viste</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">{viewStats.uniqueVisitors}</p>
+                <p className="text-[10px] text-muted-foreground">Visitatori unici</p>
+              </div>
+            </div>
+
+            {/* Device breakdown */}
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Dispositivi</p>
+              <div className="flex gap-3">
+                {[
+                  { key: "mobile", Icon: Smartphone, label: "Mobile" },
+                  { key: "tablet", Icon: TabletSmartphone, label: "Tablet" },
+                  { key: "desktop", Icon: Monitor, label: "Desktop" },
+                ].map(d => (
+                  <div key={d.key} className="flex-1 flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
+                    <d.Icon className="w-4 h-4 text-muted-foreground" />
+                    <p className="text-sm font-bold">{viewStats.devices[d.key] || 0}</p>
+                    <p className="text-[9px] text-muted-foreground">{d.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top pages */}
+            {viewStats.topPages.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Pagine più visitate</p>
+                <div className="space-y-1.5">
+                  {viewStats.topPages.map((p, i) => (
+                    <div key={p.path} className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-muted-foreground w-4">{i + 1}</span>
+                        <span className="text-xs font-medium truncate max-w-[180px]">{p.path === "/" ? "Home" : p.path.slice(1)}</span>
+                      </div>
+                      <span className="text-xs font-bold">{p.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
