@@ -147,11 +147,11 @@ export default function LiveStreamPage() {
       }
       setChatMessages(prev => [...prev, {
         id: `mod-${Date.now()}`, user: "Sistema",
-        message: `🛡️ ${profile?.display_name || "Utente"} è diventato Moderatore della live! +5 QRC extra`,
+        message: `${profile?.display_name || "Utente"} è diventato Moderatore della live! +5 QRC extra`,
         type: "system"
       }]);
       awardCoins("complete_mission");
-      toast.success("🛡️ Sei stato promosso Moderatore!", { duration: 4000 });
+      toast.success("Sei stato promosso Moderatore!", { duration: 4000 });
     }
   }, [interactionScore]);
 
@@ -159,15 +159,15 @@ export default function LiveStreamPage() {
     const newBadges = [...earnedBadges];
     if (interactionScore >= 10 && !newBadges.includes("active_viewer")) {
       newBadges.push("active_viewer");
-      toast.success("🏅 Badge: Active Viewer!", { duration: 3000 });
+      toast.success("Badge: Active Viewer!", { duration: 3000 });
     }
     if (interactionScore >= 30 && !newBadges.includes("top_contributor")) {
       newBadges.push("top_contributor");
-      toast.success("👑 Badge: Top Contributor! +10% QRC extra", { duration: 3000 });
+      toast.success("Badge: Top Contributor! +10% QRC extra", { duration: 3000 });
     }
     if (chatMessages.filter(m => m.type === "chat").length >= 5 && !newBadges.includes("chatter")) {
       newBadges.push("chatter");
-      toast.success("💬 Badge: Chatter!", { duration: 3000 });
+      toast.success("Badge: Chatter!", { duration: 3000 });
     }
     setEarnedBadges(newBadges);
   };
@@ -398,7 +398,7 @@ export default function LiveStreamPage() {
             {/* Chat Input */}
             <div className="flex gap-2">
               <input value={chatMessage} onChange={e => setChatMessage(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat()}
-                placeholder={isModerator ? "🛡️ Scrivi come moderatore..." : "Scrivi qualcosa..."}
+                placeholder={isModerator ? "Scrivi come moderatore..." : "Scrivi qualcosa..."}
                 className="flex-1 h-11 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground" />
               <button onClick={sendChat} className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow">
                 <Send className="w-5 h-5 text-primary-foreground" />
