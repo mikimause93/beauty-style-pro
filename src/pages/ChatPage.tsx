@@ -443,6 +443,7 @@ export default function ChatPage() {
                 <Mic className="w-4 h-4 text-muted-foreground" />
               </button>
             )}
+            </div>
           </div>
         )}
       </MobileLayout>
