@@ -28,7 +28,7 @@ export default function PostLiveStats({ stats, onClose }: PostLiveStatsProps) {
           <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center mx-auto mb-3">
             <Trophy className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h2 className="text-xl font-display font-bold">Live Terminata! 🎉</h2>
+          <h2 className="text-xl font-display font-bold">Live Terminata!</h2>
           <p className="text-sm text-muted-foreground">Ecco le statistiche della sessione</p>
         </div>
 

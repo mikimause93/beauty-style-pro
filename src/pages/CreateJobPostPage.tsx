@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, MapPin, Euro, Calendar, Briefcase, Plus, X } from "lucide-react";
+import { ArrowLeft, MapPin, Euro, Calendar, Briefcase, Plus, X, Scissors, Paintbrush, Gem, Droplets, Sparkles, Bath, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,13 +28,13 @@ export default function CreateJobPostPage() {
   const [newBenefit, setNewBenefit] = useState("");
 
   const categories = [
-    { key: "hair", label: "Hair Stylist", emoji: "💇‍♀️" },
-    { key: "beauty", label: "Estetista", emoji: "💄" },
-    { key: "nails", label: "Nail Artist", emoji: "💅" },
-    { key: "massage", label: "Massaggiatore", emoji: "💆" },
-    { key: "barbershop", label: "Barbiere", emoji: "💈" },
-    { key: "spa", label: "SPA", emoji: "🧖‍♀️" },
-    { key: "makeup", label: "Makeup Artist", emoji: "🎨" },
+    { key: "hair", label: "Hair Stylist", Icon: Scissors },
+    { key: "beauty", label: "Estetista", Icon: Sparkles },
+    { key: "nails", label: "Nail Artist", Icon: Gem },
+    { key: "massage", label: "Massaggiatore", Icon: Droplets },
+    { key: "barbershop", label: "Barbiere", Icon: Scissors },
+    { key: "spa", label: "SPA", Icon: Bath },
+    { key: "makeup", label: "Makeup Artist", Icon: Palette },
   ];
 
   const employmentTypes = [
@@ -133,7 +133,7 @@ export default function CreateJobPostPage() {
 
       if (error) throw error;
 
-      toast.success("Annuncio pubblicato con successo! 🎉");
+      toast.success("Annuncio pubblicato con successo!");
       navigate("/hr");
     } catch (error) {
       console.error("Create job error:", error);
@@ -191,7 +191,7 @@ export default function CreateJobPostPage() {
                     : "bg-card border border-border"
                 }`}
               >
-                {cat.emoji} {cat.label}
+                <cat.Icon className="w-4 h-4 inline" /> {cat.label}
               </button>
             ))}
           </div>

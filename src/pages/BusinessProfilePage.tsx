@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useFollow";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -186,7 +187,7 @@ export default function BusinessProfilePage() {
 
         {activeTab === "shop" && (
           <div className="text-center py-12">
-            <p className="text-3xl mb-2">🛍️</p>
+            <ShoppingBag className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-muted-foreground text-sm">Shop in arrivo</p>
             <button onClick={() => navigate("/shop")} className="mt-3 px-5 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
               Vai allo Shop

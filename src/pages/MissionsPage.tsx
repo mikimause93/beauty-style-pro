@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Flame, Trophy, Star, Gift, CheckCircle2, Lock, Zap, Target, Calendar, TrendingUp } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, Star, Gift, CheckCircle2, Lock, Zap, Target, Calendar, TrendingUp, Smartphone, Video, Heart, Share2, MessageCircle, Film, FileText, CalendarDays, Sparkles, Users, Coins, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -30,30 +30,36 @@ interface BadgeItem {
 }
 
 const defaultDailyMissions: Mission[] = [
-  { id: "d1", title: "Apri l'app", description: "Accedi all'app oggi", icon: "📱", reward: 5, progress: 1, target: 1, type: "daily", completed: true, claimed: false },
-  { id: "d2", title: "Guarda una Live", description: "Partecipa a una diretta", icon: "📹", reward: 10, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
-  { id: "d3", title: "Metti 3 Like", description: "Metti like a 3 post", icon: "❤️", reward: 5, progress: 1, target: 3, type: "daily", completed: false, claimed: false },
-  { id: "d4", title: "Condividi un post", description: "Condividi su social", icon: "📤", reward: 10, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
-  { id: "d5", title: "Chatta con qualcuno", description: "Invia un messaggio", icon: "💬", reward: 5, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
+  { id: "d1", title: "Apri l'app", description: "Accedi all'app oggi", icon: "smartphone", reward: 5, progress: 1, target: 1, type: "daily", completed: true, claimed: false },
+  { id: "d2", title: "Guarda una Live", description: "Partecipa a una diretta", icon: "video", reward: 10, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
+  { id: "d3", title: "Metti 3 Like", description: "Metti like a 3 post", icon: "heart", reward: 5, progress: 1, target: 3, type: "daily", completed: false, claimed: false },
+  { id: "d4", title: "Condividi un post", description: "Condividi su social", icon: "share", reward: 10, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
+  { id: "d5", title: "Chatta con qualcuno", description: "Invia un messaggio", icon: "message", reward: 5, progress: 0, target: 1, type: "daily", completed: false, claimed: false },
 ];
 
 const defaultWeeklyMissions: Mission[] = [
-  { id: "w1", title: "Social Star", description: "Pubblica 3 post questa settimana", icon: "⭐", reward: 50, progress: 1, target: 3, type: "weekly", completed: false, claimed: false },
-  { id: "w2", title: "Spettatore VIP", description: "Guarda 5 live questa settimana", icon: "🎬", reward: 75, progress: 2, target: 5, type: "weekly", completed: false, claimed: false },
-  { id: "w3", title: "Recensore", description: "Lascia 2 recensioni", icon: "📝", reward: 40, progress: 0, target: 2, type: "weekly", completed: false, claimed: false },
-  { id: "w4", title: "Prenota & Risparmia", description: "Prenota un servizio", icon: "📅", reward: 30, progress: 0, target: 1, type: "weekly", completed: false, claimed: false },
+  { id: "w1", title: "Social Star", description: "Pubblica 3 post questa settimana", icon: "star", reward: 50, progress: 1, target: 3, type: "weekly", completed: false, claimed: false },
+  { id: "w2", title: "Spettatore VIP", description: "Guarda 5 live questa settimana", icon: "film", reward: 75, progress: 2, target: 5, type: "weekly", completed: false, claimed: false },
+  { id: "w3", title: "Recensore", description: "Lascia 2 recensioni", icon: "filetext", reward: 40, progress: 0, target: 2, type: "weekly", completed: false, claimed: false },
+  { id: "w4", title: "Prenota & Risparmia", description: "Prenota un servizio", icon: "calendar", reward: 30, progress: 0, target: 1, type: "weekly", completed: false, claimed: false },
 ];
 
 const defaultBadges: BadgeItem[] = [
-  { id: "b1", name: "Primo Accesso", description: "Hai aperto l'app per la prima volta", icon: "🌟", rarity: "common", earned: true, earnedAt: "2026-03-01" },
-  { id: "b2", name: "Social Butterfly", description: "100 interazioni social", icon: "🦋", rarity: "rare", earned: true, earnedAt: "2026-03-05" },
-  { id: "b3", name: "Live Fan", description: "Guarda 10 dirette", icon: "📹", rarity: "rare", earned: false },
-  { id: "b4", name: "Top Reviewer", description: "Lascia 10 recensioni", icon: "⭐", rarity: "epic", earned: false },
-  { id: "b5", name: "QRCoin Master", description: "Accumula 1000 QRCoins", icon: "💰", rarity: "epic", earned: false },
-  { id: "b6", name: "Influencer", description: "Raggiungi 100 follower", icon: "👑", rarity: "legendary", earned: false },
-  { id: "b7", name: "7 Giorni Streak", description: "Accedi 7 giorni consecutivi", icon: "🔥", rarity: "rare", earned: false },
-  { id: "b8", name: "Ambasciatore", description: "Invita 10 amici", icon: "🤝", rarity: "legendary", earned: false },
+  { id: "b1", name: "Primo Accesso", description: "Hai aperto l'app per la prima volta", icon: "sparkles", rarity: "common", earned: true, earnedAt: "2026-03-01" },
+  { id: "b2", name: "Social Butterfly", description: "100 interazioni social", icon: "users", rarity: "rare", earned: true, earnedAt: "2026-03-05" },
+  { id: "b3", name: "Live Fan", description: "Guarda 10 dirette", icon: "video", rarity: "rare", earned: false },
+  { id: "b4", name: "Top Reviewer", description: "Lascia 10 recensioni", icon: "star", rarity: "epic", earned: false },
+  { id: "b5", name: "QRCoin Master", description: "Accumula 1000 QRCoins", icon: "coins", rarity: "epic", earned: false },
+  { id: "b6", name: "Influencer", description: "Raggiungi 100 follower", icon: "crown", rarity: "legendary", earned: false },
+  { id: "b7", name: "7 Giorni Streak", description: "Accedi 7 giorni consecutivi", icon: "flame", rarity: "rare", earned: false },
+  { id: "b8", name: "Ambasciatore", description: "Invita 10 amici", icon: "users", rarity: "legendary", earned: false },
 ];
+
+const iconMap: Record<string, any> = {
+  smartphone: Smartphone, video: Video, heart: Heart, share: Share2, message: MessageCircle,
+  star: Star, film: Film, filetext: FileText, calendar: CalendarDays,
+  sparkles: Sparkles, users: Users, coins: Coins, crown: Crown, flame: Flame,
+};
 
 const rarityColors: Record<string, string> = {
   common: "from-muted to-muted-foreground/20",
@@ -119,7 +125,7 @@ export default function MissionsPage() {
   const claimReward = (missionId: string, reward: number, type: "daily" | "weekly") => {
     const setter = type === "daily" ? setDailyMissions : setWeeklyMissions;
     setter(prev => prev.map(m => m.id === missionId ? { ...m, claimed: true } : m));
-    toast.success(`+${reward} QRCoins guadagnati! 🎉`);
+    toast.success(`+${reward} QRCoins guadagnati!`);
 
     if (user) {
       const currentCoins = profile?.qr_coins || 0;
@@ -213,7 +219,7 @@ export default function MissionsPage() {
             {dailyMissions.map(mission => (
               <div key={mission.id} className={`rounded-xl bg-card border p-4 transition-all ${mission.completed ? "border-primary/30 bg-primary/5" : "border-border"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{mission.icon}</span>
+                  {(() => { const IconComp = iconMap[mission.icon]; return IconComp ? <IconComp className="w-6 h-6 text-primary" /> : <Zap className="w-6 h-6 text-primary" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{mission.title}</p>
@@ -269,7 +275,7 @@ export default function MissionsPage() {
             {weeklyMissions.map(mission => (
               <div key={mission.id} className={`rounded-xl bg-card border p-4 transition-all ${mission.completed ? "border-primary/30 bg-primary/5" : "border-border"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{mission.icon}</span>
+                  {(() => { const IconComp = iconMap[mission.icon]; return IconComp ? <IconComp className="w-6 h-6 text-primary" /> : <Zap className="w-6 h-6 text-primary" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{mission.title}</p>
@@ -318,7 +324,7 @@ export default function MissionsPage() {
                   }`}
                 >
                   <div className="relative inline-block">
-                    <span className={`text-4xl ${!badge.earned ? "grayscale" : ""}`}>{badge.icon}</span>
+                    {(() => { const IconComp = iconMap[badge.icon]; return IconComp ? <IconComp className={`w-8 h-8 ${!badge.earned ? "text-muted-foreground" : "text-primary"}`} /> : <Star className={`w-8 h-8 ${!badge.earned ? "text-muted-foreground" : "text-primary"}`} />; })()}
                     {!badge.earned && (
                       <Lock className="w-4 h-4 text-muted-foreground absolute -bottom-1 -right-1" />
                     )}

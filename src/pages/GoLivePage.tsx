@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Video, Coins, Target, Clock, Users, Globe, Lock, Sparkles } from "lucide-react";
+import { ArrowLeft, Video, Coins, Target, Clock, Users, Globe, Lock, Sparkles, Scissors, Palette, Droplets, BookOpen, Paintbrush, Gem, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
 
 const CATEGORIES = [
-  { value: "taglio", label: "✂️ Taglio", color: "from-blue-500 to-cyan-500" },
-  { value: "tinta", label: "🎨 Tinta / Colore", color: "from-purple-500 to-pink-500" },
-  { value: "trattamento", label: "💆 Trattamento", color: "from-green-500 to-emerald-500" },
-  { value: "tutorial", label: "📚 Tutorial / Lezione", color: "from-orange-500 to-amber-500" },
-  { value: "makeup", label: "💄 Make-up", color: "from-rose-500 to-pink-500" },
-  { value: "nails", label: "💅 Nail Art", color: "from-fuchsia-500 to-violet-500" },
+  { value: "taglio", label: "Taglio", Icon: Scissors, color: "from-blue-500 to-cyan-500" },
+  { value: "tinta", label: "Tinta / Colore", Icon: Palette, color: "from-purple-500 to-pink-500" },
+  { value: "trattamento", label: "Trattamento", Icon: Droplets, color: "from-green-500 to-emerald-500" },
+  { value: "tutorial", label: "Tutorial / Lezione", Icon: BookOpen, color: "from-orange-500 to-amber-500" },
+  { value: "makeup", label: "Make-up", Icon: Paintbrush, color: "from-rose-500 to-pink-500" },
+  { value: "nails", label: "Nail Art", Icon: Gem, color: "from-fuchsia-500 to-violet-500" },
 ];
 
 const DURATIONS = [15, 30, 45, 60, 90, 120];
@@ -73,7 +73,7 @@ export default function GoLivePage() {
       return;
     }
 
-    toast.success("🔴 Live avviata!");
+    toast.success("Live avviata!");
     navigate("/live");
   };
 
@@ -248,8 +248,8 @@ export default function GoLivePage() {
             <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>
-              <Sparkles className="w-6 h-6" />
-              🔴 Vai in Diretta
+              <Circle className="w-5 h-5 text-destructive fill-destructive" />
+              Vai in Diretta
             </>
           )}
         </button>

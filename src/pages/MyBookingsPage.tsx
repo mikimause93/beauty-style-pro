@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { CalendarDays } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Calendar, Clock, ChevronRight } from "lucide-react";
@@ -70,7 +71,7 @@ export default function MyBookingsPage() {
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">📅</p>
+            <CalendarDays className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">
               {tab === "upcoming" ? "Nessuna prenotazione in programma" : "Nessuna prenotazione passata"}
             </p>

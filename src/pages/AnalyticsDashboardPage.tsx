@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3 } from "lucide-react";
+import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3, Target, Trophy, Gift, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,14 +166,14 @@ export default function AnalyticsDashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { emoji: "🎯", label: "Sfide", desc: "Guadagna ricompense", path: "/challenges" },
-            { emoji: "🏆", label: "Classifica", desc: "Il tuo ranking", path: "/leaderboard" },
-            { emoji: "🎁", label: "Referral", desc: "Invita amici", path: "/referral" },
-            { emoji: "🎰", label: "Gira & Vinci", desc: "Tenta la fortuna", path: "/spin" },
+            { Icon: Target, label: "Sfide", desc: "Guadagna ricompense", path: "/challenges" },
+            { Icon: Trophy, label: "Classifica", desc: "Il tuo ranking", path: "/leaderboard" },
+            { Icon: Gift, label: "Referral", desc: "Invita amici", path: "/referral" },
+            { Icon: Sparkles, label: "Gira & Vinci", desc: "Tenta la fortuna", path: "/spin" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
               className="p-4 rounded-xl bg-card border border-border text-left hover:border-primary/30 transition-colors">
-              <span className="text-2xl mb-2 block">{item.emoji}</span>
+              <item.Icon className="w-6 h-6 text-primary mb-2" />
               <p className="text-sm font-semibold">{item.label}</p>
               <p className="text-[10px] text-muted-foreground">{item.desc}</p>
             </button>

@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -329,7 +329,7 @@ export default function ChatPage() {
             </div>
           </div>
           <button onClick={() => openWhatsApp(selectedChat.name)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
-            <span className="text-sm">💬</span>
+            <MessageCircle className="w-4 h-4 text-primary-foreground" />
           </button>
           <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Phone className="w-4 h-4 text-muted-foreground" />
@@ -340,7 +340,7 @@ export default function ChatPage() {
         <div className="flex-1 px-4 py-4 space-y-3 min-h-[60vh]">
           {messages.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-4xl mb-2">💬</p>
+              <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">Inizia la conversazione!</p>
             </div>
           )}
