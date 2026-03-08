@@ -14,7 +14,7 @@ export default function PostCardActions({ postType, postId, userId, userType }: 
   const { user } = useAuth();
 
   const isJob = postType === "job";
-  const isService = postType === "service" || userType === "professional";
+  const isService = (postType === "service" || userType === "professional" || userType === "business") && userType !== "client";
   const isProduct = postType === "product";
 
   const goAuth = () => { if (!user) { navigate("/auth"); return true; } return false; };
