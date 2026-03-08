@@ -39,6 +39,8 @@ import SettingsPage from "./pages/SettingsPage";
 import ReviewPage from "./pages/ReviewPage";
 import ReferralPage from "./pages/ReferralPage";
 import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
+import InstallmentsPage from "./pages/InstallmentsPage";
+import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +82,8 @@ const App = () => (
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/referral" element={<ReferralPage />} />
             <Route path="/analytics" element={<AnalyticsDashboardPage />} />
+            <Route path="/installments" element={<InstallmentsPage />} />
+            <Route path="/purchases" element={<PurchaseHistoryPage />} />
             <Route path="/qr-coins" element={<QRCoinsPage />} />
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />
