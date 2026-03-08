@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, ChevronRight, Clock, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { ArrowLeft, Coins, ChevronRight, Clock, TrendingUp, TrendingDown, Sparkles, Video, Target, ShoppingBag, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -14,10 +14,10 @@ interface Transaction {
 }
 
 const quickActions = [
-  { icon: "💰", label: "Guadagna Coins", desc: "Guarda stream e guadagna", color: "gradient-gold", path: "/live" },
-  { icon: "🎯", label: "Sfide", desc: "Completa le sfide", color: "bg-success/20", path: "/challenges" },
-  { icon: "🛍️", label: "Spendi QRCoins", desc: "Shop e prenota servizi", color: "bg-primary/20", path: "/shop" },
-  { icon: "🏆", label: "Classifica", desc: "Vedi la classifica", color: "bg-secondary/20", path: "/leaderboard" },
+  { Icon: Coins, label: "Guadagna Coins", desc: "Guarda stream e guadagna", color: "gradient-gold", path: "/live" },
+  { Icon: Target, label: "Sfide", desc: "Completa le sfide", color: "bg-success/20", path: "/challenges" },
+  { Icon: ShoppingBag, label: "Spendi QRCoins", desc: "Shop e prenota servizi", color: "bg-primary/20", path: "/shop" },
+  { Icon: Trophy, label: "Classifica", desc: "Vedi la classifica", color: "bg-secondary/20", path: "/leaderboard" },
 ];
 
 export default function QRCoinsPage() {
@@ -145,8 +145,8 @@ export default function QRCoinsPage() {
           {quickActions.map(action => (
             <button key={action.label} onClick={() => navigate(action.path)}
               className="w-full flex items-center gap-4 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all group">
-              <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}>
-                {action.icon}
+              <div className={`w-14 h-14 rounded-2xl ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <action.Icon className="w-6 h-6" />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-semibold">{action.label}</p>
