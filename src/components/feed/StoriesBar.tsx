@@ -1,0 +1,195 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import stylist1 from "@/assets/stylist-1.jpg";
+import stylist2 from "@/assets/stylist-2.jpg";
+import beauty1 from "@/assets/beauty-1.jpg";
+
+interface Story {
+  id: string;
+  user_id: string;
+  media_url: string;
+  media_type: string;
+  caption: string | null;
+  view_count: number;
+  created_at: string;
+  profile?: { display_name: string | null; avatar_url: string | null };
+}
+
+interface GroupedStory {
+  user_id: string;
+  display_name: string;
+  avatar_url: string;
+  stories: Story[];
+  isOwn: boolean;
+}
+
+const fallbackStories: GroupedStory[] = [
+  { user_id: "1", display_name: "Martina", avatar_url: stylist2, stories: [{ id: "s1", user_id: "1", media_url: beauty1, media_type: "image", caption: "New look today! ✨", view_count: 45, created_at: new Date().toISOString() }], isOwn: false },
+  { user_id: "2", display_name: "Sylvie", avatar_url: stylist1, stories: [{ id: "s2", user_id: "2", media_url: stylist1, media_type: "image", caption: "Work in progress 💇‍♀️", view_count: 32, created_at: new Date().toISOString() }], isOwn: false },
+];
+
+export default function StoriesBar() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState<GroupedStory[]>([]);
+  const [viewingGroup, setViewingGroup] = useState<GroupedStory | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    loadStories();
+  }, [user]);
+
+  const loadStories = async () => {
+    const { data, error } = await supabase
+      .from("stories")
+      .select("*, profiles:user_id(display_name, avatar_url)")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false });
+
+    if (data && data.length > 0) {
+      const grouped: Record<string, GroupedStory> = {};
+      for (const s of data) {
+        const p = s.profiles as any;
+        if (!grouped[s.user_id]) {
+          grouped[s.user_id] = {
+            user_id: s.user_id,
+            display_name: p?.display_name || "Utente",
+            avatar_url: p?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.user_id}`,
+            stories: [],
+            isOwn: s.user_id === user?.id,
+          };
+        }
+        grouped[s.user_id].stories.push(s);
+      }
+      const arr = Object.values(grouped);
+      arr.sort((a, b) => (a.isOwn ? -1 : b.isOwn ? 1 : 0));
+      setGroups(arr);
+    } else {
+      setGroups(fallbackStories);
+    }
+  };
+
+  const openStory = (group: GroupedStory) => {
+    setViewingGroup(group);
+    setCurrentIndex(0);
+    setProgress(0);
+    // Track view
+    if (user && group.stories[0]) {
+      supabase.from("story_views").insert({ story_id: group.stories[0].id, user_id: user.id }).then(() => {});
+    }
+  };
+
+  useEffect(() => {
+    if (!viewingGroup) return;
+    const timer = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          if (currentIndex < viewingGroup.stories.length - 1) {
+            setCurrentIndex(i => i + 1);
+            return 0;
+          } else {
+            setViewingGroup(null);
+            return 0;
+          }
+        }
+        return prev + 2;
+      });
+    }, 100);
+    return () => clearInterval(timer);
+  }, [viewingGroup, currentIndex]);
+
+  const nextStory = () => {
+    if (!viewingGroup) return;
+    if (currentIndex < viewingGroup.stories.length - 1) {
+      setCurrentIndex(i => i + 1);
+      setProgress(0);
+    } else {
+      setViewingGroup(null);
+    }
+  };
+
+  const prevStory = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(i => i - 1);
+      setProgress(0);
+    }
+  };
+
+  return (
+    <>
+      {/* Stories Bar */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        {/* Add Story */}
+        {user && (
+          <button onClick={() => navigate("/create-post")} className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-primary/40">
+              <Plus className="w-5 h-5 text-primary" />
+            </div>
+            <span className="text-[10px] text-muted-foreground">La tua</span>
+          </button>
+        )}
+
+        {groups.map((group) => (
+          <button key={group.user_id} onClick={() => openStory(group)} className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-yellow-500">
+              <img src={group.avatar_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-background" />
+            </div>
+            <span className="text-[10px] text-muted-foreground truncate max-w-[64px]">{group.display_name}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Full Screen Story Viewer */}
+      {viewingGroup && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col">
+          {/* Progress bars */}
+          <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2 pt-safe">
+            {viewingGroup.stories.map((_, i) => (
+              <div key={i} className="flex-1 h-[2px] bg-white/30 rounded-full overflow-hidden">
+                <div className="h-full bg-white rounded-full transition-all duration-100"
+                  style={{ width: i < currentIndex ? "100%" : i === currentIndex ? `${progress}%` : "0%" }} />
+              </div>
+            ))}
+          </div>
+
+          {/* Header */}
+          <div className="absolute top-8 left-0 right-0 z-10 flex items-center gap-3 px-4">
+            <img src={viewingGroup.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+            <span className="text-white text-sm font-semibold flex-1">{viewingGroup.display_name}</span>
+            <button onClick={() => setViewingGroup(null)} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
+
+          {/* Story Content */}
+          <div className="flex-1 flex items-center justify-center relative">
+            <img src={viewingGroup.stories[currentIndex]?.media_url} alt="" className="w-full h-full object-contain" />
+
+            {/* Tap zones */}
+            <button onClick={prevStory} className="absolute left-0 top-0 bottom-0 w-1/3" />
+            <button onClick={nextStory} className="absolute right-0 top-0 bottom-0 w-1/3" />
+          </div>
+
+          {/* Caption */}
+          {viewingGroup.stories[currentIndex]?.caption && (
+            <div className="absolute bottom-20 left-0 right-0 px-6 text-center">
+              <p className="text-white text-sm drop-shadow-lg">{viewingGroup.stories[currentIndex].caption}</p>
+            </div>
+          )}
+
+          {/* View count */}
+          <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+            <div className="flex items-center gap-1 bg-white/10 rounded-full px-3 py-1">
+              <Eye className="w-3 h-3 text-white/70" />
+              <span className="text-[10px] text-white/70">{viewingGroup.stories[currentIndex]?.view_count}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
