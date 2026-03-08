@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
@@ -199,34 +199,34 @@ export default function HomePage() {
       {/* Quick Actions — minimal grid */}
       {activeTab === "Nuovi" && (
         <>
-        <div className="grid grid-cols-4 gap-2 px-5 mb-3">
+        <div className="flex gap-2.5 px-5 mb-3 overflow-x-auto no-scrollbar -mx-5 pl-5">
           {[
-            { icon: "💇‍♀️", label: "Stilisti", path: "/stylists" },
-            { icon: "📅", label: "Prenota", path: "/booking" },
-            { icon: "🗺️", label: "Mappa", path: "/map-search" },
-            { icon: "🏠", label: "Domicilio", path: "/map-search" },
+            { Icon: Scissors, label: "Stilisti", path: "/stylists" },
+            { Icon: CalendarDays, label: "Prenota", path: "/booking" },
+            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
+            { Icon: Home, label: "Domicilio", path: "/map-search" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1.5 py-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
-              <span className="text-xl">{item.icon}</span>
+              className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
+              <item.Icon className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-4 gap-2 px-5 mb-5">
+        <div className="flex gap-2.5 px-5 mb-5 overflow-x-auto no-scrollbar -mx-5 pl-5">
           {[
-            { icon: "🎯", label: "Missioni", path: "/missions" },
-            { icon: "✨", label: "AI Beauty", path: "/ai-assistant" },
-            { icon: "🎬", label: "Shorts", path: "/shorts" },
-            { icon: "🎡", label: "Gira&Vinci", path: "/spin" },
-            { icon: "🏆", label: "Challenge", path: "/transformation-challenge" },
-            { icon: "📸", label: "Prima/Dopo", path: "/before-after" },
-            { icon: "🎵", label: "Radio", path: "/radio" },
-            { icon: "🏅", label: "Classifica", path: "/leaderboard" },
+            { Icon: Target, label: "Missioni", path: "/missions" },
+            { Icon: Sparkles, label: "AI Beauty", path: "/ai-assistant" },
+            { Icon: Film, label: "Shorts", path: "/shorts" },
+            { Icon: Gift, label: "Gira&Vinci", path: "/spin" },
+            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
+            { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
+            { Icon: Radio, label: "Radio", path: "/radio" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1.5 py-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
-              <span className="text-xl">{item.icon}</span>
+              className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
+              <item.Icon className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
             </button>
           ))}
@@ -330,15 +330,15 @@ export default function HomePage() {
               <button onClick={() => navigate("/live")} className="text-xs text-primary font-semibold">Apri Live</button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
               {[
-                { icon: "📅", label: "Eventi", path: "/events" },
-                { icon: "📻", label: "Radio", path: "/radio" },
-                { icon: "🏆", label: "Sfide", path: "/challenges" },
+                { Icon: CalendarDays, label: "Eventi", path: "/events" },
+                { Icon: Podcast, label: "Radio", path: "/radio" },
+                { Icon: Trophy, label: "Sfide", path: "/challenges" },
               ].map(item => (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                  className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
-                  <span className="text-xl">{item.icon}</span>
+                  className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
+                  <item.Icon className="w-5 h-5 text-muted-foreground" />
                   <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
                 </button>
               ))}
