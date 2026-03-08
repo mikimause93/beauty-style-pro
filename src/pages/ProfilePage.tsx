@@ -1,4 +1,4 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -162,6 +162,7 @@ export default function ProfilePage() {
               { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
             ] : []),
             { icon: Gift, label: "Invita Amici", action: () => navigate("/referral") },
+            { icon: Wallet, label: "Wallet", action: () => navigate("/wallet") },
             { icon: Coins, label: "QR Coins", action: () => navigate("/qr-coins") },
             { icon: Cog, label: "Impostazioni", action: () => navigate("/settings") },
             { icon: LogOut, label: "Esci", action: async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); } },
@@ -285,6 +286,16 @@ export default function ProfilePage() {
               <button onClick={() => navigate("/chat")}
                 className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold">
                 Messaggio
+              </button>
+              <button
+                onClick={() => {
+                  const phone = viewProfile?.phone || "";
+                  const name = viewProfile?.display_name || "professionista";
+                  const msg = encodeURIComponent(`Ciao ${name}! Ti ho trovato su STYLE e vorrei prenotare un servizio.`);
+                  window.open(phone ? `https://wa.me/${phone.replace(/\D/g, "")}?text=${msg}` : `https://wa.me/?text=${msg}`, "_blank");
+                }}
+                className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center shrink-0">
+                <Phone className="w-4 h-4 text-primary-foreground" />
               </button>
               <button onClick={() => navigate(`/booking/${viewUserId}`)}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">

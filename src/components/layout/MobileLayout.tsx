@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
+import FloatingAIButton from "@/components/FloatingAIButton";
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
       <main className={showRadio ? "pb-32" : "pb-20"}>
         {children}
       </main>
+      <FloatingAIButton />
       <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
       <BottomNav />
     </div>
