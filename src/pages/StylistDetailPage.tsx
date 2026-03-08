@@ -142,7 +142,7 @@ export default function StylistDetailPage() {
               <Heart className={`w-4 h-4 ${isFollowing ? "fill-primary text-primary" : ""}`} />
               {isFollowing ? "Following" : "Follow"}
             </button>
-            <button onClick={() => navigate("/booking")}
+            <button onClick={() => navigate(`/booking/${id}`)}
               className="flex-1 py-2.5 rounded-xl bg-yellow-500 text-black font-semibold text-sm flex items-center justify-center gap-1.5">
               <Calendar className="w-4 h-4" /> Book
             </button>
@@ -177,7 +177,7 @@ export default function StylistDetailPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-primary">€{service.price}</p>
-                  <button onClick={() => navigate("/booking")}
+                  <button onClick={() => navigate(`/booking/${id}?service=${service.id}`)}
                     className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
                     Prenota
                   </button>

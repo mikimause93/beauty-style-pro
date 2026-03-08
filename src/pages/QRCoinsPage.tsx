@@ -131,17 +131,17 @@ export default function QRCoinsPage() {
             
             <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground">This Month</p>
+                <p className="text-xs text-muted-foreground">Guadagnati</p>
                 <p className="text-sm font-semibold flex items-center gap-1 text-success">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  +450 earned
+                  +{transactions.filter(t => t.type === 'earn').reduce((s, t) => s + t.amount, 0)} QRC
                 </p>
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Spent</p>
-                <p className="text-sm font-semibold flex items-center gap-1 text-live">
-                  <TrendingDown className="w-3.5 h-3.5" />
-                  -120 spent
+                <p className="text-xs text-muted-foreground">Transazioni</p>
+                <p className="text-sm font-semibold flex items-center gap-1 text-muted-foreground">
+                  <Clock className="w-3.5 h-3.5" />
+                  {transactions.length} totali
                 </p>
               </div>
             </div>
