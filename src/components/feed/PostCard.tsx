@@ -92,15 +92,34 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         )}
       </div>
 
-      {/* Image */}
-      {post.image_url && (
+      {/* Image / Before-After */}
+      {post.post_type === "before_after" && (post as any).before_image_url && (post as any).after_image_url ? (
+        <div className="relative aspect-square overflow-hidden">
+          <img src={(post as any).after_image_url} alt="Dopo" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
+            <img src={(post as any).before_image_url} alt="Prima" className="w-full h-full object-cover"
+              style={{ width: `${100 / (sliderPos / 100)}%`, maxWidth: "none" }} />
+          </div>
+          <div className="absolute top-0 bottom-0 w-0.5 bg-primary-foreground z-10" style={{ left: `${sliderPos}%` }}>
+            <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+              <ChevronLeft className="w-3 h-3 text-primary-foreground" />
+              <ChevronRight className="w-3 h-3 text-primary-foreground" />
+            </div>
+          </div>
+          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+          <input type="range" min={10} max={90} value={sliderPos}
+            onChange={e => setSliderPos(Number(e.target.value))}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
+        </div>
+      ) : post.image_url ? (
         <img
           src={post.image_url}
           alt=""
           className="w-full aspect-[4/5] object-cover"
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
         />
-      )}
+      ) : null}
 
       {/* Actions */}
       <div className="p-4 space-y-3">
