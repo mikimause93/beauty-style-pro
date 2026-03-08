@@ -31,50 +31,30 @@ export default function QRCoinsPage() {
 
   useEffect(() => {
     if (user) fetchTransactions();
+    else setLoading(false);
   }, [user]);
 
   const fetchTransactions = async () => {
-    // Fetch from transactions table first
-    const { data: txData } = await supabase
-      .from("transactions")
-      .select("*")
-      .eq("user_id", user?.id)
-      .order("created_at", { ascending: false })
-      .limit(30);
+    try {
+      const { data } = await supabase
+        .from("wallet_transactions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-    // Also fetch spin results as earn transactions
-    const { data: spinData } = await supabase
-      .from("spin_results")
-      .select("*")
-      .eq("user_id", user?.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    const allTx: Transaction[] = [];
-
-    if (txData) {
-      allTx.push(...txData.map(d => ({
-        id: d.id,
-        type: d.type,
-        amount: Number(d.amount),
-        description: d.description,
-        created_at: d.created_at,
-      })));
+      if (data) {
+        setTransactions(data.map(d => ({
+          id: d.id,
+          type: Number(d.amount) >= 0 ? "earn" : "spend",
+          amount: Math.abs(Number(d.amount)),
+          description: d.description || d.type || "Transazione",
+          created_at: d.created_at,
+        })));
+      }
+    } catch (e) {
+      console.error("Error fetching transactions:", e);
     }
-
-    if (spinData) {
-      allTx.push(...spinData.map(d => ({
-        id: d.id,
-        type: "earn",
-        amount: Number(d.prize_value),
-        description: `🎰 ${d.prize_description}`,
-        created_at: d.created_at,
-      })));
-    }
-
-    // Sort by date
-    allTx.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    setTransactions(allTx);
     setLoading(false);
   };
 
