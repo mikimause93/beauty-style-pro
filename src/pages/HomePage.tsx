@@ -6,8 +6,10 @@ import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import logo from "@/assets/logo.png";
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Heart, Play, Eye, Coins } from "lucide-react";
+import { Heart, Play, Eye, Coins, Plus, Calendar, Users } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const stories = [
   { id: 1, name: "Beauty Hits", img: stylist1, isLive: true },
@@ -59,6 +61,8 @@ const tabs = ["New", "Stylists", "Most", "Stream"];
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("New");
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const toggleLike = (id: number) => {
     setLikedPosts(prev => 
@@ -130,6 +134,19 @@ export default function HomePage() {
             )}
           </button>
         ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex gap-2 px-4 mb-4">
+        <button onClick={() => navigate("/create-post")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
+          <Plus className="w-3.5 h-3.5" /> Nuovo Post
+        </button>
+        <button onClick={() => navigate("/stylists")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
+          <Users className="w-3.5 h-3.5" /> Stilisti
+        </button>
+        <button onClick={() => navigate("/events")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
+          <Calendar className="w-3.5 h-3.5" /> Eventi
+        </button>
       </div>
 
       {/* Feed */}

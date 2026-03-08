@@ -1,12 +1,37 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posts" | "analytics" | "referral">("posts");
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
+          <LogIn className="w-12 h-12 text-primary mb-4" />
+          <h2 className="text-xl font-display font-bold mb-2">Accedi a Stayle</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Registrati o accedi per gestire il tuo profilo
+          </p>
+          <button
+            onClick={() => navigate("/auth")}
+            className="px-8 py-3 rounded-full gradient-primary text-primary-foreground font-semibold shadow-glow"
+          >
+            Accedi / Registrati
+          </button>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   const stats = [
     { label: "Followers", value: "12.4K", icon: Users },
@@ -26,8 +51,11 @@ export default function ProfilePage() {
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
         <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
         <div className="flex gap-2">
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Edit3 className="w-4 h-4 text-muted-foreground" />
+          <button
+            onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }}
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+          >
+            <LogOut className="w-4 h-4 text-muted-foreground" />
           </button>
           <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Settings className="w-4 h-4 text-muted-foreground" />
@@ -39,16 +67,16 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full p-0.5 gradient-primary mb-3">
-            <img src={stylist2} alt="Profile" className="w-full h-full rounded-full object-cover border-2 border-background" />
+            <img src={profile?.avatar_url || stylist2} alt="Profile" className="w-full h-full rounded-full object-cover border-2 border-background" />
           </div>
-          <h2 className="text-xl font-display font-bold">Martina Rossi</h2>
-          <p className="text-sm text-primary">💇‍♀️ Hairstylist · Freelance</p>
+          <h2 className="text-xl font-display font-bold">{profile?.display_name || user.email}</h2>
+          <p className="text-sm text-primary">💇‍♀️ {profile?.user_type === 'professional' ? 'Professional' : 'Beauty Lover'}</p>
           <div className="flex gap-3 mt-4">
-            <button className="px-6 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
-              <Heart className="w-4 h-4 inline mr-1" /> Follow
+            <button onClick={() => navigate("/booking")} className="px-6 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
+              <Calendar className="w-4 h-4 inline mr-1" /> Book
             </button>
-            <button className="px-6 py-2 rounded-full bg-card border border-border text-sm font-semibold">
-              Book Appointment
+            <button onClick={() => navigate("/events")} className="px-6 py-2 rounded-full bg-card border border-border text-sm font-semibold">
+              Events
             </button>
           </div>
         </div>
