@@ -15,6 +15,8 @@ import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
 import LiveMusicSelector from "@/components/live/LiveMusicSelector";
 import BattleChallengeButton from "@/components/live/BattleChallengeButton";
 import LiveGuestPanel from "@/components/live/LiveGuestPanel";
+import ApplauseAnimation, { useApplause } from "@/components/live/ApplauseAnimation";
+import VoiceNoteButton from "@/components/live/VoiceNoteButton";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -90,6 +92,7 @@ export default function LiveStreamPage() {
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
   const { pause: pauseRadio } = useRadio();
+  const { claps, triggerApplause } = useApplause();
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
@@ -295,6 +298,9 @@ export default function LiveStreamPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/95" />
           </div>
 
+          {/* Applause Animation */}
+          <ApplauseAnimation claps={claps} />
+
           {/* Floating Reactions */}
           <div className="absolute right-4 bottom-56 flex flex-col-reverse gap-1 pointer-events-none z-20">
             {floatingReactions.map(r => (
@@ -431,6 +437,33 @@ export default function LiveStreamPage() {
               <button onClick={() => setShowGuestPanel(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <Mic className="w-4 h-4 text-primary" />
               </button>
+              {/* Applause Button */}
+              <button onClick={() => {
+                triggerApplause(12);
+                sendReaction("👏");
+                setChatMessages(prev => [...prev, {
+                  id: `clap-${Date.now()}`, user: profile?.display_name || "Utente",
+                  message: "ha inviato un applauso! 👏👏👏", type: "badge"
+                }]);
+              }} className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center hover:scale-125 transition-transform active:scale-90 shrink-0">
+                <span className="text-lg">👏</span>
+              </button>
+              {/* Voice Note */}
+              <VoiceNoteButton onSend={async (blob, dur) => {
+                if (!user || !selectedStream) return;
+                const path = `${user.id}/voice_${Date.now()}.webm`;
+                await supabase.storage.from("posts").upload(path, blob);
+                const url = supabase.storage.from("posts").getPublicUrl(path).data.publicUrl;
+                setChatMessages(prev => [...prev, {
+                  id: `voice-${Date.now()}`, user: profile?.display_name || "Utente",
+                  message: `🎤 Nota vocale (${dur}s)`, type: "chat"
+                }]);
+                await supabase.from("stream_comments").insert({
+                  stream_id: selectedStream.id, user_id: user.id,
+                  message: `🎤 Nota vocale (${dur}s) — ${url}`
+                });
+                toast.success("Nota vocale inviata!");
+              }} />
             </div>
 
             {/* Chat Input */}
