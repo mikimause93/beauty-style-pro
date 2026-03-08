@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
+import LiveShopPanel from "@/components/live/LiveShopPanel";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -57,7 +59,10 @@ export default function LiveStreamPage() {
   const [showTipModal, setShowTipModal] = useState(false);
   const [selectedTip, setSelectedTip] = useState<number>(10);
   const [loading, setLoading] = useState(true);
+  const [showShop, setShowShop] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const watchTimerRef = useRef<number | null>(null);
+  const { awardCoins } = useQRCoinRewards();
 
   useEffect(() => {
     fetchStreams();
@@ -68,6 +73,18 @@ export default function LiveStreamPage() {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+  // Auto-earn QRCoin every minute while watching
+  useEffect(() => {
+    if (selectedStream) {
+      watchTimerRef.current = window.setInterval(() => {
+        awardCoins("watch_live", true);
+      }, 60_000);
+      // Award on join
+      awardCoins("watch_live");
+    }
+    return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
+  }, [selectedStream]);
 
   const fetchStreams = async () => {
     setLoading(true);
@@ -100,7 +117,9 @@ export default function LiveStreamPage() {
       setFloatingReactions(prev => prev.filter(r => r.id !== id));
     }, 2500);
 
-    // Save reaction to database
+    // Award QRCoin for reacting
+    awardCoins("react_live", true);
+
     if (user) {
       supabase.from('stream_reactions').insert({
         stream_id: selectedStream.id,
@@ -123,7 +142,9 @@ export default function LiveStreamPage() {
     setChatMessages(prev => [...prev, newMessage]);
     setChatMessage("");
 
-    // Save to database
+    // Award QRCoin for commenting
+    awardCoins("comment_live", true);
+
     await supabase.from('stream_comments').insert({
       stream_id: selectedStream.id,
       user_id: user.id,
@@ -312,6 +333,9 @@ export default function LiveStreamPage() {
               >
                 <Gift className="w-5 h-5 text-gold-foreground" />
               </button>
+              <button onClick={() => setShowShop(true)} className="w-11 h-11 rounded-full glass flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-accent" />
+              </button>
               <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
                 <Share2 className="w-5 h-5" />
               </button>
@@ -334,6 +358,14 @@ export default function LiveStreamPage() {
               </button>
             </div>
           </div>
+
+          {/* Shop Panel */}
+          {showShop && (
+            <LiveShopPanel
+              professionalId={selectedStream.professional?.id}
+              onClose={() => setShowShop(false)}
+            />
+          )}
 
           {/* Tip Modal */}
           {showTipModal && (
