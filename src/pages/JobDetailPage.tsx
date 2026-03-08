@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { aiJobMatch } from "@/lib/ai";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
-import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export default function JobDetailPage() {
@@ -19,6 +19,8 @@ export default function JobDetailPage() {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [analyzingAI, setAnalyzingAI] = useState(false);
 
