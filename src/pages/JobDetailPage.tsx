@@ -244,11 +244,21 @@ export default function JobDetailPage() {
               rows={4}
               className="w-full rounded-xl bg-background border border-border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            {profile?.cv_url ? (
-              <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> CV già caricato nel profilo</p>
-            ) : (
-              <p className="text-xs text-muted-foreground flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Puoi caricare il CV nelle impostazioni profilo</p>
-            )}
+            {/* CV Upload */}
+            <div>
+              {profile?.cv_url && !cvFile ? (
+                <p className="text-xs text-green-600 flex items-center gap-1 mb-2"><CheckCircle2 className="w-3 h-3" /> CV già caricato nel profilo</p>
+              ) : null}
+              <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border cursor-pointer hover:border-primary/40 transition-colors">
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  {cvFile ? cvFile.name : "Carica CV (PDF, DOC)"}
+                </span>
+                <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => {
+                  if (e.target.files?.[0]) setCvFile(e.target.files[0]);
+                }} />
+              </label>
+            </div>
 
             {/* Multiple apply methods */}
             <div className="space-y-2">
