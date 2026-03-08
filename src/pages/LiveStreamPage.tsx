@@ -13,6 +13,7 @@ import WeeklyLiveTracker from "@/components/live/WeeklyLiveTracker";
 import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
 import LiveMusicSelector from "@/components/live/LiveMusicSelector";
 import BattleChallengeButton from "@/components/live/BattleChallengeButton";
+import LiveGuestPanel from "@/components/live/LiveGuestPanel";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -83,6 +84,7 @@ export default function LiveStreamPage() {
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [showPostStats, setShowPostStats] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [showGuestPanel, setShowGuestPanel] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
@@ -388,6 +390,9 @@ export default function LiveStreamPage() {
                 currentProfessionalId={selectedStream.professional?.id}
                 currentName={selectedStream.professional?.business_name}
               />
+              <button onClick={() => setShowGuestPanel(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Mic className="w-4 h-4 text-primary" />
+              </button>
             </div>
 
             {/* Chat Input */}
@@ -411,6 +416,9 @@ export default function LiveStreamPage() {
             />
           )}
           {showMusic && <LiveMusicSelector isStreamer={false} onClose={() => setShowMusic(false)} />}
+          {showGuestPanel && (
+            <LiveGuestPanel streamId={selectedStream.id} isHost={false} onClose={() => setShowGuestPanel(false)} />
+          )}
 
           {/* Tip Modal */}
           {showTipModal && (

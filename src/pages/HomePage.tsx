@@ -1,5 +1,6 @@
 import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
+import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -155,6 +156,13 @@ export default function HomePage() {
 
       {/* Trending Clips */}
       {activeTab === "Nuovi" && <TrendingClips />}
+
+      {/* LIVE ORA Section */}
+      {activeTab !== "Stilisti" && liveStreams.length > 0 && (
+        <div className="px-5">
+          <LiveNowFeed streams={liveStreams} />
+        </div>
+      )}
 
       {/* Live Banner — subtle */}
       {activeTab !== "Stilisti" && (
