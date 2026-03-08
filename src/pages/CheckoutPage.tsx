@@ -52,29 +52,26 @@ export default function CheckoutPage() {
       }
 
       // Create wallet transaction
-      const { data: tx } = await supabase.from("wallet_transactions").insert({
-        user_id: user.id,
-        type,
-        amount: -amount,
-        description,
-        reference_type: type,
-        reference_id: refId || undefined,
-        payment_method: selected,
-        status: "completed",
-      }).select().single();
-
-      // Create receipt
-      if (tx) {
-        await supabase.from("receipts").insert({
-          user_id: user.id,
-          transaction_id: tx.id,
-          receipt_type: type,
-          service_name: description,
-          amount,
+      // Record purchase if product type
+      if (type === "product" && refId) {
+        await supabase.from("product_purchases").insert({
+          buyer_id: user.id,
+          product_id: refId,
+          unit_price: amount,
+          total_price: amount,
           payment_method: selected,
-          status: "paid",
         });
       }
+
+      // Create receipt
+      await supabase.from("receipts").insert({
+        user_id: user.id,
+        receipt_type: type,
+        service_name: description,
+        amount,
+        payment_method: selected,
+        status: "paid",
+      });
 
       toast.success("Pagamento completato!");
       navigate(`/wallet`);
