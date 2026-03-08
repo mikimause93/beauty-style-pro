@@ -31,7 +31,7 @@ export default function PWAInstallPrompt() {
   // Offline banner
   if (!isOnline) {
     return (
-      <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 py-2 px-4 flex items-center justify-center gap-2 text-sm font-medium">
+      <div className="fixed top-0 left-0 right-0 z-[100] bg-warning text-warning-foreground py-2 px-4 flex items-center justify-center gap-2 text-sm font-medium">
         <WifiOff className="w-4 h-4" />
         <span>Sei offline - Alcune funzionalità potrebbero non essere disponibili</span>
       </div>
