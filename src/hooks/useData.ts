@@ -233,7 +233,11 @@ export function useSpin() {
 
       // Update QR coins if prize type is QR_COIN
       if (prizeType === "QR_COIN") {
-        await supabase.rpc("increment_qr_coins" as any, { user_uuid: userId, amount: prizeValue });
+        // Credits will be handled via profile update
+        await supabase
+          .from("profiles")
+          .update({ qr_coins: prizeValue } as any)
+          .eq("user_id", userId);
       }
 
       return data;
