@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { aiJobMatch } from "@/lib/ai";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
-import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export default function JobDetailPage() {
@@ -19,6 +19,8 @@ export default function JobDetailPage() {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [analyzingAI, setAnalyzingAI] = useState(false);
 
@@ -51,11 +53,25 @@ export default function JobDetailPage() {
   const handleApply = async () => {
     if (!user) { navigate("/auth"); return; }
     setApplying(true);
+
+    // Upload CV if provided
+    let cvUrl = profile?.cv_url || null;
+    if (cvFile) {
+      setUploadingCv(true);
+      const path = `${user.id}/cv/${Date.now()}_${cvFile.name}`;
+      const { error: upErr } = await supabase.storage.from("documents").upload(path, cvFile);
+      if (!upErr) {
+        cvUrl = path;
+        // Save to profile for future applications
+        await supabase.from("profiles").update({ cv_url: path }).eq("user_id", user.id);
+      }
+      setUploadingCv(false);
+    }
+
     const userSkills = profile?.skills || [];
     const requiredSkills = job?.required_skills || [];
     const exp = profile?.experience_years || 0;
 
-    // Try AI analysis first
     let matchScore = 0;
     let analysis: any = {};
     try {
@@ -64,7 +80,6 @@ export default function JobDetailPage() {
       analysis = aiResult || {};
       setAiAnalysis(aiResult);
     } catch {
-      // Fallback to basic matching
       if (requiredSkills.length > 0 && userSkills.length > 0) {
         const matching = userSkills.filter((s: string) =>
           requiredSkills.some((r: string) => r.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(r.toLowerCase()))
@@ -79,7 +94,7 @@ export default function JobDetailPage() {
       job_post_id: id,
       applicant_id: user.id,
       cover_letter: coverLetter || null,
-      cv_url: profile?.cv_url || null,
+      cv_url: cvUrl,
       portfolio_urls: profile?.portfolio_urls || [],
       ai_match_score: matchScore,
       ai_recommended: matchScore >= 60,
@@ -229,11 +244,21 @@ export default function JobDetailPage() {
               rows={4}
               className="w-full rounded-xl bg-background border border-border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            {profile?.cv_url ? (
-              <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> CV già caricato nel profilo</p>
-            ) : (
-              <p className="text-xs text-muted-foreground flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Puoi caricare il CV nelle impostazioni profilo</p>
-            )}
+            {/* CV Upload */}
+            <div>
+              {profile?.cv_url && !cvFile ? (
+                <p className="text-xs text-green-600 flex items-center gap-1 mb-2"><CheckCircle2 className="w-3 h-3" /> CV già caricato nel profilo</p>
+              ) : null}
+              <label className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border cursor-pointer hover:border-primary/40 transition-colors">
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  {cvFile ? cvFile.name : "Carica CV (PDF, DOC)"}
+                </span>
+                <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => {
+                  if (e.target.files?.[0]) setCvFile(e.target.files[0]);
+                }} />
+              </label>
+            </div>
 
             {/* Multiple apply methods */}
             <div className="space-y-2">

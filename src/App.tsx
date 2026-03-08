@@ -74,7 +74,7 @@ const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{chil
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("splash_shown");
+    return !localStorage.getItem("style_splash_shown");
   });
   return (
   <QueryClientProvider client={queryClient}>
@@ -82,7 +82,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <PWAInstallPrompt />
-      {showSplash && <SplashScreen onComplete={() => { sessionStorage.setItem("splash_shown", "1"); setShowSplash(false); }} />}
+      {showSplash && <SplashScreen onComplete={() => { localStorage.setItem("style_splash_shown", "1"); setShowSplash(false); }} />}
       <BrowserRouter>
         <AuthProvider>
           <Routes>
