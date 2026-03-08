@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import HomePage from "./pages/HomePage";
 import LiveStreamPage from "./pages/LiveStreamPage";
 import RadioPage from "./pages/RadioPage";
@@ -32,6 +33,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PWAInstallPrompt />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
