@@ -74,6 +74,18 @@ export default function LiveStreamPage() {
     }
   }, [chatMessages]);
 
+  // Auto-earn QRCoin every minute while watching
+  useEffect(() => {
+    if (selectedStream) {
+      watchTimerRef.current = window.setInterval(() => {
+        awardCoins("watch_live", true);
+      }, 60_000);
+      // Award on join
+      awardCoins("watch_live");
+    }
+    return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
+  }, [selectedStream]);
+
   const fetchStreams = async () => {
     setLoading(true);
     const { data } = await supabase
