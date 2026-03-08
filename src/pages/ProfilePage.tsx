@@ -96,7 +96,7 @@ export default function ProfilePage() {
   const proMenu = [
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Calendar, label: "Prenotazioni Ricevute", path: "/my-bookings" },
-    { icon: ShoppingBag, label: "I miei Prodotti", path: "/shop" },
+    { icon: ShoppingBag, label: "Gestisci Prodotti", path: "/manage-products" },
     { icon: Briefcase, label: "Annunci Lavoro", path: "/hr" },
     { icon: Video, label: "Vai Live", path: "/go-live" },
     { icon: Star, label: "Eventi & Workshop", path: "/events" },
@@ -109,7 +109,7 @@ export default function ProfilePage() {
     { icon: Building2, label: "Dashboard Business", path: "/business" },
     { icon: BarChart3, label: "Analytics Salone", path: "/analytics" },
     { icon: Calendar, label: "Prenotazioni", path: "/my-bookings" },
-    { icon: ShoppingBag, label: "Vetrina Prodotti", path: "/shop" },
+    { icon: ShoppingBag, label: "Gestisci Catalogo", path: "/manage-products" },
     { icon: Briefcase, label: "Gestisci Annunci HR", path: "/hr" },
     { icon: Users, label: "Team", path: "/business/team" },
     { icon: Video, label: "Vai Live", path: "/go-live" },
