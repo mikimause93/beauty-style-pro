@@ -787,14 +787,96 @@ export type Database = {
         }
         Relationships: []
       }
+      live_invites: {
+        Row: {
+          bonus_awarded: boolean | null
+          created_at: string
+          id: string
+          invited_id: string
+          inviter_id: string
+          stream_id: string
+        }
+        Insert: {
+          bonus_awarded?: boolean | null
+          created_at?: string
+          id?: string
+          invited_id: string
+          inviter_id: string
+          stream_id: string
+        }
+        Update: {
+          bonus_awarded?: boolean | null
+          created_at?: string
+          id?: string
+          invited_id?: string
+          inviter_id?: string
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_invites_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_polls: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          is_active: boolean | null
+          options: Json
+          question: string
+          results: Json
+          stream_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          question: string
+          results?: Json
+          stream_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          question?: string
+          results?: Json
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_polls_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_streams: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           ended_at: string | null
           id: string
+          interaction_goal: number | null
+          is_public: boolean | null
+          max_duration_minutes: number | null
           peak_viewers: number
           professional_id: string | null
+          qr_coin_pool: number | null
+          replay_cost: number | null
           scheduled_at: string | null
           started_at: string | null
           status: string
@@ -809,12 +891,18 @@ export type Database = {
           viewer_count: number
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           ended_at?: string | null
           id?: string
+          interaction_goal?: number | null
+          is_public?: boolean | null
+          max_duration_minutes?: number | null
           peak_viewers?: number
           professional_id?: string | null
+          qr_coin_pool?: number | null
+          replay_cost?: number | null
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
@@ -829,12 +917,18 @@ export type Database = {
           viewer_count?: number
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           ended_at?: string | null
           id?: string
+          interaction_goal?: number | null
+          is_public?: boolean | null
+          max_duration_minutes?: number | null
           peak_viewers?: number
           professional_id?: string | null
+          qr_coin_pool?: number | null
+          replay_cost?: number | null
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
@@ -966,6 +1060,38 @@ export type Database = {
             columns: ["station_id"]
             isOneToOne: false
             referencedRelation: "radio_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "live_polls"
             referencedColumns: ["id"]
           },
         ]
@@ -1587,26 +1713,38 @@ export type Database = {
       }
       stream_viewers: {
         Row: {
+          badges: string[] | null
           duration: number | null
           id: string
+          interaction_score: number | null
+          invited_count: number | null
           joined_at: string
           left_at: string | null
+          qr_coin_earned: number | null
           stream_id: string
           user_id: string
         }
         Insert: {
+          badges?: string[] | null
           duration?: number | null
           id?: string
+          interaction_score?: number | null
+          invited_count?: number | null
           joined_at?: string
           left_at?: string | null
+          qr_coin_earned?: number | null
           stream_id: string
           user_id: string
         }
         Update: {
+          badges?: string[] | null
           duration?: number | null
           id?: string
+          interaction_score?: number | null
+          invited_count?: number | null
           joined_at?: string
           left_at?: string | null
+          qr_coin_earned?: number | null
           stream_id?: string
           user_id?: string
         }
