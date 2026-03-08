@@ -326,6 +326,41 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_donations: {
+        Row: {
+          amount: number
+          challenge_id: string
+          created_at: string
+          donor_id: string
+          id: string
+          message: string | null
+        }
+        Insert: {
+          amount?: number
+          challenge_id: string
+          created_at?: string
+          donor_id: string
+          id?: string
+          message?: string | null
+        }
+        Update: {
+          amount?: number
+          challenge_id?: string
+          created_at?: string
+          donor_id?: string
+          id?: string
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_donations_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "transformation_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_participations: {
         Row: {
           challenge_id: string
@@ -363,6 +398,38 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_votes: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type?: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_votes_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "transformation_challenges"
             referencedColumns: ["id"]
           },
         ]
@@ -1918,6 +1985,81 @@ export type Database = {
           reference_type?: string | null
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      transformation_challenges: {
+        Row: {
+          after_image_url: string | null
+          before_image_url: string | null
+          booking_count: number | null
+          category: string
+          comment_count: number | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          estimated_duration: string | null
+          estimated_price: number | null
+          featured: boolean | null
+          id: string
+          process_video_url: string | null
+          products_used: string[] | null
+          qr_coin_received: number | null
+          replicable: boolean | null
+          status: string | null
+          style_name: string | null
+          technique: string | null
+          title: string
+          updated_at: string
+          vote_count: number | null
+        }
+        Insert: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          booking_count?: number | null
+          category?: string
+          comment_count?: number | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          estimated_duration?: string | null
+          estimated_price?: number | null
+          featured?: boolean | null
+          id?: string
+          process_video_url?: string | null
+          products_used?: string[] | null
+          qr_coin_received?: number | null
+          replicable?: boolean | null
+          status?: string | null
+          style_name?: string | null
+          technique?: string | null
+          title: string
+          updated_at?: string
+          vote_count?: number | null
+        }
+        Update: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          booking_count?: number | null
+          category?: string
+          comment_count?: number | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          estimated_duration?: string | null
+          estimated_price?: number | null
+          featured?: boolean | null
+          id?: string
+          process_video_url?: string | null
+          products_used?: string[] | null
+          qr_coin_received?: number | null
+          replicable?: boolean | null
+          status?: string | null
+          style_name?: string | null
+          technique?: string | null
+          title?: string
+          updated_at?: string
+          vote_count?: number | null
         }
         Relationships: []
       }
