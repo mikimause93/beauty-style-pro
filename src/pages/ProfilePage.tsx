@@ -35,23 +35,23 @@ export default function ProfilePage() {
   const isBusiness = profile?.user_type === 'business';
 
   const stats = [
-    { label: "Followers", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
-    { label: "Following", value: (profile?.following_count || 0).toLocaleString(), icon: Heart },
+    { label: "Follower", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
+    { label: "Seguiti", value: (profile?.following_count || 0).toLocaleString(), icon: Heart },
     { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
   ];
 
   const menuItems = [
     ...(isBusiness ? [{ icon: Building2, label: "Dashboard Business", path: "/business" }] : []),
     ...(isProfessional || isBusiness ? [{ icon: Briefcase, label: "Gestisci Annunci HR", path: "/hr" }] : []),
-    { icon: Calendar, label: "I miei Appuntamenti", path: "/booking" },
+    { icon: Calendar, label: "I miei Appuntamenti", path: "/my-bookings" },
     { icon: ShoppingBag, label: "Shop & Prodotti", path: "/shop" },
     { icon: Star, label: "Eventi & Workshop", path: "/events" },
     { icon: Users, label: "Cerca Stilisti", path: "/stylists" },
     { icon: Video, label: "Live Stream", path: "/live" },
     { icon: Radio, label: "Radio", path: "/radio" },
-    { icon: BarChart3, label: "Leaderboard", path: "/leaderboard" },
-    { icon: Trophy, label: "Challenges", path: "/challenges" },
-    { icon: Gift, label: "Spin & Win", path: "/spin" },
+    { icon: BarChart3, label: "Classifica", path: "/leaderboard" },
+    { icon: Trophy, label: "Sfide", path: "/challenges" },
+    { icon: Gift, label: "Gira & Vinci", path: "/spin" },
     { icon: MessageCircle, label: "Chat", path: "/chat" },
     { icon: Cog, label: "Impostazioni", path: "/settings" },
   ];
@@ -90,13 +90,13 @@ export default function ProfilePage() {
           </p>
 
           <div className="flex gap-3 mt-4 w-full">
-            <button onClick={() => navigate(isProfessional || isBusiness ? "/business" : "/booking")}
+            <button onClick={() => navigate(isProfessional || isBusiness ? "/business" : "/my-bookings")}
               className="flex-1 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
-              {isProfessional || isBusiness ? 'Dashboard' : 'Book Appointment'}
+              {isProfessional || isBusiness ? 'Dashboard' : 'Prenotazioni'}
             </button>
-            <button onClick={() => navigate("/chat")}
+            <button onClick={() => navigate("/referral")}
               className="flex-1 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold flex items-center justify-center gap-1.5">
-              <Heart className="w-4 h-4 text-primary" /> Follow
+              <Gift className="w-4 h-4 text-primary" /> Invita Amici
             </button>
           </div>
         </div>
@@ -119,10 +119,10 @@ export default function ProfilePage() {
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-4 gap-2 mb-6">
           {[
-            { icon: "🎰", label: "Spin", path: "/spin" },
-            { icon: "🏆", label: "Challenges", path: "/challenges" },
-            { icon: "💼", label: "Jobs", path: "/hr" },
-            { icon: "🎪", label: "Events", path: "/events" },
+            { icon: "🎰", label: "Gira", path: "/spin" },
+            { icon: "🏆", label: "Sfide", path: "/challenges" },
+            { icon: "💼", label: "Lavoro", path: "/hr" },
+            { icon: "🎪", label: "Eventi", path: "/events" },
           ].map(qa => (
             <button key={qa.label} onClick={() => navigate(qa.path)}
               className="flex flex-col items-center gap-1 py-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all">

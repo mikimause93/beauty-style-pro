@@ -79,12 +79,15 @@ export default function MapSearchPage() {
   };
 
   const loadProfessionals = async () => {
-    const { data } = await supabase.from("professionals").select("*");
+    const { data } = await supabase
+      .from("professionals")
+      .select("*, profiles:user_id(avatar_url, display_name)");
     if (data && data.length > 0) {
       setProfessionals(
-        data.map((p, i) => ({
+        data.map((p: any) => ({
           ...p,
-          avatar: fallbackAvatars[i % fallbackAvatars.length],
+          avatar: (Array.isArray(p.profiles) ? p.profiles[0]?.avatar_url : p.profiles?.avatar_url)
+            || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
         }))
       );
     } else {
@@ -92,8 +95,6 @@ export default function MapSearchPage() {
         { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, address: "Via Montenapoleone 12", description: "Specializzata in balayage", is_verified: true, avatar: stylist2 },
         { id: "2", business_name: "Sylvie Leaciu", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, hourly_rate: 55, address: "Via del Corso 45", description: "Esperta colorazioni", is_verified: true, avatar: stylist1 },
         { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, address: "Via Toledo 78", description: "Barber tradizionale", is_verified: false, avatar: beauty1 },
-        { id: "4", business_name: "Sofia Nails", specialty: "Nail Artist", city: "Milano", rating: 4.6, review_count: 42, hourly_rate: 30, address: "Corso Buenos Aires 33", description: "Nail art creativa", is_verified: true, avatar: stylist2 },
-        { id: "5", business_name: "Luca Style", specialty: "Hairstylist", city: "Torino", rating: 4.5, review_count: 38, hourly_rate: 40, address: "Via Roma 15", description: "Tagli moderni", is_verified: false, avatar: beauty1 },
       ]);
     }
   };
