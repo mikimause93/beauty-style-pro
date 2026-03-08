@@ -12,8 +12,15 @@ export default function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState<string>("client");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const profileTypes = [
+    { key: "client", label: "Cliente", icon: "👤", desc: "Prenota servizi beauty" },
+    { key: "professional", label: "Professionista", icon: "💇‍♀️", desc: "Offri i tuoi servizi" },
+    { key: "business", label: "Business", icon: "🏢", desc: "Gestisci il tuo salone" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +40,7 @@ export default function AuthPage() {
         setLoading(false);
         return;
       }
-      const { error } = await signUp(email, password, displayName);
+      const { error } = await signUp(email, password, displayName, userType);
       if (error) {
         toast.error(error.message);
       } else {
@@ -76,16 +83,45 @@ export default function AuthPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Nome completo"
-                value={displayName}
-                onChange={e => setDisplayName(e.target.value)}
-                className="w-full h-12 rounded-xl bg-card border border-border pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
+            <>
+              {/* Profile Type Selector */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
+                  Tipo di account
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {profileTypes.map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setUserType(t.key)}
+                      className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-xs font-semibold transition-all border ${
+                        userType === t.key
+                          ? "gradient-primary text-primary-foreground border-transparent shadow-glow"
+                          : "bg-card border-border text-muted-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-lg">{t.icon}</span>
+                      <span>{t.label}</span>
+                      <span className={`text-[10px] font-normal ${userType === t.key ? "text-primary-foreground/80" : "text-muted-foreground/60"}`}>
+                        {t.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Nome completo"
+                  value={displayName}
+                  onChange={e => setDisplayName(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-card border border-border pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            </>
           )}
 
           <div className="relative">
