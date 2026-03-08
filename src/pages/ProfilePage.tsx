@@ -1,58 +1,91 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle, Bell, Cog } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useFollow } from "@/hooks/useFollow";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
+import ShareMenu from "@/components/ShareMenu";
+import PostCard from "@/components/feed/PostCard";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
 import beauty3 from "@/assets/beauty-3.jpg";
 import { toast } from "sonner";
 
+interface ProfilePost {
+  id: string;
+  user_id: string;
+  caption: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  like_count: number;
+  comment_count: number;
+  post_type: string | null;
+  created_at: string;
+  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+}
+
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<"posts" | "analytics" | "referral">("posts");
+  const { id: viewUserId } = useParams();
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
-  const [myPosts, setMyPosts] = useState<any[]>([]);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [referralStats, setReferralStats] = useState({ invites: 0, earned: 0 });
-  const [analyticsData, setAnalyticsData] = useState({ bookings: 0, revenue: 0, followers: 0, engagement: 0 });
+  const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved">("grid");
+  const [myPosts, setMyPosts] = useState<ProfilePost[]>([]);
+  const [myProducts, setMyProducts] = useState<any[]>([]);
+  const [viewProfile, setViewProfile] = useState<any>(null);
+  const [showShare, setShowShare] = useState(false);
+  const [sharePost, setSharePost] = useState<ProfilePost | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Determine if viewing own profile or someone else's
+  const isOwnProfile = !viewUserId || viewUserId === user?.id;
+  const targetUserId = isOwnProfile ? user?.id : viewUserId;
+
+  const { isFollowing, followerCount, toggleFollow, loading: followLoading } = useFollow(
+    !isOwnProfile ? targetUserId : undefined
+  );
 
   useEffect(() => {
-    if (user) { loadMyPosts(); loadReferral(); loadAnalytics(); }
-  }, [user]);
+    if (targetUserId) {
+      loadPosts();
+      loadProducts();
+      if (!isOwnProfile) loadViewProfile();
+    }
+  }, [targetUserId]);
 
-  const loadMyPosts = async () => {
-    const { data } = await supabase.from("posts").select("id, image_url, like_count, comment_count").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(12);
-    setMyPosts(data || []);
+  const loadViewProfile = async () => {
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", targetUserId!).single();
+    if (data) setViewProfile(data);
   };
 
-  const loadReferral = async () => {
-    const { data: code } = await supabase.from("referral_codes").select("*").eq("user_id", user!.id).single();
-    if (code) {
-      setReferralCode(code.code);
-      setReferralStats({ invites: code.usage_count || 0, earned: (code.usage_count || 0) * (code.reward_qr_coin || 10) });
+  const loadPosts = async () => {
+    const { data } = await supabase.from("posts").select("*").eq("user_id", targetUserId!).order("created_at", { ascending: false }).limit(30);
+    if (data) {
+      const p = isOwnProfile ? profile : viewProfile;
+      setMyPosts(data.map(post => ({
+        ...post,
+        profileData: p ? { display_name: p.display_name, avatar_url: p.avatar_url, user_type: p.user_type } : undefined,
+      })));
     }
   };
 
-  const loadAnalytics = async () => {
-    const { count: bookingsCount } = await supabase
-      .from("bookings").select("*", { count: "exact", head: true }).eq("client_id", user!.id);
-    const { data: purchases } = await supabase
-      .from("product_purchases").select("total_price").eq("buyer_id", user!.id);
-    const spent = purchases?.reduce((sum, p) => sum + (Number(p.total_price) || 0), 0) || 0;
-    setAnalyticsData({
-      bookings: bookingsCount || 0, revenue: spent,
-      followers: profile?.follower_count || 0,
-      engagement: myPosts.length > 0 ? Math.round((myPosts.reduce((s, p) => s + (p.like_count || 0), 0) / myPosts.length) * 10) / 10 : 0,
-    });
+  const loadProducts = async () => {
+    const { data } = await supabase.from("products").select("*").eq("seller_id", targetUserId!).eq("active", true).order("created_at", { ascending: false });
+    if (data) setMyProducts(data);
   };
 
-  if (!user) {
+  // Re-load posts once viewProfile is fetched
+  useEffect(() => {
+    if (viewProfile && !isOwnProfile) loadPosts();
+  }, [viewProfile]);
+
+  const displayProfile = isOwnProfile ? profile : viewProfile;
+
+  if (!user && isOwnProfile) {
     return (
       <MobileLayout>
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
@@ -67,239 +100,351 @@ export default function ProfilePage() {
     );
   }
 
-  const isProfessional = profile?.user_type === 'professional';
-  const isBusiness = profile?.user_type === 'business';
-  const isClient = !isProfessional && !isBusiness;
+  const isProfessional = displayProfile?.user_type === 'professional';
+  const isBusiness = displayProfile?.user_type === 'business';
 
-  const stats = isProfessional || isBusiness ? [
-    { label: "Follower", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
-    { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
-    { label: "Post", value: myPosts.length.toString(), icon: Star },
-  ] : [
-    { label: "Follower", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
-    { label: "Seguiti", value: (profile?.following_count || 0).toLocaleString(), icon: Heart },
-    { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
-  ];
+  const postCount = myPosts.length;
+  const followerDisplay = isOwnProfile ? (displayProfile?.follower_count || 0) : followerCount;
+  const followingDisplay = displayProfile?.following_count || 0;
 
-  const clientMenu = [
-    { icon: Calendar, label: "I miei Appuntamenti", path: "/my-bookings" },
-    { icon: ShoppingBag, label: "Shop & Prodotti", path: "/shop" },
-    { icon: Users, label: "Cerca Stilisti", path: "/stylists" },
-    { icon: Star, label: "Eventi & Workshop", path: "/events" },
-    { icon: Video, label: "Live Stream", path: "/live" },
-    { icon: Trophy, label: "Sfide", path: "/challenges" },
-    { icon: Gift, label: "Gira & Vinci", path: "/spin" },
-    { icon: MessageCircle, label: "Chat", path: "/chat" },
-    { icon: Cog, label: "Impostazioni", path: "/settings" },
-  ];
-
-  const proMenu = [
-    { icon: BarChart3, label: "Analytics", path: "/analytics" },
-    { icon: Calendar, label: "Prenotazioni Ricevute", path: "/my-bookings" },
-    { icon: ShoppingBag, label: "Gestisci Prodotti", path: "/manage-products" },
-    { icon: Briefcase, label: "Annunci Lavoro", path: "/hr" },
-    { icon: Video, label: "Vai Live", path: "/go-live" },
-    { icon: Star, label: "Eventi & Workshop", path: "/events" },
-    { icon: Trophy, label: "Sfide & Classifica", path: "/challenges" },
-    { icon: MessageCircle, label: "Chat", path: "/chat" },
-    { icon: Cog, label: "Impostazioni", path: "/settings" },
-  ];
-
-  const bizMenu = [
-    { icon: Building2, label: "Dashboard Business", path: "/business" },
-    { icon: BarChart3, label: "Analytics Salone", path: "/analytics" },
-    { icon: Calendar, label: "Prenotazioni", path: "/my-bookings" },
-    { icon: ShoppingBag, label: "Gestisci Catalogo", path: "/manage-products" },
-    { icon: Briefcase, label: "Gestisci Annunci HR", path: "/hr" },
-    { icon: Users, label: "Team", path: "/business/team" },
-    { icon: Video, label: "Vai Live", path: "/go-live" },
-    { icon: Star, label: "Eventi & Workshop", path: "/events" },
-    { icon: MessageCircle, label: "Chat", path: "/chat" },
-    { icon: Cog, label: "Impostazioni", path: "/settings" },
-  ];
-
-  const menuItems = isBusiness ? bizMenu : isProfessional ? proMenu : clientMenu;
-
-  const fallbackImages = [beauty1, beauty2, stylist2, beauty3, beauty1, beauty2];
+  const fallbackImages = [beauty1, beauty2, beauty3, stylist2];
 
   return (
     <MobileLayout>
       {/* Header */}
-      <header className="sticky top-0 z-40 glass px-5 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-display font-bold">Profilo</h1>
-        <div className="flex gap-1.5">
-          <button onClick={() => navigate("/profile/edit")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-            <Edit3 className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-            <LogOut className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-            <Bell className="w-4 h-4 text-muted-foreground" />
-            {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />}
-          </button>
+      <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {!isOwnProfile && (
+            <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <ChevronRight className="w-5 h-5 rotate-180" />
+            </button>
+          )}
+          <h1 className="text-base font-display font-bold truncate max-w-[180px]">
+            {displayProfile?.display_name || 'Profilo'}
+          </h1>
+          {(isProfessional || isBusiness) && (
+            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-primary/15 text-primary">✓</span>
+          )}
+        </div>
+        <div className="flex gap-1">
+          {isOwnProfile && (
+            <>
+              <button onClick={() => navigate("/create-post")} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+                <Plus className="w-4.5 h-4.5 text-muted-foreground" />
+              </button>
+              <button onClick={() => setShowMenu(!showMenu)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+                <Settings className="w-4.5 h-4.5 text-muted-foreground" />
+              </button>
+            </>
+          )}
+          {!isOwnProfile && (
+            <button onClick={() => setShowShare(true)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <Share2 className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="px-5 py-6">
-        {/* Profile Header */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background mb-3">
-            <img src={profile?.avatar_url || stylist2} alt="Profile" className="w-full h-full rounded-full object-cover" />
-          </div>
-          <h2 className="text-lg font-display font-bold">{profile?.display_name || user.email}</h2>
-          <div className="flex items-center gap-2 mt-1">
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-              isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-            }`}>
-              {isBusiness ? '🏢 Business' : isProfessional ? '💇‍♀️ Professionista' : '👤 Beauty Lover'}
-            </span>
-            {profile?.city && <span className="text-[10px] text-muted-foreground">📍 {profile.city}</span>}
-          </div>
-          {profile?.bio && <p className="text-xs text-muted-foreground mt-1 text-center max-w-[250px]">{profile.bio}</p>}
-
-          <div className="flex gap-2 mt-5 w-full">
-            <button onClick={() => navigate(isProfessional || isBusiness ? "/business" : "/my-bookings")}
-              className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
-              {isProfessional || isBusiness ? 'Dashboard' : 'Prenotazioni'}
-            </button>
-            <button onClick={() => navigate("/referral")}
-              className="flex-1 py-2.5 rounded-xl bg-card border border-border/50 text-sm font-semibold flex items-center justify-center gap-1.5">
-              <Gift className="w-4 h-4 text-primary" /> Invita
-            </button>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-8">
-          {stats.map(s => {
-            const Icon = s.icon;
-            return (
-              <button key={s.label} onClick={() => { if (s.label === "QR Coins") navigate("/qr-coins"); }}
-                className="rounded-2xl bg-card border border-border/50 p-3.5 text-center">
-                <Icon className="w-4 h-4 mx-auto mb-1.5 text-muted-foreground" />
-                <p className="text-base font-bold">{s.value}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Menu */}
-        <div className="space-y-0.5 mb-8">
-          {menuItems.map(item => {
+      {/* Settings Menu Dropdown */}
+      {showMenu && isOwnProfile && (
+        <div className="absolute top-14 right-4 z-50 w-56 rounded-2xl bg-card border border-border shadow-lg py-2 fade-in">
+          {[
+            { icon: Edit3, label: "Modifica Profilo", action: () => navigate("/profile/edit") },
+            { icon: Bookmark, label: "Salvati", action: () => setActiveTab("saved") },
+            { icon: Bell, label: `Notifiche${unreadCount > 0 ? ` (${unreadCount})` : ''}`, action: () => navigate("/notifications") },
+            ...(isProfessional || isBusiness ? [
+              { icon: BarChart3, label: "Analytics", action: () => navigate("/analytics") },
+              { icon: ShoppingBag, label: "Gestisci Prodotti", action: () => navigate("/manage-products") },
+              { icon: Briefcase, label: "Annunci Lavoro", action: () => navigate("/hr") },
+              { icon: Video, label: "Vai Live", action: () => navigate("/go-live") },
+            ] : []),
+            ...(isBusiness ? [
+              { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
+            ] : []),
+            { icon: Gift, label: "Invita Amici", action: () => navigate("/referral") },
+            { icon: Coins, label: "QR Coins", action: () => navigate("/qr-coins") },
+            { icon: Cog, label: "Impostazioni", action: () => navigate("/settings") },
+            { icon: LogOut, label: "Esci", action: async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); } },
+          ].map(item => {
             const Icon = item.icon;
             return (
-              <button key={item.label} onClick={() => navigate(item.path)}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left">
+              <button key={item.label} onClick={() => { setShowMenu(false); item.action(); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted/50 transition-colors">
                 <Icon className="w-4 h-4 text-muted-foreground" />
-                <span className="flex-1 text-sm">{item.label}</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                <span className="text-sm">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="px-4 pb-6">
+        {/* Profile Info — Instagram style */}
+        <div className="flex items-start gap-5 py-5">
+          {/* Avatar */}
+          <div className="shrink-0 relative">
+            <div className={`w-20 h-20 rounded-full p-[2px] ${isProfessional || isBusiness ? "bg-gradient-to-br from-primary to-accent" : "bg-border"}`}>
+              <img
+                src={displayProfile?.avatar_url || stylist2}
+                alt=""
+                className="w-full h-full rounded-full object-cover border-2 border-background"
+              />
+            </div>
+            {isOwnProfile && (
+              <button onClick={() => navigate("/profile/edit")}
+                className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary flex items-center justify-center border-2 border-background">
+                <Camera className="w-3 h-3 text-primary-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex-1 pt-1">
+            <div className="flex justify-around text-center">
+              <button onClick={() => setActiveTab("grid")} className="flex flex-col items-center">
+                <span className="text-lg font-bold">{postCount}</span>
+                <span className="text-[10px] text-muted-foreground">Post</span>
+              </button>
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-bold">{followerDisplay > 9999 ? `${(followerDisplay / 1000).toFixed(1)}K` : followerDisplay}</span>
+                <span className="text-[10px] text-muted-foreground">Follower</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-bold">{followingDisplay}</span>
+                <span className="text-[10px] text-muted-foreground">Seguiti</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Name, Bio, Links */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold">{displayProfile?.display_name || 'Utente STYLE'}</h2>
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+              isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+            }`}>
+              {isBusiness ? '🏢 Business' : isProfessional ? '💇‍♀️ Pro' : '👤 Cliente'}
+            </span>
+          </div>
+
+          {displayProfile?.bio && (
+            <p className="text-xs text-foreground mt-1 leading-relaxed whitespace-pre-line">{displayProfile.bio}</p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            {displayProfile?.city && (
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> {displayProfile.city}
+              </span>
+            )}
+            {displayProfile?.skills && displayProfile.skills.length > 0 && (
+              <span className="text-[11px] text-primary flex items-center gap-1">
+                <Tag className="w-3 h-3" /> {displayProfile.skills.slice(0, 2).join(', ')}
+              </span>
+            )}
+          </div>
+
+          {/* QR Coins badge */}
+          {isOwnProfile && (
+            <button onClick={() => navigate("/qr-coins")} className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-xs font-semibold">
+              <Coins className="w-3 h-3 text-accent" />
+              {displayProfile?.qr_coins?.toLocaleString() || '0'} QR Coins
+            </button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 mb-5">
+          {isOwnProfile ? (
+            <>
+              <button onClick={() => navigate("/profile/edit")}
+                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold">
+                Modifica profilo
+              </button>
+              <button onClick={() => navigate("/referral")}
+                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold flex items-center justify-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5" /> Condividi
+              </button>
+              {(isProfessional || isBusiness) && (
+                <button onClick={() => navigate("/go-live")}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                  Live
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <button onClick={() => { if (!user) { navigate("/auth"); return; } toggleFollow(); }}
+                disabled={followLoading}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  isFollowing ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"
+                }`}>
+                {isFollowing ? "Segui già" : "Segui"}
+              </button>
+              <button onClick={() => navigate("/chat")}
+                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold">
+                Messaggio
+              </button>
+              <button onClick={() => navigate(`/booking/${viewUserId}`)}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                Prenota
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Quick Actions — only for own profile */}
+        {isOwnProfile && (
+          <div className="flex gap-3 mb-5 overflow-x-auto no-scrollbar pb-1">
+            {[
+              { icon: "📅", label: "Prenotazioni", path: "/my-bookings" },
+              { icon: "🛍️", label: "Shop", path: "/shop" },
+              { icon: "💬", label: "Chat", path: "/chat" },
+              { icon: "🏆", label: "Sfide", path: "/challenges" },
+              { icon: "🎡", label: "Gira&Vinci", path: "/spin" },
+              ...(isProfessional || isBusiness ? [
+                { icon: "📊", label: "Analytics", path: "/analytics" },
+                { icon: "👥", label: "HR", path: "/hr" },
+              ] : []),
+            ].map(item => (
+              <button key={item.label} onClick={() => navigate(item.path)}
+                className="flex flex-col items-center gap-1 min-w-[56px]">
+                <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center text-xl">
+                  {item.icon}
+                </div>
+                <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Tabs — Instagram style icons */}
+        <div className="flex border-t border-border">
+          {[
+            { key: "grid" as const, icon: Grid3X3 },
+            { key: "feed" as const, icon: Heart },
+            ...(myProducts.length > 0 || (isOwnProfile && (isProfessional || isBusiness)) ? [{ key: "products" as const, icon: Tag }] : []),
+            ...(isOwnProfile ? [{ key: "saved" as const, icon: Bookmark }] : []),
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 py-3 flex justify-center transition-colors ${
+                  activeTab === tab.key ? "border-t-2 border-foreground text-foreground" : "text-muted-foreground"
+                }`}>
+                <Icon className="w-5 h-5" />
               </button>
             );
           })}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-5 bg-muted rounded-xl p-1">
-          {(["posts", "analytics", "referral"] as const).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                activeTab === tab ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-              }`}>
-              {tab === "posts" ? "Post" : tab === "analytics" ? "Statistiche" : "Referral"}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === "posts" && (
+        {/* Grid View */}
+        {activeTab === "grid" && (
           <div className="fade-in">
             {myPosts.length > 0 ? (
-              <div className="grid grid-cols-3 gap-1 rounded-2xl overflow-hidden">
+              <div className="grid grid-cols-3 gap-0.5">
                 {myPosts.map((post, i) => (
-                  <div key={post.id} className="aspect-square relative group">
+                  <div key={post.id} className="aspect-square relative group cursor-pointer" onClick={() => setActiveTab("feed")}>
                     <img src={post.image_url || fallbackImages[i % fallbackImages.length]} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-3.5 h-3.5 text-foreground fill-foreground" />
-                        <span className="text-xs font-bold text-foreground">{post.like_count}</span>
-                      </div>
+                    <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-3">
+                      <span className="flex items-center gap-1 text-xs font-bold text-foreground">
+                        <Heart className="w-3.5 h-3.5 fill-foreground" /> {post.like_count}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs font-bold text-foreground">
+                        <MessageCircle className="w-3.5 h-3.5 fill-foreground" /> {post.comment_count}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-16">
-                <p className="text-3xl mb-2">📸</p>
-                <p className="text-sm text-muted-foreground">Nessun post ancora</p>
-                <button onClick={() => navigate("/create-post")} className="mt-4 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                  Crea il primo post
-                </button>
+                <Camera className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-semibold mb-1">Nessun post ancora</p>
+                <p className="text-xs text-muted-foreground mb-4">Condividi il tuo primo contenuto</p>
+                {isOwnProfile && (
+                  <button onClick={() => navigate("/create-post")} className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                    Crea Post
+                  </button>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {activeTab === "analytics" && (
-          <div className="grid grid-cols-2 gap-2 fade-in">
-            {[
-              { label: "Prenotazioni", value: analyticsData.bookings.toString(), icon: Calendar },
-              { label: "Follower", value: analyticsData.followers.toLocaleString(), icon: Users },
-              { label: "Spesi €", value: analyticsData.revenue.toLocaleString(), icon: Coins },
-              { label: "Like medi", value: analyticsData.engagement.toString(), icon: Heart },
-            ].map(data => {
-              const Icon = data.icon;
-              return (
-                <div key={data.label} className="p-4 rounded-2xl bg-card border border-border/50">
-                  <Icon className="w-4 h-4 text-muted-foreground mb-2" />
-                  <p className="text-lg font-bold">{data.value}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{data.label}</p>
-                </div>
-              );
-            })}
+        {/* Feed View — Full post cards with scroll */}
+        {activeTab === "feed" && (
+          <div className="space-y-4 pt-4 fade-in">
+            {myPosts.length > 0 ? myPosts.map(post => (
+              <PostCard key={post.id} post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
+            )) : (
+              <p className="text-center text-sm text-muted-foreground py-12">Nessun post</p>
+            )}
           </div>
         )}
 
-        {activeTab === "referral" && (
-          <div className="fade-in">
-            <div className="rounded-2xl bg-card border border-border/50 p-5 text-center">
-              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">Invita & Guadagna</span>
-              <h3 className="font-display font-bold text-base mt-4">Il tuo Codice Referral</h3>
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-muted mt-3">
-                <code className="flex-1 text-base font-mono text-primary font-bold tracking-widest">{referralCode || "—"}</code>
-                {referralCode && (
-                  <button onClick={() => { navigator.clipboard.writeText(referralCode); toast.success("Codice copiato!"); }}
-                    className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-                    <Copy className="w-4 h-4 text-primary-foreground" />
+        {/* Products Tab */}
+        {activeTab === "products" && (
+          <div className="pt-4 fade-in">
+            {myProducts.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {myProducts.map(product => (
+                  <div key={product.id} className="rounded-xl bg-card border border-border/50 overflow-hidden">
+                    {product.image_url && (
+                      <img src={product.image_url} alt="" className="w-full aspect-square object-cover" />
+                    )}
+                    <div className="p-3">
+                      <p className="text-xs font-semibold truncate">{product.name}</p>
+                      <p className="text-sm font-bold text-primary mt-0.5">€{Number(product.price).toFixed(2)}</p>
+                      {product.category && <span className="text-[9px] text-muted-foreground">{product.category}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <ShoppingBag className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Nessun prodotto</p>
+                {isOwnProfile && (isProfessional || isBusiness) && (
+                  <button onClick={() => navigate("/manage-products")} className="mt-3 px-5 py-2 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                    Aggiungi Prodotto
                   </button>
                 )}
               </div>
-              {!referralCode && (
-                <button onClick={() => navigate("/referral")} className="mt-4 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                  Genera il tuo codice
-                </button>
-              )}
-              <div className="grid grid-cols-2 gap-2 mt-5">
-                <div className="p-3 rounded-xl bg-muted">
-                  <p className="text-lg font-bold">{referralStats.invites}</p>
-                  <p className="text-[10px] text-muted-foreground">Inviti accettati</p>
-                </div>
-                <div className="p-3 rounded-xl bg-muted">
-                  <p className="text-lg font-bold">{referralStats.earned} QRC</p>
-                  <p className="text-[10px] text-muted-foreground">Guadagnati</p>
-                </div>
-              </div>
-              {referralCode && (
-                <button onClick={() => { navigator.clipboard.writeText(referralCode); toast.success("Link copiato!"); }}
-                  className="w-full mt-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2">
-                  <Share2 className="w-4 h-4" /> Condividi Codice
-                </button>
-              )}
-            </div>
+            )}
+          </div>
+        )}
+
+        {/* Saved Tab */}
+        {activeTab === "saved" && isOwnProfile && (
+          <div className="text-center py-16 fade-in">
+            <Bookmark className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm font-semibold mb-1">Contenuti Salvati</p>
+            <p className="text-xs text-muted-foreground">I post che salvi appariranno qui</p>
           </div>
         )}
       </div>
+
+      {/* Overlay to close menu */}
+      {showMenu && <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />}
+
+      {showShare && (
+        <ShareMenu
+          url={window.location.href}
+          title={`${displayProfile?.display_name || 'Utente'} su STYLE`}
+          description={displayProfile?.bio || "Scopri il profilo su STYLE"}
+          onClose={() => setShowShare(false)}
+        />
+      )}
+      {sharePost && (
+        <ShareMenu
+          title={sharePost.caption || "Post su STYLE"}
+          description={`di ${sharePost.profileData?.display_name || "Style User"}`}
+          onClose={() => setSharePost(null)}
+          onChatShare={() => { navigate("/chat"); setSharePost(null); }}
+        />
+      )}
     </MobileLayout>
   );
 }

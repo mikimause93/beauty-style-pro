@@ -71,7 +71,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-4">
-        <button onClick={() => navigate(`/stylist/${post.user_id}`)}>
+        <button onClick={() => navigate(`/profile/${post.user_id}`)}>
           <img
             src={post.profileData?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.id}`}
             alt=""
