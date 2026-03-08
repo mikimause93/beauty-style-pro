@@ -15,39 +15,38 @@ export default function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border safe-area-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
-        {tabs.map((tab, i) => {
-          const isActive = location.pathname === tab.path ||
-            (tab.path !== "/" && location.pathname.startsWith(tab.path));
-          const Icon = tab.icon;
-          const isCenter = i === 2;
-          return (
-            <button
-              key={tab.path}
-              onClick={() => navigate(tab.path)}
-              className={cn(
-                "flex flex-col items-center justify-center gap-1 w-16 h-full transition-all relative",
-                isCenter ? "" : isActive ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              {isCenter ? (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+      <div className="glass border-t border-border/50">
+        <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+          {tabs.map((tab) => {
+            const isActive = location.pathname === tab.path ||
+              (tab.path !== "/" && location.pathname.startsWith(tab.path));
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.path}
+                onClick={() => navigate(tab.path)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}
+              >
                 <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center -mt-4 shadow-lg",
-                  isActive ? "gradient-primary shadow-glow" : "gradient-primary"
+                  "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200",
+                  isActive && "bg-primary/10"
                 )}>
-                  <Icon className="w-5 h-5 text-primary-foreground" />
+                  <Icon className={cn("w-[22px] h-[22px] transition-all duration-200", isActive && "text-primary")} />
                 </div>
-              ) : (
-                <Icon className={cn("w-5 h-5", isActive && "drop-shadow-[0_0_8px_hsl(340,82%,60%)]")} />
-              )}
-              <span className={cn("text-[10px] font-medium", isCenter && "-mt-0.5 text-primary")}>{tab.label}</span>
-              {isActive && !isCenter && (
-                <div className="absolute bottom-1 w-1 h-1 rounded-full bg-primary" />
-              )}
-            </button>
-          );
-        })}
+                <span className={cn(
+                  "text-[10px] font-medium transition-all duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

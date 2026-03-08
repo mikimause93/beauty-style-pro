@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, ShoppingBag, Calendar } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,7 +38,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     if (s < 60) return `${s}s`;
     if (s < 3600) return `${Math.floor(s / 60)}m`;
     if (s < 86400) return `${Math.floor(s / 3600)}h`;
-    return `${Math.floor(s / 86400)}d`;
+    return `${Math.floor(s / 86400)}g`;
   };
 
   const toggleLike = async () => {
@@ -61,35 +61,30 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
       message: comment.trim(),
     }).select().single();
     if (!error && data) {
-      setComments(prev => [...prev, {
-        id: data.id,
-        message: data.message,
-        name: "Tu",
-        time: "ora",
-      }]);
+      setComments(prev => [...prev, { id: data.id, message: data.message, name: "Tu", time: "ora" }]);
       setCommentCount(prev => prev + 1);
       setComment("");
     }
   };
 
   return (
-    <div className="rounded-2xl bg-card overflow-hidden shadow-card">
+    <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 p-3">
+      <div className="flex items-center gap-3 p-4">
         <button onClick={() => navigate(`/stylist/${post.user_id}`)}>
           <img
             src={post.profileData?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.id}`}
             alt=""
-            className="w-10 h-10 rounded-full object-cover border border-border"
+            className="w-10 h-10 rounded-full object-cover ring-1 ring-border"
             onError={(e) => { (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.id}`; }}
           />
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{post.profileData?.display_name || "Beauty Pro"}</p>
-          <p className="text-[10px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
+          <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
-        <button onClick={() => navigate("/booking")} className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
-          <Calendar className="w-3 h-3 inline mr-0.5" /> Prenota
+        <button onClick={() => navigate("/booking")} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors">
+          Prenota
         </button>
       </div>
 
@@ -103,35 +98,30 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         />
       )}
 
-      {/* Actions Row */}
-      <div className="p-3 space-y-2">
-        <div className="flex items-center gap-3">
+      {/* Actions */}
+      <div className="p-4 space-y-3">
+        <div className="flex items-center gap-4">
           <button onClick={toggleLike} className="flex items-center gap-1.5 group">
-            <Heart className={`w-5 h-5 transition-all ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-primary"}`} />
-            <span className="text-xs font-medium">{likeCount}</span>
+            <Heart className={`w-[22px] h-[22px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
+            <span className="text-xs font-medium text-muted-foreground">{likeCount}</span>
           </button>
           <button onClick={() => { if (!user) { navigate("/auth"); return; } setShowCommentInput(!showCommentInput); }} className="flex items-center gap-1.5 group">
-            <MessageCircle className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-all" />
-            <span className="text-xs font-medium">{commentCount}</span>
+            <MessageCircle className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            <span className="text-xs font-medium text-muted-foreground">{commentCount}</span>
           </button>
           <button onClick={onShare} className="group">
-            <Share2 className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-all" />
+            <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
           <div className="flex-1" />
-          <button onClick={() => navigate("/shop")} className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-all">
-            <ShoppingBag className="w-3 h-3" /> Acquista
-          </button>
           <button onClick={() => setSaved(!saved)}>
-            <Bookmark className={`w-5 h-5 transition-all ${saved ? "text-gold fill-gold" : "text-muted-foreground"}`} />
+            <Bookmark className={`w-[22px] h-[22px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
           </button>
         </div>
 
-        {/* Caption */}
-        {post.caption && <p className="text-sm">{post.caption}</p>}
+        {post.caption && <p className="text-sm leading-relaxed">{post.caption}</p>}
 
-        {/* Inline Comments */}
         {comments.length > 0 && (
-          <div className="space-y-1 pt-1">
+          <div className="space-y-1.5">
             {comments.map(c => (
               <p key={c.id} className="text-xs">
                 <span className="font-semibold">{c.name}</span>{" "}
@@ -141,20 +131,19 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           </div>
         )}
 
-        {/* Comment Input */}
         {showCommentInput && (
-          <div className="flex items-center gap-2 pt-1 fade-in">
+          <div className="flex items-center gap-2 fade-in">
             <input
               value={comment}
               onChange={e => setComment(e.target.value)}
               onKeyDown={e => e.key === "Enter" && submitComment()}
               placeholder="Scrivi un commento..."
-              className="flex-1 bg-muted rounded-full px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+              className="flex-1 bg-muted rounded-full px-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
             />
             <button
               onClick={submitComment}
               disabled={!comment.trim()}
-              className="px-3 py-2 rounded-full gradient-primary text-primary-foreground text-xs font-semibold disabled:opacity-50"
+              className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-40 transition-opacity"
             >
               Invia
             </button>
