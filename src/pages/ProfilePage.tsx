@@ -51,8 +51,11 @@ export default function ProfilePage() {
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
         <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
         <div className="flex gap-2">
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Edit3 className="w-4 h-4 text-muted-foreground" />
+          <button
+            onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }}
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+          >
+            <LogOut className="w-4 h-4 text-muted-foreground" />
           </button>
           <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Settings className="w-4 h-4 text-muted-foreground" />
@@ -64,16 +67,16 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full p-0.5 gradient-primary mb-3">
-            <img src={stylist2} alt="Profile" className="w-full h-full rounded-full object-cover border-2 border-background" />
+            <img src={profile?.avatar_url || stylist2} alt="Profile" className="w-full h-full rounded-full object-cover border-2 border-background" />
           </div>
-          <h2 className="text-xl font-display font-bold">Martina Rossi</h2>
-          <p className="text-sm text-primary">💇‍♀️ Hairstylist · Freelance</p>
+          <h2 className="text-xl font-display font-bold">{profile?.display_name || user.email}</h2>
+          <p className="text-sm text-primary">💇‍♀️ {profile?.user_type === 'professional' ? 'Professional' : 'Beauty Lover'}</p>
           <div className="flex gap-3 mt-4">
-            <button className="px-6 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
-              <Heart className="w-4 h-4 inline mr-1" /> Follow
+            <button onClick={() => navigate("/booking")} className="px-6 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
+              <Calendar className="w-4 h-4 inline mr-1" /> Book
             </button>
-            <button className="px-6 py-2 rounded-full bg-card border border-border text-sm font-semibold">
-              Book Appointment
+            <button onClick={() => navigate("/events")} className="px-6 py-2 rounded-full bg-card border border-border text-sm font-semibold">
+              Events
             </button>
           </div>
         </div>
