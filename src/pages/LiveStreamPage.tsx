@@ -390,6 +390,9 @@ export default function LiveStreamPage() {
                 currentProfessionalId={selectedStream.professional?.id}
                 currentName={selectedStream.professional?.business_name}
               />
+              <button onClick={() => setShowGuestPanel(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Mic className="w-4 h-4 text-primary" />
+              </button>
             </div>
 
             {/* Chat Input */}
