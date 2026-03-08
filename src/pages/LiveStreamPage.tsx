@@ -437,6 +437,33 @@ export default function LiveStreamPage() {
               <button onClick={() => setShowGuestPanel(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <Mic className="w-4 h-4 text-primary" />
               </button>
+              {/* Applause Button */}
+              <button onClick={() => {
+                triggerApplause(12);
+                sendReaction("👏");
+                setChatMessages(prev => [...prev, {
+                  id: `clap-${Date.now()}`, user: profile?.display_name || "Utente",
+                  message: "ha inviato un applauso! 👏👏👏", type: "badge"
+                }]);
+              }} className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center hover:scale-125 transition-transform active:scale-90 shrink-0">
+                <span className="text-lg">👏</span>
+              </button>
+              {/* Voice Note */}
+              <VoiceNoteButton onSend={async (blob, dur) => {
+                if (!user || !selectedStream) return;
+                const path = `${user.id}/voice_${Date.now()}.webm`;
+                await supabase.storage.from("posts").upload(path, blob);
+                const url = supabase.storage.from("posts").getPublicUrl(path).data.publicUrl;
+                setChatMessages(prev => [...prev, {
+                  id: `voice-${Date.now()}`, user: profile?.display_name || "Utente",
+                  message: `🎤 Nota vocale (${dur}s)`, type: "chat"
+                }]);
+                await supabase.from("stream_comments").insert({
+                  stream_id: selectedStream.id, user_id: user.id,
+                  message: `🎤 Nota vocale (${dur}s) — ${url}`
+                });
+                toast.success("Nota vocale inviata!");
+              }} />
             </div>
 
             {/* Chat Input */}
