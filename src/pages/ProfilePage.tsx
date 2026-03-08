@@ -267,10 +267,15 @@ export default function ProfilePage() {
                 className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold flex items-center justify-center gap-1.5">
                 <Share2 className="w-3.5 h-3.5" /> Condividi
               </button>
-              {(isProfessional || isBusiness) && (
+              {(isProfessional || isBusiness) ? (
                 <button onClick={() => navigate("/go-live")}
                   className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
                   Live
+                </button>
+              ) : (
+                <button onClick={() => navigate("/become-creator")}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                  Diventa Pro
                 </button>
               )}
             </>

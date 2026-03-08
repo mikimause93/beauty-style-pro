@@ -1,4 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
+import BookingReceipt from "@/components/BookingReceipt";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Star, Check, Building2, Home, Monitor, Scissors } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -131,22 +132,31 @@ export default function BookingPage() {
   if (confirmed) {
     return (
       <MobileLayout>
-        <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center fade-in">
-          <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-4">
-            <Check className="w-10 h-10 text-success" />
-          </div>
-          <h2 className="text-2xl font-display font-bold mb-2">Prenotazione Confermata!</h2>
-          <p className="text-muted-foreground mb-2">
-            {selectedServiceData?.name} · {selectedDate} alle {selectedTime}
-          </p>
-          {professional && (
-            <p className="text-sm text-muted-foreground mb-6">con {professional.business_name}</p>
-          )}
-          <div className="flex gap-3">
-            <button onClick={() => navigate("/my-bookings")} className="px-5 py-3 rounded-full gradient-primary text-primary-foreground font-semibold">
+        <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate("/")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-display font-bold">Ricevuta</h1>
+        </header>
+        <div className="px-4 py-6 fade-in">
+          <BookingReceipt
+            booking={{
+              id: Date.now().toString(),
+              booking_date: selectedDate,
+              start_time: selectedTime || "",
+              total_price: selectedServiceData?.price || null,
+              notes: notes || null,
+              status: "pending",
+            }}
+            professional={professional ? { business_name: professional.business_name, city: professional.city } : null}
+            service={selectedServiceData ? { name: selectedServiceData.name, duration_minutes: selectedServiceData.duration_minutes } : null}
+            clientName={user?.email?.split("@")[0] || "Cliente"}
+          />
+          <div className="flex gap-3 mt-6">
+            <button onClick={() => navigate("/my-bookings")} className="flex-1 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm">
               Le Mie Prenotazioni
             </button>
-            <button onClick={() => navigate("/")} className="px-5 py-3 rounded-full bg-muted text-muted-foreground font-semibold">
+            <button onClick={() => navigate("/")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
               Home
             </button>
           </div>
