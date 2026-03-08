@@ -88,7 +88,7 @@ export default function StylistsPage() {
         {filtered.map(stylist => (
           <button
             key={stylist.id}
-            onClick={() => navigate("/booking")}
+            onClick={() => navigate(`/stylist/${stylist.id}`)}
             className="w-full flex items-center gap-3 p-3 rounded-xl bg-card shadow-card hover:bg-muted transition-all text-left"
           >
             <img src={stylist.avatar} alt="" className="w-16 h-16 rounded-xl object-cover" />
