@@ -298,6 +298,9 @@ export default function LiveStreamPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/95" />
           </div>
 
+          {/* Applause Animation */}
+          <ApplauseAnimation claps={claps} />
+
           {/* Floating Reactions */}
           <div className="absolute right-4 bottom-56 flex flex-col-reverse gap-1 pointer-events-none z-20">
             {floatingReactions.map(r => (
