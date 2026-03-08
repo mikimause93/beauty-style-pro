@@ -1,5 +1,6 @@
 import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
+import StoriesBar from "@/components/feed/StoriesBar";
 import ReelsSection from "@/components/feed/ReelsSection";
 import SponsorBanner from "@/components/feed/SponsorBanner";
 import AIMatchBanner from "@/components/feed/AIMatchBanner";

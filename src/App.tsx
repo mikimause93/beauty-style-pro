@@ -50,6 +50,7 @@ import GoLivePage from "./pages/GoLivePage";
 import TransformationChallengePage from "./pages/TransformationChallengePage";
 import LiveBattlePage from "./pages/LiveBattlePage";
 import SearchPage from "./pages/SearchPage";
+import ExplorePage from "./pages/ExplorePage";
 import ManageProductsPage from "./pages/ManageProductsPage";
 import WalletPage from "./pages/WalletPage";
 import AdminPage from "./pages/AdminPage";
@@ -114,6 +115,7 @@ const App = () => {
             <Route path="/transformation-challenge" element={<TransformationChallengePage />} />
             <Route path="/live-battle" element={<LiveBattlePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/manage-products" element={<ManageProductsPage />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/admin" element={<AdminPage />} />
