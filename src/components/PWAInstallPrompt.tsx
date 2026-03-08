@@ -16,9 +16,13 @@ export default function PWAInstallPrompt() {
   }, [canInstall, dismissed]);
 
   const handleInstall = async () => {
-    const success = await installApp();
-    if (success) {
-      setShowPrompt(false);
+    try {
+      const success = await installApp();
+      if (success) {
+        setShowPrompt(false);
+      }
+    } catch (err) {
+      console.error("Install failed:", err);
     }
   };
 
