@@ -394,6 +394,14 @@ export default function HomePage() {
           </div>
         )}
       </div>
+      {sharePost && (
+        <ShareMenu
+          title={sharePost.caption || "Post su Style"}
+          description={`di ${sharePost.profileData?.display_name || "Style User"}`}
+          onClose={() => setSharePost(null)}
+          onChatShare={() => { navigate("/chat"); setSharePost(null); }}
+        />
+      )}
     </MobileLayout>
   );
 }
