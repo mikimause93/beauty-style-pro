@@ -333,6 +333,9 @@ export default function LiveStreamPage() {
               >
                 <Gift className="w-5 h-5 text-gold-foreground" />
               </button>
+              <button onClick={() => setShowShop(true)} className="w-11 h-11 rounded-full glass flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-accent" />
+              </button>
               <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
                 <Share2 className="w-5 h-5" />
               </button>
