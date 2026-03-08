@@ -57,6 +57,9 @@ import AdminPage from "./pages/AdminPage";
 import CreatorApplicationPage from "./pages/CreatorApplicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import BoostProfilePage from "./pages/BoostProfilePage";
+import MarketplacePage from "./pages/MarketplacePage";
+import CreateServiceRequestPage from "./pages/CreateServiceRequestPage";
+import CreateCastingPage from "./pages/CreateCastingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
