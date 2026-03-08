@@ -140,11 +140,11 @@ export default function StylistDetailPage() {
               }`}
             >
               <Heart className={`w-4 h-4 ${isFollowing ? "fill-primary text-primary" : ""}`} />
-              {isFollowing ? "Following" : "Follow"}
+              {isFollowing ? "Segui già" : "Segui"}
             </button>
             <button onClick={() => navigate(`/booking/${id}`)}
               className="flex-1 py-2.5 rounded-xl bg-yellow-500 text-black font-semibold text-sm flex items-center justify-center gap-1.5">
-              <Calendar className="w-4 h-4" /> Book
+              <Calendar className="w-4 h-4" /> Prenota
             </button>
             <button onClick={() => navigate("/chat")}
               className="w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center">
