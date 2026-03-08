@@ -21,7 +21,7 @@ export default function ProfilePage() {
       <MobileLayout>
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
           <LogIn className="w-12 h-12 text-primary mb-4" />
-          <h2 className="text-xl font-display font-bold mb-2">Accedi a Stayle</h2>
+          <h2 className="text-xl font-display font-bold mb-2">Accedi a STYLE</h2>
           <p className="text-sm text-muted-foreground mb-6">Registrati o accedi per gestire il tuo profilo</p>
           <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full gradient-primary text-primary-foreground font-semibold shadow-glow">
             Accedi / Registrati
@@ -58,7 +58,7 @@ export default function ProfilePage() {
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
+        <h1 className="text-xl font-display font-bold text-gradient-primary">STYLE</h1>
         <div className="flex gap-2">
           <button onClick={() => navigate("/profile/edit")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Edit3 className="w-4 h-4 text-muted-foreground" />

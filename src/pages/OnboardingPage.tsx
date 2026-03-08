@@ -108,7 +108,7 @@ export default function OnboardingPage() {
       {/* Header */}
       <div className="px-6 pt-8 pb-4">
         <div className="flex items-center gap-3 mb-6">
-          <img src={logo} alt="Stayle" className="w-10 h-10" />
+          <img src={logo} alt="STYLE" className="w-10 h-10" />
           <div>
             <h1 className="text-xl font-display font-bold">Completa il profilo</h1>
             <p className="text-xs text-muted-foreground">

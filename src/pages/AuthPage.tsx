@@ -55,8 +55,8 @@ export default function AuthPage() {
       <div className="w-full">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <img src={logo} alt="Stayle" className="w-20 h-20 mb-3" />
-          <h1 className="text-3xl font-display font-bold text-gradient-primary">Stayle</h1>
+          <img src={logo} alt="STYLE" className="w-20 h-20 mb-3" />
+          <h1 className="text-3xl font-display font-bold text-gradient-primary">STYLE</h1>
           <p className="text-sm text-muted-foreground mt-1">La piattaforma beauty</p>
         </div>
 
