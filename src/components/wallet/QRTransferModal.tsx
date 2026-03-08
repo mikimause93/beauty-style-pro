@@ -131,7 +131,17 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
               </div>
             </button>
 
-            <button onClick={() => { navigator.share?.({ title: "STYLE Beauty", text: `Scarica STYLE Beauty e usa il mio codice ${myCode} per ricevere QR Coins!`, url: window.location.origin }) || toast.info("Condividi il tuo codice: " + myCode); }}
+            <button onClick={() => {
+              const shareData = { title: "STYLE Beauty", text: `Scarica STYLE Beauty e usa il mio codice ${myCode} per ricevere QR Coins!`, url: window.location.origin };
+              try {
+                if (navigator.share && navigator.canShare?.(shareData)) {
+                  navigator.share(shareData);
+                } else {
+                  navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                  toast.success("Messaggio copiato!");
+                }
+              } catch { navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); toast.success("Messaggio copiato!"); }
+            }}
               className="w-full flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border border-border/50 hover:bg-muted transition-colors">
               <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
                 <Users className="w-5 h-5 text-accent-foreground" />

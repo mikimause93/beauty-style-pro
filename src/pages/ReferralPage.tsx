@@ -54,14 +54,21 @@ export default function ReferralPage() {
   };
 
   const shareCode = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: "Unisciti a STYLE Beauty!",
-        text: `Unisciti a STYLE Beauty con il mio codice ${referralCode} e ricevi 20 QR Coin bonus! 🎁`,
-        url: window.location.origin,
-      });
-    } else {
-      copyCode();
+    const shareData = {
+      title: "Unisciti a STYLE Beauty!",
+      text: `Unisciti a STYLE Beauty con il mio codice ${referralCode} e ricevi 20 QR Coin bonus! 🎁`,
+      url: window.location.origin,
+    };
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        copyCode();
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        copyCode();
+      }
     }
   };
 

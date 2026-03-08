@@ -21,16 +21,24 @@ export default function ShareAppModal({ open, onClose }: ShareAppModalProps) {
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "STYLE Beauty",
-        text: "Scopri STYLE Beauty – la piattaforma beauty per professionisti e clienti!",
-        url: window.location.origin,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.origin);
-      toast.success("Link copiato!");
+  const handleShare = async () => {
+    const shareData = {
+      title: "STYLE Beauty",
+      text: "Scopri STYLE Beauty – la piattaforma beauty per professionisti e clienti!",
+      url: window.location.origin,
+    };
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.origin);
+        toast.success("Link copiato!");
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        await navigator.clipboard.writeText(window.location.origin);
+        toast.success("Link copiato!");
+      }
     }
   };
 
