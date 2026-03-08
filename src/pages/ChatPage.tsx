@@ -1,5 +1,6 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle } from "lucide-react";
+import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -414,7 +415,15 @@ export default function ChatPage() {
             </button>
           </div>
         ) : (
-          <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2">
+          <div className="sticky bottom-16 glass px-4 py-2 space-y-2">
+            {messages.length < 3 && (
+              <AutoMessageSuggestions
+                recipientName={conversations.find(c => c.id === id)?.name}
+                context="prenotare un servizio"
+                onSelect={(msg) => setNewMessage(msg)}
+              />
+            )}
+            <div className="flex items-center gap-2">
             <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <Paperclip className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -434,6 +443,7 @@ export default function ChatPage() {
                 <Mic className="w-4 h-4 text-muted-foreground" />
               </button>
             )}
+            </div>
           </div>
         )}
       </MobileLayout>
