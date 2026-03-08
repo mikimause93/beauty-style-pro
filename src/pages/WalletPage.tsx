@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2, Send, Download, Smartphone, Shield, Check, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2, Send, Download, Smartphone, Shield, Check, X, SplitSquareHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -79,6 +79,16 @@ export default function WalletPage() {
     toast.success("Google Pay collegato!");
   };
 
+  const addKlarna = async () => {
+    const existing = paymentMethods.find(m => m.method_type === "klarna");
+    if (existing) { toast.info("Klarna già collegato"); return; }
+    await supabase.from("payment_methods").insert({
+      user_id: user!.id, method_type: "klarna", label: "Klarna — Paga in 3 rate", brand: "Klarna",
+    });
+    loadPaymentMethods();
+    toast.success("Klarna collegato!");
+  };
+
   const saveIBAN = async () => {
     const cleanIban = ibanForm.iban.replace(/\s/g, "").toUpperCase();
     if (cleanIban.length < 15 || cleanIban.length > 34) { toast.error("IBAN non valido"); return; }
@@ -150,6 +160,7 @@ export default function WalletPage() {
       case "bank_transfer": return <Building2 className="w-5 h-5" />;
       case "google_pay": return <Smartphone className="w-5 h-5" />;
       case "paypal": return <Banknote className="w-5 h-5" />;
+      case "klarna": return <SplitSquareHorizontal className="w-5 h-5" />;
       default: return <Wallet className="w-5 h-5" />;
     }
   };
@@ -160,6 +171,7 @@ export default function WalletPage() {
       case "bank_transfer": return "bg-blue-500/10 text-blue-500";
       case "google_pay": return "bg-green-500/10 text-green-500";
       case "paypal": return "bg-yellow-500/10 text-yellow-600";
+      case "klarna": return "bg-pink-500/10 text-pink-500";
       default: return "bg-muted text-muted-foreground";
     }
   };
@@ -445,6 +457,37 @@ export default function WalletPage() {
                       <p className="text-[11px] text-muted-foreground">Collega il tuo account PayPal</p>
                     </div>
                     <Plus className="w-5 h-5 text-yellow-600" />
+                  </button>
+                )}
+
+                {/* Klarna */}
+                {paymentMethods.find(m => m.method_type === "klarna") ? (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-pink-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                      <SplitSquareHorizontal className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">Klarna</p>
+                      <p className="text-[11px] text-pink-500 font-medium flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Collegato — Paga in 3 rate
+                      </p>
+                    </div>
+                    <button onClick={() => removeMethod(paymentMethods.find(m => m.method_type === "klarna")!.id)}
+                      className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={addKlarna}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-pink-500/30 bg-pink-500/5 hover:bg-pink-500/10 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                      <SplitSquareHorizontal className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-sm font-bold">Klarna</p>
+                      <p className="text-[11px] text-muted-foreground">Paga in 3 rate senza interessi</p>
+                    </div>
+                    <Plus className="w-5 h-5 text-pink-500" />
                   </button>
                 )}
               </div>
