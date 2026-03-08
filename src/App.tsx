@@ -126,6 +126,10 @@ const App = () => {
             <Route path="/boost" element={<BoostProfilePage />} />
             <Route path="/become-creator" element={<CreatorApplicationPage />} />
             <Route path="/become-creator" element={<CreatorApplicationPage />} />
+            {/* Marketplace */}
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/marketplace/create-request" element={<CreateServiceRequestPage />} />
+            <Route path="/marketplace/create-casting" element={<CreateCastingPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />
