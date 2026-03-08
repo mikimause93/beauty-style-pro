@@ -12,8 +12,15 @@ export default function AuthPage() {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState<string>("client");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const profileTypes = [
+    { key: "client", label: "Cliente", icon: "👤", desc: "Prenota servizi beauty" },
+    { key: "professional", label: "Professionista", icon: "💇‍♀️", desc: "Offri i tuoi servizi" },
+    { key: "business", label: "Business", icon: "🏢", desc: "Gestisci il tuo salone" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
