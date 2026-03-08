@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords, Scissors, Palette, Heart, Droplets, BookOpen, Paintbrush, Gem, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -43,24 +43,24 @@ interface ChatMessage {
 
 interface FloatingReaction { id: number; emoji: string; x: number }
 
-const reactionEmojis = [
-  { emoji: "❤️", label: "Amore" },
-  { emoji: "🔥", label: "Fuoco" },
-  { emoji: "👏", label: "Applauso" },
-  { emoji: "😍", label: "Wow" },
-  { emoji: "⭐", label: "Stella" },
+const reactionIcons = [
+  { Icon: Heart, label: "Amore", color: "text-primary" },
+  { Icon: Flame, label: "Fuoco", color: "text-destructive" },
+  { Icon: Sparkles, label: "Applauso", color: "text-accent" },
+  { Icon: Crown, label: "Wow", color: "text-yellow-400" },
+  { Icon: Trophy, label: "Stella", color: "text-accent" },
 ];
 
 const tipAmounts = [5, 10, 25, 50, 100, 500];
 
 const CATEGORIES = [
-  { value: "all", label: "🔥 Tutti" },
-  { value: "taglio", label: "✂️ Taglio" },
-  { value: "tinta", label: "🎨 Tinta" },
-  { value: "trattamento", label: "💆 Trattamento" },
-  { value: "tutorial", label: "📚 Tutorial" },
-  { value: "makeup", label: "💄 Make-up" },
-  { value: "nails", label: "💅 Nails" },
+  { value: "all", label: "Tutti", Icon: Flame },
+  { value: "taglio", label: "Taglio", Icon: Scissors },
+  { value: "tinta", label: "Tinta", Icon: Palette },
+  { value: "trattamento", label: "Trattamento", Icon: Droplets },
+  { value: "tutorial", label: "Tutorial", Icon: BookOpen },
+  { value: "makeup", label: "Make-up", Icon: Paintbrush },
+  { value: "nails", label: "Nails", Icon: Gem },
 ];
 
 export default function LiveStreamPage() {
@@ -364,10 +364,10 @@ export default function LiveStreamPage() {
             </div>
 
             {/* Reactions */}
-            <div className="flex items-center gap-2 mb-3">
-              {reactionEmojis.map(r => (
-                <button key={r.label} onClick={() => sendReaction(r.emoji)} className="w-10 h-10 rounded-full glass flex items-center justify-center text-xl hover:scale-125 transition-transform active:scale-90">
-                  {r.emoji}
+            <div className="flex items-center gap-2 mb-3 overflow-x-auto no-scrollbar">
+              {reactionIcons.map(r => (
+                <button key={r.label} onClick={() => sendReaction(r.label)} className="w-10 h-10 rounded-full glass flex items-center justify-center hover:scale-125 transition-transform active:scale-90 shrink-0">
+                  <r.Icon className={`w-5 h-5 ${r.color}`} />
                 </button>
               ))}
               <button onClick={() => setShowTipModal(true)} className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center shadow-lg">
@@ -487,7 +487,7 @@ export default function LiveStreamPage() {
               <Swords className="w-4 h-4 text-destructive" /> Battle
             </button>
             <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
-              📹 Go Live
+              <Video className="w-4 h-4" /> Go Live
             </button>
           </div>
         </div>
@@ -496,11 +496,12 @@ export default function LiveStreamPage() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
           {CATEGORIES.map(cat => (
             <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 selectedCategory === cat.value
                   ? "bg-foreground text-background"
                   : "bg-card border border-border text-muted-foreground"
               }`}>
+              <cat.Icon className="w-3.5 h-3.5" />
               {cat.label}
             </button>
           ))}
