@@ -51,11 +51,13 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<EditProfilePage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking/:id" element={<BookingPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/stylists" element={<StylistsPage />} />
             <Route path="/stylist/:id" element={<StylistDetailPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/before-after" element={<BeforeAfterPage />} />
             <Route path="/qr-coins" element={<QRCoinsPage />} />

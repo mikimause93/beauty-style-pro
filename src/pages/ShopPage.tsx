@@ -1,7 +1,9 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Trophy, Star, Zap, Heart, ArrowLeft } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, ArrowLeft, Search, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
 import beauty3 from "@/assets/beauty-3.jpg";
@@ -20,6 +22,8 @@ const products = [
   { id: 2, name: "Maschera Idratante Bio", price: 28.50, image: beauty2, rating: 4.6, reviews: 89 },
   { id: 3, name: "Siero Luminosità", price: 42.00, image: stylist1, rating: 4.9, reviews: 214 },
   { id: 4, name: "Shampoo Ristrutturante", price: 19.99, image: beauty3, rating: 4.5, reviews: 56 },
+  { id: 5, name: "Balsamo Nutriente", price: 22.00, image: stylist2, rating: 4.7, reviews: 98 },
+  { id: 6, name: "Spray Protettivo", price: 15.99, image: beauty1, rating: 4.4, reviews: 34 },
 ];
 
 const sections = [
@@ -30,12 +34,23 @@ const sections = [
 
 export default function ShopPage() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured">("products");
-  const [qrCoins] = useState(3450);
+  const qrCoins = profile?.qr_coins || 3450;
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
+  const [cart, setCart] = useState<number[]>([]);
 
   const toggleLike = (id: number) => {
     setLikedProducts(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
+
+  const addToCart = (id: number) => {
+    setCart(prev => [...prev, id]);
+    toast.success("Aggiunto al carrello! 🛒");
+  };
+
+  const buyNow = (product: typeof products[0]) => {
+    toast.success(`Acquisto di ${product.name} per €${product.price}! ✨`);
   };
 
   return (
@@ -43,25 +58,29 @@ export default function ShopPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-display font-bold">Shop & Products</h1>
-          <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-2 px-3 py-1.5 rounded-full gradient-gold">
-            <Coins className="w-4 h-4 text-gold-foreground" />
-            <span className="text-sm font-bold text-gold-foreground">{qrCoins.toLocaleString()}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button className="relative w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+              <ShoppingCart className="w-4 h-4 text-muted-foreground" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">{cart.length}</span>
+              )}
+            </button>
+            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-2 px-3 py-1.5 rounded-full gradient-gold">
+              <Coins className="w-4 h-4 text-gold-foreground" />
+              <span className="text-sm font-bold text-gold-foreground">{qrCoins.toLocaleString()}</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-2 mt-3">
           {sections.map(s => {
             const Icon = s.icon;
             return (
-              <button
-                key={s.key}
-                onClick={() => setActiveSection(s.key)}
+              <button key={s.key} onClick={() => setActiveSection(s.key)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeSection === s.key ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {s.label}
+                }`}>
+                <Icon className="w-3.5 h-3.5" />{s.label}
               </button>
             );
           })}
@@ -71,7 +90,7 @@ export default function ShopPage() {
       <div className="p-4">
         {activeSection === "products" && (
           <div className="space-y-4 fade-in">
-            {/* Featured Product */}
+            {/* Featured Product Banner */}
             <div className="rounded-2xl overflow-hidden relative aspect-[2/1]">
               <img src={beauty2} alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent flex items-center px-5">
@@ -80,6 +99,10 @@ export default function ShopPage() {
                   <h3 className="text-lg font-display font-bold mt-2">Cosmohairr Beam</h3>
                   <p className="text-xs text-muted-foreground">Max Mascolini</p>
                   <p className="text-lg font-bold text-gradient-gold mt-1">€39.99</p>
+                  <button onClick={() => buyNow({ id: 0, name: "Cosmohairr Beam", price: 39.99, image: beauty2, rating: 4.9, reviews: 300 })}
+                    className="mt-2 px-4 py-1.5 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
+                    Acquista Ora
+                  </button>
                 </div>
               </div>
             </div>
@@ -87,16 +110,12 @@ export default function ShopPage() {
             {/* Categories horizontal */}
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
               {categories.map(cat => (
-                <button key={cat.name} className="min-w-[130px] rounded-xl bg-card overflow-hidden shadow-card">
+                <button key={cat.name} onClick={() => setActiveSection("categories")} className="min-w-[130px] rounded-xl bg-card overflow-hidden shadow-card">
                   <img src={cat.image} alt="" className="w-full aspect-[3/2] object-cover" />
                   <div className="p-2 flex items-center justify-between">
                     <span className="text-xs font-medium">{cat.name}</span>
                     {cat.tag && (
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                        cat.tag === "Hot" ? "bg-live/20 text-live" : "bg-primary/20 text-primary"
-                      }`}>
-                        {cat.tag}
-                      </span>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${cat.tag === "Hot" ? "bg-live/20 text-live" : "bg-primary/20 text-primary"}`}>{cat.tag}</span>
                     )}
                   </div>
                 </button>
@@ -110,10 +129,8 @@ export default function ShopPage() {
                 <div key={product.id} className="rounded-xl bg-card overflow-hidden shadow-card">
                   <div className="relative">
                     <img src={product.image} alt={product.name} className="w-full aspect-square object-cover" />
-                    <button
-                      onClick={() => toggleLike(product.id)}
-                      className="absolute top-2 right-2 w-8 h-8 rounded-full glass flex items-center justify-center"
-                    >
+                    <button onClick={() => toggleLike(product.id)}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full glass flex items-center justify-center">
                       <Heart className={`w-4 h-4 ${likedProducts.includes(product.id) ? "text-primary fill-primary" : "text-primary-foreground"}`} />
                     </button>
                   </div>
@@ -125,9 +142,14 @@ export default function ShopPage() {
                         <Star className="w-3 h-3 fill-gold" /> {product.rating}
                       </span>
                     </div>
-                    <button className="w-full mt-2 py-1.5 rounded-lg gradient-primary text-primary-foreground text-[10px] font-semibold">
-                      Add to Cart
-                    </button>
+                    <div className="flex gap-1.5 mt-2">
+                      <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-card border border-border text-[10px] font-semibold hover:bg-muted transition-all">
+                        🛒 Cart
+                      </button>
+                      <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg gradient-primary text-primary-foreground text-[10px] font-semibold">
+                        Acquista
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -145,11 +167,7 @@ export default function ShopPage() {
                   <p className="text-xs text-muted-foreground">{cat.count} prodotti</p>
                 </div>
                 {cat.tag && (
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    cat.tag === "Hot" ? "bg-live/20 text-live" : "bg-primary/20 text-primary"
-                  }`}>
-                    {cat.tag}
-                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cat.tag === "Hot" ? "bg-live/20 text-live" : "bg-primary/20 text-primary"}`}>{cat.tag}</span>
                 )}
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
@@ -160,7 +178,7 @@ export default function ShopPage() {
         {activeSection === "featured" && (
           <div className="space-y-4 fade-in">
             <p className="text-sm text-muted-foreground">I prodotti più amati dalla community ✨</p>
-            {products.slice(0, 3).map(product => (
+            {products.slice(0, 4).map(product => (
               <div key={product.id} className="flex items-center gap-3 p-3 rounded-xl bg-card shadow-card">
                 <img src={product.image} alt="" className="w-20 h-20 rounded-xl object-cover" />
                 <div className="flex-1">
@@ -172,9 +190,14 @@ export default function ShopPage() {
                   </div>
                   <p className="text-sm font-bold text-primary mt-1">€{product.price}</p>
                 </div>
-                <button className="px-3 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
-                  Buy
-                </button>
+                <div className="flex flex-col gap-1.5">
+                  <button onClick={() => buyNow(product)} className="px-3 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
+                    Buy
+                  </button>
+                  <button onClick={() => addToCart(product.id)} className="px-3 py-2 rounded-xl bg-muted text-xs font-semibold">
+                    🛒
+                  </button>
+                </div>
               </div>
             ))}
           </div>
