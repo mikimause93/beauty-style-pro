@@ -64,9 +64,13 @@ const App = () => (
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
+            <Route path="/business/team" element={<BusinessDashboardPage />} />
+            <Route path="/business/team/invite" element={<BusinessDashboardPage />} />
             <Route path="/hr" element={<HRPage />} />
             <Route path="/hr/create-job" element={<CreateJobPostPage />} />
             <Route path="/hr/job/:id" element={<JobDetailPage />} />
+            <Route path="/hr/job/:id/manage" element={<JobDetailPage />} />
+            <Route path="/hr/application/:id" element={<HRPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
@@ -76,4 +80,3 @@ const App = () => (
 );
 
 export default App;
-

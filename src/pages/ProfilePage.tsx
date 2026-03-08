@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3 } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,10 +29,13 @@ export default function ProfilePage() {
     );
   }
 
+  const isProfessional = profile?.user_type === 'professional';
+  const isBusiness = profile?.user_type === 'business';
+
   const stats = [
     { label: "Followers", value: "12.4K", icon: Users },
     { label: "Total Views", value: "52.0K", icon: Eye },
-    { label: "QR Coins", value: (profile?.qr_coins || 3450).toLocaleString(), icon: Coins },
+    { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
   ];
 
   const analyticData = [
@@ -42,11 +45,29 @@ export default function ProfilePage() {
     { label: "Engagement Rate", value: "50.10%", change: "+2%", up: true },
   ];
 
+  // Role-based quick actions
   const quickActions = [
     { icon: Trophy, label: "Challenges", path: "/challenges" },
     { icon: Gift, label: "Spin & Win", path: "/spin" },
+    ...(isProfessional || isBusiness
+      ? [
+          { icon: Briefcase, label: "HR / Jobs", path: "/hr" },
+          { icon: Calendar, label: "Bookings", path: "/booking" },
+        ]
+      : [
+          { icon: BarChart3, label: "Leaderboard", path: "/leaderboard" },
+          { icon: Calendar, label: "Bookings", path: "/booking" },
+        ]),
+  ];
+
+  // Extra menu items for business/professional
+  const menuItems = [
+    ...(isBusiness ? [{ icon: Building2, label: "Dashboard Business", path: "/business" }] : []),
+    ...(isProfessional || isBusiness ? [{ icon: Briefcase, label: "Gestisci Annunci", path: "/hr" }] : []),
+    { icon: Calendar, label: "I miei Appuntamenti", path: "/booking" },
+    { icon: Star, label: "Eventi & Workshop", path: "/events" },
+    { icon: Users, label: "Cerca Stilisti", path: "/stylists" },
     { icon: BarChart3, label: "Leaderboard", path: "/leaderboard" },
-    { icon: Calendar, label: "Bookings", path: "/booking" },
   ];
 
   return (
@@ -60,7 +81,7 @@ export default function ProfilePage() {
           <button onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <LogOut className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => navigate("/notifications")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Settings className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
@@ -73,14 +94,16 @@ export default function ProfilePage() {
             <img src={profile?.avatar_url || stylist2} alt="Profile" className="w-full h-full rounded-full object-cover border-2 border-background" />
           </div>
           <h2 className="text-xl font-display font-bold">{profile?.display_name || user.email}</h2>
-          <p className="text-sm text-primary">💇‍♀️ {profile?.user_type === 'professional' ? 'Stylehair / Melbedne bigpic' : 'Beauty Lover'}</p>
+          <p className="text-sm text-primary">
+            {isProfessional ? '💇‍♀️ Professionista' : isBusiness ? '🏢 Business' : '💖 Beauty Lover'}
+          </p>
           
           <div className="flex gap-3 mt-4 w-full">
             <button onClick={() => navigate("/booking")} className="flex-1 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold shadow-glow">
-              Book Appointment
+              {isProfessional || isBusiness ? 'Dashboard' : 'Book Appointment'}
             </button>
-            <button className="flex-1 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold flex items-center justify-center gap-1.5">
-              <Heart className="w-4 h-4 text-primary" /> Follow
+            <button onClick={() => navigate("/chat")} className="flex-1 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold flex items-center justify-center gap-1.5">
+              <Heart className="w-4 h-4 text-primary" /> Chat
             </button>
           </div>
         </div>
@@ -90,11 +113,11 @@ export default function ProfilePage() {
           {stats.map(s => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="rounded-xl bg-card p-3 text-center shadow-card">
+              <button key={s.label} onClick={() => s.label === "QR Coins" && navigate("/qr-coins")} className="rounded-xl bg-card p-3 text-center shadow-card">
                 <Icon className="w-4 h-4 mx-auto mb-1 text-primary" />
                 <p className="text-lg font-bold">{s.value}</p>
                 <p className="text-[10px] text-muted-foreground">{s.label}</p>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -112,17 +135,29 @@ export default function ProfilePage() {
           })}
         </div>
 
+        {/* Menu Items */}
+        <div className="space-y-1 mb-6">
+          {menuItems.map(item => {
+            const Icon = item.icon;
+            return (
+              <button key={item.label} onClick={() => navigate(item.path)}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-all text-left">
+                <Icon className="w-4 h-4 text-primary" />
+                <span className="flex-1 text-sm font-medium">{item.label}</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            );
+          })}
+        </div>
+
         {/* Tabs */}
         <div className="flex gap-2 mb-4">
           {(["posts", "analytics", "referral"] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+            <button key={tab} onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all capitalize ${
                 activeTab === tab ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {tab}
+              }`}>
+              {tab === "posts" ? "Post" : tab === "analytics" ? "Analytics" : "Referral"}
             </button>
           ))}
         </div>
@@ -141,15 +176,11 @@ export default function ProfilePage() {
           <div className="space-y-3 fade-in">
             <div className="rounded-xl gradient-card border border-border p-4 shadow-card">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-semibold">Earnings This Month</h3>
-                <span className="px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold">
-                  Total Viewers
-                </span>
+                <h3 className="text-sm font-semibold">Guadagni del Mese</h3>
+                <span className="px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold">Totale</span>
               </div>
               <p className="text-3xl font-display font-bold text-gradient-gold">€ 4,280</p>
-              <p className="text-xs text-muted-foreground">Flawless Sheet's Papers</p>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               {analyticData.map(data => (
                 <div key={data.label} className="p-3 rounded-xl bg-card shadow-card">
@@ -159,8 +190,6 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
-
-            {/* Chart */}
             <div className="rounded-xl bg-card p-4 shadow-card">
               <p className="text-xs text-muted-foreground mb-3">Revenue Trend</p>
               <div className="flex items-end gap-1 h-24">
@@ -180,46 +209,25 @@ export default function ProfilePage() {
         {activeTab === "referral" && (
           <div className="space-y-4 fade-in">
             <div className="rounded-2xl gradient-card border border-border p-5 text-center shadow-card">
-              <span className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold">
-                Invite & Earn
-              </span>
-              <h3 className="font-display font-bold text-lg mt-3">REFERRAL CODE RE NUOVE</h3>
+              <span className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold">Invita & Guadagna</span>
+              <h3 className="font-display font-bold text-lg mt-3">Il tuo Codice Referral</h3>
               <div className="flex items-center gap-2 p-3 rounded-xl bg-muted mt-3">
                 <code className="flex-1 text-lg font-mono text-primary font-bold tracking-widest">AB39-KD75</code>
-                <button
-                  onClick={() => { navigator.clipboard.writeText("AB39-KD75"); toast.success("Codice copiato!"); }}
-                  className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center"
-                >
+                <button onClick={() => { navigator.clipboard.writeText("AB39-KD75"); toast.success("Codice copiato!"); }}
+                  className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
                   <Copy className="w-4 h-4 text-primary-foreground" />
                 </button>
               </div>
-
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="p-3 rounded-xl bg-card">
-                  <p className="text-xl font-bold text-gradient-gold">Scores Mascolinet</p>
-                  <p className="text-[10px] text-muted-foreground">Pleasatness Dispromelal Tolost</p>
+                  <p className="text-xl font-bold text-gradient-gold">12</p>
+                  <p className="text-[10px] text-muted-foreground">Inviti accettati</p>
                 </div>
                 <div className="p-3 rounded-xl bg-card">
                   <p className="text-xl font-bold text-gradient-gold">160 QRC</p>
-                  <p className="text-[10px] text-muted-foreground">Earned Total</p>
+                  <p className="text-[10px] text-muted-foreground">Guadagnati</p>
                 </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Recent Referrals</h3>
-              {["Eeveos Maoneshat", "MaRY Moeonproduet"].map((name, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-card shadow-card">
-                  <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
-                    {name[0]}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{name}</p>
-                    <p className="text-xs text-muted-foreground">Joined 2 days ago</p>
-                  </div>
-                  <span className="text-xs font-semibold text-gold">+20 QRC</span>
-                </div>
-              ))}
             </div>
           </div>
         )}
