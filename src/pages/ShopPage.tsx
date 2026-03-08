@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, Plus, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,19 +28,23 @@ const sections = [
   { key: "products" as const, label: "Prodotti", icon: ShoppingBag },
   { key: "categories" as const, label: "Categorie", icon: Star },
   { key: "featured" as const, label: "In Evidenza", icon: Gift },
+  { key: "my_products" as const, label: "I Miei", icon: Package },
 ];
 
 export default function ShopPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured">("products");
+  const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured" | "my_products">("products");
   const [products, setProducts] = useState<Product[]>([]);
+  const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ name: string; count: number; image: string }[]>([]);
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number } | null>(null);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", description: "", category: "Hair Care" });
 
   const qrCoins = profile?.qr_coins || 0;
 
