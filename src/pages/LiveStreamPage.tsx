@@ -37,11 +37,11 @@ interface FloatingReaction {
 }
 
 const reactionEmojis = [
-  { emoji: "❤️", label: "Love" },
-  { emoji: "🔥", label: "Fire" },
-  { emoji: "👏", label: "Applause" },
+  { emoji: "❤️", label: "Amore" },
+  { emoji: "🔥", label: "Fuoco" },
+  { emoji: "👏", label: "Applauso" },
   { emoji: "😍", label: "Wow" },
-  { emoji: "⭐", label: "Star" },
+  { emoji: "⭐", label: "Stella" },
 ];
 
 const tipAmounts = [5, 10, 25, 50, 100, 500];
@@ -133,13 +133,13 @@ export default function LiveStreamPage() {
 
   const sendTip = async () => {
     if (!selectedStream || !user) {
-      toast.error("Login required to send tips");
+      toast.error("Devi effettuare l'accesso per inviare regali");
       return;
     }
 
     const qrCoins = profile?.qr_coins || 0;
     if (qrCoins < selectedTip) {
-      toast.error("Insufficient QR Coins");
+      toast.error("QR Coins insufficienti");
       navigate("/qr-coins");
       return;
     }
@@ -161,16 +161,16 @@ export default function LiveStreamPage() {
       const tipMessage: ChatMessage = {
         id: Date.now().toString(),
         user: profile?.display_name || 'You',
-        message: `Sent ${selectedTip} QRCoins! 🎉`,
+        message: `Ha inviato ${selectedTip} QRCoins! 🎉`,
         type: 'tip',
         amount: selectedTip
       };
 
       setChatMessages(prev => [...prev, tipMessage]);
       setShowTipModal(false);
-      toast.success(`Sent ${selectedTip} QRCoins!`);
+      toast.success(`Inviati ${selectedTip} QRCoins!`);
     } catch (error) {
-      toast.error("Failed to send tip");
+      toast.error("Errore nell'invio del regalo");
     }
   };
 
@@ -240,7 +240,7 @@ export default function LiveStreamPage() {
                 <p className="text-sm text-muted-foreground">{selectedStream.title}</p>
               </div>
               <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">
-                Follow
+                Segui
               </button>
             </div>
 
@@ -251,7 +251,7 @@ export default function LiveStreamPage() {
                   <Coins className="w-5 h-5 text-gold-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">QRCoin Earned</p>
+                  <p className="text-xs text-muted-foreground">QRCoin Guadagnati</p>
                   <p className="text-xl font-bold text-gradient-gold">
                     {selectedStream.total_earnings.toLocaleString()}
                   </p>
@@ -263,7 +263,7 @@ export default function LiveStreamPage() {
                   className="px-4 py-2 rounded-full gradient-gold text-gold-foreground text-sm font-bold flex items-center gap-1.5"
                 >
                   <Gift className="w-4 h-4" />
-                  Send Gift
+                   Invia Regalo
                 </button>
               </div>
             </div>
@@ -323,7 +323,7 @@ export default function LiveStreamPage() {
                 value={chatMessage}
                 onChange={e => setChatMessage(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && sendChat()}
-                placeholder="Say something nice..."
+                placeholder="Scrivi qualcosa..."
                 className="flex-1 h-12 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
               />
               <button 
@@ -346,8 +346,8 @@ export default function LiveStreamPage() {
                       <Gift className="w-5 h-5 text-gold-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-display font-bold text-lg">Send a Gift</h3>
-                      <p className="text-xs text-muted-foreground">Support your favorite creator</p>
+                      <h3 className="font-display font-bold text-lg">Invia un Regalo</h3>
+                      <p className="text-xs text-muted-foreground">Supporta il tuo creator preferito</p>
                     </div>
                   </div>
                   <button onClick={() => setShowTipModal(false)}>
@@ -356,7 +356,7 @@ export default function LiveStreamPage() {
                 </div>
 
                 <p className="text-sm text-muted-foreground mb-3">
-                  Your balance: <span className="text-gold font-bold">{profile?.qr_coins?.toLocaleString() || 0} QRC</span>
+                  Il tuo saldo: <span className="text-gold font-bold">{profile?.qr_coins?.toLocaleString() || 0} QRC</span>
                 </p>
 
                 <div className="grid grid-cols-3 gap-3 mb-6">
@@ -381,7 +381,7 @@ export default function LiveStreamPage() {
                   className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg shadow-glow flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Send {selectedTip} QRCoins
+                   Invia {selectedTip} QRCoins
                 </button>
               </div>
             </div>
@@ -398,7 +398,7 @@ export default function LiveStreamPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
-            <p className="text-sm text-muted-foreground">Watch tutorials & earn QRCoins</p>
+            <p className="text-sm text-muted-foreground">Guarda tutorial e guadagna QRCoins</p>
           </div>
           <button className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
             📹 Go Live
@@ -418,8 +418,8 @@ export default function LiveStreamPage() {
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
               <Users className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No Live Streams</h3>
-            <p className="text-muted-foreground text-sm">Be the first to go live!</p>
+            <h3 className="text-lg font-semibold mb-2">Nessuna Diretta</h3>
+            <p className="text-muted-foreground text-sm">Sii il primo a trasmettere in diretta!</p>
           </div>
         ) : (
           <div className="grid gap-4">
