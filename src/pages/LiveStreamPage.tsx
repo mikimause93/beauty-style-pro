@@ -13,6 +13,7 @@ import WeeklyLiveTracker from "@/components/live/WeeklyLiveTracker";
 import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
 import LiveMusicSelector from "@/components/live/LiveMusicSelector";
 import BattleChallengeButton from "@/components/live/BattleChallengeButton";
+import LiveGuestPanel from "@/components/live/LiveGuestPanel";
 import { toast } from "sonner";
 
 interface LiveStream {
