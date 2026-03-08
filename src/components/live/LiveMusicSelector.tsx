@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { Music, Play, Pause, X, Volume2, VolumeX } from "lucide-react";
+import { useRadio } from "@/contexts/RadioContext";
 import beauty2 from "@/assets/beauty-2.jpg";
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
+import beauty3 from "@/assets/beauty-3.jpg";
 
-const bgTracks = [
-  { id: "1", title: "Chill Salon Vibes", genre: "Lounge", cover: beauty2 },
-  { id: "2", title: "Energetic Cuts", genre: "Pop", cover: stylist1 },
-  { id: "3", title: "Relax & Beauty", genre: "Ambient", cover: stylist2 },
-  { id: "4", title: "Trend Beats", genre: "R&B", cover: beauty2 },
-];
+const coverImages = [beauty2, stylist1, stylist2, beauty3];
 
 interface LiveMusicSelectorProps {
   isStreamer: boolean;
@@ -17,14 +14,21 @@ interface LiveMusicSelectorProps {
 }
 
 export default function LiveMusicSelector({ isStreamer, onClose }: LiveMusicSelectorProps) {
-  const [activeTrack, setActiveTrack] = useState<string | null>(null);
+  const { isPlaying, loading, currentStation, toggle, play, pause, nextStation, stations, volume, changeVolume } = useRadio();
   const [muted, setMuted] = useState(false);
+  const prevVolume = useState(volume)[0];
 
-  const toggleTrack = (id: string) => {
-    setActiveTrack(prev => (prev === id ? null : id));
+  const handleMute = () => {
+    if (muted) {
+      changeVolume(prevVolume || 0.8);
+    } else {
+      changeVolume(0);
+    }
+    setMuted(!muted);
   };
 
-  const current = bgTracks.find(t => t.id === activeTrack);
+  const currentIdx = stations.findIndex(s => s.id === currentStation.id);
+  const cover = coverImages[currentIdx % coverImages.length];
 
   return (
     <div className="absolute inset-0 z-40 flex items-end">
@@ -48,61 +52,71 @@ export default function LiveMusicSelector({ isStreamer, onClose }: LiveMusicSele
         </div>
 
         {/* Now playing */}
-        {current && (
+        {isPlaying && (
           <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 mb-4">
-            <img src={current.cover} alt="" className="w-10 h-10 rounded-lg object-cover animate-[spin_8s_linear_infinite]" />
+            <img src={cover} alt="" className="w-10 h-10 rounded-lg object-cover animate-[spin_8s_linear_infinite]" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{current.title}</p>
-              <p className="text-[10px] text-muted-foreground">{current.genre}</p>
+              <p className="text-sm font-semibold truncate">{currentStation.name}</p>
+              <p className="text-[10px] text-muted-foreground">{currentStation.genre}</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <button onClick={() => setMuted(!muted)} className="w-8 h-8 rounded-full bg-card flex items-center justify-center">
+              <button onClick={handleMute} className="w-8 h-8 rounded-full bg-card flex items-center justify-center">
                 {muted ? <VolumeX className="w-4 h-4 text-muted-foreground" /> : <Volume2 className="w-4 h-4 text-primary" />}
               </button>
-              <div className="flex items-center gap-0.5">
-                <div className="w-0.5 h-3 bg-primary rounded-full animate-pulse" />
-                <div className="w-0.5 h-4 bg-primary rounded-full animate-pulse" style={{ animationDelay: "0.1s" }} />
-                <div className="w-0.5 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: "0.2s" }} />
-              </div>
+              <button onClick={pause} className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center">
+                <Pause className="w-4 h-4 text-destructive" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* Track List */}
+        {/* Station List */}
         <div className="space-y-2">
-          {bgTracks.map(track => (
-            <button
-              key={track.id}
-              onClick={() => isStreamer && toggleTrack(track.id)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                activeTrack === track.id
-                  ? "bg-primary/10 border border-primary/30"
-                  : "bg-card border border-border/50 hover:border-primary/20"
-              } ${!isStreamer ? "opacity-70 cursor-default" : ""}`}
-            >
-              <img src={track.cover} alt="" className="w-10 h-10 rounded-lg object-cover" />
-              <div className="flex-1 text-left">
-                <p className={`text-sm font-medium ${activeTrack === track.id ? "text-primary" : ""}`}>{track.title}</p>
-                <p className="text-[10px] text-muted-foreground">{track.genre}</p>
-              </div>
-              {activeTrack === track.id ? (
-                <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
-                  <Pause className="w-4 h-4 text-primary-foreground" />
+          {stations.map((station, idx) => {
+            const isActive = isPlaying && currentStation.id === station.id;
+            return (
+              <button
+                key={station.id}
+                onClick={() => play(station)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                  isActive
+                    ? "bg-primary/10 border border-primary/30"
+                    : "bg-card border border-border/50 hover:border-primary/20"
+                }`}
+              >
+                <img src={coverImages[idx % coverImages.length]} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                <div className="flex-1 text-left">
+                  <p className={`text-sm font-medium ${isActive ? "text-primary" : ""}`}>{station.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{station.genre}</p>
                 </div>
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                  <Play className="w-4 h-4 text-muted-foreground ml-0.5" />
-                </div>
-              )}
-            </button>
-          ))}
+                {isActive ? (
+                  <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
+                    <Pause className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                    <Play className="w-4 h-4 text-muted-foreground ml-0.5" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {!isStreamer && (
-          <p className="text-[10px] text-muted-foreground text-center mt-4">
-            Solo il professionista può cambiare la musica
-          </p>
-        )}
+        {/* Volume slider */}
+        <div className="mt-4 flex items-center gap-3 px-1">
+          <VolumeX className="w-4 h-4 text-muted-foreground shrink-0" />
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={volume}
+            onChange={e => { changeVolume(Number(e.target.value)); setMuted(false); }}
+            className="flex-1 accent-primary"
+          />
+          <Volume2 className="w-4 h-4 text-muted-foreground shrink-0" />
+        </div>
       </div>
     </div>
   );
