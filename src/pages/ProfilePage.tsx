@@ -162,6 +162,7 @@ export default function ProfilePage() {
               { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
             ] : []),
             { icon: Gift, label: "Invita Amici", action: () => navigate("/referral") },
+            { icon: Wallet, label: "Wallet", action: () => navigate("/wallet") },
             { icon: Coins, label: "QR Coins", action: () => navigate("/qr-coins") },
             { icon: Cog, label: "Impostazioni", action: () => navigate("/settings") },
             { icon: LogOut, label: "Esci", action: async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); } },
