@@ -11,6 +11,7 @@ import RadioPage from "./pages/RadioPage";
 import ShopPage from "./pages/ShopPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import BookingPage from "./pages/BookingPage";
 import EventsPage from "./pages/EventsPage";
 import CreatePostPage from "./pages/CreatePostPage";
@@ -27,6 +28,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import BusinessDashboardPage from "./pages/BusinessDashboardPage";
 import HRPage from "./pages/HRPage";
 import CreateJobPostPage from "./pages/CreateJobPostPage";
+import JobDetailPage from "./pages/JobDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/live" element={<LiveStreamPage />} />
             <Route path="/radio" element={<RadioPage />} />
             <Route path="/shop" element={<ShopPage />} />
@@ -63,6 +66,7 @@ const App = () => (
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/hr" element={<HRPage />} />
             <Route path="/hr/create-job" element={<CreateJobPostPage />} />
+            <Route path="/hr/job/:id" element={<JobDetailPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
