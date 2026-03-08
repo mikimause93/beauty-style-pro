@@ -93,6 +93,15 @@ export default function LiveStreamPage() {
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
+  // Auto-select stream from URL param
+  useEffect(() => {
+    const streamId = searchParams.get("stream");
+    if (streamId && streams.length > 0 && !selectedStream) {
+      const found = streams.find(s => s.id === streamId);
+      if (found) setSelectedStream(found);
+    }
+  }, [streams, searchParams]);
+
   useEffect(() => {
     if (selectedCategory === "all") {
       setFilteredStreams(streams);
@@ -104,6 +113,32 @@ export default function LiveStreamPage() {
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [chatMessages]);
+
+  // Realtime chat subscription
+  useEffect(() => {
+    if (!selectedStream) return;
+    const channel = supabase
+      .channel(`live-chat-${selectedStream.id}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "stream_comments",
+        filter: `stream_id=eq.${selectedStream.id}`,
+      }, async (payload) => {
+        const comment = payload.new as any;
+        // Don't add own messages (already added locally)
+        if (comment.user_id === user?.id) return;
+        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).single();
+        setChatMessages(prev => [...prev, {
+          id: comment.id,
+          user: prof?.display_name || "Utente",
+          message: comment.message,
+          type: "chat",
+        }]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedStream?.id]);
 
   // Auto-earn + badge checks
   useEffect(() => {
