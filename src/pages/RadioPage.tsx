@@ -1,7 +1,9 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Headphones } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Headphones, Coins } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
+import { toast } from "sonner";
 import beauty2 from "@/assets/beauty-2.jpg";
 import beauty3 from "@/assets/beauty-3.jpg";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -28,7 +30,22 @@ export default function RadioPage() {
   const [stations, setStations] = useState(fallbackStations);
   const [tracks, setTracks] = useState(fallbackTracks);
   const [activeStation, setActiveStation] = useState<string | null>(null);
+  const [listenMinutes, setListenMinutes] = useState(0);
+  const { awardCoins } = useQRCoinRewards();
+  const rewardTimerRef = useRef<number | null>(null);
 
+  // Award QRCoin every 2 minutes of listening
+  useEffect(() => {
+    if (isPlaying) {
+      rewardTimerRef.current = window.setInterval(() => {
+        setListenMinutes(prev => prev + 1);
+        awardCoins("listen_radio", true);
+      }, 120_000);
+    } else if (rewardTimerRef.current) {
+      clearInterval(rewardTimerRef.current);
+    }
+    return () => { if (rewardTimerRef.current) clearInterval(rewardTimerRef.current); };
+  }, [isPlaying]);
   useEffect(() => {
     fetchStations();
   }, []);
