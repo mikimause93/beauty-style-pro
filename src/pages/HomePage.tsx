@@ -312,7 +312,49 @@ export default function HomePage() {
 
       {/* Feed */}
       <div className="space-y-4 px-4 pb-4">
-        {loading ? (
+        {activeTab === "Jobs" ? (
+          /* Jobs Tab */
+          jobPosts.length === 0 ? (
+            <div className="text-center py-12">
+              <Briefcase className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground text-sm">Nessun annuncio di lavoro</p>
+              <button onClick={() => navigate("/hr")} className="mt-3 text-primary text-sm font-semibold">
+                Vai alla sezione HR
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {jobPosts.map((job) => {
+                const employer = job.businesses || job.professionals;
+                const name = employer?.business_name || "Anonimo";
+                return (
+                  <button
+                    key={job.id}
+                    onClick={() => navigate(`/hr/job/${job.id}`)}
+                    className="w-full text-left p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                        {name[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{job.title}</h3>
+                        <p className="text-xs text-muted-foreground">{name} • {job.location}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium">{job.category}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">{job.employment_type}</span>
+                          {job.salary_min && (
+                            <span className="text-[10px] font-medium text-foreground">{job.salary_min}€{job.salary_max ? `-${job.salary_max}€` : "+"}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )
+        ) : loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="rounded-2xl bg-card animate-pulse">
