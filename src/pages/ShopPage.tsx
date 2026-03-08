@@ -48,9 +48,35 @@ export default function ShopPage() {
 
   const qrCoins = profile?.qr_coins || 0;
 
+  const isSeller = profile?.user_type === 'professional' || profile?.user_type === 'business';
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+    if (user && isSeller) fetchMyProducts();
+  }, [user, isSeller]);
+
+  const fetchMyProducts = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("products").select("*").eq("seller_id", user.id).order("created_at", { ascending: false });
+    setMyProducts(data || []);
+  };
+
+  const handleAddProduct = async () => {
+    if (!user || !newProduct.name.trim() || !newProduct.price) { toast.error("Compila nome e prezzo"); return; }
+    const { error } = await supabase.from("products").insert({
+      seller_id: user.id,
+      name: newProduct.name.trim(),
+      price: parseFloat(newProduct.price),
+      description: newProduct.description.trim() || null,
+      category: newProduct.category,
+    });
+    if (error) { toast.error("Errore nell'aggiunta"); return; }
+    toast.success("Prodotto aggiunto! 🎉");
+    setNewProduct({ name: "", price: "", description: "", category: "Hair Care" });
+    setShowAddProduct(false);
+    fetchMyProducts();
+    fetchProducts();
+  };
 
   const fetchProducts = async () => {
     const { data } = await supabase
