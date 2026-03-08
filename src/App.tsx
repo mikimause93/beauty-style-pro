@@ -66,8 +66,11 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
+
+const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
