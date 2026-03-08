@@ -28,11 +28,11 @@ export default function PurchaseHistoryPage() {
   }, [user]);
 
   const fetchPurchases = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("product_purchases")
       .select("*")
       .order("created_at", { ascending: false });
-    if (data) setPurchases(data as Purchase[]);
+    if (data) setPurchases(data as unknown as Purchase[]);
     setLoading(false);
   };
 
@@ -74,7 +74,7 @@ export default function PurchaseHistoryPage() {
                 <div className="text-right">
                   <p className="text-sm font-bold text-primary">€{p.total_price}</p>
                   {p.discount_amount > 0 && (
-                    <p className="text-[10px] text-green-500">-€{p.discount_amount}</p>
+                    <p className="text-[10px] text-primary">-€{p.discount_amount}</p>
                   )}
                 </div>
               </div>

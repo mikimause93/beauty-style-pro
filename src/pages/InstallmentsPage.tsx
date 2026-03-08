@@ -40,17 +40,17 @@ export default function InstallmentsPage() {
 
   const loadData = async () => {
     const [{ data: plansData }, { data: paymentsData }] = await Promise.all([
-      supabase.from("installment_plans").select("*").order("created_at", { ascending: false }),
-      supabase.from("installment_payments").select("*").order("due_date", { ascending: true }),
+      (supabase as any).from("installment_plans").select("*").order("created_at", { ascending: false }),
+      (supabase as any).from("installment_payments").select("*").order("due_date", { ascending: true }),
     ]);
-    if (plansData) setPlans(plansData as InstallmentPlan[]);
-    if (paymentsData) setPayments(paymentsData as InstallmentPayment[]);
+    if (plansData) setPlans(plansData as unknown as InstallmentPlan[]);
+    if (paymentsData) setPayments(paymentsData as unknown as InstallmentPayment[]);
     setLoading(false);
   };
 
   const payInstallment = async (payment: InstallmentPayment) => {
     if (!user) return;
-    const { error } = await supabase.from("installment_payments").update({
+    const { error } = await (supabase as any).from("installment_payments").update({
       status: "paid",
       paid_at: new Date().toISOString(),
     }).eq("id", payment.id);
@@ -60,7 +60,7 @@ export default function InstallmentsPage() {
       const plan = plans.find(p => p.id === payment.plan_id);
       if (plan) {
         const newPaidCount = plan.paid_count + 1;
-        await supabase.from("installment_plans").update({
+        await (supabase as any).from("installment_plans").update({
           paid_count: newPaidCount,
           status: newPaidCount >= plan.installment_count ? "completed" : "active",
         }).eq("id", plan.id);
@@ -80,7 +80,7 @@ export default function InstallmentsPage() {
   };
 
   const statusIcon = (status: string) => {
-    if (status === "paid") return <CheckCircle className="w-4 h-4 text-green-500" />;
+    if (status === "paid") return <CheckCircle className="w-4 h-4 text-primary" />;
     if (status === "overdue") return <AlertCircle className="w-4 h-4 text-destructive" />;
     return <Clock className="w-4 h-4 text-muted-foreground" />;
   };
