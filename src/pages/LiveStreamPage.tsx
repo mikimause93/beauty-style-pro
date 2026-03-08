@@ -359,6 +359,14 @@ export default function LiveStreamPage() {
             </div>
           </div>
 
+          {/* Shop Panel */}
+          {showShop && (
+            <LiveShopPanel
+              professionalId={selectedStream.professional?.id}
+              onClose={() => setShowShop(false)}
+            />
+          )}
+
           {/* Tip Modal */}
           {showTipModal && (
             <div className="absolute inset-0 z-40 flex items-end">
