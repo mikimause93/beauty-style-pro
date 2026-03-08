@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
+import PageTracker from "@/components/PageTracker";
 import HomePage from "./pages/HomePage";
 import LiveStreamPage from "./pages/LiveStreamPage";
 import RadioPage from "./pages/RadioPage";
@@ -87,6 +88,7 @@ const App = () => {
       <BrowserRouter>
         <AuthProvider>
         <RadioProvider>
+          <PageTracker />
           <Routes>
             {/* Public routes - accessible without login */}
             <Route path="/" element={<HomePage />} />
