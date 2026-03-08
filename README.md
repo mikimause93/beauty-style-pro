@@ -1,73 +1,44 @@
-# Welcome to your Lovable project
+# 💇 STYLE - La Piattaforma Beauty Completa
 
-## Project info
+**Versione:** 1.0.0 | **Stack:** React + Vite + TypeScript + Tailwind CSS + Lovable Cloud
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## ✨ Funzionalità
 
-There are several ways of editing your application.
+### Core
+- ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
+- ✅ Feed social con like, commenti, condivisioni
+- ✅ Sistema Follow / Unfollow in tempo reale
+- ✅ Notifiche real-time
+- ✅ Chat e messaggistica
+- ✅ Prenotazioni con selezione data, orario e luogo
+- ✅ Profilo modificabile con avatar upload
 
-**Use Lovable**
+### Business & HR
+- ✅ Dashboard Business con analytics
+- ✅ Gestione annunci di lavoro (HR)
+- ✅ Profilo Business con servizi, shop e recensioni
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Entertainment & Gamification
+- ✅ Live Streaming con reactions, chat e tips (QRCoin)
+- ✅ Radio & Music Player integrato
+- ✅ Spin & Win, Challenges, Leaderboard
+- ✅ Sistema QRCoin e Programma referral
 
-Changes made via Lovable will be committed automatically to this repo.
+### E-commerce & Altro
+- ✅ Shop prodotti beauty
+- ✅ Dettaglio servizi con prenotazione diretta
+- ✅ Before/After gallery, Eventi, PWA installabile
+- ✅ Impostazioni utente, Recensioni, Ricerca su mappa
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Sviluppo
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Creato con [Lovable](https://lovable.dev) | Deploy: Publish dal pannello Lovable
