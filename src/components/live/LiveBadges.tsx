@@ -1,10 +1,15 @@
-import { Crown, Eye, Users, MessageCircle, Flame } from "lucide-react";
+import { Crown, Eye, Users, MessageCircle, Flame, Shield } from "lucide-react";
 
 interface LiveBadgesProps {
   badges: string[];
 }
 
 const BADGE_CONFIG: Record<string, { icon: React.ReactNode; label: string; gradient: string }> = {
+  moderator: {
+    icon: <Shield className="w-3.5 h-3.5" />,
+    label: "Moderatore",
+    gradient: "from-teal-500 to-cyan-500",
+  },
   top_contributor: {
     icon: <Crown className="w-3.5 h-3.5" />,
     label: "Top Contributor",
