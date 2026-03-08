@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, BarChart3, Trophy } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -9,6 +9,7 @@ import LiveShopPanel from "@/components/live/LiveShopPanel";
 import LivePollWidget from "@/components/live/LivePollWidget";
 import LiveBadges from "@/components/live/LiveBadges";
 import PostLiveStats from "@/components/live/PostLiveStats";
+import WeeklyLiveTracker from "@/components/live/WeeklyLiveTracker";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -24,26 +25,19 @@ interface LiveStream {
   qr_coin_pool?: number;
   interaction_goal?: number;
   is_public?: boolean;
-  professional?: {
-    id: string;
-    business_name: string;
-    rating: number | null;
-  };
+  professional?: { id: string; business_name: string; rating: number | null };
 }
 
 interface ChatMessage {
   id: string;
   user: string;
   message: string;
-  type: 'chat' | 'tip' | 'join' | 'badge';
+  type: 'chat' | 'tip' | 'join' | 'badge' | 'system';
   amount?: number;
+  isMod?: boolean;
 }
 
-interface FloatingReaction {
-  id: number;
-  emoji: string;
-  x: number;
-}
+interface FloatingReaction { id: number; emoji: string; x: number }
 
 const reactionEmojis = [
   { emoji: "❤️", label: "Amore" },
@@ -55,10 +49,23 @@ const reactionEmojis = [
 
 const tipAmounts = [5, 10, 25, 50, 100, 500];
 
+const CATEGORIES = [
+  { value: "all", label: "🔥 Tutti" },
+  { value: "taglio", label: "✂️ Taglio" },
+  { value: "tinta", label: "🎨 Tinta" },
+  { value: "trattamento", label: "💆 Trattamento" },
+  { value: "tutorial", label: "📚 Tutorial" },
+  { value: "makeup", label: "💄 Make-up" },
+  { value: "nails", label: "💅 Nails" },
+];
+
 export default function LiveStreamPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
   const [streams, setStreams] = useState<LiveStream[]>([]);
+  const [filteredStreams, setFilteredStreams] = useState<LiveStream[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null);
   const [chatMessage, setChatMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -67,10 +74,10 @@ export default function LiveStreamPage() {
   const [selectedTip, setSelectedTip] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const [showShop, setShowShop] = useState(false);
-  const [showInvite, setShowInvite] = useState(false);
   const [interactionScore, setInteractionScore] = useState(0);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [showPostStats, setShowPostStats] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
@@ -78,10 +85,18 @@ export default function LiveStreamPage() {
   useEffect(() => { fetchStreams(); }, []);
 
   useEffect(() => {
+    if (selectedCategory === "all") {
+      setFilteredStreams(streams);
+    } else {
+      setFilteredStreams(streams.filter(s => s.category === selectedCategory));
+    }
+  }, [selectedCategory, streams]);
+
+  useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [chatMessages]);
 
-  // Auto-earn QRCoin every minute + badge checks
+  // Auto-earn + badge checks
   useEffect(() => {
     if (selectedStream) {
       watchTimerRef.current = window.setInterval(() => {
@@ -90,18 +105,48 @@ export default function LiveStreamPage() {
       }, 60_000);
       awardCoins("watch_live");
 
-      // Join message
       if (user && profile) {
-        setChatMessages(prev => [...prev, {
+        setChatMessages([{
           id: `join-${Date.now()}`,
           user: profile.display_name || "Utente",
           message: "è entrato nella live! 👋",
           type: "join"
         }]);
       }
+
+      // Check referral param
+      const ref = searchParams.get("ref");
+      if (ref && ref !== user?.id) {
+        supabase.from("live_invites").insert({
+          stream_id: selectedStream.id,
+          inviter_id: ref,
+          invited_id: user?.id || "",
+        }).then(() => {
+          setChatMessages(prev => [...prev, {
+            id: `invite-${Date.now()}`, user: "Sistema", message: "Sei stato invitato! Bonus QRCoin attivato 🎁", type: "system"
+          }]);
+        });
+      }
     }
     return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
   }, [selectedStream]);
+
+  // Moderator promotion at high interaction
+  useEffect(() => {
+    if (interactionScore >= 25 && !isModerator) {
+      setIsModerator(true);
+      if (!earnedBadges.includes("moderator")) {
+        setEarnedBadges(prev => [...prev, "moderator"]);
+      }
+      setChatMessages(prev => [...prev, {
+        id: `mod-${Date.now()}`, user: "Sistema",
+        message: `🛡️ ${profile?.display_name || "Utente"} è diventato Moderatore della live! +5 QRC extra`,
+        type: "system"
+      }]);
+      awardCoins("complete_mission");
+      toast.success("🛡️ Sei stato promosso Moderatore!", { duration: 4000 });
+    }
+  }, [interactionScore]);
 
   const checkBadges = () => {
     const newBadges = [...earnedBadges];
@@ -113,7 +158,7 @@ export default function LiveStreamPage() {
       newBadges.push("top_contributor");
       toast.success("👑 Badge: Top Contributor! +10% QRC extra", { duration: 3000 });
     }
-    if (interactionScore >= 5 && chatMessages.filter(m => m.type === "chat").length >= 5 && !newBadges.includes("chatter")) {
+    if (chatMessages.filter(m => m.type === "chat").length >= 5 && !newBadges.includes("chatter")) {
       newBadges.push("chatter");
       toast.success("💬 Badge: Chatter!", { duration: 3000 });
     }
@@ -140,94 +185,67 @@ export default function LiveStreamPage() {
   const sendReaction = (emoji: string) => {
     if (!selectedStream) return;
     const id = Date.now() + Math.random();
-    const x = 20 + Math.random() * 60;
-    setFloatingReactions(prev => [...prev, { id, emoji, x }]);
+    setFloatingReactions(prev => [...prev, { id, emoji, x: 20 + Math.random() * 60 }]);
     setTimeout(() => setFloatingReactions(prev => prev.filter(r => r.id !== id)), 2500);
-
     setInteractionScore(prev => prev + 1);
     awardCoins("react_live", true);
-
     if (user) {
-      supabase.from('stream_reactions').insert({
-        stream_id: selectedStream.id, user_id: user.id, reaction_type: emoji
-      });
+      supabase.from('stream_reactions').insert({ stream_id: selectedStream.id, user_id: user.id, reaction_type: emoji });
     }
   };
 
   const sendChat = async () => {
     if (!chatMessage.trim() || !selectedStream || !user) return;
     setChatMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      user: profile?.display_name || 'You',
-      message: chatMessage,
-      type: 'chat'
+      id: Date.now().toString(), user: profile?.display_name || 'You',
+      message: chatMessage, type: 'chat', isMod: isModerator
     }]);
     const msg = chatMessage;
     setChatMessage("");
-
     setInteractionScore(prev => prev + 2);
     awardCoins("comment_live", true);
-
-    await supabase.from('stream_comments').insert({
-      stream_id: selectedStream.id, user_id: user.id, message: msg
-    });
+    await supabase.from('stream_comments').insert({ stream_id: selectedStream.id, user_id: user.id, message: msg });
   };
 
   const sendTip = async () => {
-    if (!selectedStream || !user) {
-      toast.error("Devi effettuare l'accesso per inviare regali");
-      return;
-    }
+    if (!selectedStream || !user) { toast.error("Devi effettuare l'accesso"); return; }
     const qrCoins = profile?.qr_coins || 0;
-    if (qrCoins < selectedTip) {
-      toast.error("QR Coins insufficienti");
-      navigate("/qr-coins");
-      return;
-    }
+    if (qrCoins < selectedTip) { toast.error("QR Coins insufficienti"); navigate("/qr-coins"); return; }
     try {
-      await supabase.from('stream_tips').insert({
-        stream_id: selectedStream.id, user_id: user.id, amount: selectedTip
-      });
+      await supabase.from('stream_tips').insert({ stream_id: selectedStream.id, user_id: user.id, amount: selectedTip });
       await supabase.from('profiles').update({ qr_coins: qrCoins - selectedTip }).eq('user_id', user.id);
       setChatMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        user: profile?.display_name || 'You',
-        message: `Ha inviato ${selectedTip} QRCoins! 🎉`,
-        type: 'tip',
-        amount: selectedTip
+        id: Date.now().toString(), user: profile?.display_name || 'You',
+        message: `Ha inviato ${selectedTip} QRCoins! 🎉`, type: 'tip', amount: selectedTip
       }]);
       setShowTipModal(false);
       setInteractionScore(prev => prev + 5);
       toast.success(`Inviati ${selectedTip} QRCoins!`);
-    } catch {
-      toast.error("Errore nell'invio del regalo");
-    }
+    } catch { toast.error("Errore nell'invio del regalo"); }
   };
 
   const shareInvite = () => {
     if (!selectedStream) return;
     const url = `${window.location.origin}/live?stream=${selectedStream.id}&ref=${user?.id}`;
     if (navigator.share) {
-      navigator.share({ title: `Live: ${selectedStream.title}`, url });
+      navigator.share({ title: `Live: ${selectedStream.title}`, text: "Guarda questa live su Style e guadagna QRCoin! 🎁", url });
     } else {
       navigator.clipboard.writeText(url);
       toast.success("Link copiato! Condividilo per guadagnare QRCoin bonus 🎁");
     }
     awardCoins("share");
     setInteractionScore(prev => prev + 3);
-
     if (!earnedBadges.includes("inviter")) {
       setEarnedBadges(prev => [...prev, "inviter"]);
       toast.success("🔗 Badge: Inviter!", { duration: 3000 });
     }
   };
 
-  // Watch Stream View
+  // ===== WATCH STREAM VIEW =====
   if (selectedStream) {
     return (
       <MobileLayout>
         <div className="relative min-h-screen bg-background">
-          {/* Video Background */}
           <div className="absolute inset-0">
             <img src={selectedStream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/95" />
@@ -242,7 +260,7 @@ export default function LiveStreamPage() {
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between p-4">
-            <button onClick={() => setSelectedStream(null)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+            <button onClick={() => { setShowPostStats(true); }} className="w-10 h-10 rounded-full glass flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
@@ -252,6 +270,11 @@ export default function LiveStreamPage() {
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm">
                 <Eye className="w-4 h-4" /> {selectedStream.viewer_count.toLocaleString()}
               </span>
+              {isModerator && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-bold">
+                  <Shield className="w-3 h-3" /> MOD
+                </span>
+              )}
             </div>
           </div>
 
@@ -268,36 +291,25 @@ export default function LiveStreamPage() {
                 <p className="font-bold text-lg">{selectedStream.professional?.business_name || 'Beauty Streamer'}</p>
                 <p className="text-sm text-muted-foreground">{selectedStream.title}</p>
                 {selectedStream.category && (
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">
-                    {selectedStream.category}
-                  </span>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">{selectedStream.category}</span>
                 )}
               </div>
               <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">Segui</button>
             </div>
 
-            {/* Your Badges */}
-            {earnedBadges.length > 0 && (
-              <div className="mt-2">
-                <LiveBadges badges={earnedBadges} />
-              </div>
-            )}
+            {earnedBadges.length > 0 && <div className="mt-2"><LiveBadges badges={earnedBadges} /></div>}
 
-            {/* QRCoin + Interaction Score */}
+            {/* QRC + Score */}
             <div className="flex gap-2 mt-3">
               <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center">
-                  <Coins className="w-4 h-4 text-gold-foreground" />
-                </div>
+                <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center"><Coins className="w-4 h-4 text-gold-foreground" /></div>
                 <div>
                   <p className="text-[10px] text-muted-foreground">QRC Pool</p>
                   <p className="text-sm font-bold text-gold">{(selectedStream.qr_coin_pool || 0).toLocaleString()}</p>
                 </div>
               </div>
               <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Trophy className="w-4 h-4 text-accent" />
-                </div>
+                <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center"><Trophy className="w-4 h-4 text-accent" /></div>
                 <div>
                   <p className="text-[10px] text-muted-foreground">Il tuo Score</p>
                   <p className="text-sm font-bold text-accent">{interactionScore}</p>
@@ -305,7 +317,7 @@ export default function LiveStreamPage() {
               </div>
             </div>
 
-            {/* Interaction Goal Progress */}
+            {/* Interaction Goal */}
             {(selectedStream.interaction_goal || 0) > 0 && (
               <div className="mt-2 glass rounded-xl p-3">
                 <div className="flex items-center justify-between mb-1">
@@ -325,18 +337,18 @@ export default function LiveStreamPage() {
 
           {/* Bottom Controls */}
           <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pb-24">
-            {/* Poll Widget */}
             <LivePollWidget streamId={selectedStream.id} />
 
-            {/* Chat Messages */}
+            {/* Chat */}
             <div ref={chatRef} className="mb-4 space-y-2 max-h-32 overflow-y-auto no-scrollbar">
               {chatMessages.slice(-8).map(msg => (
                 <div key={msg.id} className={`glass rounded-xl px-3 py-2 max-w-[85%] fade-in ${
-                  msg.type === 'tip' ? 'border border-gold/30' : msg.type === 'join' ? 'opacity-60' : ''
+                  msg.type === 'tip' ? 'border border-gold/30' : msg.type === 'system' ? 'border border-accent/30' : msg.type === 'join' ? 'opacity-60' : ''
                 }`}>
                   <p className="text-sm">
+                    {msg.isMod && <Shield className="w-3 h-3 inline text-accent mr-1" />}
                     <span className={`font-semibold ${
-                      msg.type === 'tip' ? 'text-gold' : msg.type === 'join' ? 'text-muted-foreground' : 'text-primary'
+                      msg.type === 'tip' ? 'text-gold' : msg.type === 'system' ? 'text-accent' : msg.type === 'join' ? 'text-muted-foreground' : 'text-primary'
                     }`}>{msg.user}</span>{' '}
                     {msg.message}
                   </p>
@@ -358,19 +370,15 @@ export default function LiveStreamPage() {
                 <ShoppingBag className="w-4 h-4 text-accent" />
               </button>
               <button onClick={shareInvite} className="w-10 h-10 rounded-full glass flex items-center justify-center">
-                <UserPlus className="w-4 h-4 text-green-500" />
+                <UserPlus className="w-4 h-4 text-primary" />
               </button>
             </div>
 
             {/* Chat Input */}
             <div className="flex gap-2">
-              <input
-                value={chatMessage}
-                onChange={e => setChatMessage(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && sendChat()}
-                placeholder="Scrivi qualcosa..."
-                className="flex-1 h-11 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
-              />
+              <input value={chatMessage} onChange={e => setChatMessage(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat()}
+                placeholder={isModerator ? "🛡️ Scrivi come moderatore..." : "Scrivi qualcosa..."}
+                className="flex-1 h-11 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground" />
               <button onClick={sendChat} className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow">
                 <Send className="w-5 h-5 text-primary-foreground" />
               </button>
@@ -386,9 +394,7 @@ export default function LiveStreamPage() {
               <div className="relative w-full glass rounded-t-3xl p-6 slide-up">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
-                      <Gift className="w-5 h-5 text-gold-foreground" />
-                    </div>
+                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center"><Gift className="w-5 h-5 text-gold-foreground" /></div>
                     <div>
                       <h3 className="font-display font-bold text-lg">Invia un Regalo</h3>
                       <p className="text-xs text-muted-foreground">Supporta il tuo creator preferito</p>
@@ -420,15 +426,11 @@ export default function LiveStreamPage() {
           {showPostStats && (
             <PostLiveStats
               stats={{
-                totalViewers: selectedStream.viewer_count,
-                peakViewers: selectedStream.viewer_count,
+                totalViewers: selectedStream.viewer_count, peakViewers: selectedStream.viewer_count,
                 totalComments: chatMessages.filter(m => m.type === 'chat').length,
-                totalReactions: interactionScore,
-                totalTips: selectedStream.total_tips,
-                qrCoinsDistributed: selectedStream.qr_coin_pool || 0,
-                durationMinutes: 30,
-                interactionGoal: selectedStream.interaction_goal || 50,
-                interactionsAchieved: interactionScore,
+                totalReactions: interactionScore, totalTips: selectedStream.total_tips,
+                qrCoinsDistributed: selectedStream.qr_coin_pool || 0, durationMinutes: 30,
+                interactionGoal: selectedStream.interaction_goal || 50, interactionsAchieved: interactionScore,
               }}
               onClose={() => { setShowPostStats(false); setSelectedStream(null); }}
             />
@@ -438,11 +440,11 @@ export default function LiveStreamPage() {
     );
   }
 
-  // Streams List View
+  // ===== STREAMS LIST VIEW =====
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
             <p className="text-sm text-muted-foreground">Guarda tutorial e guadagna QRCoins</p>
@@ -451,24 +453,43 @@ export default function LiveStreamPage() {
             📹 Go Live
           </button>
         </div>
+
+        {/* Category Filters */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
+          {CATEGORIES.map(cat => (
+            <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                selectedCategory === cat.value
+                  ? "bg-foreground text-background"
+                  : "bg-card border border-border text-muted-foreground"
+              }`}>
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </header>
 
       <div className="p-4 space-y-4">
+        {/* Weekly Tracker */}
+        <WeeklyLiveTracker />
+
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => <div key={i} className="aspect-[3/4] rounded-2xl bg-card animate-pulse" />)}
           </div>
-        ) : streams.length === 0 ? (
+        ) : filteredStreams.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
               <Users className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Nessuna Diretta</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {selectedCategory !== "all" ? `Nessuna live "${selectedCategory}"` : "Nessuna Diretta"}
+            </h3>
             <p className="text-muted-foreground text-sm">Sii il primo a trasmettere in diretta!</p>
           </div>
         ) : (
           <div className="grid gap-4">
-            {streams.map(stream => (
+            {filteredStreams.map(stream => (
               <button key={stream.id} onClick={() => setSelectedStream(stream)}
                 className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-card shadow-card group">
                 <img src={stream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} alt=""
