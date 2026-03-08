@@ -84,6 +84,7 @@ export default function LiveStreamPage() {
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [showPostStats, setShowPostStats] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [showGuestPanel, setShowGuestPanel] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
