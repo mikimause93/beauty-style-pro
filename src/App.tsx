@@ -24,6 +24,9 @@ import QRCoinsPage from "./pages/QRCoinsPage";
 import ChallengesPage from "./pages/ChallengesPage";
 import SpinWheelPage from "./pages/SpinWheelPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import BusinessDashboardPage from "./pages/BusinessDashboardPage";
+import HRPage from "./pages/HRPage";
+import CreateJobPostPage from "./pages/CreateJobPostPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +59,10 @@ const App = () => (
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            {/* Business & HR */}
+            <Route path="/business" element={<BusinessDashboardPage />} />
+            <Route path="/hr" element={<HRPage />} />
+            <Route path="/hr/create-job" element={<CreateJobPostPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
@@ -65,3 +72,4 @@ const App = () => (
 );
 
 export default App;
+
