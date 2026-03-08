@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
