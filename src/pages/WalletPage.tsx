@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2, Send, Download } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, History, Plus, Wallet, Building2, Banknote, QrCode, Receipt, ChevronRight, Trash2, Send, Download, Smartphone, Shield, Check, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,8 @@ export default function WalletPage() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [showQRTransfer, setShowQRTransfer] = useState(false);
   const [showShareApp, setShowShareApp] = useState(false);
+  const [showAddIBAN, setShowAddIBAN] = useState(false);
+  const [ibanForm, setIbanForm] = useState({ iban: "", holder: "" });
 
   useEffect(() => {
     if (user) { loadTransactions(); loadPaymentMethods(); }
@@ -58,6 +60,8 @@ export default function WalletPage() {
   };
 
   const addPaypal = async () => {
+    const existing = paymentMethods.find(m => m.method_type === "paypal");
+    if (existing) { toast.info("PayPal già collegato"); return; }
     await supabase.from("payment_methods").insert({
       user_id: user!.id, method_type: "paypal", label: "PayPal", brand: "PayPal",
     });
@@ -65,7 +69,56 @@ export default function WalletPage() {
     toast.success("PayPal collegato!");
   };
 
+  const addGooglePay = async () => {
+    const existing = paymentMethods.find(m => m.method_type === "google_pay");
+    if (existing) { toast.info("Google Pay già collegato"); return; }
+    await supabase.from("payment_methods").insert({
+      user_id: user!.id, method_type: "google_pay", label: "Google Pay", brand: "Google",
+    });
+    loadPaymentMethods();
+    toast.success("Google Pay collegato!");
+  };
+
+  const saveIBAN = async () => {
+    const cleanIban = ibanForm.iban.replace(/\s/g, "").toUpperCase();
+    if (cleanIban.length < 15 || cleanIban.length > 34) { toast.error("IBAN non valido"); return; }
+    if (!ibanForm.holder.trim()) { toast.error("Inserisci l'intestatario"); return; }
+
+    await supabase.from("profiles").update({
+      iban: cleanIban,
+      bank_holder_name: ibanForm.holder.trim(),
+    }).eq("user_id", user!.id);
+
+    // Also save as payment method
+    const existing = paymentMethods.find(m => m.method_type === "bank_transfer");
+    if (!existing) {
+      await supabase.from("payment_methods").insert({
+        user_id: user!.id,
+        method_type: "bank_transfer",
+        label: `IBAN •••• ${cleanIban.slice(-4)}`,
+        last_four: cleanIban.slice(-4),
+        brand: "Conto Bancario",
+      });
+    } else {
+      await supabase.from("payment_methods").update({
+        label: `IBAN •••• ${cleanIban.slice(-4)}`,
+        last_four: cleanIban.slice(-4),
+      }).eq("id", existing.id);
+    }
+
+    await refreshProfile();
+    loadPaymentMethods();
+    setShowAddIBAN(false);
+    setIbanForm({ iban: "", holder: "" });
+    toast.success("Conto bancario collegato!");
+  };
+
   const removeMethod = async (id: string) => {
+    const method = paymentMethods.find(m => m.id === id);
+    if (method?.method_type === "bank_transfer") {
+      await supabase.from("profiles").update({ iban: null, bank_holder_name: null }).eq("user_id", user!.id);
+      await refreshProfile();
+    }
     await supabase.from("payment_methods").delete().eq("id", id);
     loadPaymentMethods();
     toast.success("Metodo rimosso");
@@ -76,11 +129,11 @@ export default function WalletPage() {
     if (!amt || amt <= 0) { toast.error("Importo non valido"); return; }
     const balance = profile?.qr_coins || 0;
     if (amt > balance) { toast.error("Saldo insufficiente"); return; }
-    if (!profile?.iban) { toast.error("Aggiungi prima il tuo IBAN nelle impostazioni"); return; }
+    if (!profile?.iban) { toast.error("Collega prima un conto bancario"); return; }
 
     await supabase.from("profiles").update({ qr_coins: balance - amt }).eq("user_id", user!.id);
     await supabase.from("wallet_transactions").insert({
-      user_id: user!.id, type: "withdraw", amount: -amt, description: `Prelievo su IBAN ${profile.iban.slice(-4)}`, payment_method: "bank_transfer", status: "pending",
+      user_id: user!.id, type: "withdraw", amount: -amt, description: `Prelievo su IBAN •••• ${profile.iban.slice(-4)}`, payment_method: "bank_transfer", status: "pending",
     });
     await refreshProfile();
     loadTransactions();
@@ -90,6 +143,26 @@ export default function WalletPage() {
   };
 
   const balance = profile?.qr_coins || 0;
+
+  const getMethodIcon = (type: string) => {
+    switch (type) {
+      case "card": return <CreditCard className="w-5 h-5" />;
+      case "bank_transfer": return <Building2 className="w-5 h-5" />;
+      case "google_pay": return <Smartphone className="w-5 h-5" />;
+      case "paypal": return <Banknote className="w-5 h-5" />;
+      default: return <Wallet className="w-5 h-5" />;
+    }
+  };
+
+  const getMethodColor = (type: string) => {
+    switch (type) {
+      case "card": return "bg-primary/10 text-primary";
+      case "bank_transfer": return "bg-blue-500/10 text-blue-500";
+      case "google_pay": return "bg-green-500/10 text-green-500";
+      case "paypal": return "bg-yellow-500/10 text-yellow-600";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
 
   if (!user) {
     return (
@@ -130,15 +203,28 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {/* IBAN Info */}
-        {profile?.iban && (
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50">
-            <Building2 className="w-5 h-5 text-muted-foreground" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">IBAN collegato</p>
-              <p className="text-sm font-medium truncate">•••• {profile.iban.slice(-4)}</p>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold">Attivo</span>
+        {/* Connected accounts summary */}
+        {(profile?.iban || paymentMethods.length > 0) && (
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {profile?.iban && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 shrink-0">
+                <Building2 className="w-3.5 h-3.5 text-blue-500" />
+                <span className="text-[11px] font-semibold text-blue-500">IBAN •••{profile.iban.slice(-4)}</span>
+                <Check className="w-3 h-3 text-blue-500" />
+              </div>
+            )}
+            {paymentMethods.filter(m => m.method_type === "card").slice(0, 2).map(m => (
+              <div key={m.id} className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20 shrink-0">
+                <CreditCard className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[11px] font-semibold text-primary">{m.label}</span>
+              </div>
+            ))}
+            {paymentMethods.find(m => m.method_type === "google_pay") && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-green-500/10 border border-green-500/20 shrink-0">
+                <Smartphone className="w-3.5 h-3.5 text-green-500" />
+                <span className="text-[11px] font-semibold text-green-500">Google Pay</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -227,28 +313,148 @@ export default function WalletPage() {
 
         {/* Payment Methods */}
         {tab === "methods" && (
-          <div className="space-y-4">
-            {paymentMethods.map(pm => (
-              <div key={pm.id} className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                  {pm.method_type === "card" ? <CreditCard className="w-5 h-5 text-muted-foreground" /> : <Banknote className="w-5 h-5 text-muted-foreground" />}
+          <div className="space-y-5">
+            {/* Bank Account Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Conto Bancario</h3>
+              {profile?.iban ? (
+                <div className="p-4 rounded-2xl bg-card border border-blue-500/20 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl" />
+                  <div className="relative flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-bold">Conto Bancario</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold flex items-center gap-1">
+                          <Check className="w-2.5 h-2.5" /> Collegato
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">IBAN: •••• •••• •••• {profile.iban.slice(-4)}</p>
+                      {profile.bank_holder_name && (
+                        <p className="text-xs text-muted-foreground">Intestatario: {profile.bank_holder_name}</p>
+                      )}
+                    </div>
+                    <button onClick={() => {
+                      setIbanForm({ iban: profile.iban || "", holder: profile.bank_holder_name || "" });
+                      setShowAddIBAN(true);
+                    }} className="text-xs text-primary font-semibold">Modifica</button>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">{pm.label}</p>
-                  <p className="text-[11px] text-muted-foreground">{pm.brand || pm.method_type}</p>
-                </div>
-                <button onClick={() => removeMethod(pm.id)}><Trash2 className="w-4 h-4 text-muted-foreground" /></button>
-              </div>
-            ))}
+              ) : (
+                <button onClick={() => setShowAddIBAN(true)}
+                  className="w-full p-4 rounded-2xl border-2 border-dashed border-blue-500/30 bg-blue-500/5 flex items-center gap-3 hover:bg-blue-500/10 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-bold">Collega Conto Bancario</p>
+                    <p className="text-[11px] text-muted-foreground">Aggiungi IBAN per prelievi e pagamenti</p>
+                  </div>
+                  <Plus className="w-5 h-5 text-blue-500" />
+                </button>
+              )}
+            </div>
 
-            <button onClick={() => setShowAddCard(true)}
-              className="w-full py-3 rounded-2xl border-2 border-dashed border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2">
-              <CreditCard className="w-4 h-4" /> Aggiungi Carta
-            </button>
-            <button onClick={addPaypal}
-              className="w-full py-3 rounded-2xl border-2 border-dashed border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2">
-              <Banknote className="w-4 h-4" /> Collega PayPal
-            </button>
+            {/* Cards Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Carte di Pagamento</h3>
+              <div className="space-y-2">
+                {paymentMethods.filter(m => m.method_type === "card").map(pm => (
+                  <div key={pm.id} className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
+                    <div className={`w-10 h-10 rounded-xl ${getMethodColor("card")} flex items-center justify-center`}>
+                      {getMethodIcon("card")}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">{pm.label}</p>
+                      <p className="text-[11px] text-muted-foreground">{pm.brand}</p>
+                    </div>
+                    <button onClick={() => removeMethod(pm.id)} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => setShowAddCard(true)}
+                  className="w-full py-3 rounded-2xl border-2 border-dashed border-border text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 hover:border-primary/30 hover:text-primary transition-colors">
+                  <CreditCard className="w-4 h-4" /> Aggiungi Carta
+                </button>
+              </div>
+            </div>
+
+            {/* Digital Wallets Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Wallet Digitali</h3>
+              <div className="space-y-2">
+                {/* Google Pay */}
+                {paymentMethods.find(m => m.method_type === "google_pay") ? (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-green-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">Google Pay</p>
+                      <p className="text-[11px] text-green-500 font-medium flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Collegato
+                      </p>
+                    </div>
+                    <button onClick={() => removeMethod(paymentMethods.find(m => m.method_type === "google_pay")!.id)}
+                      className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={addGooglePay}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 hover:bg-green-500/10 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-sm font-bold">Google Pay</p>
+                      <p className="text-[11px] text-muted-foreground">Paga rapidamente con Google</p>
+                    </div>
+                    <Plus className="w-5 h-5 text-green-500" />
+                  </button>
+                )}
+
+                {/* PayPal */}
+                {paymentMethods.find(m => m.method_type === "paypal") ? (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-yellow-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                      <Banknote className="w-5 h-5 text-yellow-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">PayPal</p>
+                      <p className="text-[11px] text-yellow-600 font-medium flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Collegato
+                      </p>
+                    </div>
+                    <button onClick={() => removeMethod(paymentMethods.find(m => m.method_type === "paypal")!.id)}
+                      className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={addPaypal}
+                    className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                      <Banknote className="w-5 h-5 text-yellow-600" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-sm font-bold">PayPal</p>
+                      <p className="text-[11px] text-muted-foreground">Collega il tuo account PayPal</p>
+                    </div>
+                    <Plus className="w-5 h-5 text-yellow-600" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Security note */}
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50">
+              <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+              <p className="text-[11px] text-muted-foreground">I tuoi dati di pagamento sono criptati e protetti. Non conserviamo i dati della tua carta.</p>
+            </div>
           </div>
         )}
 
@@ -289,7 +495,12 @@ export default function WalletPage() {
       {showAddCard && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end">
           <div className="w-full rounded-t-3xl bg-card p-6 space-y-4 animate-slide-up">
-            <h3 className="text-lg font-display font-bold">Aggiungi Carta</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-display font-bold">Aggiungi Carta</h3>
+              <button onClick={() => setShowAddCard(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             <input placeholder="Nome sulla carta" value={cardForm.name} onChange={e => setCardForm({ ...cardForm, name: e.target.value })}
               className="w-full px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
             <input placeholder="Numero carta" value={cardForm.number} onChange={e => setCardForm({ ...cardForm, number: e.target.value })} maxLength={19}
@@ -301,7 +512,40 @@ export default function WalletPage() {
                 className="flex-1 px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
             </div>
             <button onClick={addCard} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Salva Carta</button>
-            <button onClick={() => setShowAddCard(false)} className="w-full py-2 text-sm text-muted-foreground">Annulla</button>
+          </div>
+        </div>
+      )}
+
+      {/* Add IBAN Modal */}
+      {showAddIBAN && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end">
+          <div className="w-full rounded-t-3xl bg-card p-6 space-y-4 animate-slide-up">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-display font-bold">Collega Conto Bancario</h3>
+              <button onClick={() => setShowAddIBAN(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
+              <p className="text-xs text-blue-500 font-medium flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5" /> I tuoi dati bancari sono protetti e criptati
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">Intestatario conto</label>
+              <input placeholder="Mario Rossi" value={ibanForm.holder} onChange={e => setIbanForm({ ...ibanForm, holder: e.target.value })}
+                className="w-full px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">IBAN</label>
+              <input placeholder="IT60 X054 2811 1010 0000 0123 456" value={ibanForm.iban}
+                onChange={e => setIbanForm({ ...ibanForm, iban: e.target.value.toUpperCase() })}
+                className="w-full px-4 py-3 rounded-xl bg-muted text-sm font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              <p className="text-[10px] text-muted-foreground">Inserisci il tuo IBAN completo (es. IT60X0542811101000000123456)</p>
+            </div>
+            <button onClick={saveIBAN} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">
+              {profile?.iban ? "Aggiorna IBAN" : "Collega Conto"}
+            </button>
           </div>
         </div>
       )}
@@ -310,24 +554,36 @@ export default function WalletPage() {
       {showWithdraw && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end">
           <div className="w-full rounded-t-3xl bg-card p-6 space-y-4 animate-slide-up">
-            <h3 className="text-lg font-display font-bold">Preleva</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-display font-bold">Preleva</h3>
+              <button onClick={() => setShowWithdraw(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             {profile?.iban ? (
               <>
-                <p className="text-xs text-muted-foreground">Invieremo su: •••• {profile.iban.slice(-4)}</p>
+                <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-500" />
+                  <span className="text-xs text-muted-foreground">Invieremo su: <strong>IBAN •••• {profile.iban.slice(-4)}</strong></span>
+                </div>
                 <input type="number" placeholder="Importo (€)" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                <p className="text-[11px] text-muted-foreground">Saldo disponibile: <strong>{balance.toLocaleString()} QR Coins</strong></p>
                 <button onClick={handleWithdraw} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Conferma Prelievo</button>
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">Devi aggiungere un IBAN per prelevare. Vai all'onboarding.</p>
-                <button onClick={() => navigate("/onboarding")} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Vai a Onboarding</button>
+                <p className="text-sm text-muted-foreground">Devi collegare un conto bancario per poter prelevare.</p>
+                <button onClick={() => { setShowWithdraw(false); setShowAddIBAN(true); }}
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2">
+                  <Building2 className="w-4 h-4" /> Collega Conto Bancario
+                </button>
               </>
             )}
-            <button onClick={() => setShowWithdraw(false)} className="w-full py-2 text-sm text-muted-foreground">Annulla</button>
           </div>
         </div>
       )}
+
       {/* QR Transfer Modal */}
       <QRTransferModal open={showQRTransfer} onClose={() => setShowQRTransfer(false)} onComplete={() => { loadTransactions(); refreshProfile(); }} />
 
