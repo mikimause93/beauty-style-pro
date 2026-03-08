@@ -474,9 +474,14 @@ export default function LiveStreamPage() {
             <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
             <p className="text-sm text-muted-foreground">Guarda tutorial e guadagna QRCoins</p>
           </div>
-          <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
-            📹 Go Live
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/live-battle")} className="px-4 py-2.5 rounded-full glass text-sm font-bold flex items-center gap-2">
+              <Swords className="w-4 h-4 text-destructive" /> Battle
+            </button>
+            <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
+              📹 Go Live
+            </button>
+          </div>
         </div>
 
         {/* Category Filters */}
