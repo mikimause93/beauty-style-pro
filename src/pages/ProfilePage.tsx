@@ -1,4 +1,4 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket, Store } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
 import PostCard from "@/components/feed/PostCard";
+import ProfileShowcasePanel from "@/components/profile/ProfileShowcasePanel";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -33,7 +34,7 @@ export default function ProfilePage() {
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved">("grid");
+  const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved" | "vetrina">("grid");
   const [myPosts, setMyPosts] = useState<ProfilePost[]>([]);
   const [myProducts, setMyProducts] = useState<any[]>([]);
   const [viewProfile, setViewProfile] = useState<any>(null);
@@ -346,6 +347,7 @@ export default function ProfilePage() {
           {[
             { key: "grid" as const, icon: Grid3X3 },
             { key: "feed" as const, icon: Heart },
+            ...((isProfessional || isBusiness) ? [{ key: "vetrina" as const, icon: Store }] : []),
             ...(myProducts.length > 0 || (isOwnProfile && (isProfessional || isBusiness)) ? [{ key: "products" as const, icon: Tag }] : []),
             ...(isOwnProfile ? [{ key: "saved" as const, icon: Bookmark }] : []),
           ].map(tab => {
@@ -436,6 +438,11 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Vetrina Tab */}
+        {activeTab === "vetrina" && targetUserId && (
+          <ProfileShowcasePanel isOwnProfile={isOwnProfile} userId={targetUserId} />
         )}
 
         {/* Saved Tab */}
