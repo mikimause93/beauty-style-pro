@@ -361,6 +361,101 @@ export type Database = {
         }
         Relationships: []
       }
+      casting_applications: {
+        Row: {
+          applicant_id: string
+          casting_id: string
+          created_at: string
+          id: string
+          message: string | null
+          portfolio_urls: string[] | null
+          status: string
+        }
+        Insert: {
+          applicant_id: string
+          casting_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          portfolio_urls?: string[] | null
+          status?: string
+        }
+        Update: {
+          applicant_id?: string
+          casting_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          portfolio_urls?: string[] | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casting_applications_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "casting_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casting_posts: {
+        Row: {
+          application_count: number
+          casting_type: string
+          category: string
+          compensation: string | null
+          created_at: string
+          creator_id: string
+          description: string
+          event_date: string | null
+          featured: boolean
+          id: string
+          images: string[] | null
+          location: string | null
+          requirements: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_count?: number
+          casting_type?: string
+          category?: string
+          compensation?: string | null
+          created_at?: string
+          creator_id: string
+          description: string
+          event_date?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          requirements?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_count?: number
+          casting_type?: string
+          category?: string
+          compensation?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string
+          event_date?: string | null
+          featured?: boolean
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          requirements?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       challenge_donations: {
         Row: {
           amount: number
@@ -1849,6 +1944,101 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_request_responses: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          professional_id: string
+          proposed_date: string | null
+          proposed_price: number | null
+          request_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          professional_id: string
+          proposed_date?: string | null
+          proposed_price?: number | null
+          request_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          professional_id?: string
+          proposed_date?: string | null
+          proposed_price?: number | null
+          request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_request_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          preferred_date: string | null
+          preferred_time: string | null
+          response_count: number
+          status: string
+          title: string
+          updated_at: string
+          urgency: string
+          user_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          response_count?: number
+          status?: string
+          title: string
+          updated_at?: string
+          urgency?: string
+          user_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          preferred_date?: string | null
+          preferred_time?: string | null
+          response_count?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       services: {
         Row: {
