@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Eye, Heart, MessageCircle, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, BarChart3, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
 import LiveShopPanel from "@/components/live/LiveShopPanel";
+import LivePollWidget from "@/components/live/LivePollWidget";
+import LiveBadges from "@/components/live/LiveBadges";
+import PostLiveStats from "@/components/live/PostLiveStats";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -17,6 +20,10 @@ interface LiveStream {
   total_tips: number;
   total_earnings: number;
   status: string;
+  category?: string;
+  qr_coin_pool?: number;
+  interaction_goal?: number;
+  is_public?: boolean;
   professional?: {
     id: string;
     business_name: string;
@@ -28,7 +35,7 @@ interface ChatMessage {
   id: string;
   user: string;
   message: string;
-  type: 'chat' | 'tip' | 'join';
+  type: 'chat' | 'tip' | 'join' | 'badge';
   amount?: number;
 }
 
@@ -60,40 +67,64 @@ export default function LiveStreamPage() {
   const [selectedTip, setSelectedTip] = useState<number>(10);
   const [loading, setLoading] = useState(true);
   const [showShop, setShowShop] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [interactionScore, setInteractionScore] = useState(0);
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
+  const [showPostStats, setShowPostStats] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
 
-  useEffect(() => {
-    fetchStreams();
-  }, []);
+  useEffect(() => { fetchStreams(); }, []);
 
   useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [chatMessages]);
 
-  // Auto-earn QRCoin every minute while watching
+  // Auto-earn QRCoin every minute + badge checks
   useEffect(() => {
     if (selectedStream) {
       watchTimerRef.current = window.setInterval(() => {
         awardCoins("watch_live", true);
+        checkBadges();
       }, 60_000);
-      // Award on join
       awardCoins("watch_live");
+
+      // Join message
+      if (user && profile) {
+        setChatMessages(prev => [...prev, {
+          id: `join-${Date.now()}`,
+          user: profile.display_name || "Utente",
+          message: "è entrato nella live! 👋",
+          type: "join"
+        }]);
+      }
     }
     return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
   }, [selectedStream]);
+
+  const checkBadges = () => {
+    const newBadges = [...earnedBadges];
+    if (interactionScore >= 10 && !newBadges.includes("active_viewer")) {
+      newBadges.push("active_viewer");
+      toast.success("🏅 Badge: Active Viewer!", { duration: 3000 });
+    }
+    if (interactionScore >= 30 && !newBadges.includes("top_contributor")) {
+      newBadges.push("top_contributor");
+      toast.success("👑 Badge: Top Contributor! +10% QRC extra", { duration: 3000 });
+    }
+    if (interactionScore >= 5 && chatMessages.filter(m => m.type === "chat").length >= 5 && !newBadges.includes("chatter")) {
+      newBadges.push("chatter");
+      toast.success("💬 Badge: Chatter!", { duration: 3000 });
+    }
+    setEarnedBadges(newBadges);
+  };
 
   const fetchStreams = async () => {
     setLoading(true);
     const { data } = await supabase
       .from('live_streams')
-      .select(`
-        *,
-        professional:professionals(id, business_name, rating)
-      `)
+      .select(`*, professional:professionals(id, business_name, rating)`)
       .in('status', ['live', 'scheduled'])
       .order('viewer_count', { ascending: false });
 
@@ -108,47 +139,37 @@ export default function LiveStreamPage() {
 
   const sendReaction = (emoji: string) => {
     if (!selectedStream) return;
-    
     const id = Date.now() + Math.random();
     const x = 20 + Math.random() * 60;
     setFloatingReactions(prev => [...prev, { id, emoji, x }]);
-    
-    setTimeout(() => {
-      setFloatingReactions(prev => prev.filter(r => r.id !== id));
-    }, 2500);
+    setTimeout(() => setFloatingReactions(prev => prev.filter(r => r.id !== id)), 2500);
 
-    // Award QRCoin for reacting
+    setInteractionScore(prev => prev + 1);
     awardCoins("react_live", true);
 
     if (user) {
       supabase.from('stream_reactions').insert({
-        stream_id: selectedStream.id,
-        user_id: user.id,
-        reaction_type: emoji
+        stream_id: selectedStream.id, user_id: user.id, reaction_type: emoji
       });
     }
   };
 
   const sendChat = async () => {
     if (!chatMessage.trim() || !selectedStream || !user) return;
-
-    const newMessage: ChatMessage = {
+    setChatMessages(prev => [...prev, {
       id: Date.now().toString(),
       user: profile?.display_name || 'You',
       message: chatMessage,
       type: 'chat'
-    };
-
-    setChatMessages(prev => [...prev, newMessage]);
+    }]);
+    const msg = chatMessage;
     setChatMessage("");
 
-    // Award QRCoin for commenting
+    setInteractionScore(prev => prev + 2);
     awardCoins("comment_live", true);
 
     await supabase.from('stream_comments').insert({
-      stream_id: selectedStream.id,
-      user_id: user.id,
-      message: chatMessage
+      stream_id: selectedStream.id, user_id: user.id, message: msg
     });
   };
 
@@ -157,41 +178,47 @@ export default function LiveStreamPage() {
       toast.error("Devi effettuare l'accesso per inviare regali");
       return;
     }
-
     const qrCoins = profile?.qr_coins || 0;
     if (qrCoins < selectedTip) {
       toast.error("QR Coins insufficienti");
       navigate("/qr-coins");
       return;
     }
-
     try {
-      // Save tip
       await supabase.from('stream_tips').insert({
-        stream_id: selectedStream.id,
-        user_id: user.id,
-        amount: selectedTip
+        stream_id: selectedStream.id, user_id: user.id, amount: selectedTip
       });
-
-      // Deduct from wallet
-      await supabase
-        .from('profiles')
-        .update({ qr_coins: qrCoins - selectedTip })
-        .eq('user_id', user.id);
-
-      const tipMessage: ChatMessage = {
+      await supabase.from('profiles').update({ qr_coins: qrCoins - selectedTip }).eq('user_id', user.id);
+      setChatMessages(prev => [...prev, {
         id: Date.now().toString(),
         user: profile?.display_name || 'You',
         message: `Ha inviato ${selectedTip} QRCoins! 🎉`,
         type: 'tip',
         amount: selectedTip
-      };
-
-      setChatMessages(prev => [...prev, tipMessage]);
+      }]);
       setShowTipModal(false);
+      setInteractionScore(prev => prev + 5);
       toast.success(`Inviati ${selectedTip} QRCoins!`);
-    } catch (error) {
+    } catch {
       toast.error("Errore nell'invio del regalo");
+    }
+  };
+
+  const shareInvite = () => {
+    if (!selectedStream) return;
+    const url = `${window.location.origin}/live?stream=${selectedStream.id}&ref=${user?.id}`;
+    if (navigator.share) {
+      navigator.share({ title: `Live: ${selectedStream.title}`, url });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copiato! Condividilo per guadagnare QRCoin bonus 🎁");
+    }
+    awardCoins("share");
+    setInteractionScore(prev => prev + 3);
+
+    if (!earnedBadges.includes("inviter")) {
+      setEarnedBadges(prev => [...prev, "inviter"]);
+      toast.success("🔗 Badge: Inviter!", { duration: 3000 });
     }
   };
 
@@ -202,56 +229,37 @@ export default function LiveStreamPage() {
         <div className="relative min-h-screen bg-background">
           {/* Video Background */}
           <div className="absolute inset-0">
-            <img 
-              src={selectedStream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} 
-              alt="" 
-              className="w-full h-full object-cover"
-            />
+            <img src={selectedStream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/95" />
           </div>
 
           {/* Floating Reactions */}
           <div className="absolute right-4 bottom-56 flex flex-col-reverse gap-1 pointer-events-none z-20">
             {floatingReactions.map(r => (
-              <span
-                key={r.id}
-                className="text-3xl animate-float-up"
-                style={{ marginLeft: `${r.x - 50}px` }}
-              >
-                {r.emoji}
-              </span>
+              <span key={r.id} className="text-3xl animate-float-up" style={{ marginLeft: `${r.x - 50}px` }}>{r.emoji}</span>
             ))}
           </div>
 
           {/* Header */}
           <div className="relative z-10 flex items-center justify-between p-4">
-            <button 
-              onClick={() => setSelectedStream(null)} 
-              className="w-10 h-10 rounded-full glass flex items-center justify-center"
-            >
+            <button onClick={() => setSelectedStream(null)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" />
-                LIVE
+                <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" /> LIVE
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm">
-                <Eye className="w-4 h-4" />
-                {selectedStream.viewer_count.toLocaleString()}
+                <Eye className="w-4 h-4" /> {selectedStream.viewer_count.toLocaleString()}
               </span>
             </div>
           </div>
 
           {/* Streamer Info */}
-          <div className="relative z-10 px-4 mt-4">
+          <div className="relative z-10 px-4 mt-2">
             <div className="flex items-center gap-4 glass rounded-2xl p-4">
               <div className="relative">
-                <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedStream.professional?.id}`}
-                  alt=""
-                  className="w-14 h-14 rounded-full object-cover border-2 border-primary"
-                />
+                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedStream.professional?.id}`} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-primary" />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-live border-2 border-background flex items-center justify-center">
                   <Crown className="w-3 h-3 text-primary-foreground" />
                 </div>
@@ -259,57 +267,77 @@ export default function LiveStreamPage() {
               <div className="flex-1">
                 <p className="font-bold text-lg">{selectedStream.professional?.business_name || 'Beauty Streamer'}</p>
                 <p className="text-sm text-muted-foreground">{selectedStream.title}</p>
+                {selectedStream.category && (
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">
+                    {selectedStream.category}
+                  </span>
+                )}
               </div>
-              <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">
-                Segui
-              </button>
+              <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">Segui</button>
             </div>
 
-            {/* QRCoin Earnings Banner */}
-            <div className="flex items-center justify-between mt-3 glass rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
-                  <Coins className="w-5 h-5 text-gold-foreground" />
+            {/* Your Badges */}
+            {earnedBadges.length > 0 && (
+              <div className="mt-2">
+                <LiveBadges badges={earnedBadges} />
+              </div>
+            )}
+
+            {/* QRCoin + Interaction Score */}
+            <div className="flex gap-2 mt-3">
+              <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center">
+                  <Coins className="w-4 h-4 text-gold-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">QRCoin Guadagnati</p>
-                  <p className="text-xl font-bold text-gradient-gold">
-                    {selectedStream.total_earnings.toLocaleString()}
-                  </p>
+                  <p className="text-[10px] text-muted-foreground">QRC Pool</p>
+                  <p className="text-sm font-bold text-gold">{(selectedStream.qr_coin_pool || 0).toLocaleString()}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setShowTipModal(true)}
-                  className="px-4 py-2 rounded-full gradient-gold text-gold-foreground text-sm font-bold flex items-center gap-1.5"
-                >
-                  <Gift className="w-4 h-4" />
-                   Invia Regalo
-                </button>
+              <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Il tuo Score</p>
+                  <p className="text-sm font-bold text-accent">{interactionScore}</p>
+                </div>
               </div>
             </div>
+
+            {/* Interaction Goal Progress */}
+            {(selectedStream.interaction_goal || 0) > 0 && (
+              <div className="mt-2 glass rounded-xl p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-muted-foreground">Obiettivo community</span>
+                  <span className="text-[10px] font-bold text-primary">
+                    {Math.min(100, Math.round((interactionScore / (selectedStream.interaction_goal || 1)) * 100))}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full rounded-full gradient-primary transition-all" style={{
+                    width: `${Math.min(100, (interactionScore / (selectedStream.interaction_goal || 1)) * 100)}%`
+                  }} />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom Controls */}
           <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pb-24">
+            {/* Poll Widget */}
+            <LivePollWidget streamId={selectedStream.id} />
+
             {/* Chat Messages */}
-            <div 
-              ref={chatRef}
-              className="mb-4 space-y-2 max-h-40 overflow-y-auto no-scrollbar"
-            >
+            <div ref={chatRef} className="mb-4 space-y-2 max-h-32 overflow-y-auto no-scrollbar">
               {chatMessages.slice(-8).map(msg => (
-                <div 
-                  key={msg.id} 
-                  className={`glass rounded-xl px-3 py-2 max-w-[85%] fade-in ${
-                    msg.type === 'tip' ? 'border border-gold/30' : ''
-                  }`}
-                >
+                <div key={msg.id} className={`glass rounded-xl px-3 py-2 max-w-[85%] fade-in ${
+                  msg.type === 'tip' ? 'border border-gold/30' : msg.type === 'join' ? 'opacity-60' : ''
+                }`}>
                   <p className="text-sm">
                     <span className={`font-semibold ${
-                      msg.type === 'tip' ? 'text-gold' : 'text-primary'
-                    }`}>
-                      {msg.user}:
-                    </span>{' '}
+                      msg.type === 'tip' ? 'text-gold' : msg.type === 'join' ? 'text-muted-foreground' : 'text-primary'
+                    }`}>{msg.user}</span>{' '}
                     {msg.message}
                   </p>
                 </div>
@@ -319,25 +347,18 @@ export default function LiveStreamPage() {
             {/* Reactions */}
             <div className="flex items-center gap-2 mb-3">
               {reactionEmojis.map(r => (
-                <button
-                  key={r.label}
-                  onClick={() => sendReaction(r.emoji)}
-                  className="w-11 h-11 rounded-full glass flex items-center justify-center text-xl hover:scale-125 transition-transform active:scale-90"
-                >
+                <button key={r.label} onClick={() => sendReaction(r.emoji)} className="w-10 h-10 rounded-full glass flex items-center justify-center text-xl hover:scale-125 transition-transform active:scale-90">
                   {r.emoji}
                 </button>
               ))}
-              <button
-                onClick={() => setShowTipModal(true)}
-                className="w-11 h-11 rounded-full gradient-gold flex items-center justify-center shadow-lg"
-              >
-                <Gift className="w-5 h-5 text-gold-foreground" />
+              <button onClick={() => setShowTipModal(true)} className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center shadow-lg">
+                <Gift className="w-4 h-4 text-gold-foreground" />
               </button>
-              <button onClick={() => setShowShop(true)} className="w-11 h-11 rounded-full glass flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-accent" />
+              <button onClick={() => setShowShop(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <ShoppingBag className="w-4 h-4 text-accent" />
               </button>
-              <button className="w-11 h-11 rounded-full glass flex items-center justify-center">
-                <Share2 className="w-5 h-5" />
+              <button onClick={shareInvite} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <UserPlus className="w-4 h-4 text-green-500" />
               </button>
             </div>
 
@@ -348,24 +369,15 @@ export default function LiveStreamPage() {
                 onChange={e => setChatMessage(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && sendChat()}
                 placeholder="Scrivi qualcosa..."
-                className="flex-1 h-12 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
+                className="flex-1 h-11 rounded-full glass px-5 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
               />
-              <button 
-                onClick={sendChat}
-                className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-glow"
-              >
+              <button onClick={sendChat} className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow">
                 <Send className="w-5 h-5 text-primary-foreground" />
               </button>
             </div>
           </div>
 
-          {/* Shop Panel */}
-          {showShop && (
-            <LiveShopPanel
-              professionalId={selectedStream.professional?.id}
-              onClose={() => setShowShop(false)}
-            />
-          )}
+          {showShop && <LiveShopPanel professionalId={selectedStream.professional?.id} onClose={() => setShowShop(false)} />}
 
           {/* Tip Modal */}
           {showTipModal && (
@@ -382,41 +394,44 @@ export default function LiveStreamPage() {
                       <p className="text-xs text-muted-foreground">Supporta il tuo creator preferito</p>
                     </div>
                   </div>
-                  <button onClick={() => setShowTipModal(false)}>
-                    <X className="w-6 h-6 text-muted-foreground" />
-                  </button>
+                  <button onClick={() => setShowTipModal(false)}><X className="w-6 h-6 text-muted-foreground" /></button>
                 </div>
-
                 <p className="text-sm text-muted-foreground mb-3">
                   Il tuo saldo: <span className="text-gold font-bold">{profile?.qr_coins?.toLocaleString() || 0} QRC</span>
                 </p>
-
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {tipAmounts.map(amt => (
-                    <button 
-                      key={amt} 
-                      onClick={() => setSelectedTip(amt)}
+                    <button key={amt} onClick={() => setSelectedTip(amt)}
                       className={`py-4 rounded-xl text-center transition-all ${
-                        selectedTip === amt
-                          ? "gradient-gold text-gold-foreground scale-105 shadow-lg"
-                          : "bg-card border border-border hover:border-gold/50"
-                      }`}
-                    >
+                        selectedTip === amt ? "gradient-gold text-gold-foreground scale-105 shadow-lg" : "bg-card border border-border hover:border-gold/50"
+                      }`}>
                       <p className="text-lg font-bold">{amt}</p>
                       <p className="text-[10px] opacity-70">QRC</p>
                     </button>
                   ))}
                 </div>
-
-                <button 
-                  onClick={sendTip}
-                  className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg shadow-glow flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="w-5 h-5" />
-                   Invia {selectedTip} QRCoins
+                <button onClick={sendTip} className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg shadow-glow flex items-center justify-center gap-2">
+                  <Sparkles className="w-5 h-5" /> Invia {selectedTip} QRCoins
                 </button>
               </div>
             </div>
+          )}
+
+          {showPostStats && (
+            <PostLiveStats
+              stats={{
+                totalViewers: selectedStream.viewer_count,
+                peakViewers: selectedStream.viewer_count,
+                totalComments: chatMessages.filter(m => m.type === 'chat').length,
+                totalReactions: interactionScore,
+                totalTips: selectedStream.total_tips,
+                qrCoinsDistributed: selectedStream.qr_coin_pool || 0,
+                durationMinutes: 30,
+                interactionGoal: selectedStream.interaction_goal || 50,
+                interactionsAchieved: interactionScore,
+              }}
+              onClose={() => { setShowPostStats(false); setSelectedStream(null); }}
+            />
           )}
         </div>
       </MobileLayout>
@@ -432,7 +447,7 @@ export default function LiveStreamPage() {
             <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
             <p className="text-sm text-muted-foreground">Guarda tutorial e guadagna QRCoins</p>
           </div>
-          <button className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
+          <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
             📹 Go Live
           </button>
         </div>
@@ -441,9 +456,7 @@ export default function LiveStreamPage() {
       <div className="p-4 space-y-4">
         {loading ? (
           <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-[3/4] rounded-2xl bg-card animate-pulse" />
-            ))}
+            {[1, 2, 3].map(i => <div key={i} className="aspect-[3/4] rounded-2xl bg-card animate-pulse" />)}
           </div>
         ) : streams.length === 0 ? (
           <div className="text-center py-16">
@@ -456,46 +469,31 @@ export default function LiveStreamPage() {
         ) : (
           <div className="grid gap-4">
             {streams.map(stream => (
-              <button
-                key={stream.id}
-                onClick={() => setSelectedStream(stream)}
-                className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-card shadow-card group"
-              >
-                <img 
-                  src={stream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} 
-                  alt="" 
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <button key={stream.id} onClick={() => setSelectedStream(stream)}
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-card shadow-card group">
+                <img src={stream.thumbnail_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800'} alt=""
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/90" />
-
-                {/* Live Badge */}
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
-                    <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" />
-                    LIVE
+                    <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" /> LIVE
                   </span>
+                  {stream.category && (
+                    <span className="px-3 py-1.5 rounded-full glass text-xs font-medium capitalize">{stream.category}</span>
+                  )}
                 </div>
-
-                {/* Viewer Count */}
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
                   <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm font-medium">
-                    <Eye className="w-4 h-4" />
-                    {stream.viewer_count.toLocaleString()}
+                    <Eye className="w-4 h-4" /> {stream.viewer_count.toLocaleString()}
                   </span>
                   <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold text-gold-foreground text-xs font-bold">
-                    <Coins className="w-3.5 h-3.5" />
-                    €{stream.total_earnings}
+                    <Coins className="w-3.5 h-3.5" /> {stream.qr_coin_pool || 0} QRC
                   </span>
                 </div>
-
-                {/* Streamer Info */}
                 <div className="absolute bottom-0 inset-x-0 p-4">
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.professional?.id}`}
-                      alt=""
-                      className="w-12 h-12 rounded-full object-cover border-2 border-primary"
-                    />
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${stream.professional?.id}`} alt=""
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary" />
                     <div className="flex-1 text-left">
                       <p className="font-bold">{stream.professional?.business_name || 'Beauty Streamer'}</p>
                       <p className="text-sm text-muted-foreground line-clamp-1">{stream.title}</p>

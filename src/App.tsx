@@ -44,6 +44,7 @@ import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
 import MissionsPage from "./pages/MissionsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import ShortsPage from "./pages/ShortsPage";
+import GoLivePage from "./pages/GoLivePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
