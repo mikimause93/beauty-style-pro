@@ -191,7 +191,7 @@ export default function CreateJobPostPage() {
                     : "bg-card border border-border"
                 }`}
               >
-                {cat.emoji ? cat.emoji : <cat.Icon className="w-4 h-4" />} {cat.label}
+                <cat.Icon className="w-4 h-4 inline" /> {cat.label}
               </button>
             ))}
           </div>
