@@ -15,6 +15,8 @@ import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
 import LiveMusicSelector from "@/components/live/LiveMusicSelector";
 import BattleChallengeButton from "@/components/live/BattleChallengeButton";
 import LiveGuestPanel from "@/components/live/LiveGuestPanel";
+import ApplauseAnimation, { useApplause } from "@/components/live/ApplauseAnimation";
+import VoiceNoteButton from "@/components/live/VoiceNoteButton";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -90,6 +92,7 @@ export default function LiveStreamPage() {
   const watchTimerRef = useRef<number | null>(null);
   const { awardCoins } = useQRCoinRewards();
   const { pause: pauseRadio } = useRadio();
+  const { claps, triggerApplause } = useApplause();
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
