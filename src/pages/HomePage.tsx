@@ -3,6 +3,8 @@ import TrendingClips from "@/components/feed/TrendingClips";
 import ReelsSection from "@/components/feed/ReelsSection";
 import SponsorBanner from "@/components/feed/SponsorBanner";
 import AIMatchBanner from "@/components/feed/AIMatchBanner";
+import AIGrowthSuggestions from "@/components/feed/AIGrowthSuggestions";
+import AutoOffersBanner from "@/components/feed/AutoOffersBanner";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
@@ -162,6 +164,12 @@ export default function HomePage() {
 
       {/* AI Smart Match */}
       {activeTab === "Nuovi" && <AIMatchBanner />}
+
+      {/* AI Growth Suggestions */}
+      {activeTab === "Nuovi" && <AIGrowthSuggestions />}
+
+      {/* Auto Offers */}
+      {activeTab === "Nuovi" && <AutoOffersBanner />}
 
       {/* Reels */}
       {activeTab === "Nuovi" && <ReelsSection />}
