@@ -46,6 +46,7 @@ import AIAssistantPage from "./pages/AIAssistantPage";
 import ShortsPage from "./pages/ShortsPage";
 import GoLivePage from "./pages/GoLivePage";
 import TransformationChallengePage from "./pages/TransformationChallengePage";
+import LiveBattlePage from "./pages/LiveBattlePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/go-live" element={<GoLivePage />} />
             <Route path="/transformation-challenge" element={<TransformationChallengePage />} />
+            <Route path="/live-battle" element={<LiveBattlePage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />
             <Route path="/business/team" element={<BusinessDashboardPage />} />

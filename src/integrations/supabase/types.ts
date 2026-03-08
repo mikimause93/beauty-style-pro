@@ -146,6 +146,41 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_votes: {
+        Row: {
+          battle_id: string
+          created_at: string
+          id: string
+          qr_coin_amount: number
+          user_id: string
+          voted_for: string
+        }
+        Insert: {
+          battle_id: string
+          created_at?: string
+          id?: string
+          qr_coin_amount?: number
+          user_id: string
+          voted_for: string
+        }
+        Update: {
+          battle_id?: string
+          created_at?: string
+          id?: string
+          qr_coin_amount?: number
+          user_id?: string
+          voted_for?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_votes_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "live_battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           booking_date: string
@@ -853,6 +888,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      live_battles: {
+        Row: {
+          category: string | null
+          created_at: string
+          ended_at: string | null
+          host_a_id: string
+          host_a_name: string
+          host_a_thumbnail: string | null
+          host_b_id: string
+          host_b_name: string
+          host_b_thumbnail: string | null
+          id: string
+          prize_pool: number
+          score_a: number
+          score_b: number
+          status: string
+          stream_id: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_a_id: string
+          host_a_name?: string
+          host_a_thumbnail?: string | null
+          host_b_id: string
+          host_b_name?: string
+          host_b_thumbnail?: string | null
+          id?: string
+          prize_pool?: number
+          score_a?: number
+          score_b?: number
+          status?: string
+          stream_id?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          ended_at?: string | null
+          host_a_id?: string
+          host_a_name?: string
+          host_a_thumbnail?: string | null
+          host_b_id?: string
+          host_b_name?: string
+          host_b_thumbnail?: string | null
+          id?: string
+          prize_pool?: number
+          score_a?: number
+          score_b?: number
+          status?: string
+          stream_id?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_battles_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       live_invites: {
         Row: {

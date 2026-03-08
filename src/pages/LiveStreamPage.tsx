@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2 } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -12,6 +12,7 @@ import PostLiveStats from "@/components/live/PostLiveStats";
 import WeeklyLiveTracker from "@/components/live/WeeklyLiveTracker";
 import StyleReplicatorPanel from "@/components/live/StyleReplicatorPanel";
 import LiveMusicSelector from "@/components/live/LiveMusicSelector";
+import BattleChallengeButton from "@/components/live/BattleChallengeButton";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -382,6 +383,11 @@ export default function LiveStreamPage() {
               <button onClick={() => setShowMusic(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <Music className="w-4 h-4 text-muted-foreground" />
               </button>
+              <BattleChallengeButton
+                streamId={selectedStream.id}
+                currentProfessionalId={selectedStream.professional?.id}
+                currentName={selectedStream.professional?.business_name}
+              />
             </div>
 
             {/* Chat Input */}
@@ -468,9 +474,14 @@ export default function LiveStreamPage() {
             <h1 className="text-2xl font-display font-bold">Live Beauty</h1>
             <p className="text-sm text-muted-foreground">Guarda tutorial e guadagna QRCoins</p>
           </div>
-          <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
-            📹 Go Live
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/live-battle")} className="px-4 py-2.5 rounded-full glass text-sm font-bold flex items-center gap-2">
+              <Swords className="w-4 h-4 text-destructive" /> Battle
+            </button>
+            <button onClick={() => navigate("/go-live")} className="px-4 py-2.5 rounded-full gradient-live text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-glow">
+              📹 Go Live
+            </button>
+          </div>
         </div>
 
         {/* Category Filters */}
