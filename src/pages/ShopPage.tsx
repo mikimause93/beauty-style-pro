@@ -260,8 +260,8 @@ export default function ShopPage() {
                           </span>
                         </div>
                         <div className="flex gap-1.5 mt-2">
-                          <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all">
-                            🛒 Carrello
+                          <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
+                            <ShoppingCart className="w-3 h-3" /> Carrello
                           </button>
                           <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
                             Acquista
