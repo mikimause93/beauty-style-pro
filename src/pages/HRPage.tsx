@@ -223,8 +223,13 @@ export default function HRPage() {
             {/* Job List */}
             <div className="space-y-3">
               {allJobs && allJobs.length > 0 ? (
-                allJobs.map(job => {
-                  const employer = job.businesses || job.professionals;
+              allJobs.map(job => {
+                  const businessEmployer = job.businesses;
+                  const professionalEmployer = job.professionals;
+                  const employerName = businessEmployer?.business_name || professionalEmployer?.business_name;
+                  const employerLogo = businessEmployer?.logo_url;
+                  const isVerified = businessEmployer?.verified;
+                  
                   return (
                     <div
                       key={job.id}
@@ -233,9 +238,9 @@ export default function HRPage() {
                     >
                       <div className="flex gap-3">
                         <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                          {employer?.logo_url || employer?.profiles?.avatar_url ? (
+                          {employerLogo ? (
                             <img 
-                              src={employer?.logo_url || employer?.profiles?.avatar_url} 
+                              src={employerLogo} 
                               alt="" 
                               className="w-full h-full object-cover" 
                             />
@@ -250,8 +255,8 @@ export default function HRPage() {
                             <div>
                               <h3 className="font-semibold text-sm line-clamp-1">{job.title}</h3>
                               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                {employer?.business_name}
-                                {employer?.verified && <Star className="w-3 h-3 text-gold fill-gold" />}
+                                {employerName}
+                                {isVerified && <Star className="w-3 h-3 text-gold fill-gold" />}
                               </p>
                             </div>
                             {job.featured && (
