@@ -76,8 +76,9 @@ export default function GoLivePage() {
       return;
     }
 
-    toast.success("Live avviata!");
-    navigate("/live");
+    toast.success("Live avviata! 🔴");
+    // Navigate to live page with the stream ID so it auto-selects
+    navigate(`/live?stream=${data.id}`);
   };
 
   return (
