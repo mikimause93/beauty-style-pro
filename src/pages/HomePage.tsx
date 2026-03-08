@@ -6,8 +6,10 @@ import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import logo from "@/assets/logo.png";
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Heart, Play, Eye, Coins } from "lucide-react";
+import { Heart, Play, Eye, Coins, Plus, Calendar, Users } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const stories = [
   { id: 1, name: "Beauty Hits", img: stylist1, isLive: true },
