@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { aiJobMatch } from "@/lib/ai";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
-import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 export default function JobDetailPage() {
@@ -18,6 +19,8 @@ export default function JobDetailPage() {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [analyzingAI, setAnalyzingAI] = useState(false);
 
   useEffect(() => {
     if (id) fetchJob();
@@ -50,15 +53,27 @@ export default function JobDetailPage() {
     setApplying(true);
     const userSkills = profile?.skills || [];
     const requiredSkills = job?.required_skills || [];
-    let matchScore = 0;
-    if (requiredSkills.length > 0 && userSkills.length > 0) {
-      const matching = userSkills.filter((s: string) =>
-        requiredSkills.some((r: string) => r.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(r.toLowerCase()))
-      );
-      matchScore = Math.round((matching.length / requiredSkills.length) * 100);
-    }
     const exp = profile?.experience_years || 0;
-    matchScore = Math.min(100, matchScore + Math.min(exp * 10, 30));
+
+    // Try AI analysis first
+    let matchScore = 0;
+    let analysis: any = {};
+    try {
+      const aiResult = await aiJobMatch(userSkills, exp, requiredSkills, job?.description || "");
+      matchScore = aiResult?.matchScore || 0;
+      analysis = aiResult || {};
+      setAiAnalysis(aiResult);
+    } catch {
+      // Fallback to basic matching
+      if (requiredSkills.length > 0 && userSkills.length > 0) {
+        const matching = userSkills.filter((s: string) =>
+          requiredSkills.some((r: string) => r.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(r.toLowerCase()))
+        );
+        matchScore = Math.round((matching.length / requiredSkills.length) * 100);
+      }
+      matchScore = Math.min(100, matchScore + Math.min(exp * 10, 30));
+      analysis = { skillsMatch: matchScore, experienceYears: exp };
+    }
 
     const { error } = await supabase.from("job_applications").insert({
       job_post_id: id,
@@ -68,13 +83,7 @@ export default function JobDetailPage() {
       portfolio_urls: profile?.portfolio_urls || [],
       ai_match_score: matchScore,
       ai_recommended: matchScore >= 60,
-      ai_analysis: {
-        skillsMatch: matchScore,
-        experienceYears: exp,
-        recommendations: matchScore >= 60
-          ? ["👍 Buon match con le competenze richieste"]
-          : ["📈 Potresti migliorare le competenze richieste"],
-      },
+      ai_analysis: analysis,
     });
 
     if (error) {
