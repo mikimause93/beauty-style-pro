@@ -6,10 +6,11 @@ import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import logo from "@/assets/logo.png";
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Heart, Play, Eye, Coins, Plus, Calendar, Users } from "lucide-react";
+import { Heart, Play, Eye, Coins, Plus, Calendar, Users, Share2, Bookmark, Grid3X3, Trophy } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { usePosts } from "@/hooks/useData";
 
 const stories = [
   { id: 1, name: "Beauty Hits", img: stylist1, isLive: true },
@@ -33,7 +34,7 @@ const feedPosts = [
   },
   {
     id: 2,
-    author: "Beauty Ross",
+    author: "Beauty Rossi",
     avatar: stylist1,
     role: "Makeup Artist 💄",
     image: beauty2,
@@ -58,6 +59,13 @@ const feedPosts = [
 
 const tabs = ["New", "Stylists", "Most", "Stream"];
 
+const quickLinks = [
+  { icon: "💇‍♀️", label: "Stylists", path: "/stylists" },
+  { icon: "📅", label: "Bookings", path: "/booking" },
+  { icon: "🎯", label: "Challenges", path: "/shop" },
+  { icon: "✨", label: "Emotions", path: "/before-after" },
+];
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("New");
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
@@ -65,7 +73,7 @@ export default function HomePage() {
   const { user } = useAuth();
 
   const toggleLike = (id: number) => {
-    setLikedPosts(prev => 
+    setLikedPosts(prev =>
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     );
   };
@@ -80,8 +88,9 @@ export default function HomePage() {
             <h1 className="text-xl font-display font-bold text-gradient-primary">Stayle</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-              <Search className="w-4 h-4 text-muted-foreground" />
+            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1 px-3 py-1 rounded-full gradient-gold">
+              <Coins className="w-3.5 h-3.5 text-gold-foreground" />
+              <span className="text-xs font-bold text-gold-foreground">3,450</span>
             </button>
             <button onClick={() => navigate("/notifications")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
               <Bell className="w-4 h-4 text-muted-foreground" />
@@ -115,37 +124,60 @@ export default function HomePage() {
       <div className="flex gap-3 px-4 py-4 overflow-x-auto no-scrollbar">
         {stories.map(story => (
           <button key={story.id} className="flex flex-col items-center gap-1 min-w-[68px]">
-            <div className={`w-16 h-16 rounded-full p-0.5 ${
-              story.isLive ? "gradient-live" : "bg-border"
-            }`}>
-              <img
-                src={story.img}
-                alt={story.name}
-                className="w-full h-full rounded-full object-cover border-2 border-background"
-              />
+            <div className={`w-16 h-16 rounded-full p-0.5 ${story.isLive ? "gradient-live" : "bg-border"}`}>
+              <img src={story.img} alt={story.name} className="w-full h-full rounded-full object-cover border-2 border-background" />
             </div>
-            <span className="text-[10px] text-muted-foreground truncate w-16 text-center">
-              {story.name}
-            </span>
+            <span className="text-[10px] text-muted-foreground truncate w-16 text-center">{story.name}</span>
             {story.isLive && (
-              <span className="text-[9px] font-bold text-live bg-live/20 px-2 py-0.5 rounded-full -mt-0.5">
-                LIVE
-              </span>
+              <span className="text-[9px] font-bold text-live bg-live/20 px-2 py-0.5 rounded-full -mt-0.5">LIVE</span>
             )}
+          </button>
+        ))}
+      </div>
+
+      {/* Live Now Banner */}
+      <div className="px-4 mb-3">
+        <button onClick={() => navigate("/live")} className="w-full rounded-xl overflow-hidden relative h-28">
+          <img src={beauty2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/30 flex items-center px-4">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-3">
+                <img src={stylist1} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-background" />
+                <img src={stylist2} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-background" />
+                <img src={beauty1} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-background" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-live text-primary-foreground text-[10px] font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" /> LIVE
+                  </span>
+                  <span className="text-xs text-muted-foreground">See more</span>
+                </div>
+                <p className="text-sm font-semibold mt-1">Live Now</p>
+                <p className="text-[10px] text-muted-foreground">3 streaming in corso</p>
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Quick Links */}
+      <div className="flex gap-2 px-4 mb-4">
+        {quickLinks.map(link => (
+          <button key={link.label} onClick={() => navigate(link.path)} className="flex-1 flex flex-col items-center gap-1 py-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all">
+            <span className="text-lg">{link.icon}</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{link.label}</span>
           </button>
         ))}
       </div>
 
       {/* Quick Actions */}
       <div className="flex gap-2 px-4 mb-4">
-        <button onClick={() => navigate("/create-post")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
+        <button onClick={() => navigate("/create-post")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
           <Plus className="w-3.5 h-3.5" /> Nuovo Post
         </button>
-        <button onClick={() => navigate("/stylists")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
-          <Users className="w-3.5 h-3.5" /> Stilisti
-        </button>
-        <button onClick={() => navigate("/events")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
-          <Calendar className="w-3.5 h-3.5" /> Eventi
+        <button onClick={() => navigate("/before-after")} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-card border border-border text-xs font-semibold">
+          <Grid3X3 className="w-3.5 h-3.5" /> Before & After
         </button>
       </div>
 
@@ -153,7 +185,6 @@ export default function HomePage() {
       <div className="flex flex-col gap-4 px-4 pb-4">
         {feedPosts.map(post => (
           <article key={post.id} className="rounded-2xl overflow-hidden bg-card shadow-card fade-in">
-            {/* Post Header */}
             <div className="flex items-center gap-3 p-3">
               <img src={post.avatar} alt={post.author} className="w-10 h-10 rounded-full object-cover" />
               <div className="flex-1 min-w-0">
@@ -162,13 +193,11 @@ export default function HomePage() {
               </div>
               {post.isLive && (
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-live text-primary-foreground text-xs font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" />
-                  LIVE
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" /> LIVE
                 </span>
               )}
             </div>
 
-            {/* Image */}
             <div className="relative aspect-[4/5] bg-muted">
               <img src={post.image} alt="" className="w-full h-full object-cover" />
               {post.isLive && (
@@ -184,29 +213,30 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Actions */}
             <div className="p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-4">
                   <button onClick={() => toggleLike(post.id)} className="flex items-center gap-1">
-                    <Heart
-                      className={`w-5 h-5 transition-all ${
-                        likedPosts.includes(post.id)
-                          ? "text-primary fill-primary scale-110"
-                          : "text-muted-foreground"
-                      }`}
-                    />
+                    <Heart className={`w-5 h-5 transition-all ${likedPosts.includes(post.id) ? "text-primary fill-primary scale-110" : "text-muted-foreground"}`} />
                     <span className="text-xs text-muted-foreground">{post.likes}</span>
                   </button>
                   <button className="flex items-center gap-1">
                     <MessageCircle className="w-5 h-5 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">{post.comments}</span>
                   </button>
+                  <button>
+                    <Share2 className="w-5 h-5 text-muted-foreground" />
+                  </button>
                 </div>
-                <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-gold/20">
-                  <Coins className="w-4 h-4 text-gold" />
-                  <span className="text-xs font-semibold text-gold">Tip</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-1 px-3 py-1 rounded-full bg-gold/20">
+                    <Coins className="w-4 h-4 text-gold" />
+                    <span className="text-xs font-semibold text-gold">Tip</span>
+                  </button>
+                  <button>
+                    <Bookmark className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
               <p className="text-sm">
                 <span className="font-semibold">{post.author}</span>{" "}

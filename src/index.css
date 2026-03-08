@@ -159,6 +159,22 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+
+  /* Floating reaction animation */
+  @keyframes float-up {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 0.8; transform: translateY(-60px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-120px) scale(0.8); }
+  }
+
+  .animate-float-up {
+    animation: float-up 2.5s ease-out forwards;
+  }
+
+  /* Safe area for bottom nav */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 /* Mobile viewport fix */
