@@ -70,14 +70,16 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    return !sessionStorage.getItem("splash_shown");
+  });
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <PWAInstallPrompt />
-      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      {showSplash && <SplashScreen onComplete={() => { sessionStorage.setItem("splash_shown", "1"); setShowSplash(false); }} />}
       <BrowserRouter>
         <AuthProvider>
           <Routes>
