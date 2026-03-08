@@ -120,11 +120,11 @@ export default function RadioPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 text-[10px] font-bold text-accent">
+              <Coins className="w-3 h-3" /> +1 QRC/2min
+            </span>
             <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <Volume2 className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-              <Headphones className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
         </div>
@@ -185,7 +185,12 @@ export default function RadioPage() {
               <RadioIcon className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Top</span>
             </button>
-            <button className="flex flex-col items-center gap-1">
+            <button onClick={() => {
+              if (navigator.share) {
+                navigator.share({ title: currentTrackData.title, text: `Ascolta "${currentTrackData.title}" su Stayle! 🎵` });
+              }
+              awardCoins("share");
+            }} className="flex flex-col items-center gap-1">
               <Share2 className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Condividi</span>
             </button>
