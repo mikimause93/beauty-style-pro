@@ -103,7 +103,7 @@ export default function StylistDetailPage() {
             )}
           </div>
           <h2 className="text-xl font-display font-bold">{stylist.name}</h2>
-          <p className="text-sm text-primary">💇‍♀️ {stylist.specialty}</p>
+          <p className="text-sm text-primary">{stylist.specialty}</p>
           <div className="flex items-center gap-1 mt-1">
             <MapPin className="w-3 h-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{stylist.city}</span>

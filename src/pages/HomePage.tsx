@@ -38,9 +38,9 @@ const fallbackStylists = [
 ];
 
 const fallbackPosts: Post[] = [
-  { id: "f1", user_id: "", caption: "New summer looks available! ✨", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
-  { id: "f2", user_id: "", caption: "Balayage transformation 🌿", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
-  { id: "f3", user_id: "", caption: "Keratin treatment results 💇‍♀️", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
+  { id: "f1", user_id: "", caption: "New summer looks available!", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
+  { id: "f2", user_id: "", caption: "Balayage transformation", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
+  { id: "f3", user_id: "", caption: "Keratin treatment results", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
 ];
 
 export default function HomePage() {

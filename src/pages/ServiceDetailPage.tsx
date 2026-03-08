@@ -104,12 +104,12 @@ export default function ServiceDetailPage() {
           <h3 className="text-sm font-semibold mb-3">Disponibile</h3>
           <div className="grid grid-cols-3 gap-2">
             {[
-              { icon: "🏢", label: "In Salone" },
-              { icon: "🏠", label: "A Domicilio" },
-              { icon: "💻", label: "Online" },
+              { Icon: Building2, label: "In Salone" },
+              { Icon: Home, label: "A Domicilio" },
+              { Icon: Monitor, label: "Online" },
             ].map(loc => (
               <div key={loc.label} className="flex flex-col items-center py-3 rounded-xl bg-card border border-border">
-                <span className="text-2xl mb-1">{loc.icon}</span>
+                <loc.Icon className="w-6 h-6 text-muted-foreground mb-1" />
                 <span className="text-xs font-medium text-muted-foreground">{loc.label}</span>
               </div>
             ))}

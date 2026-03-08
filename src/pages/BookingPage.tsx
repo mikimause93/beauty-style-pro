@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Star, Check } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Clock, MapPin, Star, Check, Building2, Home, Monitor, Scissors } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,9 +24,9 @@ interface Professional {
 }
 
 const locationOptions = [
-  { id: "center", label: "In Salone", icon: "🏢" },
-  { id: "home", label: "A Domicilio", icon: "🏠" },
-  { id: "online", label: "Online", icon: "💻" },
+  { id: "center", label: "In Salone", Icon: Building2 },
+  { id: "home", label: "A Domicilio", Icon: Home },
+  { id: "online", label: "Online", Icon: Monitor },
 ];
 
 const timeSlots = [
@@ -166,7 +166,7 @@ export default function BookingPage() {
           <h1 className="text-lg font-display font-bold">Prenota</h1>
         </header>
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-          <p className="text-4xl mb-4">💇‍♀️</p>
+          <Scissors className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-display font-bold mb-2">Scegli un professionista</h2>
           <p className="text-muted-foreground text-sm mb-6">Seleziona uno stilista per prenotare</p>
           <button onClick={() => navigate("/stylists")} className="px-6 py-3 rounded-full gradient-primary text-primary-foreground font-semibold">
@@ -200,7 +200,7 @@ export default function BookingPage() {
               </div>
               <div className="flex-1">
                 <p className="font-semibold">{professional.business_name}</p>
-                <p className="text-xs text-muted-foreground">💇‍♀️ {professional.specialty || "Beauty Pro"} · {professional.city || ""}</p>
+                <p className="text-xs text-muted-foreground">{professional.specialty || "Beauty Pro"} · {professional.city || ""}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <Star className="w-3 h-3 text-gold fill-gold" />
                   <span className="text-xs font-semibold">{professional.rating || "N/A"}</span>

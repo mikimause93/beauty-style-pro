@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Trophy, ThumbsUp, MessageCircle, Coins, Calendar, Star, Flame, Crown, Bookmark, MapPin, Sparkles, Plus, ChevronRight, Loader2, Camera } from "lucide-react";
+import { ArrowLeft, Trophy, ThumbsUp, MessageCircle, Coins, Calendar, Star, Flame, Crown, Bookmark, MapPin, Sparkles, Plus, ChevronRight, Loader2, Camera, Scissors, Palette, Paintbrush, Gem } from "lucide-react";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,13 +35,13 @@ interface TransformationChallenge {
 }
 
 const CATEGORIES = [
-  { value: "all", label: "🔥 Tutti", color: "" },
-  { value: "hairstyle", label: "✂️ Capelli", color: "" },
-  { value: "barber", label: "💈 Barba", color: "" },
-  { value: "color", label: "🎨 Colore", color: "" },
-  { value: "makeup", label: "💄 Makeup", color: "" },
-  { value: "nails", label: "💅 Nails", color: "" },
-  { value: "skincare", label: "✨ Skincare", color: "" },
+  { value: "all", label: "Tutti", Icon: Flame, color: "" },
+  { value: "hairstyle", label: "Capelli", Icon: Scissors, color: "" },
+  { value: "barber", label: "Barba", Icon: Scissors, color: "" },
+  { value: "color", label: "Colore", Icon: Palette, color: "" },
+  { value: "makeup", label: "Makeup", Icon: Paintbrush, color: "" },
+  { value: "nails", label: "Nails", Icon: Gem, color: "" },
+  { value: "skincare", label: "Skincare", Icon: Sparkles, color: "" },
 ];
 
 const LEADERBOARD_TABS = ["Settimana", "Mese", "Sempre"];
