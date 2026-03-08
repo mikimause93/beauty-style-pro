@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, Eye } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, CalendarDays, Briefcase, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,20 +24,35 @@ interface Product {
   seller_id: string;
 }
 
+interface ServiceItem {
+  id: string;
+  name: string;
+  price: number;
+  duration: number | null;
+  description: string | null;
+  professional_id: string;
+  professional_name?: string;
+  professional_city?: string;
+}
+
 const fallbackImages = [beauty1, beauty2, beauty3, stylist1, stylist2];
 
 const sections = [
-  { key: "products" as const, label: "Vetrina", icon: ShoppingBag },
-  { key: "categories" as const, label: "Categorie", icon: Star },
+  { key: "products" as const, label: "Prodotti", icon: ShoppingBag },
+  { key: "services" as const, label: "Servizi", icon: CalendarDays },
+  { key: "professionals" as const, label: "Saloni", icon: Briefcase },
   { key: "featured" as const, label: "Top Rated", icon: Gift },
 ];
+
+type SectionKey = "products" | "services" | "professionals" | "featured";
 
 export default function ShopPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured">("products");
+  const [activeSection, setActiveSection] = useState<SectionKey>("products");
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ name: string; count: number; image: string }[]>([]);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [professionals, setProfessionals] = useState<any[]>([]);
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,40 +65,40 @@ export default function ShopPage() {
 
   const qrCoins = profile?.qr_coins || 0;
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
-  const fetchProducts = async () => {
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .eq("active", true)
-      .order("created_at", { ascending: false });
+  const fetchAll = async () => {
+    setLoading(true);
+    const [prodRes, svcRes, proRes] = await Promise.all([
+      supabase.from("products").select("*").eq("active", true).order("created_at", { ascending: false }),
+      supabase.from("services").select("*, professionals(business_name, city)").eq("active", true).order("name"),
+      supabase.from("professionals").select("*, profiles:user_id(display_name, avatar_url)").order("rating", { ascending: false }),
+    ]);
 
-    if (data && data.length > 0) {
-      setProducts(data);
-      const catMap = new Map<string, number>();
-      data.forEach(p => {
-        const cat = p.category || "Altro";
-        catMap.set(cat, (catMap.get(cat) || 0) + 1);
-      });
-      setCategories(Array.from(catMap.entries()).map(([name, count], i) => ({
-        name, count, image: fallbackImages[i % fallbackImages.length],
-      })));
+    if (prodRes.data && prodRes.data.length > 0) {
+      setProducts(prodRes.data);
     } else {
-      setProducts([
-        { id: "1", name: "Olio Ristrutturante Pro", price: 34.99, image_url: null, rating: 4.8, review_count: 127, category: "Hair Care", description: "Olio professionale per capelli danneggiati", seller_id: "" },
-        { id: "2", name: "Maschera Idratante Bio", price: 28.50, image_url: null, rating: 4.6, review_count: 89, category: "Skincare", description: "Maschera nutriente 100% biologica", seller_id: "" },
-        { id: "3", name: "Siero Luminosità", price: 42.00, image_url: null, rating: 4.9, review_count: 214, category: "Skincare", description: "Siero illuminante con vitamina C", seller_id: "" },
-        { id: "4", name: "Shampoo Ristrutturante", price: 19.99, image_url: null, rating: 4.5, review_count: 56, category: "Hair Care", description: "Shampoo delicato per uso quotidiano", seller_id: "" },
-        { id: "5", name: "Balsamo Nutriente", price: 22.00, image_url: null, rating: 4.7, review_count: 98, category: "Hair Care", description: "Balsamo senza siliconi", seller_id: "" },
-        { id: "6", name: "Spray Protettivo", price: 15.99, image_url: null, rating: 4.4, review_count: 34, category: "Makeup", description: "Protezione termica fino a 230°C", seller_id: "" },
-      ]);
-      setCategories([
-        { name: "Hair Care", count: 24, image: beauty1 },
-        { name: "Skincare", count: 18, image: beauty2 },
-        { name: "Makeup", count: 32, image: beauty3 },
-      ]);
+      // No fallback with fake IDs — show empty state
+      setProducts([]);
     }
+
+    if (svcRes.data) {
+      setServices(svcRes.data.map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        price: s.price,
+        duration: s.duration,
+        description: s.description,
+        professional_id: s.professional_id,
+        professional_name: s.professionals?.business_name || "Professionista",
+        professional_city: s.professionals?.city || "",
+      })));
+    }
+
+    if (proRes.data) {
+      setProfessionals(proRes.data);
+    }
+
     setLoading(false);
   };
 
@@ -97,23 +112,11 @@ export default function ShopPage() {
     toast.success("Aggiunto al carrello! 🛒");
   };
 
-  const buyNow = async (product: Product) => {
+  const buyNow = (product: Product) => {
     if (!user) { navigate("/auth"); return; }
     const discount = appliedPromo ? (product.price * appliedPromo.discount / 100) : 0;
     const finalPrice = product.price - discount;
-    const { error } = await supabase.from("product_purchases").insert({
-      buyer_id: user.id,
-      product_id: product.id,
-      unit_price: product.price,
-      total_price: finalPrice,
-      discount_amount: discount,
-      payment_method: "wallet",
-    });
-    if (error) {
-      toast.error("Errore nell'acquisto");
-    } else {
-      toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}!`);
-    }
+    navigate(`/checkout?amount=${finalPrice.toFixed(2)}&desc=${encodeURIComponent(product.name)}&type=product&ref=${product.id}`);
   };
 
   const applyPromoCode = async () => {
@@ -123,7 +126,7 @@ export default function ShopPage() {
       .select("*")
       .eq("code", promoCode.trim().toUpperCase())
       .eq("active", true)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setAppliedPromo({ code: data.code, discount: Number(data.discount_value) });
@@ -140,6 +143,14 @@ export default function ShopPage() {
   const filteredProducts = searchQuery.trim()
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category?.toLowerCase().includes(searchQuery.toLowerCase()))
     : products;
+
+  const filteredServices = searchQuery.trim()
+    ? services.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.professional_name?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : services;
+
+  const filteredProfessionals = searchQuery.trim()
+    ? professionals.filter(p => p.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) || p.specialty?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : professionals;
 
   return (
     <MobileLayout>
@@ -160,13 +171,12 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mt-3 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Cerca prodotti, marchi..."
+            placeholder="Cerca prodotti, servizi, saloni..."
             className="w-full h-10 rounded-xl bg-muted pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
         </div>
@@ -213,123 +223,193 @@ export default function ShopPage() {
           </div>
         ) : (
           <>
-            {/* Products Grid */}
+            {/* ===== PRODUCTS ===== */}
             {activeSection === "products" && (
               <div className="space-y-4 fade-in">
-                {/* Hero Banner */}
                 <div className="rounded-2xl overflow-hidden relative aspect-[2/1]">
-                  <img src={beauty2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={beauty2} alt="Prodotto in evidenza" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent flex items-center px-5">
                     <div>
                       <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">Prodotto Top</span>
                       <h3 className="text-lg font-display font-bold mt-2">Cosmohairr Beam</h3>
                       <p className="text-xs text-muted-foreground">Max Mascolini</p>
                       <p className="text-lg font-bold text-primary mt-1">€39.99</p>
-                      <button className="mt-2 px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                        Acquista Ora
-                      </button>
                     </div>
                   </div>
                 </div>
 
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Scopri i Prodotti</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {filteredProducts.map((product, idx) => (
-                    <div key={product.id} className="rounded-xl bg-card overflow-hidden border border-border/50">
-                      <div className="relative">
-                        <img src={getImage(product, idx)} alt={product.name} className="w-full aspect-square object-cover" />
-                        <div className="absolute top-2 right-2 flex flex-col gap-1.5">
-                          <button onClick={() => toggleLike(product.id)}
-                            className="w-8 h-8 rounded-full glass flex items-center justify-center">
-                            <Heart className={`w-4 h-4 ${likedProducts.includes(product.id) ? "text-primary fill-primary" : "text-foreground"}`} />
-                          </button>
-                          <button onClick={() => setShareProduct(product)}
-                            className="w-8 h-8 rounded-full glass flex items-center justify-center">
-                            <Share2 className="w-4 h-4 text-foreground" />
-                          </button>
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-semibold">Nessun prodotto disponibile</p>
+                    <p className="text-xs text-muted-foreground mt-1">I prodotti appariranno qui quando i professionisti li aggiungeranno</p>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Scopri i Prodotti</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {filteredProducts.map((product, idx) => (
+                        <div key={product.id} className="rounded-xl bg-card overflow-hidden border border-border/50">
+                          <div className="relative">
+                            <img src={getImage(product, idx)} alt={product.name} className="w-full aspect-square object-cover" />
+                            <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+                              <button onClick={() => toggleLike(product.id)}
+                                className="w-8 h-8 rounded-full glass flex items-center justify-center">
+                                <Heart className={`w-4 h-4 ${likedProducts.includes(product.id) ? "text-primary fill-primary" : "text-foreground"}`} />
+                              </button>
+                              <button onClick={() => setShareProduct(product)}
+                                className="w-8 h-8 rounded-full glass flex items-center justify-center">
+                                <Share2 className="w-4 h-4 text-foreground" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-3">
+                            <p className="text-sm font-medium truncate">{product.name}</p>
+                            {product.description && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{product.description}</p>}
+                            <div className="flex items-center justify-between mt-1.5">
+                              <span className="text-sm font-bold text-primary">€{product.price}</span>
+                              <span className="text-xs text-accent flex items-center gap-0.5">
+                                <Star className="w-3 h-3 fill-accent" /> {product.rating || 4.5}
+                              </span>
+                            </div>
+                            <div className="flex gap-1.5 mt-2">
+                              <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
+                                <ShoppingCart className="w-3 h-3" /> Carrello
+                              </button>
+                              <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                                Acquista
+                              </button>
+                            </div>
+                            <button onClick={() => setSelectedProduct(product)}
+                              className="w-full mt-1.5 py-1.5 rounded-lg border border-border/50 text-[10px] font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
+                              <MessageCircle className="w-3 h-3" /> Recensione
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ===== SERVICES ===== */}
+            {activeSection === "services" && (
+              <div className="space-y-3 fade-in">
+                <p className="text-sm text-muted-foreground">Prenota servizi dai migliori professionisti</p>
+                {filteredServices.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CalendarDays className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-semibold">Nessun servizio disponibile</p>
+                    <p className="text-xs text-muted-foreground mt-1">I servizi appariranno qui quando i professionisti li aggiungeranno</p>
+                  </div>
+                ) : (
+                  filteredServices.map((svc, idx) => (
+                    <button key={svc.id}
+                      onClick={() => navigate(`/booking/${svc.professional_id}`)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all text-left">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                        <img src={fallbackImages[idx % fallbackImages.length]} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{svc.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{svc.professional_name}</p>
+                        {svc.duration && <p className="text-[10px] text-muted-foreground">{svc.duration} min</p>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-primary">€{svc.price}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* ===== PROFESSIONALS / SALONI ===== */}
+            {activeSection === "professionals" && (
+              <div className="space-y-3 fade-in">
+                <p className="text-sm text-muted-foreground">Scopri i saloni e professionisti verificati</p>
+                {filteredProfessionals.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Briefcase className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-semibold">Nessun professionista disponibile</p>
+                  </div>
+                ) : (
+                  filteredProfessionals.map((pro, idx) => (
+                    <button key={pro.id}
+                      onClick={() => navigate(`/stylist/${pro.id}`)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all text-left">
+                      <img
+                        src={pro.profiles?.avatar_url || fallbackImages[idx % fallbackImages.length]}
+                        alt=""
+                        className="w-14 h-14 rounded-xl object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{pro.business_name}</p>
+                        {pro.specialty && <p className="text-[11px] text-muted-foreground">{pro.specialty}</p>}
+                        {pro.city && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] text-muted-foreground">{pro.city}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Star className="w-3 h-3 text-accent fill-accent" />
+                          <span className="text-[10px] font-semibold">{pro.rating || 0}</span>
+                          <span className="text-[10px] text-muted-foreground">({pro.review_count || 0})</span>
                         </div>
                       </div>
-                      <div className="p-3">
-                        <p className="text-sm font-medium truncate">{product.name}</p>
-                        {product.description && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{product.description}</p>}
-                        <div className="flex items-center justify-between mt-1.5">
-                          <span className="text-sm font-bold text-primary">€{product.price}</span>
-                          <span className="text-xs text-accent flex items-center gap-0.5">
-                            <Star className="w-3 h-3 fill-accent" /> {product.rating || 4.5}
-                            <span className="text-muted-foreground">({product.review_count || 0})</span>
-                          </span>
-                        </div>
-                        <div className="flex gap-1.5 mt-2">
-                          <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
-                            <ShoppingCart className="w-3 h-3" /> Carrello
-                          </button>
-                          <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
-                            Acquista
-                          </button>
-                        </div>
-                        {/* Quick review button */}
-                        <button onClick={() => setSelectedProduct(product)}
-                          className="w-full mt-1.5 py-1.5 rounded-lg border border-border/50 text-[10px] font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
-                          <MessageCircle className="w-3 h-3" /> Recensione
+                      <div className="flex flex-col gap-1.5 shrink-0">
+                        <button onClick={e => { e.stopPropagation(); navigate(`/booking/${pro.id}`); }}
+                          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                          Prenota
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    </button>
+                  ))
+                )}
               </div>
             )}
 
-            {/* Categories */}
-            {activeSection === "categories" && (
-              <div className="space-y-2 fade-in">
-                {categories.map(cat => (
-                  <button key={cat.name} onClick={() => { setSearchQuery(cat.name); setActiveSection("products"); }} className="w-full flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-muted transition-all border border-border/50">
-                    <img src={cat.image} alt="" className="w-14 h-14 rounded-lg object-cover" />
-                    <div className="flex-1 text-left">
-                      <p className="text-sm font-medium">{cat.name}</p>
-                      <p className="text-xs text-muted-foreground">{cat.count} prodotti</p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Top Rated / Featured */}
+            {/* ===== FEATURED / TOP RATED ===== */}
             {activeSection === "featured" && (
               <div className="space-y-4 fade-in">
                 <p className="text-sm text-muted-foreground">I prodotti più amati dalla community</p>
-                {filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6).map((product, idx) => (
-                  <div key={product.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50">
-                    <div className="relative">
-                      <img src={getImage(product, idx)} alt="" className="w-20 h-20 rounded-xl object-cover" />
-                      <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">#{idx + 1}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{product.name}</p>
-                      {product.description && <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>}
-                      <div className="flex items-center gap-1 mt-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} className={`w-3 h-3 ${i < Math.round(product.rating || 4.5) ? "text-accent fill-accent" : "text-muted"}`} />
-                        ))}
-                        <span className="text-xs font-semibold ml-1">{product.rating || 4.5}</span>
-                        <span className="text-xs text-muted-foreground">({product.review_count || 0})</span>
-                      </div>
-                      <p className="text-sm font-bold text-primary mt-1">€{product.price}</p>
-                    </div>
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      <button onClick={() => buyNow(product)} className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold">
-                        Acquista
-                      </button>
-                      <button onClick={() => toggleLike(product.id)} className="px-3 py-2 rounded-xl bg-muted text-xs font-semibold flex items-center justify-center gap-1">
-                        <Heart className={`w-3 h-3 ${likedProducts.includes(product.id) ? "fill-primary text-primary" : ""}`} />
-                      </button>
-                      <button onClick={() => setShareProduct(product)} className="px-3 py-2 rounded-xl bg-muted text-xs font-semibold flex items-center justify-center gap-1">
-                        <Share2 className="w-3 h-3" />
-                      </button>
-                    </div>
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Gift className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-semibold">Nessun prodotto in evidenza</p>
                   </div>
-                ))}
+                ) : (
+                  [...filteredProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6).map((product, idx) => (
+                    <div key={product.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50">
+                      <div className="relative">
+                        <img src={getImage(product, idx)} alt="" className="w-20 h-20 rounded-xl object-cover" />
+                        <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">#{idx + 1}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{product.name}</p>
+                        {product.description && <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>}
+                        <div className="flex items-center gap-1 mt-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < Math.round(product.rating || 4.5) ? "text-accent fill-accent" : "text-muted"}`} />
+                          ))}
+                          <span className="text-xs font-semibold ml-1">{product.rating || 4.5}</span>
+                        </div>
+                        <p className="text-sm font-bold text-primary mt-1">€{product.price}</p>
+                      </div>
+                      <div className="flex flex-col gap-1.5 shrink-0">
+                        <button onClick={() => buyNow(product)} className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold">
+                          Acquista
+                        </button>
+                        <button onClick={() => toggleLike(product.id)} className="px-3 py-2 rounded-xl bg-muted text-xs font-semibold flex items-center justify-center gap-1">
+                          <Heart className={`w-3 h-3 ${likedProducts.includes(product.id) ? "fill-primary text-primary" : ""}`} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </>
@@ -373,7 +453,6 @@ export default function ShopPage() {
         )}
       </div>
 
-      {/* Share Menu */}
       {shareProduct && (
         <ShareMenu
           onClose={() => setShareProduct(null)}
