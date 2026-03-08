@@ -40,13 +40,13 @@ export default function ProfilePage() {
   };
 
   const loadAnalytics = async () => {
-    const [{ count: bookingsCount }, { data: transactions }] = await Promise.all([
-      supabase.from("bookings").select("*", { count: "exact", head: true }).eq("client_id", user!.id),
-      supabase.from("transactions").select("amount").eq("user_id", user!.id).eq("type", "credit"),
-    ]);
-    const revenue = transactions?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+    const { count: bookingsCount } = await supabase
+      .from("bookings").select("*", { count: "exact", head: true }).eq("client_id", user!.id);
+    const { data: purchases } = await supabase
+      .from("product_purchases").select("total_price").eq("buyer_id", user!.id);
+    const spent = purchases?.reduce((sum, p) => sum + (Number(p.total_price) || 0), 0) || 0;
     setAnalyticsData({
-      bookings: bookingsCount || 0, revenue,
+      bookings: bookingsCount || 0, revenue: spent,
       followers: profile?.follower_count || 0,
       engagement: myPosts.length > 0 ? Math.round((myPosts.reduce((s, p) => s + (p.like_count || 0), 0) / myPosts.length) * 10) / 10 : 0,
     });
@@ -69,28 +69,56 @@ export default function ProfilePage() {
 
   const isProfessional = profile?.user_type === 'professional';
   const isBusiness = profile?.user_type === 'business';
+  const isClient = !isProfessional && !isBusiness;
 
-  const stats = [
+  const stats = isProfessional || isBusiness ? [
+    { label: "Follower", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
+    { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
+    { label: "Post", value: myPosts.length.toString(), icon: Star },
+  ] : [
     { label: "Follower", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
     { label: "Seguiti", value: (profile?.following_count || 0).toLocaleString(), icon: Heart },
     { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
   ];
 
-  const menuItems = [
-    ...(isBusiness ? [{ icon: Building2, label: "Dashboard Business", path: "/business" }] : []),
-    ...(isProfessional || isBusiness ? [{ icon: Briefcase, label: "Gestisci Annunci HR", path: "/hr" }] : []),
+  const clientMenu = [
     { icon: Calendar, label: "I miei Appuntamenti", path: "/my-bookings" },
     { icon: ShoppingBag, label: "Shop & Prodotti", path: "/shop" },
-    { icon: Star, label: "Eventi & Workshop", path: "/events" },
     { icon: Users, label: "Cerca Stilisti", path: "/stylists" },
+    { icon: Star, label: "Eventi & Workshop", path: "/events" },
     { icon: Video, label: "Live Stream", path: "/live" },
-    { icon: Radio, label: "Radio", path: "/radio" },
-    { icon: BarChart3, label: "Classifica", path: "/leaderboard" },
     { icon: Trophy, label: "Sfide", path: "/challenges" },
     { icon: Gift, label: "Gira & Vinci", path: "/spin" },
     { icon: MessageCircle, label: "Chat", path: "/chat" },
     { icon: Cog, label: "Impostazioni", path: "/settings" },
   ];
+
+  const proMenu = [
+    { icon: BarChart3, label: "Analytics", path: "/analytics" },
+    { icon: Calendar, label: "Prenotazioni Ricevute", path: "/my-bookings" },
+    { icon: ShoppingBag, label: "I miei Prodotti", path: "/shop" },
+    { icon: Briefcase, label: "Annunci Lavoro", path: "/hr" },
+    { icon: Video, label: "Vai Live", path: "/go-live" },
+    { icon: Star, label: "Eventi & Workshop", path: "/events" },
+    { icon: Trophy, label: "Sfide & Classifica", path: "/challenges" },
+    { icon: MessageCircle, label: "Chat", path: "/chat" },
+    { icon: Cog, label: "Impostazioni", path: "/settings" },
+  ];
+
+  const bizMenu = [
+    { icon: Building2, label: "Dashboard Business", path: "/business" },
+    { icon: BarChart3, label: "Analytics Salone", path: "/analytics" },
+    { icon: Calendar, label: "Prenotazioni", path: "/my-bookings" },
+    { icon: ShoppingBag, label: "Vetrina Prodotti", path: "/shop" },
+    { icon: Briefcase, label: "Gestisci Annunci HR", path: "/hr" },
+    { icon: Users, label: "Team", path: "/business/team" },
+    { icon: Video, label: "Vai Live", path: "/go-live" },
+    { icon: Star, label: "Eventi & Workshop", path: "/events" },
+    { icon: MessageCircle, label: "Chat", path: "/chat" },
+    { icon: Cog, label: "Impostazioni", path: "/settings" },
+  ];
+
+  const menuItems = isBusiness ? bizMenu : isProfessional ? proMenu : clientMenu;
 
   const fallbackImages = [beauty1, beauty2, stylist2, beauty3, beauty1, beauty2];
 
@@ -120,9 +148,15 @@ export default function ProfilePage() {
             <img src={profile?.avatar_url || stylist2} alt="Profile" className="w-full h-full rounded-full object-cover" />
           </div>
           <h2 className="text-lg font-display font-bold">{profile?.display_name || user.email}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isProfessional ? 'Professionista' : isBusiness ? 'Business' : 'Beauty Lover'}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+            }`}>
+              {isBusiness ? '🏢 Business' : isProfessional ? '💇‍♀️ Professionista' : '👤 Beauty Lover'}
+            </span>
+            {profile?.city && <span className="text-[10px] text-muted-foreground">📍 {profile.city}</span>}
+          </div>
+          {profile?.bio && <p className="text-xs text-muted-foreground mt-1 text-center max-w-[250px]">{profile.bio}</p>}
 
           <div className="flex gap-2 mt-5 w-full">
             <button onClick={() => navigate(isProfessional || isBusiness ? "/business" : "/my-bookings")}
@@ -212,7 +246,7 @@ export default function ProfilePage() {
             {[
               { label: "Prenotazioni", value: analyticsData.bookings.toString(), icon: Calendar },
               { label: "Follower", value: analyticsData.followers.toLocaleString(), icon: Users },
-              { label: "QR Coins", value: analyticsData.revenue.toLocaleString(), icon: Coins },
+              { label: "Spesi €", value: analyticsData.revenue.toLocaleString(), icon: Coins },
               { label: "Like medi", value: analyticsData.engagement.toString(), icon: Heart },
             ].map(data => {
               const Icon = data.icon;

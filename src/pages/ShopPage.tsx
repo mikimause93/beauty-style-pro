@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, Plus, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,25 +28,55 @@ const sections = [
   { key: "products" as const, label: "Prodotti", icon: ShoppingBag },
   { key: "categories" as const, label: "Categorie", icon: Star },
   { key: "featured" as const, label: "In Evidenza", icon: Gift },
+  { key: "my_products" as const, label: "I Miei", icon: Package },
 ];
 
 export default function ShopPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured">("products");
+  const [activeSection, setActiveSection] = useState<"products" | "categories" | "featured" | "my_products">("products");
   const [products, setProducts] = useState<Product[]>([]);
+  const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ name: string; count: number; image: string }[]>([]);
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number } | null>(null);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", description: "", category: "Hair Care" });
 
   const qrCoins = profile?.qr_coins || 0;
 
+  const isSeller = profile?.user_type === 'professional' || profile?.user_type === 'business';
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+    if (user && isSeller) fetchMyProducts();
+  }, [user, isSeller]);
+
+  const fetchMyProducts = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("products").select("*").eq("seller_id", user.id).order("created_at", { ascending: false });
+    setMyProducts(data || []);
+  };
+
+  const handleAddProduct = async () => {
+    if (!user || !newProduct.name.trim() || !newProduct.price) { toast.error("Compila nome e prezzo"); return; }
+    const { error } = await supabase.from("products").insert({
+      seller_id: user.id,
+      name: newProduct.name.trim(),
+      price: parseFloat(newProduct.price),
+      description: newProduct.description.trim() || null,
+      category: newProduct.category,
+    });
+    if (error) { toast.error("Errore nell'aggiunta"); return; }
+    toast.success("Prodotto aggiunto! 🎉");
+    setNewProduct({ name: "", price: "", description: "", category: "Hair Care" });
+    setShowAddProduct(false);
+    fetchMyProducts();
+    fetchProducts();
+  };
 
   const fetchProducts = async () => {
     const { data } = await supabase
@@ -100,8 +130,7 @@ export default function ShopPage() {
     if (!user) { navigate("/auth"); return; }
     const discount = appliedPromo ? (product.price * appliedPromo.discount / 100) : 0;
     const finalPrice = product.price - discount;
-    // Record purchase
-    await supabase.from("product_purchases").insert({
+    const { error } = await supabase.from("product_purchases").insert({
       buyer_id: user.id,
       product_id: product.id,
       unit_price: product.price,
@@ -109,16 +138,11 @@ export default function ShopPage() {
       discount_amount: discount,
       payment_method: "wallet",
     });
-    // Record transaction
-    await supabase.from("transactions").insert({
-      user_id: user.id,
-      type: "spend",
-      amount: finalPrice,
-      description: `Acquisto: ${product.name}`,
-      reference_type: "product",
-      reference_id: product.id,
-    });
-    toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}! ✨`);
+    if (error) {
+      toast.error("Errore nell'acquisto");
+    } else {
+      toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}! ✨`);
+    }
   };
 
   const applyPromoCode = async () => {
@@ -161,12 +185,12 @@ export default function ShopPage() {
           </div>
         </div>
 
-        <div className="flex gap-2 mt-3">
-          {sections.map(s => {
+        <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar">
+          {sections.filter(s => s.key !== 'my_products' || isSeller).map(s => {
             const Icon = s.icon;
             return (
               <button key={s.key} onClick={() => setActiveSection(s.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                   activeSection === s.key ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 }`}>
                 <Icon className="w-3.5 h-3.5" />{s.label}
@@ -294,6 +318,64 @@ export default function ShopPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {activeSection === "my_products" && isSeller && (
+              <div className="space-y-4 fade-in">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">La tua vetrina prodotti</p>
+                  <button onClick={() => setShowAddProduct(!showAddProduct)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
+                    <Plus className="w-3.5 h-3.5" /> Aggiungi
+                  </button>
+                </div>
+
+                {showAddProduct && (
+                  <div className="p-4 rounded-2xl bg-card border border-border space-y-3">
+                    <input value={newProduct.name} onChange={e => setNewProduct(p => ({ ...p, name: e.target.value }))}
+                      placeholder="Nome prodotto *" className="w-full h-10 rounded-xl bg-background border border-border px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                    <input value={newProduct.price} onChange={e => setNewProduct(p => ({ ...p, price: e.target.value }))}
+                      placeholder="Prezzo (€) *" type="number" step="0.01" className="w-full h-10 rounded-xl bg-background border border-border px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                    <textarea value={newProduct.description} onChange={e => setNewProduct(p => ({ ...p, description: e.target.value }))}
+                      placeholder="Descrizione..." rows={2} className="w-full rounded-xl bg-background border border-border px-4 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                    <select value={newProduct.category} onChange={e => setNewProduct(p => ({ ...p, category: e.target.value }))}
+                      className="w-full h-10 rounded-xl bg-background border border-border px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30">
+                      {["Hair Care", "Skincare", "Makeup", "Nails", "Tools", "Altro"].map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowAddProduct(false)} className="flex-1 py-2 rounded-xl bg-muted text-sm font-semibold">Annulla</button>
+                      <button onClick={handleAddProduct} className="flex-1 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">Pubblica</button>
+                    </div>
+                  </div>
+                )}
+
+                {myProducts.length === 0 && !showAddProduct ? (
+                  <div className="p-8 rounded-xl bg-card border border-dashed border-border text-center">
+                    <Package className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nessun prodotto nella tua vetrina</p>
+                    <button onClick={() => setShowAddProduct(true)}
+                      className="mt-3 px-4 py-2 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
+                      Aggiungi il primo prodotto
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {myProducts.map((product, idx) => (
+                      <div key={product.id} className="rounded-xl bg-card overflow-hidden shadow-card border border-border">
+                        <div className="relative">
+                          <img src={getImage(product, idx)} alt={product.name} className="w-full aspect-square object-cover" />
+                          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[10px] font-bold">Il tuo</span>
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-medium truncate">{product.name}</p>
+                          <p className="text-sm font-bold text-primary mt-1">€{product.price}</p>
+                          <p className="text-[10px] text-muted-foreground">{product.category}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </>

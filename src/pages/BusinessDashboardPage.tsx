@@ -24,16 +24,15 @@ export default function BusinessDashboardPage() {
     enabled: !!user,
   });
 
-  // Fetch team members
+  // Fetch professionals linked to this business
   const { data: teamMembers } = useQuery({
-    queryKey: ["team_members", business?.id],
+    queryKey: ["team_professionals", business?.user_id],
     queryFn: async () => {
       if (!business) return [];
       const { data } = await supabase
-        .from("team_members")
+        .from("professionals")
         .select("*")
-        .eq("business_id", business.id)
-        .eq("active", true);
+        .eq("city", business.city || "");
       return data || [];
     },
     enabled: !!business,
@@ -75,17 +74,16 @@ export default function BusinessDashboardPage() {
     enabled: !!business,
   });
 
-  // Fetch revenue
+  // Fetch revenue from purchases
   const { data: revenue } = useQuery({
     queryKey: ["business_revenue", user?.id],
     queryFn: async () => {
       if (!user) return 0;
       const { data } = await supabase
-        .from("transactions")
-        .select("amount")
-        .eq("user_id", user.id)
-        .eq("type", "credit");
-      return data?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+        .from("product_purchases")
+        .select("total_price")
+        .eq("buyer_id", user.id);
+      return data?.reduce((sum, t) => sum + (Number(t.total_price) || 0), 0) || 0;
     },
     enabled: !!user,
   });
@@ -96,7 +94,7 @@ export default function BusinessDashboardPage() {
   };
 
   const stats = [
-    { label: "Dipendenti", value: teamMembers?.length || 0, icon: Users, color: "text-primary" },
+    { label: "Team", value: teamMembers?.length || 0, icon: Users, color: "text-primary" },
     { label: "Prenotazioni", value: bookingsCount || 0, icon: Calendar, color: "text-gold" },
     { label: "Fatturato", value: formatRevenue(revenue || 0), icon: TrendingUp, color: "text-success" },
     { label: "Annunci Attivi", value: jobPosts?.filter(j => j.status === "active").length || 0, icon: Briefcase, color: "text-live" },
@@ -261,16 +259,12 @@ export default function BusinessDashboardPage() {
               teamMembers.map(member => (
                 <div key={member.id} className="flex-shrink-0 w-20 text-center">
                   <div className="w-14 h-14 rounded-full mx-auto mb-1 overflow-hidden border-2 border-border">
-                    {member.avatar ? (
-                      <img src={member.avatar} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
-                        {member.name[0]}
-                      </div>
-                    )}
+                    <div className="w-full h-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
+                      {(member.business_name || "?")[0]}
+                    </div>
                   </div>
-                  <p className="text-xs font-medium truncate">{member.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{member.position || member.role}</p>
+                  <p className="text-xs font-medium truncate">{member.business_name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{member.specialty || "Pro"}</p>
                 </div>
               ))
             ) : (
