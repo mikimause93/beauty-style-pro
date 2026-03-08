@@ -37,6 +37,8 @@ import MapSearchPage from "./pages/MapSearchPage";
 import HomeServicePage from "./pages/HomeServicePage";
 import SettingsPage from "./pages/SettingsPage";
 import ReviewPage from "./pages/ReviewPage";
+import ReferralPage from "./pages/ReferralPage";
+import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +78,8 @@ const App = () => (
             <Route path="/map-search" element={<MapSearchPage />} />
             <Route path="/home-service/:id" element={<HomeServicePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/referral" element={<ReferralPage />} />
+            <Route path="/analytics" element={<AnalyticsDashboardPage />} />
             <Route path="/qr-coins" element={<QRCoinsPage />} />
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />
