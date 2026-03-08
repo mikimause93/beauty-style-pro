@@ -190,8 +190,8 @@ export default function HomePage() {
           {[
             { icon: "💇‍♀️", label: "Stylists", path: "/stylists" },
             { icon: "📅", label: "Booking", path: "/booking" },
-            { icon: "🎯", label: "Challenges", path: "/challenges" },
-            { icon: "✨", label: "Before/After", path: "/before-after" },
+            { icon: "🗺️", label: "Mappa AI", path: "/map-search" },
+            { icon: "🏠", label: "Domicilio", path: "/map-search" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
               className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all">

@@ -29,6 +29,8 @@ import BusinessDashboardPage from "./pages/BusinessDashboardPage";
 import HRPage from "./pages/HRPage";
 import CreateJobPostPage from "./pages/CreateJobPostPage";
 import JobDetailPage from "./pages/JobDetailPage";
+import MapSearchPage from "./pages/MapSearchPage";
+import HomeServicePage from "./pages/HomeServicePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,8 @@ const App = () => (
             <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/before-after" element={<BeforeAfterPage />} />
+            <Route path="/map-search" element={<MapSearchPage />} />
+            <Route path="/home-service/:id" element={<HomeServicePage />} />
             <Route path="/qr-coins" element={<QRCoinsPage />} />
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/spin" element={<SpinWheelPage />} />
