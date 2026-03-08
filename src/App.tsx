@@ -37,6 +37,8 @@ import MapSearchPage from "./pages/MapSearchPage";
 import HomeServicePage from "./pages/HomeServicePage";
 import SettingsPage from "./pages/SettingsPage";
 import ReviewPage from "./pages/ReviewPage";
+import ReferralPage from "./pages/ReferralPage";
+import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
