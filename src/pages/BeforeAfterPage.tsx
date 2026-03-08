@@ -78,7 +78,7 @@ export default function BeforeAfterPage() {
         </button>
         <div className="flex-1">
           <h1 className="text-lg font-display font-bold">Prima & Dopo</h1>
-          <p className="text-[10px] text-muted-foreground">Scopri e prenota le trasformazioni ✨</p>
+          <p className="text-[10px] text-muted-foreground">Scopri e prenota le trasformazioni</p>
         </div>
         <button onClick={() => navigate("/transformation-challenge")} className="px-3 py-1.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
           <Sparkles className="w-3 h-3" /> Challenge

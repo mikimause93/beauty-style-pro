@@ -165,9 +165,9 @@ export default function ReferralPage() {
           <h3 className="font-semibold mb-3">Come funziona</h3>
           <div className="space-y-3">
             {[
-              { icon: "📤", text: "Condividi il tuo codice referral unico" },
-              { icon: "👤", text: "Il tuo amico si registra con il tuo codice" },
-              { icon: "🎁", text: "Entrambi guadagnate 20 QR Coin!" },
+              { icon: "1", text: "Condividi il tuo codice referral unico" },
+              { icon: "2", text: "Il tuo amico si registra con il tuo codice" },
+              { icon: "3", text: "Entrambi guadagnate 20 QR Coin!" },
             ].map((step, i) => (
               <div key={i} className="flex items-center gap-3">
                 <span className="text-xl">{step.icon}</span>

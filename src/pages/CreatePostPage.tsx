@@ -68,7 +68,7 @@ export default function CreatePostPage() {
     if (error) {
       toast.error("Errore nella pubblicazione");
     } else {
-      toast.success("Post pubblicato! ✨");
+      toast.success("Post pubblicato!");
       navigate("/");
     }
     setLoading(false);

@@ -248,9 +248,9 @@ export default function TransformationChallengePage() {
                     {/* Style Details */}
                     {ch.style_name && (
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">✨ {ch.style_name}</span>}
-                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">🔧 {ch.technique}</span>}
-                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">⏱ {ch.estimated_duration}</span>}
+                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.style_name}</span>}
+                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.technique}</span>}
+                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.estimated_duration}</span>}
                         {ch.estimated_price && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">€{ch.estimated_price}</span>}
                       </div>
                     )}

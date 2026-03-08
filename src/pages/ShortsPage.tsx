@@ -63,7 +63,7 @@ const fallbackShorts: Short[] = [
   {
     id: "4",
     user: { name: "SkincarePro", avatar: beauty2, verified: true },
-    caption: "Routine skincare in 3 step 💆‍♀️ Risultati in 2 settimane! #skincare",
+    caption: "Routine skincare in 3 step. Risultati in 2 settimane! #skincare",
     image: stylist1,
     likes: 3400,
     comments: 210,
