@@ -1,8 +1,9 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, TrendingUp, Users, Eye, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Radio, Video, MessageCircle, Bell } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posts" | "analytics" | "referral">("posts");
   const { user, profile, signOut } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   if (!user) {
@@ -34,7 +36,7 @@ export default function ProfilePage() {
 
   const stats = [
     { label: "Followers", value: (profile?.follower_count || 0).toLocaleString(), icon: Users },
-    { label: "Total Views", value: "52.0K", icon: Eye },
+    { label: "Following", value: (profile?.following_count || 0).toLocaleString(), icon: Heart },
     { label: "QR Coins", value: (profile?.qr_coins || 0).toLocaleString(), icon: Coins },
   ];
 
@@ -64,8 +66,13 @@ export default function ProfilePage() {
           <button onClick={async () => { await signOut(); toast.success("Disconnesso"); navigate("/auth"); }} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <LogOut className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button onClick={() => navigate("/notifications")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Settings className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <Bell className="w-4 h-4 text-muted-foreground" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-destructive flex items-center justify-center px-0.5">
+                <span className="text-[9px] font-bold text-destructive-foreground">{unreadCount}</span>
+              </span>
+            )}
           </button>
         </div>
       </header>

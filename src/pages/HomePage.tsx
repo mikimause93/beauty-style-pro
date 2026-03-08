@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import logo from "@/assets/logo.png";
@@ -42,6 +43,7 @@ const fallbackPosts: Post[] = [
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { unreadCount } = useNotifications();
   const [activeTab, setActiveTab] = useState("New");
   const [posts, setPosts] = useState<Post[]>(fallbackPosts);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
@@ -85,7 +87,14 @@ export default function HomePage() {
 
   const toggleLike = async (postId: string) => {
     if (!user) { navigate('/auth'); return; }
-    setLikedPosts(prev => prev.includes(postId) ? prev.filter(id => id !== postId) : [...prev, postId]);
+    const isLiked = likedPosts.includes(postId);
+    setLikedPosts(prev => isLiked ? prev.filter(id => id !== postId) : [...prev, postId]);
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, like_count: p.like_count + (isLiked ? -1 : 1) } : p));
+    if (isLiked) {
+      await supabase.from("post_likes").delete().eq("user_id", user.id).eq("post_id", postId);
+    } else {
+      await supabase.from("post_likes").insert({ user_id: user.id, post_id: postId });
+    }
   };
 
   const formatTimeAgo = (date: string) => {
@@ -119,7 +128,11 @@ export default function HomePage() {
             </button>
             <button onClick={() => navigate("/notifications")} className="relative w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
               <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-live border-2 border-background" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-destructive flex items-center justify-center px-1">
+                  <span className="text-[10px] font-bold text-destructive-foreground">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                </span>
+              )}
             </button>
             <button onClick={() => navigate("/chat")} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-muted-foreground" />
