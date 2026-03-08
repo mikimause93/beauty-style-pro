@@ -54,6 +54,8 @@ import ManageProductsPage from "./pages/ManageProductsPage";
 import WalletPage from "./pages/WalletPage";
 import AdminPage from "./pages/AdminPage";
 import CreatorApplicationPage from "./pages/CreatorApplicationPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import BoostProfilePage from "./pages/BoostProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -115,6 +117,9 @@ const App = () => {
             <Route path="/manage-products" element={<ManageProductsPage />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/subscriptions" element={<SubscriptionPage />} />
+            <Route path="/boost" element={<BoostProfilePage />} />
+            <Route path="/become-creator" element={<CreatorApplicationPage />} />
             <Route path="/become-creator" element={<CreatorApplicationPage />} />
             {/* Business & HR */}
             <Route path="/business" element={<BusinessDashboardPage />} />

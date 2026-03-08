@@ -1234,6 +1234,27 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       playlists: {
         Row: {
           cover_image: string | null
@@ -1514,6 +1535,42 @@ export type Database = {
           review_count?: number | null
           specialty?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profile_boosts: {
+        Row: {
+          active: boolean | null
+          boost_type: string
+          created_at: string
+          duration_days: number
+          expires_at: string
+          id: string
+          price_paid: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          boost_type?: string
+          created_at?: string
+          duration_days?: number
+          expires_at: string
+          id?: string
+          price_paid?: number
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          boost_type?: string
+          created_at?: string
+          duration_days?: number
+          expires_at?: string
+          id?: string
+          price_paid?: number
+          started_at?: string
           user_id?: string
         }
         Relationships: []
@@ -2013,6 +2070,60 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          active: boolean | null
+          ads_included: boolean | null
+          ai_promotion: boolean | null
+          analytics_access: boolean | null
+          created_at: string
+          features: Json
+          id: string
+          map_priority: boolean | null
+          max_services: number | null
+          name: string
+          price_monthly: number
+          price_yearly: number
+          priority_support: boolean | null
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          ads_included?: boolean | null
+          ai_promotion?: boolean | null
+          analytics_access?: boolean | null
+          created_at?: string
+          features?: Json
+          id?: string
+          map_priority?: boolean | null
+          max_services?: number | null
+          name: string
+          price_monthly?: number
+          price_yearly?: number
+          priority_support?: boolean | null
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          ads_included?: boolean | null
+          ai_promotion?: boolean | null
+          analytics_access?: boolean | null
+          created_at?: string
+          features?: Json
+          id?: string
+          map_priority?: boolean | null
+          max_services?: number | null
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          priority_support?: boolean | null
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           accepted_at: string | null
@@ -2276,6 +2387,53 @@ export type Database = {
             columns: ["badge_id"]
             isOneToOne: false
             referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_trial: boolean | null
+          payment_method: string | null
+          plan_id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_trial?: boolean | null
+          payment_method?: string | null
+          plan_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_trial?: boolean | null
+          payment_method?: string | null
+          plan_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]
