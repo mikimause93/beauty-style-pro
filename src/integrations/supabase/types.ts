@@ -671,6 +671,42 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          created_at: string
+          error_type: string
+          id: string
+          message: string
+          metadata: Json | null
+          page_path: string | null
+          severity: string
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          page_path?: string | null
+          severity?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          page_path?: string | null
+          severity?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       event_participants: {
         Row: {
           attended: boolean | null
@@ -2544,6 +2580,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stress_test_results: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          success: boolean | null
+          test_name: string
+          test_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          success?: boolean | null
+          test_name: string
+          test_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          success?: boolean | null
+          test_name?: string
+          test_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       subscription_plans: {
         Row: {
