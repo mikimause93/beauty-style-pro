@@ -1,4 +1,5 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag } from "lucide-react";
+import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
@@ -223,45 +224,12 @@ export default function HomePage() {
         {activeTab === "New" && (
           <div className="space-y-4 fade-in">
             {posts.map(post => (
-              <div key={post.id} className="rounded-2xl bg-card overflow-hidden shadow-card">
-                {/* Post Header */}
-                <div className="flex items-center gap-3 p-3">
-                  <img src={post.profileData?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.id}`}
-                    alt="" className="w-10 h-10 rounded-full object-cover border border-border"
-                    onError={(e) => { (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.id}`; }} />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">{post.profileData?.display_name || 'Beauty Pro'}</p>
-                    <p className="text-[10px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
-                  </div>
-                  <button onClick={() => navigate("/booking")} className="px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
-                    Book
-                  </button>
-                </div>
-                {/* Image */}
-                {post.image_url && (
-                  <img src={post.image_url} alt="" className="w-full aspect-[4/5] object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = beauty1; }} />
-                )}
-                {/* Actions */}
-                <div className="p-3">
-                  <div className="flex items-center gap-4 mb-2">
-                    <button onClick={() => toggleLike(post.id)} className="flex items-center gap-1.5">
-                      <Heart className={`w-5 h-5 ${likedPosts.includes(post.id) ? "text-primary fill-primary" : "text-muted-foreground"}`} />
-                      <span className="text-xs font-medium">{post.like_count}</span>
-                    </button>
-                    <button onClick={() => navigate("/chat")} className="flex items-center gap-1.5">
-                      <MessageCircle className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-xs font-medium">{post.comment_count}</span>
-                    </button>
-                    <button onClick={() => setSharePost(post)} className="flex items-center gap-1.5">
-                      <Share2 className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                    <div className="flex-1" />
-                    <button><Bookmark className="w-5 h-5 text-muted-foreground" /></button>
-                  </div>
-                  {post.caption && <p className="text-sm">{post.caption}</p>}
-                </div>
-              </div>
+              <PostCard
+                key={post.id}
+                post={post}
+                onShare={() => setSharePost(post)}
+                fallbackImage={beauty1}
+              />
             ))}
           </div>
         )}

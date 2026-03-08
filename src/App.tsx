@@ -19,6 +19,8 @@ import EventsPage from "./pages/EventsPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import StylistsPage from "./pages/StylistsPage";
 import StylistDetailPage from "./pages/StylistDetailPage";
+import ServiceDetailPage from "./pages/ServiceDetailPage";
+import BusinessProfilePage from "./pages/BusinessProfilePage";
 import ChatPage from "./pages/ChatPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import EditProfilePage from "./pages/EditProfilePage";
@@ -62,6 +64,8 @@ const App = () => (
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/stylists" element={<StylistsPage />} />
             <Route path="/stylist/:id" element={<StylistDetailPage />} />
+            <Route path="/service/:id" element={<ServiceDetailPage />} />
+            <Route path="/business/:id" element={<BusinessProfilePage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
