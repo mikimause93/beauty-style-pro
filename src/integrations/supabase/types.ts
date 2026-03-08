@@ -1375,6 +1375,53 @@ export type Database = {
         }
         Relationships: []
       }
+      product_purchases: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          discount_amount: number | null
+          id: string
+          payment_method: string | null
+          product_id: string | null
+          quantity: number
+          status: string | null
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          payment_method?: string | null
+          product_id?: string | null
+          quantity?: number
+          status?: string | null
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          payment_method?: string | null
+          product_id?: string | null
+          quantity?: number
+          status?: string | null
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
