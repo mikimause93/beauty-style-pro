@@ -208,6 +208,10 @@ export default function HomePage() {
             { icon: "✨", label: "AI Beauty", path: "/ai-assistant" },
             { icon: "🎬", label: "Shorts", path: "/shorts" },
             { icon: "🎡", label: "Gira&Vinci", path: "/spin" },
+            { icon: "🏆", label: "Challenge", path: "/transformation-challenge" },
+            { icon: "📸", label: "Prima/Dopo", path: "/before-after" },
+            { icon: "🎵", label: "Radio", path: "/radio" },
+            { icon: "🏅", label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => navigate(item.path)}
               className="flex flex-col items-center gap-1.5 py-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200">
