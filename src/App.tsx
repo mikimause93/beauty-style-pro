@@ -68,7 +68,11 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import NotFound from "./pages/NotFound";
+import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { initGlobalErrorHandler } from "@/lib/errorLogger";
+
+initGlobalErrorHandler();
 
 const queryClient = new QueryClient();
 
@@ -159,6 +163,7 @@ const App = () => {
             <Route path="/hr/job/:id" element={<P><JobDetailPage /></P>} />
             <Route path="/hr/job/:id/manage" element={<P><JobDetailPage /></P>} />
             <Route path="/hr/application/:id" element={<P><HRPage /></P>} />
+            <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </RadioProvider>
