@@ -1,4 +1,5 @@
 import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight } from "lucide-react";
+import TrendingClips from "@/components/feed/TrendingClips";
 import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -151,6 +152,9 @@ export default function HomePage() {
           </button>
         ))}
       </div>
+
+      {/* Trending Clips */}
+      {activeTab === "Nuovi" && <TrendingClips />}
 
       {/* Live Banner — subtle */}
       {activeTab !== "Stilisti" && (
