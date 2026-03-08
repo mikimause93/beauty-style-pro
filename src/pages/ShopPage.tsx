@@ -376,7 +376,6 @@ export default function ShopPage() {
       {/* Share Menu */}
       {shareProduct && (
         <ShareMenu
-          isOpen={!!shareProduct}
           onClose={() => setShareProduct(null)}
           title={shareProduct.name}
           url={`https://stayle.app/product/${shareProduct.id}`}
