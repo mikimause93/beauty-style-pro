@@ -114,7 +114,7 @@ export default function StylistsPage() {
               <p className="text-sm font-bold text-primary">€{stylist.hourly_rate}</p>
               <p className="text-[10px] text-muted-foreground">/ora</p>
               <button className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
-                Book
+                Prenota
               </button>
             </div>
           </button>
