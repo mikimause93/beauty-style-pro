@@ -347,6 +347,7 @@ export default function ProfilePage() {
           {[
             { key: "grid" as const, icon: Grid3X3 },
             { key: "feed" as const, icon: Heart },
+            ...((isProfessional || isBusiness) ? [{ key: "vetrina" as const, icon: Store }] : []),
             ...(myProducts.length > 0 || (isOwnProfile && (isProfessional || isBusiness)) ? [{ key: "products" as const, icon: Tag }] : []),
             ...(isOwnProfile ? [{ key: "saved" as const, icon: Bookmark }] : []),
           ].map(tab => {
