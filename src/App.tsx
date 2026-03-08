@@ -13,6 +13,8 @@ import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import BookingPage from "./pages/BookingPage";
+import BookingDetailPage from "./pages/BookingDetailPage";
+import MyBookingsPage from "./pages/MyBookingsPage";
 import EventsPage from "./pages/EventsPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import StylistsPage from "./pages/StylistsPage";
@@ -54,6 +56,8 @@ const App = () => (
             <Route path="/profile/edit" element={<EditProfilePage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking/:id" element={<BookingPage />} />
+            <Route path="/my-bookings" element={<MyBookingsPage />} />
+            <Route path="/my-bookings/:id" element={<BookingDetailPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/stylists" element={<StylistsPage />} />

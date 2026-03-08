@@ -216,6 +216,29 @@ export default function BookingPage() {
           </div>
         </div>
 
+        {/* Location Selection */}
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <MapPin className="w-4 h-4 inline mr-1" /> Luogo
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            {locationOptions.map(loc => (
+              <button
+                key={loc.id}
+                onClick={() => setSelectedLocation(loc.id)}
+                className={`flex flex-col items-center py-3 px-2 rounded-xl transition-all ${
+                  selectedLocation === loc.id
+                    ? "gradient-primary text-primary-foreground"
+                    : "bg-card hover:bg-muted"
+                }`}
+              >
+                <span className="text-2xl mb-1">{loc.icon}</span>
+                <span className="text-xs font-medium">{loc.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Notes */}
         <div>
           <textarea
