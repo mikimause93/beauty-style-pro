@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer, Heart, Sparkles, Zap, Video, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -32,7 +32,13 @@ interface ChatMessage {
   side?: "a" | "b";
 }
 
-const reactionEmojis = ["🔥", "❤️", "👏", "😍", "⭐"];
+const reactionIcons = [
+  { Icon: Flame, label: "fire", color: "text-destructive" },
+  { Icon: Heart, label: "heart", color: "text-primary" },
+  { Icon: Sparkles, label: "sparkle", color: "text-accent" },
+  { Icon: Crown, label: "crown", color: "text-yellow-400" },
+  { Icon: Trophy, label: "star", color: "text-accent" },
+];
 
 export default function LiveBattlePage() {
   const navigate = useNavigate();
@@ -97,7 +103,7 @@ export default function LiveBattlePage() {
     setHasVoted(true);
     setChatMessages(prev => [...prev, {
       id: `vote-${Date.now()}`, user: profile?.display_name || "Utente",
-      message: withQRC ? `ha inviato ${qrcAmount} QRC a ${name}! 🔥` : `ha votato per ${name}! 👍`,
+      message: withQRC ? `ha inviato ${qrcAmount} QRC a ${name}!` : `ha votato per ${name}!`,
       type: withQRC ? "tip" : "vote", side
     }]);
 
@@ -186,7 +192,7 @@ export default function LiveBattlePage() {
                   disabled={hasVoted}
                   className="w-full mt-2 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-bold disabled:opacity-50"
                 >
-                  {hasVoted ? "Votato ✓" : "👍 Vota"}
+                   {hasVoted ? "Votato ✓" : "Vota"}
                 </button>
               </div>
             </div>
@@ -211,7 +217,7 @@ export default function LiveBattlePage() {
                   disabled={hasVoted}
                   className="w-full mt-2 py-2.5 rounded-xl bg-accent text-accent-foreground text-sm font-bold disabled:opacity-50"
                 >
-                  {hasVoted ? "Votato ✓" : "👍 Vota"}
+                  {hasVoted ? "Votato ✓" : "Vota"}
                 </button>
               </div>
             </div>
@@ -228,8 +234,8 @@ export default function LiveBattlePage() {
               <span className="text-xs font-bold text-accent">{pctB}%</span>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-[10px] text-muted-foreground">⚡ {selectedBattle.score_a + selectedBattle.score_b} voti totali</span>
-              <span className="text-[10px] text-gold font-bold">🏆 {selectedBattle.prize_pool} QRC in palio</span>
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Zap className="w-3 h-3" /> {selectedBattle.score_a + selectedBattle.score_b} voti totali</span>
+              <span className="text-[10px] text-gold font-bold flex items-center gap-1"><Trophy className="w-3 h-3" /> {selectedBattle.prize_pool} QRC in palio</span>
             </div>
           </div>
 
@@ -270,12 +276,12 @@ export default function LiveBattlePage() {
 
             {/* Reactions + Input */}
             <div className="flex items-center gap-2 mb-3">
-              {reactionEmojis.map(e => (
-                <button key={e} onClick={() => {
-                  setChatMessages(prev => [...prev, { id: `r-${Date.now()}`, user: profile?.display_name || "Utente", message: e, type: "chat" }]);
+              {reactionIcons.map(r => (
+                <button key={r.label} onClick={() => {
+                  setChatMessages(prev => [...prev, { id: `r-${Date.now()}`, user: profile?.display_name || "Utente", message: r.label, type: "chat" }]);
                   awardCoins("react_live", true);
-                }} className="w-9 h-9 rounded-full glass flex items-center justify-center text-lg hover:scale-110 transition-transform">
-                  {e}
+                }} className="w-9 h-9 rounded-full glass flex items-center justify-center hover:scale-110 transition-transform shrink-0">
+                  <r.Icon className={`w-4 h-4 ${r.color}`} />
                 </button>
               ))}
             </div>
@@ -321,9 +327,9 @@ export default function LiveBattlePage() {
                 </div>
                 <button
                   onClick={() => vote(tipSide, true)}
-                  className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg"
+                  className="w-full py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg flex items-center justify-center gap-2"
                 >
-                  🔥 Invia {tipAmount} QRC
+                  <Flame className="w-5 h-5" /> Invia {tipAmount} QRC
                 </button>
               </div>
             </div>
@@ -344,8 +350,8 @@ export default function LiveBattlePage() {
             </h1>
             <p className="text-sm text-muted-foreground">Sfide in tempo reale tra professionisti</p>
           </div>
-          <button onClick={() => navigate("/live")} className="px-4 py-2 rounded-full glass text-sm font-semibold">
-            📺 Live
+          <button onClick={() => navigate("/live")} className="px-4 py-2 rounded-full glass text-sm font-semibold flex items-center gap-1.5">
+            <Video className="w-4 h-4" /> Live
           </button>
         </div>
       </header>
@@ -378,8 +384,8 @@ export default function LiveBattlePage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Nessuna Battle attiva</h3>
             <p className="text-muted-foreground text-sm mb-4">Sfida un professionista dalla tua live!</p>
-            <button onClick={() => navigate("/go-live")} className="px-6 py-3 rounded-xl gradient-primary text-primary-foreground font-bold">
-              🔴 Avvia una Live
+            <button onClick={() => navigate("/go-live")} className="px-6 py-3 rounded-xl gradient-primary text-primary-foreground font-bold flex items-center gap-2">
+              <Circle className="w-4 h-4 text-destructive fill-destructive" /> Avvia una Live
             </button>
           </div>
         ) : (
@@ -408,7 +414,7 @@ export default function LiveBattlePage() {
                     </div>
                     <div className="shrink-0">
                       <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                        <span className="text-lg font-bold">⚡</span>
+                        <Zap className="w-5 h-5 text-destructive" />
                       </div>
                     </div>
                     <div className="flex-1 text-center">

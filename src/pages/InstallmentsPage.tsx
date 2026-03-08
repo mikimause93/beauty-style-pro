@@ -74,7 +74,7 @@ export default function InstallmentsPage() {
         reference_type: "installment",
         reference_id: payment.id,
       });
-      toast.success(`Rata ${payment.installment_number} pagata! ✅`);
+      toast.success(`Rata ${payment.installment_number} pagata!`);
       loadData();
     }
   };

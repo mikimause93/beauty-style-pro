@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { aiJobMatch } from "@/lib/ai";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
-import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 export default function JobDetailPage() {
@@ -93,7 +93,7 @@ export default function JobDetailPage() {
       await supabase.from("job_posts").update({ application_count: (job.application_count || 0) + 1 }).eq("id", id!);
       setAlreadyApplied(true);
       setShowApplyForm(false);
-      toast.success("Candidatura inviata! 🎉");
+      toast.success("Candidatura inviata!");
     }
     setApplying(false);
   };
@@ -214,8 +214,8 @@ export default function JobDetailPage() {
 
         {/* Stats */}
         <div className="flex gap-4 text-xs text-muted-foreground">
-          <span>👁 {job.view_count || 0} visualizzazioni</span>
-          <span>📋 {job.application_count || 0} candidature</span>
+          <span className="flex items-center gap-1"><EyeIcon className="w-3 h-3" /> {job.view_count || 0} visualizzazioni</span>
+          <span className="flex items-center gap-1"><FileText className="w-3 h-3" /> {job.application_count || 0} candidature</span>
         </div>
 
         {/* Apply form */}
@@ -230,9 +230,9 @@ export default function JobDetailPage() {
               className="w-full rounded-xl bg-background border border-border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
             {profile?.cv_url ? (
-              <p className="text-xs text-green-600">✅ CV già caricato nel profilo</p>
+              <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> CV già caricato nel profilo</p>
             ) : (
-              <p className="text-xs text-muted-foreground">💡 Puoi caricare il CV nelle impostazioni profilo</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Puoi caricare il CV nelle impostazioni profilo</p>
             )}
 
             {/* Multiple apply methods */}
@@ -255,7 +255,7 @@ export default function JobDetailPage() {
                   onClick={handleWhatsAppApply}
                   className="flex-1 h-10 rounded-xl bg-green-600 text-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5"
                 >
-                  💬 WhatsApp
+                  <Phone className="w-4 h-4" /> WhatsApp
                 </button>
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function JobDetailPage() {
                   <MessageCircle className="w-4 h-4 text-primary" /> Chat Diretta
                 </button>
                 <button onClick={handleWhatsAppApply} className="flex-1 h-10 rounded-xl bg-green-600 text-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5">
-                  💬 WhatsApp
+                  <Phone className="w-4 h-4" /> WhatsApp
                 </button>
                 <button onClick={() => setShowShare(true)} className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                   <Share2 className="w-4 h-4" />

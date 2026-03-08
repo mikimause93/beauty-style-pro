@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Camera, MapPin, Phone, Mail, Navigation, Briefcase } from "lucide-react";
+import { ArrowLeft, Camera, MapPin, Phone, Mail, Navigation, Briefcase, User, Scissors, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,15 +158,15 @@ export default function EditProfilePage() {
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Tipo Account</p>
           <div className="flex gap-1.5">
             {[
-              { key: "client", label: "Cliente", icon: "👤" },
-              { key: "professional", label: "Pro", icon: "💇‍♀️" },
-              { key: "business", label: "Business", icon: "🏢" },
+              { key: "client", label: "Cliente", Icon: User },
+              { key: "professional", label: "Pro", Icon: Scissors },
+              { key: "business", label: "Business", Icon: Building2 },
             ].map(t => (
               <button key={t.key} onClick={() => setUserType(t.key)}
                 className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   userType === t.key ? "bg-primary text-primary-foreground" : "bg-card border border-border/50 text-muted-foreground"
                 }`}>
-                {t.icon} {t.label}
+                <t.Icon className="w-4 h-4 inline mr-1" /> {t.label}
               </button>
             ))}
           </div>

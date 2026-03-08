@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -17,9 +17,9 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   const profileTypes = [
-    { key: "client", label: "Cliente", icon: "👤", desc: "Prenota servizi" },
-    { key: "professional", label: "Pro", icon: "💇‍♀️", desc: "Offri servizi" },
-    { key: "business", label: "Business", icon: "🏢", desc: "Gestisci salone" },
+    { key: "client", label: "Cliente", Icon: User, desc: "Prenota servizi" },
+    { key: "professional", label: "Pro", Icon: Scissors, desc: "Offri servizi" },
+    { key: "business", label: "Business", Icon: Building2, desc: "Gestisci salone" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,7 +77,7 @@ export default function AuthPage() {
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card border-border/50 text-muted-foreground"
                     }`}>
-                    <span className="text-base">{t.icon}</span>
+                    <t.Icon className="w-5 h-5" />
                     <span>{t.label}</span>
                     <span className={`text-[9px] font-normal ${userType === t.key ? "text-primary-foreground/70" : "text-muted-foreground/50"}`}>{t.desc}</span>
                   </button>

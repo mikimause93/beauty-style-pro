@@ -41,7 +41,7 @@ export default function HomeServicePage() {
     }
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1500));
-    toast.success("🏠 Prenotazione a domicilio confermata! Il professionista verrà da te.");
+    toast.success("Prenotazione a domicilio confermata! Il professionista verrà da te.");
     setLoading(false);
     navigate("/profile");
   };
@@ -122,7 +122,7 @@ export default function HomeServicePage() {
         {/* Step 2: Date, Time & Address */}
         {step === 2 && (
           <div className="space-y-4 fade-in">
-            <h2 className="text-sm font-bold">📅 Scegli data e orario</h2>
+            <h2 className="text-sm font-bold flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> Scegli data e orario</h2>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {dates.map((d) => {
                 const date = new Date(d);
@@ -143,7 +143,7 @@ export default function HomeServicePage() {
               })}
             </div>
 
-            <h2 className="text-sm font-bold">⏰ Orario</h2>
+            <h2 className="text-sm font-bold flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Orario</h2>
             <div className="grid grid-cols-3 gap-2">
               {timeSlots.map((t) => (
                 <button
@@ -168,7 +168,7 @@ export default function HomeServicePage() {
               className="w-full h-12 rounded-xl bg-card border border-border px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
 
-            <h2 className="text-sm font-bold">📝 Note aggiuntive</h2>
+            <h2 className="text-sm font-bold flex items-center gap-2"><MessageCircle className="w-4 h-4 text-primary" /> Note aggiuntive</h2>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -243,7 +243,7 @@ export default function HomeServicePage() {
               </div>
 
               <p className="text-[10px] text-muted-foreground text-center">
-                ⚡ Supplemento domicilio incluso nel prezzo
+                Supplemento domicilio incluso nel prezzo
               </p>
             </div>
 
