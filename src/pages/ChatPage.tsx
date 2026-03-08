@@ -291,11 +291,27 @@ export default function ChatPage() {
     !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Voice bubble
+  // Voice bubble with real audio playback
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleVoicePlay = (msg: Message) => {
+    if (playingVoice === msg.id) {
+      audioRef.current?.pause();
+      setPlayingVoice(null);
+    } else {
+      if (audioRef.current) audioRef.current.pause();
+      const audio = new Audio(msg.mediaUrl);
+      audio.onended = () => setPlayingVoice(null);
+      audio.play().catch(() => toast.error("Impossibile riprodurre audio"));
+      audioRef.current = audio;
+      setPlayingVoice(msg.id);
+    }
+  };
+
   const VoiceBubble = ({ msg }: { msg: Message }) => {
     const isPlaying = playingVoice === msg.id;
     return (
-      <button onClick={() => setPlayingVoice(isPlaying ? null : msg.id)} className="flex items-center gap-2 min-w-[140px]">
+      <button onClick={() => toggleVoicePlay(msg)} className="flex items-center gap-2 min-w-[140px]">
         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${msg.sender === "me" ? "bg-primary-foreground/20" : "bg-primary/20"}`}>
           {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
         </div>
