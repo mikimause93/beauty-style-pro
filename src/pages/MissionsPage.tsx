@@ -55,6 +55,12 @@ const defaultBadges: BadgeItem[] = [
   { id: "b8", name: "Ambasciatore", description: "Invita 10 amici", icon: "users", rarity: "legendary", earned: false },
 ];
 
+const iconMap: Record<string, any> = {
+  smartphone: Smartphone, video: Video, heart: Heart, share: Share2, message: MessageCircle,
+  star: Star, film: Film, filetext: FileText, calendar: CalendarDays,
+  sparkles: Sparkles, users: Users, coins: Coins, crown: Crown, flame: Flame,
+};
+
 const rarityColors: Record<string, string> = {
   common: "from-muted to-muted-foreground/20",
   rare: "from-blue-500/20 to-blue-600/20",
@@ -213,7 +219,7 @@ export default function MissionsPage() {
             {dailyMissions.map(mission => (
               <div key={mission.id} className={`rounded-xl bg-card border p-4 transition-all ${mission.completed ? "border-primary/30 bg-primary/5" : "border-border"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{mission.icon}</span>
+                  {(() => { const IconComp = iconMap[mission.icon]; return IconComp ? <IconComp className="w-6 h-6 text-primary" /> : <Zap className="w-6 h-6 text-primary" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{mission.title}</p>
@@ -269,7 +275,7 @@ export default function MissionsPage() {
             {weeklyMissions.map(mission => (
               <div key={mission.id} className={`rounded-xl bg-card border p-4 transition-all ${mission.completed ? "border-primary/30 bg-primary/5" : "border-border"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{mission.icon}</span>
+                  {(() => { const IconComp = iconMap[mission.icon]; return IconComp ? <IconComp className="w-6 h-6 text-primary" /> : <Zap className="w-6 h-6 text-primary" />; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{mission.title}</p>
@@ -318,7 +324,7 @@ export default function MissionsPage() {
                   }`}
                 >
                   <div className="relative inline-block">
-                    <span className={`text-4xl ${!badge.earned ? "grayscale" : ""}`}>{badge.icon}</span>
+                    {(() => { const IconComp = iconMap[badge.icon]; return IconComp ? <IconComp className={`w-8 h-8 ${!badge.earned ? "text-muted-foreground" : "text-primary"}`} /> : <Star className={`w-8 h-8 ${!badge.earned ? "text-muted-foreground" : "text-primary"}`} />; })()}
                     {!badge.earned && (
                       <Lock className="w-4 h-4 text-muted-foreground absolute -bottom-1 -right-1" />
                     )}
