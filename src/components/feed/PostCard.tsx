@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +33,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
   const [comment, setComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comment_count);
   const [comments, setComments] = useState<{ id: string; message: string; name: string; time: string }[]>([]);
+  const [sliderPos, setSliderPos] = useState(50);
 
   const formatTimeAgo = (date: string) => {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
