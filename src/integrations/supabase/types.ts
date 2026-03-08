@@ -1674,65 +1674,89 @@ export type Database = {
         Row: {
           availability: Json | null
           avatar_url: string | null
+          bank_holder_name: string | null
           bio: string | null
           city: string | null
           created_at: string
           cv_url: string | null
           desired_categories: string[] | null
           display_name: string | null
+          document_urls: string[] | null
           experience_years: number | null
           follower_count: number
           following_count: number
+          iban: string | null
           id: string
+          otp_code: string | null
+          otp_expires_at: string | null
           phone: string | null
+          phone_verified: boolean
           portfolio_urls: string[] | null
           qr_coins: number
           skills: string[] | null
           updated_at: string
           user_id: string
           user_type: string
+          verification_notes: string | null
+          verification_status: string
         }
         Insert: {
           availability?: Json | null
           avatar_url?: string | null
+          bank_holder_name?: string | null
           bio?: string | null
           city?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
+          document_urls?: string[] | null
           experience_years?: number | null
           follower_count?: number
           following_count?: number
+          iban?: string | null
           id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
           phone?: string | null
+          phone_verified?: boolean
           portfolio_urls?: string[] | null
           qr_coins?: number
           skills?: string[] | null
           updated_at?: string
           user_id: string
           user_type?: string
+          verification_notes?: string | null
+          verification_status?: string
         }
         Update: {
           availability?: Json | null
           avatar_url?: string | null
+          bank_holder_name?: string | null
           bio?: string | null
           city?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
+          document_urls?: string[] | null
           experience_years?: number | null
           follower_count?: number
           following_count?: number
+          iban?: string | null
           id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
           phone?: string | null
+          phone_verified?: boolean
           portfolio_urls?: string[] | null
           qr_coins?: number
           skills?: string[] | null
           updated_at?: string
           user_id?: string
           user_type?: string
+          verification_notes?: string | null
+          verification_status?: string
         }
         Relationships: []
       }
