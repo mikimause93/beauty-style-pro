@@ -114,8 +114,31 @@ export default function LiveStreamPage() {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [chatMessages]);
 
-  // Auto-earn + badge checks
+  // Realtime chat subscription
   useEffect(() => {
+    if (!selectedStream) return;
+    const channel = supabase
+      .channel(`live-chat-${selectedStream.id}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "stream_comments",
+        filter: `stream_id=eq.${selectedStream.id}`,
+      }, async (payload) => {
+        const comment = payload.new as any;
+        // Don't add own messages (already added locally)
+        if (comment.user_id === user?.id) return;
+        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).single();
+        setChatMessages(prev => [...prev, {
+          id: comment.id,
+          user: prof?.display_name || "Utente",
+          message: comment.message,
+          type: "chat",
+        }]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedStream?.id]);
     if (selectedStream) {
       watchTimerRef.current = window.setInterval(() => {
         awardCoins("watch_live", true);
