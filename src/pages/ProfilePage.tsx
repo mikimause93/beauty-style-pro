@@ -161,6 +161,7 @@ export default function ProfilePage() {
             ...(isBusiness ? [
               { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
             ] : []),
+            { icon: ShoppingBag, label: "Marketplace", action: () => navigate("/marketplace") },
             { icon: Gift, label: "Invita Amici", action: () => navigate("/referral") },
             { icon: Crown, label: "Abbonamenti", action: () => navigate("/subscriptions") },
             { icon: Rocket, label: "Boost Profilo", action: () => navigate("/boost") },
