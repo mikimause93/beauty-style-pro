@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Building2, Home, Monitor } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Clock, MapPin, Star, CheckCircle } from "lucide-react";

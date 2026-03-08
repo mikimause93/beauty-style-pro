@@ -299,7 +299,7 @@ export default function BookingPage() {
                       : "bg-card hover:bg-muted"
                   }`}
                 >
-                  <span className="text-2xl mb-1">{loc.icon}</span>
+                  <loc.Icon className="w-6 h-6 mb-1" />
                   <span className="text-xs font-medium">{loc.label}</span>
                 </button>
               ))}

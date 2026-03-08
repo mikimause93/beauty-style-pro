@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3 } from "lucide-react";
+import { ArrowLeft, TrendingUp, Coins, Users, Star, Calendar, Eye, BarChart3, Target, Trophy, Gift, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";

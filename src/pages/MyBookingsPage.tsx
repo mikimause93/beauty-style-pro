@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { CalendarDays } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Calendar, Clock, ChevronRight } from "lucide-react";
