@@ -1,4 +1,4 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -162,6 +162,8 @@ export default function ProfilePage() {
               { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
             ] : []),
             { icon: Gift, label: "Invita Amici", action: () => navigate("/referral") },
+            { icon: Crown, label: "Abbonamenti", action: () => navigate("/subscriptions") },
+            { icon: Rocket, label: "Boost Profilo", action: () => navigate("/boost") },
             { icon: Wallet, label: "Wallet", action: () => navigate("/wallet") },
             { icon: Coins, label: "QR Coins", action: () => navigate("/qr-coins") },
             { icon: Cog, label: "Impostazioni", action: () => navigate("/settings") },
