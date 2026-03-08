@@ -15,7 +15,6 @@ interface Story {
   caption: string | null;
   view_count: number;
   created_at: string;
-  profile?: { display_name: string | null; avatar_url: string | null };
 }
 
 interface GroupedStory {
@@ -38,22 +37,37 @@ export default function StoriesBar() {
   const [viewingGroup, setViewingGroup] = useState<GroupedStory | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    loadStories();
-  }, [user]);
+  useEffect(() => { loadStories(); }, [user]);
 
   const loadStories = async () => {
+    // Load stories without FK join (no FK from stories to profiles)
     const { data, error } = await supabase
       .from("stories")
-      .select("*, profiles:user_id(display_name, avatar_url)")
+      .select("*")
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false });
 
+    if (error) {
+      console.error("Stories load error:", error);
+      setGroups(fallbackStories);
+      return;
+    }
+
     if (data && data.length > 0) {
+      // Load profiles separately
+      const userIds = [...new Set(data.map(s => s.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .in("user_id", userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
       const grouped: Record<string, GroupedStory> = {};
       for (const s of data) {
-        const p = s.profiles as any;
+        const p = profileMap.get(s.user_id);
         if (!grouped[s.user_id]) {
           grouped[s.user_id] = {
             user_id: s.user_id,
@@ -73,11 +87,50 @@ export default function StoriesBar() {
     }
   };
 
+  const handleAddStory = async () => {
+    if (!user) { navigate("/auth"); return; }
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*,video/*";
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setUploading(true);
+
+      try {
+        const ext = file.name.split(".").pop();
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from("posts").upload(path, file);
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = supabase.storage.from("posts").getPublicUrl(path);
+        const mediaUrl = urlData.publicUrl;
+        const mediaType = file.type.startsWith("video") ? "video" : "image";
+
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+        const { error: insertErr } = await supabase.from("stories").insert({
+          user_id: user.id,
+          media_url: mediaUrl,
+          media_type: mediaType,
+          expires_at: expiresAt,
+        });
+
+        if (insertErr) throw insertErr;
+        await loadStories();
+      } catch (err) {
+        console.error("Story upload error:", err);
+      }
+      setUploading(false);
+    };
+    input.click();
+  };
+
   const openStory = (group: GroupedStory) => {
     setViewingGroup(group);
     setCurrentIndex(0);
     setProgress(0);
-    // Track view
     if (user && group.stories[0]) {
       supabase.from("story_views").insert({ story_id: group.stories[0].id, user_id: user.id }).then(() => {});
     }
@@ -121,17 +174,18 @@ export default function StoriesBar() {
 
   return (
     <>
-      {/* Stories Bar */}
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {/* Add Story */}
-        {user && (
-          <button onClick={() => navigate("/create-post")} className="flex flex-col items-center gap-1 flex-shrink-0">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-primary/40">
+        <button onClick={handleAddStory} disabled={uploading} className="flex flex-col items-center gap-1 flex-shrink-0">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-primary/40">
+            {uploading ? (
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
               <Plus className="w-5 h-5 text-primary" />
-            </div>
-            <span className="text-[10px] text-muted-foreground">La tua</span>
-          </button>
-        )}
+            )}
+          </div>
+          <span className="text-[10px] text-muted-foreground">{uploading ? "..." : "La tua"}</span>
+        </button>
 
         {groups.map((group) => (
           <button key={group.user_id} onClick={() => openStory(group)} className="flex flex-col items-center gap-1 flex-shrink-0">
@@ -146,7 +200,6 @@ export default function StoriesBar() {
       {/* Full Screen Story Viewer */}
       {viewingGroup && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
-          {/* Progress bars */}
           <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2 pt-safe">
             {viewingGroup.stories.map((_, i) => (
               <div key={i} className="flex-1 h-[2px] bg-white/30 rounded-full overflow-hidden">
@@ -156,7 +209,6 @@ export default function StoriesBar() {
             ))}
           </div>
 
-          {/* Header */}
           <div className="absolute top-8 left-0 right-0 z-10 flex items-center gap-3 px-4">
             <img src={viewingGroup.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
             <span className="text-white text-sm font-semibold flex-1">{viewingGroup.display_name}</span>
@@ -165,23 +217,22 @@ export default function StoriesBar() {
             </button>
           </div>
 
-          {/* Story Content */}
           <div className="flex-1 flex items-center justify-center relative">
-            <img src={viewingGroup.stories[currentIndex]?.media_url} alt="" className="w-full h-full object-contain" />
-
-            {/* Tap zones */}
+            {viewingGroup.stories[currentIndex]?.media_type === "video" ? (
+              <video src={viewingGroup.stories[currentIndex]?.media_url} autoPlay muted className="w-full h-full object-contain" />
+            ) : (
+              <img src={viewingGroup.stories[currentIndex]?.media_url} alt="" className="w-full h-full object-contain" />
+            )}
             <button onClick={prevStory} className="absolute left-0 top-0 bottom-0 w-1/3" />
             <button onClick={nextStory} className="absolute right-0 top-0 bottom-0 w-1/3" />
           </div>
 
-          {/* Caption */}
           {viewingGroup.stories[currentIndex]?.caption && (
             <div className="absolute bottom-20 left-0 right-0 px-6 text-center">
               <p className="text-white text-sm drop-shadow-lg">{viewingGroup.stories[currentIndex].caption}</p>
             </div>
           )}
 
-          {/* View count */}
           <div className="absolute bottom-8 left-0 right-0 flex justify-center">
             <div className="flex items-center gap-1 bg-white/10 rounded-full px-3 py-1">
               <Eye className="w-3 h-3 text-white/70" />

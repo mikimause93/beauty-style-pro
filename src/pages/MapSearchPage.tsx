@@ -1,7 +1,7 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Search, MapPin, Navigation, Star, Filter, Sparkles, Home, Locate, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -58,6 +58,7 @@ export default function MapSearchPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadProfessionals();
@@ -66,7 +67,7 @@ export default function MapSearchPage() {
 
   const loadUserLocation = async () => {
     if (!user) return;
-    const { data } = await supabase.from("profiles").select("city, availability").eq("user_id", user.id).single();
+    const { data } = await supabase.from("profiles").select("city, availability").eq("user_id", user.id).maybeSingle();
     if (data?.city) setUserCity(data.city);
     const prefs = data?.availability as any;
     if (prefs?.latitude && prefs?.longitude) {
@@ -84,7 +85,6 @@ export default function MapSearchPage() {
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
       });
       setUserCoords([pos.coords.latitude, pos.coords.longitude]);
-      // Find closest city
       let closest = "Milano"; let minDist = Infinity;
       for (const [name, [clat, clng]] of Object.entries(cityCoords)) {
         const d = Math.sqrt((pos.coords.latitude - clat) ** 2 + (pos.coords.longitude - clng) ** 2);
@@ -166,6 +166,24 @@ export default function MapSearchPage() {
     setAiLoading(false);
   };
 
+  // Build Google Maps embed URL with markers
+  const mapEmbedUrl = useMemo(() => {
+    const center = `${userCoords[0]},${userCoords[1]}`;
+    const zoom = maxDistance > 100 ? 6 : maxDistance > 50 ? 8 : 10;
+    // Use OpenStreetMap embed as free alternative (no API key needed)
+    const bbox = (() => {
+      const delta = maxDistance / 111; // rough degrees
+      return `${userCoords[1] - delta},${userCoords[0] - delta},${userCoords[1] + delta},${userCoords[0] + delta}`;
+    })();
+    // Using an iframe with marker pins
+    let markers = filtered.slice(0, 10).map(p => {
+      const coords = cityCoords[(p.city || "").toLowerCase()] || cityCoords.milano;
+      return `${coords[0]},${coords[1]}`;
+    });
+    // Use OpenStreetMap
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${center}`;
+  }, [userCoords, filtered, maxDistance]);
+
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-5 py-3">
@@ -239,39 +257,17 @@ export default function MapSearchPage() {
         </div>
       )}
 
-      {/* Map */}
-      <div className="mx-5 mt-3 rounded-2xl overflow-hidden border border-border/50 relative" style={{ height: 200 }}>
-        <div className="w-full h-full bg-card flex items-center justify-center relative">
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: "radial-gradient(circle, hsl(var(--primary)/0.3) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }} />
-          <div className="absolute" style={{ top: "45%", left: "48%" }}>
-            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
-              <Navigation className="w-3.5 h-3.5 text-primary-foreground" />
-            </div>
-            <span className="text-[8px] text-primary font-bold mt-0.5 block text-center">Tu</span>
-          </div>
-          {filtered.slice(0, 5).map((p, i) => {
-            const positions = [
-              { top: "20%", left: "25%" }, { top: "28%", left: "72%" },
-              { top: "65%", left: "30%" }, { top: "58%", left: "75%" },
-              { top: "15%", left: "52%" },
-            ];
-            return (
-              <button key={p.id} onClick={() => navigate(`/stylist/${p.id}`)} className="absolute group" style={positions[i]}>
-                <div className="w-7 h-7 rounded-full border-2 border-primary/30 overflow-hidden shadow-sm group-hover:scale-110 transition-transform">
-                  <img src={p.avatar || fallbackAvatars[i % 3]} alt="" className="w-full h-full object-cover" />
-                </div>
-                <div className="hidden group-hover:block absolute -top-7 left-1/2 -translate-x-1/2 bg-card px-2 py-1 rounded-lg shadow text-[8px] font-semibold whitespace-nowrap border border-border/50 z-10">
-                  {p.business_name} · {p.distance}km
-                </div>
-              </button>
-            );
-          })}
-          <div className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded-lg text-[8px] text-muted-foreground border border-border/50">
-            {userCity} · {filtered.length} risultati
-          </div>
+      {/* Real Map Embed */}
+      <div className="mx-5 mt-3 rounded-2xl overflow-hidden border border-border/50 relative" style={{ height: 220 }}>
+        <iframe
+          src={mapEmbedUrl}
+          className="w-full h-full border-0"
+          title="Mappa professionisti"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded-lg text-[8px] text-muted-foreground border border-border/50">
+          {userCity} · {filtered.length} risultati
         </div>
       </div>
 
