@@ -83,11 +83,11 @@ export default function HomePage() {
             <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <Search className="w-4 h-4 text-muted-foreground" />
             </button>
-            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
+            <button onClick={() => navigate("/notifications")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
               <Bell className="w-4 h-4 text-muted-foreground" />
               <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
             </button>
-            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <MessageCircle className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
