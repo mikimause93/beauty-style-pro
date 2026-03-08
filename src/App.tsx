@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { RadioProvider } from "@/contexts/RadioContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import HomePage from "./pages/HomePage";
@@ -85,6 +86,7 @@ const App = () => {
       {showSplash && <SplashScreen onComplete={() => { localStorage.setItem("style_splash_shown", "1"); setShowSplash(false); }} />}
       <BrowserRouter>
         <AuthProvider>
+        <RadioProvider>
           <Routes>
             {/* Public routes - accessible without login */}
             <Route path="/" element={<HomePage />} />
@@ -157,6 +159,7 @@ const App = () => {
             <Route path="/hr/application/:id" element={<P><HRPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+        </RadioProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
