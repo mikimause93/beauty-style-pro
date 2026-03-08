@@ -172,10 +172,10 @@ export default function TransformationChallengePage() {
         {/* View Toggle */}
         <div className="flex gap-2 mb-3">
           <button onClick={() => setView("feed")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "feed" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            🔥 Feed
+            Feed
           </button>
           <button onClick={() => setView("leaderboard")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "leaderboard" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            🏆 Classifica
+            Classifica
           </button>
         </div>
 
@@ -248,9 +248,9 @@ export default function TransformationChallengePage() {
                     {/* Style Details */}
                     {ch.style_name && (
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">✨ {ch.style_name}</span>}
-                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">🔧 {ch.technique}</span>}
-                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">⏱ {ch.estimated_duration}</span>}
+                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.style_name}</span>}
+                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.technique}</span>}
+                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.estimated_duration}</span>}
                         {ch.estimated_price && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">€{ch.estimated_price}</span>}
                       </div>
                     )}
@@ -338,7 +338,7 @@ export default function TransformationChallengePage() {
                   <div className="space-y-2">
                     {catChallenges.map((ch, i) => (
                       <div key={ch.id} className="flex items-center gap-3">
-                        <span className="text-lg">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</span>
+                        <span className="text-sm font-bold text-muted-foreground">{i + 1}</span>
                         <img src={ch.after_image_url || beauty2} alt="" className="w-10 h-10 rounded-lg object-cover" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate">{ch.title}</p>

@@ -465,7 +465,7 @@ export default function ChatPage() {
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-4xl mb-3">💬</p>
+            <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">Nessuna conversazione</p>
             <p className="text-xs text-muted-foreground mt-1">Inizia una chat dal profilo di uno stilista</p>
           </div>

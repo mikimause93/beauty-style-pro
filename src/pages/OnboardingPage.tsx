@@ -230,7 +230,7 @@ export default function OnboardingPage() {
                         : "bg-background border-border text-muted-foreground"
                     }`}
                   >
-                    {t === "center" ? "🏢 Centro" : t === "barbershop" ? "💈 Barbershop" : t === "spa" ? "🧖 Spa" : "👤 Individuale"}
+                    {t === "center" ? "Centro" : t === "barbershop" ? "Barbershop" : t === "spa" ? "Spa" : "Individuale"}
                   </button>
                 ))}
               </div>
@@ -299,7 +299,7 @@ export default function OnboardingPage() {
               disabled={loading}
               className="flex-1 h-12 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm shadow-glow disabled:opacity-50"
             >
-              {loading ? "Salvataggio..." : "Completa Profilo ✨"}
+              {loading ? "Salvataggio..." : "Completa Profilo"}
             </button>
           )}
         </div>

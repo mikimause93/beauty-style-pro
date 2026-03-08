@@ -27,7 +27,7 @@ const fallbackShorts: Short[] = [
   {
     id: "1",
     user: { name: "GlowMaster", avatar: stylist1, verified: true },
-    caption: "Trasformazione colore incredibile! 🎨 Da castano a biondo cenere #beforeafter #colore",
+    caption: "Trasformazione colore incredibile! Da castano a biondo cenere #beforeafter #colore",
     image: beauty1,
     likes: 1243,
     comments: 89,
@@ -39,7 +39,7 @@ const fallbackShorts: Short[] = [
   {
     id: "2",
     user: { name: "HairQueen", avatar: beauty2, verified: true },
-    caption: "Tutorial taglio bob corto ✂️ Perfetto per la primavera! #tutorial #bob",
+    caption: "Tutorial taglio bob corto. Perfetto per la primavera! #tutorial #bob",
     image: stylist2,
     likes: 892,
     comments: 56,
@@ -63,7 +63,7 @@ const fallbackShorts: Short[] = [
   {
     id: "4",
     user: { name: "SkincarePro", avatar: beauty2, verified: true },
-    caption: "Routine skincare in 3 step 💆‍♀️ Risultati in 2 settimane! #skincare",
+    caption: "Routine skincare in 3 step. Risultati in 2 settimane! #skincare",
     image: stylist1,
     likes: 3400,
     comments: 210,

@@ -270,7 +270,7 @@ export default function MapSearchPage() {
             );
           })}
           <div className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded-lg text-[8px] text-muted-foreground border border-border/50">
-            📍 {userCity} · {filtered.length} risultati
+            {userCity} · {filtered.length} risultati
           </div>
         </div>
       </div>

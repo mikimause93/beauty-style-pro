@@ -1,5 +1,7 @@
 import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
+import ReelsSection from "@/components/feed/ReelsSection";
+import SponsorBanner from "@/components/feed/SponsorBanner";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import { useState, useEffect } from "react";
@@ -157,6 +159,9 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Reels */}
+      {activeTab === "Nuovi" && <ReelsSection />}
+
       {/* Trending Clips */}
       {activeTab === "Nuovi" && <TrendingClips />}
 
@@ -239,6 +244,8 @@ export default function HomePage() {
         {/* Feed */}
         {activeTab === "Nuovi" && (
           <div className="space-y-4 fade-in">
+            {/* Sponsor Banner */}
+            <SponsorBanner />
             {posts.map(post => (
               <PostCard key={post.id} post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
             ))}

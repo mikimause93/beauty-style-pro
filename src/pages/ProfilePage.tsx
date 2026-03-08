@@ -1,4 +1,4 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -224,7 +224,7 @@ export default function ProfilePage() {
             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
               isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
             }`}>
-              {isBusiness ? '🏢 Business' : isProfessional ? '💇‍♀️ Pro' : '👤 Cliente'}
+              {isBusiness ? 'Business' : isProfessional ? 'Pro' : 'Cliente'}
             </span>
           </div>
 
@@ -298,24 +298,27 @@ export default function ProfilePage() {
         {isOwnProfile && (
           <div className="flex gap-3 mb-5 overflow-x-auto no-scrollbar pb-1">
             {[
-              { icon: "📅", label: "Prenotazioni", path: "/my-bookings" },
-              { icon: "🛍️", label: "Shop", path: "/shop" },
-              { icon: "💬", label: "Chat", path: "/chat" },
-              { icon: "🏆", label: "Sfide", path: "/challenges" },
-              { icon: "🎡", label: "Gira&Vinci", path: "/spin" },
+              { Icon: Calendar, label: "Prenotazioni", path: "/my-bookings" },
+              { Icon: ShoppingBag, label: "Shop", path: "/shop" },
+              { Icon: MessageCircle, label: "Chat", path: "/chat" },
+              { Icon: Trophy, label: "Sfide", path: "/challenges" },
+              { Icon: RotateCw, label: "Gira&Vinci", path: "/spin" },
               ...(isProfessional || isBusiness ? [
-                { icon: "📊", label: "Analytics", path: "/analytics" },
-                { icon: "👥", label: "HR", path: "/hr" },
+                { Icon: BarChart3, label: "Analytics", path: "/analytics" },
+                { Icon: Users, label: "HR", path: "/hr" },
               ] : []),
-            ].map(item => (
-              <button key={item.label} onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-1 min-w-[56px]">
-                <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center text-xl">
-                  {item.icon}
-                </div>
-                <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
-              </button>
-            ))}
+            ].map(item => {
+              const ItemIcon = item.Icon;
+              return (
+                <button key={item.label} onClick={() => navigate(item.path)}
+                  className="flex flex-col items-center gap-1 min-w-[56px]">
+                  <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center">
+                    <ItemIcon className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 

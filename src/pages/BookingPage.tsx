@@ -123,7 +123,7 @@ export default function BookingPage() {
       toast.error("Errore nella prenotazione");
     } else {
       setConfirmed(true);
-      toast.success("Prenotazione confermata! ✨");
+      toast.success("Prenotazione confermata!");
     }
     setLoading(false);
   };

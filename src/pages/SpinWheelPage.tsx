@@ -113,9 +113,9 @@ export default function SpinWheelPage() {
       </header>
 
       <div className="flex flex-col items-center px-4 py-6 min-h-[calc(100vh-180px)]">
-        <div className="absolute top-20 left-4 text-2xl animate-pulse">⭐</div>
-        <div className="absolute top-32 right-8 text-xl animate-pulse delay-75">✨</div>
-        <div className="absolute top-48 left-8 text-lg animate-pulse delay-150">🌟</div>
+        <div className="absolute top-20 left-4 w-4 h-4 rounded-full bg-accent/20 animate-pulse" />
+        <div className="absolute top-32 right-8 w-3 h-3 rounded-full bg-primary/20 animate-pulse delay-75" />
+        <div className="absolute top-48 left-8 w-2.5 h-2.5 rounded-full bg-accent/30 animate-pulse delay-150" />
 
         <p className="text-center text-muted-foreground mb-6 max-w-xs">
           Gira la ruota per vincere <span className="text-gold font-semibold">QRCoins</span>, 
@@ -236,7 +236,7 @@ export default function SpinWheelPage() {
         )}
 
         <p className="text-[11px] text-muted-foreground mt-6 text-center px-8 leading-relaxed">
-          🎯 Completa le sfide per ottenere più giri<br/>
+          Completa le sfide per ottenere più giri<br/>
           I premi vengono accreditati istantaneamente
         </p>
       </div>

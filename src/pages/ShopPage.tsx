@@ -89,7 +89,7 @@ export default function ShopPage() {
 
   const toggleLike = (id: string) => {
     setLikedProducts(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
-    toast.success(likedProducts.includes(id) ? "Rimosso dai preferiti" : "Aggiunto ai preferiti ❤️");
+    toast.success(likedProducts.includes(id) ? "Rimosso dai preferiti" : "Aggiunto ai preferiti");
   };
 
   const addToCart = (id: string) => {
@@ -112,7 +112,7 @@ export default function ShopPage() {
     if (error) {
       toast.error("Errore nell'acquisto");
     } else {
-      toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}! ✨`);
+      toast.success(`Acquisto di ${product.name} per €${finalPrice.toFixed(2)}!`);
     }
   };
 
@@ -298,7 +298,7 @@ export default function ShopPage() {
             {/* Top Rated / Featured */}
             {activeSection === "featured" && (
               <div className="space-y-4 fade-in">
-                <p className="text-sm text-muted-foreground">I prodotti più amati dalla community ✨</p>
+                <p className="text-sm text-muted-foreground">I prodotti più amati dalla community</p>
                 {filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 6).map((product, idx) => (
                   <div key={product.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50">
                     <div className="relative">
@@ -363,7 +363,7 @@ export default function ShopPage() {
                 <button onClick={() => setSelectedProduct(null)} className="flex-1 py-3 rounded-xl bg-muted text-sm font-semibold">
                   Annulla
                 </button>
-                <button onClick={() => { toast.success("Recensione inviata! ⭐"); setSelectedProduct(null); setReviewText(""); }}
+                <button onClick={() => { toast.success("Recensione inviata!"); setSelectedProduct(null); setReviewText(""); }}
                   className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
                   Pubblica
                 </button>

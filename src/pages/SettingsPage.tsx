@@ -136,7 +136,7 @@ export default function SettingsPage() {
                 <span className="text-sm">Condividi posizione</span>
                 {currentCoords && (
                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                    📍 {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}
+                    {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}
                   </p>
                 )}
               </div>

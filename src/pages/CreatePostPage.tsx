@@ -68,7 +68,7 @@ export default function CreatePostPage() {
     if (error) {
       toast.error("Errore nella pubblicazione");
     } else {
-      toast.success("Post pubblicato! ✨");
+      toast.success("Post pubblicato!");
       navigate("/");
     }
     setLoading(false);
@@ -101,7 +101,7 @@ export default function CreatePostPage() {
               postType === "image" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
-            📸 Foto/Video
+            Foto/Video
           </button>
           <button
             onClick={() => setPostType("before_after")}
@@ -109,7 +109,7 @@ export default function CreatePostPage() {
               postType === "before_after" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
-            🔄 Before & After
+            Before & After
           </button>
         </div>
 
