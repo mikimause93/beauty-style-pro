@@ -32,6 +32,7 @@ export default function GoLivePage() {
   const [loading, setLoading] = useState(false);
 
   const startLive = async () => {
+    pauseRadio();
     if (!title.trim()) {
       toast.error("Inserisci un titolo per la live");
       return;
