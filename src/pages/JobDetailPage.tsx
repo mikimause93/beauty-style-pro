@@ -53,11 +53,25 @@ export default function JobDetailPage() {
   const handleApply = async () => {
     if (!user) { navigate("/auth"); return; }
     setApplying(true);
+
+    // Upload CV if provided
+    let cvUrl = profile?.cv_url || null;
+    if (cvFile) {
+      setUploadingCv(true);
+      const path = `${user.id}/cv/${Date.now()}_${cvFile.name}`;
+      const { error: upErr } = await supabase.storage.from("documents").upload(path, cvFile);
+      if (!upErr) {
+        cvUrl = path;
+        // Save to profile for future applications
+        await supabase.from("profiles").update({ cv_url: path }).eq("user_id", user.id);
+      }
+      setUploadingCv(false);
+    }
+
     const userSkills = profile?.skills || [];
     const requiredSkills = job?.required_skills || [];
     const exp = profile?.experience_years || 0;
 
-    // Try AI analysis first
     let matchScore = 0;
     let analysis: any = {};
     try {
@@ -66,7 +80,6 @@ export default function JobDetailPage() {
       analysis = aiResult || {};
       setAiAnalysis(aiResult);
     } catch {
-      // Fallback to basic matching
       if (requiredSkills.length > 0 && userSkills.length > 0) {
         const matching = userSkills.filter((s: string) =>
           requiredSkills.some((r: string) => r.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(r.toLowerCase()))
@@ -81,7 +94,7 @@ export default function JobDetailPage() {
       job_post_id: id,
       applicant_id: user.id,
       cover_letter: coverLetter || null,
-      cv_url: profile?.cv_url || null,
+      cv_url: cvUrl,
       portfolio_urls: profile?.portfolio_urls || [],
       ai_match_score: matchScore,
       ai_recommended: matchScore >= 60,
