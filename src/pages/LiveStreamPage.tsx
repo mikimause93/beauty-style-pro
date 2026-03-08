@@ -376,6 +376,12 @@ export default function LiveStreamPage() {
               <button onClick={shareInvite} className="w-10 h-10 rounded-full glass flex items-center justify-center">
                 <UserPlus className="w-4 h-4 text-primary" />
               </button>
+              <button onClick={() => setShowStyleReplicator(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Wand2 className="w-4 h-4 text-primary" />
+              </button>
+              <button onClick={() => setShowMusic(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                <Music className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* Chat Input */}
@@ -390,6 +396,15 @@ export default function LiveStreamPage() {
           </div>
 
           {showShop && <LiveShopPanel professionalId={selectedStream.professional?.id} onClose={() => setShowShop(false)} />}
+          {showStyleReplicator && (
+            <StyleReplicatorPanel
+              streamTitle={selectedStream.title}
+              streamCategory={selectedStream.category}
+              professionalName={selectedStream.professional?.business_name}
+              onClose={() => setShowStyleReplicator(false)}
+            />
+          )}
+          {showMusic && <LiveMusicSelector isStreamer={false} onClose={() => setShowMusic(false)} />}
 
           {/* Tip Modal */}
           {showTipModal && (
