@@ -41,11 +41,20 @@ export default function AIAssistantPage() {
   const [isSTTActive, setIsSTTActive] = useState(false);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
   
-  const { speak, cancel: cancelTTS, speaking, voices } = useVoiceSynthesis({
-    voice: voices.find(v => v.name.includes('Alice') || v.name.includes('Silvia') || v.lang.startsWith('it'))
-  });
+  const { speak, cancel: cancelTTS, speaking, voices } = useVoiceSynthesis();
   
   const {
+    isListening,
+    transcript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    resetTranscript,
+    isWakeWordListening,
+    wakeWordDetected,
+    startWakeWordListening,
+    stopWakeWordListening
+  } = useVoiceRecognition({
     isListening,
     transcript,
     interimTranscript,
