@@ -67,6 +67,7 @@ import ReceiptsPage from "./pages/ReceiptsPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
+import RemindersPage from "./pages/RemindersPage";
 import NotFound from "./pages/NotFound";
 import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -138,6 +139,7 @@ const App = () => {
             <Route path="/spin" element={<P><SpinWheelPage /></P>} />
             <Route path="/leaderboard" element={<P><LeaderboardPage /></P>} />
             <Route path="/missions" element={<P><MissionsPage /></P>} />
+            <Route path="/reminders" element={<P><RemindersPage /></P>} />
             <Route path="/ai-assistant" element={<P><AIAssistantPage /></P>} />
             <Route path="/go-live" element={<P><GoLivePage /></P>} />
             <Route path="/transformation-challenge" element={<P><TransformationChallengePage /></P>} />
