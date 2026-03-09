@@ -30,16 +30,56 @@ export default function AIAssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Ciao! Sono il tuo assistente beauty AI. Chiedimi qualsiasi cosa su tagli, colori, skincare, trattamenti o prodotti. Sono qui per aiutarti!",
+      content: "Ciao! Sono Stella, la tua assistente beauty AI. Chiedimi qualsiasi cosa su tagli, colori, skincare, trattamenti o prodotti. Sono qui per aiutarti!",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const [isSTTActive, setIsSTTActive] = useState(false);
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
+  
+  const { speak, cancel: cancelTTS, speaking, voices } = useVoiceSynthesis({
+    voice: voices.find(v => v.name.includes('Alice') || v.name.includes('Silvia') || v.lang.startsWith('it'))
+  });
+  
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    resetTranscript,
+    isWakeWordListening,
+    wakeWordDetected,
+    startWakeWordListening,
+    stopWakeWordListening
+  } = useVoiceRecognition({
+    continuous: false,
+    interimResults: true,
+    language: 'it-IT',
+    wakeWordEnabled: wakeWordEnabled,
+    wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
+    onWakeWordDetected: () => {
+      if (isTTSEnabled) {
+        speak("Ciao! Sono Stella, la tua assistente beauty. Come posso aiutarti?");
+      }
+    }
+  });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Handle transcript changes
+  useEffect(() => {
+    if (transcript && !isListening) {
+      setInput(transcript);
+      resetTranscript();
+    }
+  }, [transcript, isListening, resetTranscript]);
 
   const sendMessage = async () => {
     const text = input.trim();
@@ -69,6 +109,11 @@ export default function AIAssistantPage() {
         role: "assistant",
         content: aiContent,
       }]);
+
+      // Speak the response if TTS is enabled
+      if (isTTSEnabled) {
+        speak(aiContent);
+      }
     } catch (err: any) {
       console.error("AI error:", err);
       if (err?.message?.includes("429") || err?.status === 429) {
@@ -108,7 +153,7 @@ export default function AIAssistantPage() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 px-4 py-4 space-y-4 min-h-[60vh]">
+      <div className="flex-1 px-4 py-4 space-y-4 min-h-[50vh]">
         {messages.map(msg => (
           <div key={msg.id} className={`flex gap-2.5 fade-in ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${

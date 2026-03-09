@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -50,18 +50,34 @@ export const useVoiceRecognition = (
   const [isWakeWordListening, setIsWakeWordListening] = useState(false);
   const [wakeWordDetected, setWakeWordDetected] = useState(false);
   
-  const recognitionRef = useState<any>(null)[1];
-  const wakeWordRecognitionRef = useState<any>(null)[1];
+  const recognitionRef = useRef<any>(null);
+  const wakeWordRecognitionRef = useRef<any>(null);
   const isSupported = typeof window !== 'undefined' && 
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      setInterimTranscript('');
+    }
+  }, []);
+
+  const stopWakeWordListening = useCallback(() => {
+    if (wakeWordRecognitionRef.current) {
+      wakeWordRecognitionRef.current.stop();
+      setIsWakeWordListening(false);
+    }
+  }, []);
 
   const startListening = useCallback(() => {
     if (!isSupported) return;
 
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+      recognitionRef.current = new SpeechRecognition();
       
+      const recognition = recognitionRef.current;
       recognition.continuous = continuous;
       recognition.interimResults = interimResults;
       recognition.lang = language;
@@ -101,20 +117,11 @@ export const useVoiceRecognition = (
       };
 
       recognition.start();
-      recognitionRef(recognition);
     } catch (err) {
       setError('Speech recognition not supported');
       setIsListening(false);
     }
   }, [isSupported, continuous, interimResults, language]);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef) {
-      recognitionRef.stop();
-      setIsListening(false);
-      setInterimTranscript('');
-    }
-  }, [recognitionRef]);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
@@ -128,8 +135,9 @@ export const useVoiceRecognition = (
 
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+      wakeWordRecognitionRef.current = new SpeechRecognition();
       
+      const recognition = wakeWordRecognitionRef.current;
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = language;
@@ -163,25 +171,14 @@ export const useVoiceRecognition = (
 
       recognition.onend = () => {
         setIsWakeWordListening(false);
-        if (wakeWordEnabled) {
-          setTimeout(startWakeWordListening, 1000);
-        }
       };
 
       recognition.start();
-      wakeWordRecognitionRef(recognition);
     } catch (err) {
       setError('Wake word recognition not supported');
       setIsWakeWordListening(false);
     }
-  }, [isSupported, wakeWordEnabled, language, wakeWords, onWakeWordDetected, startListening]);
-
-  const stopWakeWordListening = useCallback(() => {
-    if (wakeWordRecognitionRef) {
-      wakeWordRecognitionRef.stop();
-      setIsWakeWordListening(false);
-    }
-  }, [wakeWordRecognitionRef]);
+  }, [isSupported, wakeWordEnabled, language, wakeWords, onWakeWordDetected, startListening, stopWakeWordListening]);
 
   return {
     isListening,
