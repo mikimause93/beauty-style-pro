@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useFollow } from "@/hooks/useFollow";
+import { useSmartRemindersCount } from "@/hooks/useData";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const { id: viewUserId } = useParams();
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useNotifications();
+  const { data: activeRemindersCount = 0 } = useSmartRemindersCount();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved" | "vetrina">("grid");
@@ -319,8 +321,9 @@ export default function ProfilePage() {
           <div className="flex gap-3 mb-5 overflow-x-auto no-scrollbar pb-1">
             {[
               { Icon: Calendar, label: "Prenotazioni", path: "/my-bookings" },
+              { Icon: Bell, label: "Promemoria", path: "/reminders", badge: activeRemindersCount },
               { Icon: ShoppingBag, label: "Shop", path: "/shop" },
-              { Icon: MessageCircle, label: "Chat", path: "/chat" },
+              { Icon: MessageCircle, label: "Chat", path: "/chat", badge: unreadCount },
               { Icon: Trophy, label: "Sfide", path: "/challenges" },
               { Icon: RotateCw, label: "Gira&Vinci", path: "/spin" },
               ...(isProfessional || isBusiness ? [
@@ -331,9 +334,16 @@ export default function ProfilePage() {
               const ItemIcon = item.Icon;
               return (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                  className="flex flex-col items-center gap-1 min-w-[56px]">
+                  className="flex flex-col items-center gap-1 min-w-[56px] relative">
                   <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center">
                     <ItemIcon className="w-5 h-5 text-muted-foreground" />
+                    {item.badge && item.badge > 0 && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
+                        <span className="text-[9px] text-destructive-foreground font-bold">
+                          {item.badge > 99 ? '99+' : item.badge}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
                 </button>
