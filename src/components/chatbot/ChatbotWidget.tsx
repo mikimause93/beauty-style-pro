@@ -230,7 +230,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
         >
           <MessageCircle className="w-5 h-5 text-primary-foreground" />
           {suggestions.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
               {suggestions.length}
             </span>
           )}
