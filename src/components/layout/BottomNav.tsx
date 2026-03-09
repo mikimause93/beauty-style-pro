@@ -33,9 +33,9 @@ export default function BottomNav() {
               >
                 <div className={cn(
                   "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200",
-                  isActive && "bg-primary/10"
+                  isActive ? "bg-primary/15" : "bg-primary/5"
                 )}>
-                  <Icon className={cn("w-[22px] h-[22px] transition-all duration-200", isActive && "text-primary")} />
+                  <Icon className={cn("w-[22px] h-[22px] transition-all duration-200", isActive ? "text-primary" : "text-primary/60")} />
                 </div>
                 <span className={cn(
                   "text-[10px] font-medium transition-all duration-200",
