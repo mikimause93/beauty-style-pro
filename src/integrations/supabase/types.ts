@@ -2142,6 +2142,48 @@ export type Database = {
           },
         ]
       }
+      reminder_preferences: {
+        Row: {
+          auto_booking: boolean | null
+          auto_reorder: boolean | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          notification_advance_days: number | null
+          preferred_frequency_days: number | null
+          service_type: string
+          shipping_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_booking?: boolean | null
+          auto_reorder?: boolean | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_advance_days?: number | null
+          preferred_frequency_days?: number | null
+          service_type: string
+          shipping_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_booking?: boolean | null
+          auto_reorder?: boolean | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_advance_days?: number | null
+          preferred_frequency_days?: number | null
+          service_type?: string
+          shipping_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           booking_id: string | null
@@ -2326,55 +2368,139 @@ export type Database = {
           },
         ]
       }
+      shipping_promos: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          id: string
+          max_uses: number | null
+          min_order_amount: number | null
+          service_types: string[] | null
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          service_types?: string[] | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          service_types?: string[] | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       smart_reminders: {
         Row: {
+          auto_reorder: boolean | null
           created_at: string | null
+          enabled: boolean | null
+          free_shipping: boolean | null
           frequency_days: number
           id: string
           last_service_date: string
           next_suggested_date: string
           notes: string | null
           priority: string | null
+          product_id: string | null
           professional_id: string | null
+          promo_code: string | null
+          promo_discount: number | null
+          quantity: number | null
           reminder_sent: boolean | null
           reminder_sent_at: string | null
           service_name: string
           service_type: string
+          shipping_address: string | null
+          shipping_enabled: boolean | null
+          shipping_notes: string | null
           status: string | null
+          total_price: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          auto_reorder?: boolean | null
           created_at?: string | null
+          enabled?: boolean | null
+          free_shipping?: boolean | null
           frequency_days: number
           id?: string
           last_service_date: string
           next_suggested_date: string
           notes?: string | null
           priority?: string | null
+          product_id?: string | null
           professional_id?: string | null
+          promo_code?: string | null
+          promo_discount?: number | null
+          quantity?: number | null
           reminder_sent?: boolean | null
           reminder_sent_at?: string | null
           service_name: string
           service_type: string
+          shipping_address?: string | null
+          shipping_enabled?: boolean | null
+          shipping_notes?: string | null
           status?: string | null
+          total_price?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          auto_reorder?: boolean | null
           created_at?: string | null
+          enabled?: boolean | null
+          free_shipping?: boolean | null
           frequency_days?: number
           id?: string
           last_service_date?: string
           next_suggested_date?: string
           notes?: string | null
           priority?: string | null
+          product_id?: string | null
           professional_id?: string | null
+          promo_code?: string | null
+          promo_discount?: number | null
+          quantity?: number | null
           reminder_sent?: boolean | null
           reminder_sent_at?: string | null
           service_name?: string
           service_type?: string
+          shipping_address?: string | null
+          shipping_enabled?: boolean | null
+          shipping_notes?: string | null
           status?: string | null
+          total_price?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -3194,6 +3320,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_shipping_promo: {
+        Args: { _code: string; _order_amount?: number; _service_type: string }
+        Returns: {
+          discount_type: string
+          discount_value: number
+          free_shipping: boolean
+          message: string
+          valid: boolean
+        }[]
+      }
       create_notification: {
         Args: {
           _data?: Json
