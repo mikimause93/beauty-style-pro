@@ -125,67 +125,20 @@ export default function AuthPage() {
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
     const { error } = await signUp(email, password, displayName, accountType);
-    if (error) { toast.error(error.message); setLoading(false); return; }
-
-    // Wait briefly for profile creation trigger
-    await new Promise(r => setTimeout(r, 1500));
-
-    // Get the new user session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) { toast.success("Account creato! Effettua il login."); setLoading(false); return; }
-
-    const userId = session.user.id;
-
-    // Update profile with extra fields
-    const profileUpdate: Record<string, any> = {
-      surname, username, phone, city, country, bio, whatsapp,
-      latitude, longitude,
-      interests: interests.length > 0 ? interests : null,
-      birth_date: birthDate || null,
-      instagram: instagram || null,
-      tiktok: tiktok || null,
-      facebook: facebook || null,
-    };
-    await supabase.from("profiles").update(profileUpdate).eq("user_id", userId);
-
-    // Create professional record
-    if (accountType === "professional") {
-      await supabase.from("professionals").insert({
-        user_id: userId,
-        business_name: displayName,
-        specialty: category || null,
-        description: description || null,
-        city: city || null,
-        whatsapp: whatsapp || null,
-        price_min: priceMin ? parseFloat(priceMin) : null,
-        price_max: priceMax ? parseFloat(priceMax) : null,
-        latitude, longitude,
-      });
+    
+    if (error) { 
+      toast.error(error.message); 
+      setLoading(false); 
+      return; 
     }
 
-    // Create business record
-    if (accountType === "business") {
-      const slug = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-      await supabase.from("businesses").insert({
-        user_id: userId,
-        business_name: companyName,
-        legal_name: companyName,
-        vat_number: vatNumber,
-        tax_code: taxCode || null,
-        slug: slug || `biz-${Date.now()}`,
-        city: city || null,
-        address: address || null,
-        zip_code: zipCode || null,
-        phone: phone || null,
-        email: email,
-        website: website || null,
-        business_type: bizCategory || "center",
-        latitude, longitude,
-      });
-    }
+    // Since email verification is now enabled, show verification screen
+    setRegistrationResult({
+      success: true,
+      email: email,
+      accountType: accountType
+    });
 
-    toast.success("Registrazione completata!");
-    navigate("/");
     setLoading(false);
   };
 
@@ -207,6 +160,70 @@ export default function AuthPage() {
     if (step < totalSteps) setStep(step + 1);
     else handleSignup();
   };
+
+  // ─── RENDER: EMAIL VERIFICATION SUCCESS ──────────────
+  if (registrationResult?.success) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+        <div className="w-full">
+          <div className="flex flex-col items-center mb-10">
+            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
+            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+            <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
+          </div>
+
+          <div className="text-center space-y-6">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+              <Mail className="w-10 h-10 text-primary" />
+            </div>
+            
+            <div>
+              <h2 className="text-xl font-display font-bold mb-2">Verifica la tua email</h2>
+              <p className="text-sm text-muted-foreground mb-1">
+                Ti abbiamo inviato un link di conferma a:
+              </p>
+              <p className="text-sm font-semibold">{registrationResult.email}</p>
+            </div>
+
+            <div className="bg-muted/50 rounded-2xl p-4 text-left">
+              <p className="text-xs text-muted-foreground">
+                <strong>Importante:</strong> Controlla anche lo spam. Il link è valido per 24h.
+                {registrationResult.accountType !== "client" && (
+                  <span> Dopo la verifica email potrai completare l'onboarding con verifica telefonica e documenti.</span>
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button 
+                onClick={() => setRegistrationResult(null)} 
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm"
+              >
+                Torna al Login
+              </button>
+              
+              <button 
+                onClick={() => {
+                  // Trigger email resend
+                  supabase.auth.resend({ 
+                    type: 'signup', 
+                    email: registrationResult.email! 
+                  }).then(() => toast.success("Email di verifica rinviata"));
+                }}
+                className="w-full h-10 rounded-xl bg-muted text-foreground font-medium text-sm"
+              >
+                Rinvia Email
+              </button>
+            </div>
+          </div>
+
+          <p className="text-center text-[10px] text-muted-foreground mt-8">
+            Non hai ricevuto l'email? Controlla lo spam o clicca "Rinvia Email"
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // ─── RENDER: LOGIN ──────────────────────────────────
   if (isLogin) {
