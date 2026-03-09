@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────
 type AccountType = "client" | "professional" | "business";
+type RegistrationResult = { success: boolean; email?: string; accountType?: AccountType } | null;
 
 const CATEGORIES_PRO = [
   "Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist",
