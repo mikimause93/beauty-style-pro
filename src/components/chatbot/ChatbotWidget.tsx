@@ -45,7 +45,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   };
 
   return (
-    <div className={`fixed bottom-20 right-4 z-40 ${className}`}>
+    <div className={`fixed bottom-36 right-4 z-30 ${className}`}>
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
