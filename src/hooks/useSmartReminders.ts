@@ -1,0 +1,208 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+
+export interface SmartReminder {
+  id: string;
+  user_id: string;
+  service_type: string;
+  service_name: string;
+  last_service_date: string;
+  next_suggested_date: string;
+  professional_id: string | null;
+  reminder_sent: boolean;
+  reminder_sent_at: string | null;
+  status: string;
+  frequency_days: number;
+  priority: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  professionals?: {
+    business_name: string;
+    profiles: {
+      display_name: string;
+    };
+  };
+}
+
+export function useSmartReminders() {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ["smart_reminders", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from("smart_reminders")
+        .select(`
+          *,
+          professionals(
+            business_name,
+            profiles:user_id(display_name)
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .order("priority", { ascending: false })
+        .order("next_suggested_date", { ascending: true });
+        
+      if (error) throw error;
+      return data as SmartReminder[];
+    },
+    enabled: !!user,
+  });
+}
+
+export function useActiveReminders() {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ["active_reminders", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from("smart_reminders")
+        .select(`
+          *,
+          professionals(
+            business_name,
+            profiles:user_id(display_name)
+          )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .lte("next_suggested_date", today)
+        .order("priority", { ascending: false });
+        
+      if (error) throw error;
+      return data as SmartReminder[];
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpdateReminderStatus() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      reminderId, 
+      status, 
+      notes 
+    }: { 
+      reminderId: string; 
+      status: 'active' | 'completed' | 'dismissed';
+      notes?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("smart_reminders")
+        .update({ 
+          status,
+          notes: notes || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", reminderId)
+        .eq("user_id", user!.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["smart_reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["active_reminders"] });
+    },
+  });
+}
+
+export function useCreateManualReminder() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({
+      serviceType,
+      serviceName,
+      lastServiceDate,
+      frequencyDays,
+      professionalId,
+      priority = 'medium',
+      notes
+    }: {
+      serviceType: string;
+      serviceName: string;
+      lastServiceDate: string;
+      frequencyDays: number;
+      professionalId?: string;
+      priority?: 'low' | 'medium' | 'high';
+      notes?: string;
+    }) => {
+      const nextDate = new Date(lastServiceDate);
+      nextDate.setDate(nextDate.getDate() + frequencyDays);
+      
+      const { data, error } = await supabase
+        .from("smart_reminders")
+        .insert({
+          user_id: user!.id,
+          service_type: serviceType,
+          service_name: serviceName,
+          last_service_date: lastServiceDate,
+          next_suggested_date: nextDate.toISOString().split('T')[0],
+          frequency_days: frequencyDays,
+          professional_id: professionalId || null,
+          priority,
+          notes: notes || null
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["smart_reminders"] });
+    },
+  });
+}
+
+export function useRescheduleReminder() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      reminderId, 
+      newDate 
+    }: { 
+      reminderId: string; 
+      newDate: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("smart_reminders")
+        .update({ 
+          next_suggested_date: newDate,
+          reminder_sent: false,
+          reminder_sent_at: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", reminderId)
+        .eq("user_id", user!.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["smart_reminders"] });
+      queryClient.invalidateQueries({ queryKey: ["active_reminders"] });
+    },
+  });
+}

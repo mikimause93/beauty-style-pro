@@ -263,3 +263,27 @@ export function useMyReferralCode() {
     enabled: !!user,
   });
 }
+
+// ======= SMART REMINDERS =======
+export function useSmartRemindersCount() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["smart_reminders_count", user?.id],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { count, error } = await supabase
+        .from("smart_reminders")
+        .select("*", { count: 'exact', head: true })
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .lte("next_suggested_date", today);
+        
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!user,
+  });
+}
