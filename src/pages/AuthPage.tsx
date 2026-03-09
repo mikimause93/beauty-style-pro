@@ -24,6 +24,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
+  const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
   const { signIn, signUp, user } = useAuth();
 
