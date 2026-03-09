@@ -2326,6 +2326,60 @@ export type Database = {
           },
         ]
       }
+      smart_reminders: {
+        Row: {
+          created_at: string | null
+          frequency_days: number
+          id: string
+          last_service_date: string
+          next_suggested_date: string
+          notes: string | null
+          priority: string | null
+          professional_id: string | null
+          reminder_sent: boolean | null
+          reminder_sent_at: string | null
+          service_name: string
+          service_type: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          frequency_days: number
+          id?: string
+          last_service_date: string
+          next_suggested_date: string
+          notes?: string | null
+          priority?: string | null
+          professional_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
+          service_name: string
+          service_type: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          frequency_days?: number
+          id?: string
+          last_service_date?: string
+          next_suggested_date?: string
+          notes?: string | null
+          priority?: string | null
+          professional_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
+          service_name?: string
+          service_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       spin_results: {
         Row: {
           created_at: string
