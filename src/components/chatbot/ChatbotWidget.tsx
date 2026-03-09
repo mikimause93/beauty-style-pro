@@ -45,14 +45,14 @@ export default function ChatbotWidget({ className = "" }: Props) {
   };
 
   return (
-    <div className={`fixed bottom-20 right-4 z-50 ${className}`}>
+    <div className={`fixed bottom-20 right-4 z-40 ${className}`}>
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className={`bg-card border border-border rounded-2xl shadow-2xl ${
+            className={`bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl shadow-lg ${
               isExpanded ? "w-80 h-96" : "w-72 max-h-80"
             } transition-all duration-300`}
           >
@@ -63,8 +63,8 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold">Assistente Stayle</h4>
-                  <p className="text-[10px] text-muted-foreground">Sono qui per aiutarti</p>
+                  <h4 className="text-sm font-medium">Stella Assistant</h4>
+                  <p className="text-[10px] text-muted-foreground">Suggerimenti discreti</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
