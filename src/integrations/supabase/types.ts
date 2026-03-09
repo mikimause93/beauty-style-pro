@@ -612,6 +612,81 @@ export type Database = {
         }
         Relationships: []
       }
+      chatbot_messages: {
+        Row: {
+          action_buttons: Json | null
+          clicked_at: string | null
+          content: string
+          dismissed_at: string | null
+          id: string
+          message_type: string
+          shown_at: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_buttons?: Json | null
+          clicked_at?: string | null
+          content: string
+          dismissed_at?: string | null
+          id?: string
+          message_type: string
+          shown_at?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_buttons?: Json | null
+          clicked_at?: string | null
+          content?: string
+          dismissed_at?: string | null
+          id?: string
+          message_type?: string
+          shown_at?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chatbot_suggestions_config: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          excludes_actions: string[] | null
+          id: string
+          max_frequency_hours: number | null
+          priority: number | null
+          requires_actions: string[] | null
+          suggestion_template: string
+          trigger_conditions: Json
+          user_type: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          excludes_actions?: string[] | null
+          id?: string
+          max_frequency_hours?: number | null
+          priority?: number | null
+          requires_actions?: string[] | null
+          suggestion_template: string
+          trigger_conditions: Json
+          user_type: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          excludes_actions?: string[] | null
+          id?: string
+          max_frequency_hours?: number | null
+          priority?: number | null
+          requires_actions?: string[] | null
+          suggestion_template?: string
+          trigger_conditions?: Json
+          user_type?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           created_at: string
@@ -2142,6 +2217,48 @@ export type Database = {
           },
         ]
       }
+      reminder_preferences: {
+        Row: {
+          auto_booking: boolean | null
+          auto_reorder: boolean | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          notification_advance_days: number | null
+          preferred_frequency_days: number | null
+          service_type: string
+          shipping_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_booking?: boolean | null
+          auto_reorder?: boolean | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_advance_days?: number | null
+          preferred_frequency_days?: number | null
+          service_type: string
+          shipping_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_booking?: boolean | null
+          auto_reorder?: boolean | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_advance_days?: number | null
+          preferred_frequency_days?: number | null
+          service_type?: string
+          shipping_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           booking_id: string | null
@@ -2326,55 +2443,139 @@ export type Database = {
           },
         ]
       }
+      shipping_promos: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          id: string
+          max_uses: number | null
+          min_order_amount: number | null
+          service_types: string[] | null
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          service_types?: string[] | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string
+          max_uses?: number | null
+          min_order_amount?: number | null
+          service_types?: string[] | null
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       smart_reminders: {
         Row: {
+          auto_reorder: boolean | null
           created_at: string | null
+          enabled: boolean | null
+          free_shipping: boolean | null
           frequency_days: number
           id: string
           last_service_date: string
           next_suggested_date: string
           notes: string | null
           priority: string | null
+          product_id: string | null
           professional_id: string | null
+          promo_code: string | null
+          promo_discount: number | null
+          quantity: number | null
           reminder_sent: boolean | null
           reminder_sent_at: string | null
           service_name: string
           service_type: string
+          shipping_address: string | null
+          shipping_enabled: boolean | null
+          shipping_notes: string | null
           status: string | null
+          total_price: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          auto_reorder?: boolean | null
           created_at?: string | null
+          enabled?: boolean | null
+          free_shipping?: boolean | null
           frequency_days: number
           id?: string
           last_service_date: string
           next_suggested_date: string
           notes?: string | null
           priority?: string | null
+          product_id?: string | null
           professional_id?: string | null
+          promo_code?: string | null
+          promo_discount?: number | null
+          quantity?: number | null
           reminder_sent?: boolean | null
           reminder_sent_at?: string | null
           service_name: string
           service_type: string
+          shipping_address?: string | null
+          shipping_enabled?: boolean | null
+          shipping_notes?: string | null
           status?: string | null
+          total_price?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          auto_reorder?: boolean | null
           created_at?: string | null
+          enabled?: boolean | null
+          free_shipping?: boolean | null
           frequency_days?: number
           id?: string
           last_service_date?: string
           next_suggested_date?: string
           notes?: string | null
           priority?: string | null
+          product_id?: string | null
           professional_id?: string | null
+          promo_code?: string | null
+          promo_discount?: number | null
+          quantity?: number | null
           reminder_sent?: boolean | null
           reminder_sent_at?: string | null
           service_name?: string
           service_type?: string
+          shipping_address?: string | null
+          shipping_enabled?: boolean | null
+          shipping_notes?: string | null
           status?: string | null
+          total_price?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -2963,6 +3164,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_actions_tracking: {
+        Row: {
+          action_data: Json | null
+          action_type: string
+          created_at: string
+          id: string
+          page_context: string | null
+          user_id: string
+        }
+        Insert: {
+          action_data?: Json | null
+          action_type: string
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          user_id: string
+        }
+        Update: {
+          action_data?: Json | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -3102,6 +3330,36 @@ export type Database = {
           },
         ]
       }
+      user_suggestion_history: {
+        Row: {
+          id: string
+          last_shown_at: string
+          suggestion_type: string
+          times_clicked: number | null
+          times_dismissed: number | null
+          times_shown: number | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_shown_at?: string
+          suggestion_type: string
+          times_clicked?: number | null
+          times_dismissed?: number | null
+          times_shown?: number | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_shown_at?: string
+          suggestion_type?: string
+          times_clicked?: number | null
+          times_dismissed?: number | null
+          times_shown?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_requests: {
         Row: {
           address: string | null
@@ -3194,12 +3452,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_shipping_promo: {
+        Args: { _code: string; _order_amount?: number; _service_type: string }
+        Returns: {
+          discount_type: string
+          discount_value: number
+          free_shipping: boolean
+          message: string
+          valid: boolean
+        }[]
+      }
       create_notification: {
         Args: {
           _data?: Json
           _message: string
           _title: string
           _type?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      get_chatbot_suggestions: {
+        Args: { _user_id: string }
+        Returns: {
+          action_buttons: Json
+          content: string
+          message_type: string
+          priority: number
+          suggestion_id: string
+        }[]
+      }
+      track_user_action: {
+        Args: {
+          _action_data?: Json
+          _action_type: string
+          _page_context?: string
           _user_id: string
         }
         Returns: undefined

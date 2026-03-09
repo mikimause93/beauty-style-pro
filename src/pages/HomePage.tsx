@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import logo from "@/assets/logo.png";
@@ -54,6 +55,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
+  const { trackAction } = useChatbot();
   const [activeTab, setActiveTab] = useState("Nuovi");
   const [posts, setPosts] = useState<Post[]>(fallbackPosts);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
@@ -62,6 +64,13 @@ export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [stylists, setStylists] = useState(fallbackStylists);
   const [sharePost, setSharePost] = useState<Post | null>(null);
+
+  // Track page visit
+  useEffect(() => {
+    if (user) {
+      trackAction("page_visit", { page: "home" }, "home");
+    }
+  }, [user, trackAction]);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -99,9 +108,38 @@ export default function HomePage() {
     { id: "s1", name: "Martina", avatar: stylist2, isLive: true, hasStory: true },
     { id: "s2", name: "Sylvie", avatar: stylist1, isLive: true, hasStory: true },
     { id: "s3", name: "Marco", avatar: beauty1, isLive: false, hasStory: true },
-    { id: "s4", name: "Anna", avatar: beauty2, isLive: false, hasStory: true },
-    { id: "s5", name: "Sofia", avatar: beauty3, isLive: false, hasStory: true },
+    { id: "s4", name: "Luca", avatar: beauty2, isLive: false, hasStory: true },
   ];
+
+  const displayLiveStreams = liveStreams.length > 0 ? liveStreams : [
+    { id: "l1", title: "Makeover completo", professional: { business_name: "Martina Rossi" }, viewer_count: 234, thumbnail_url: beauty1, category: "Makeup" },
+    { id: "l2", title: "Taglio tendenza 2024", professional: { business_name: "Sylvie Beauty" }, viewer_count: 189, thumbnail_url: beauty2, category: "Hair" },
+  ];
+
+  const displayPosts = posts.length > 0 ? posts : fallbackPosts;
+
+  const handleLike = async (postId: string) => {
+    const isLiked = likedPosts.includes(postId);
+    if (isLiked) {
+      setLikedPosts(likedPosts.filter(id => id !== postId));
+      setPosts(posts.map(p => p.id === postId ? { ...p, like_count: p.like_count - 1 } : p));
+    } else {
+      setLikedPosts([...likedPosts, postId]);
+      setPosts(posts.map(p => p.id === postId ? { ...p, like_count: p.like_count + 1 } : p));
+      // Track like action
+      trackAction("post_like", { post_id: postId }, "home");
+    }
+  };
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    trackAction("tab_change", { from: activeTab, to: tab }, "home");
+  };
+
+  const handleQuickAction = (action: string, path: string) => {
+    trackAction("quick_action_click", { action }, "home");
+    navigate(path);
+  };
 
   return (
     <MobileLayout>
@@ -132,7 +170,7 @@ export default function HomePage() {
         {/* Tabs */}
         <div className="flex gap-1 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
+            <button key={tab} onClick={() => handleTabClick(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab 
                   ? "bg-foreground text-background" 
@@ -210,7 +248,7 @@ export default function HomePage() {
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
           ].map(item => (
-            <button key={item.label} onClick={() => navigate(item.path)}
+            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
               <item.Icon className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
@@ -228,7 +266,7 @@ export default function HomePage() {
             { Icon: Radio, label: "Radio", path: "/radio" },
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
-            <button key={item.label} onClick={() => navigate(item.path)}
+            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
               <item.Icon className="w-5 h-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
@@ -245,7 +283,7 @@ export default function HomePage() {
           <div className="space-y-4 fade-in">
             {/* Sponsor Banner */}
             <SponsorBanner />
-            {posts.map((post, index) => (
+            {displayPosts.map((post, index) => (
               <div key={post.id}>
                 <PostCard post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
                 {/* Insert a job post card after every 2nd post */}
@@ -257,7 +295,7 @@ export default function HomePage() {
               </div>
             ))}
             {/* Show remaining job posts at the end if any */}
-            {jobPosts.length > 0 && posts.length < 3 && jobPosts.map(job => (
+            {jobPosts.length > 0 && displayPosts.length < 3 && jobPosts.map(job => (
               <FeedJobCard key={job.id} job={job} />
             ))}
           </div>
@@ -324,7 +362,7 @@ export default function HomePage() {
             )}
             <h4 className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Post Popolari</h4>
             <div className="grid grid-cols-2 gap-2">
-              {posts.slice(0, 4).map(post => (
+              {displayPosts.slice(0, 4).map(post => (
                 <div key={post.id} className="rounded-2xl bg-card border border-border/50 overflow-hidden">
                   <img src={post.image_url || beauty1} alt="" className="w-full aspect-square object-cover" />
                   <div className="p-3">
@@ -362,7 +400,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {liveStreams.length === 0 ? (
+            {displayLiveStreams.length === 0 ? (
               <div className="text-center py-12">
                 <Video className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">Nessun live stream attivo</p>
@@ -371,7 +409,7 @@ export default function HomePage() {
                 </button>
               </div>
             ) : (
-              liveStreams.map(stream => (
+              displayLiveStreams.map(stream => (
                 <button key={stream.id} onClick={() => navigate("/live")}
                   className="w-full relative aspect-video rounded-2xl overflow-hidden bg-card border border-border/50">
                   <img src={stream.thumbnail_url || beauty2} alt="" className="w-full h-full object-cover" />
