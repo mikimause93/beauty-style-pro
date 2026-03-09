@@ -20,7 +20,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   } = useChatbot();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [chatInput, setChatInput] = useState("");
   const [mode, setMode] = useState<"suggestions" | "chat">("suggestions");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   };
 
   return (
-    <div className={`fixed bottom-36 right-4 z-30 ${className}`}>
+    <div className={`fixed bottom-20 left-4 z-30 ${className}`}>
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
