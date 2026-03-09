@@ -25,8 +25,8 @@ const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
     const cover = coverImages[idx % coverImages.length];
 
     return (
-      <div ref={ref} className="fixed bottom-[68px] left-0 right-0 z-40 px-3 pb-1 safe-area-bottom">
-        <div className="max-w-lg mx-auto glass rounded-2xl border border-border/50 overflow-hidden shadow-card">
+      <div ref={ref} className="fixed bottom-[68px] left-0 right-0 z-30 px-3 pb-1 safe-area-bottom">
+        <div className="max-w-lg mx-auto bg-card/60 backdrop-blur-md rounded-2xl border border-border/30 overflow-hidden shadow-sm">
           <div className="flex items-center gap-3 p-3">
             <button onClick={() => navigate("/radio")} className="relative shrink-0">
               <img src={cover} alt=""
