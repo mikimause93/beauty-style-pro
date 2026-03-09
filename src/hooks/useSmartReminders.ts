@@ -18,12 +18,6 @@ export interface SmartReminder {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  professionals?: {
-    business_name: string;
-    profiles: {
-      display_name: string;
-    };
-  };
 }
 
 export function useSmartReminders() {
@@ -36,13 +30,7 @@ export function useSmartReminders() {
       
       const { data, error } = await supabase
         .from("smart_reminders")
-        .select(`
-          *,
-          professionals(
-            business_name,
-            profiles:user_id(display_name)
-          )
-        `)
+        .select("*")
         .eq("user_id", user.id)
         .eq("status", "active")
         .order("priority", { ascending: false })
@@ -67,13 +55,7 @@ export function useActiveReminders() {
       
       const { data, error } = await supabase
         .from("smart_reminders")
-        .select(`
-          *,
-          professionals(
-            business_name,
-            profiles:user_id(display_name)
-          )
-        `)
+        .select("*")
         .eq("user_id", user.id)
         .eq("status", "active")
         .lte("next_suggested_date", today)

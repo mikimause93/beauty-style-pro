@@ -2,12 +2,14 @@ import { Calendar, Clock, Sparkles, CheckCircle, X, Phone } from "lucide-react";
 import { SmartReminder, useUpdateReminderStatus, useRescheduleReminder } from "@/hooks/useSmartReminders";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface SmartReminderCardProps {
   reminder: SmartReminder;
 }
 
 export default function SmartReminderCard({ reminder }: SmartReminderCardProps) {
+  const navigate = useNavigate();
   const [showReschedule, setShowReschedule] = useState(false);
   const [newDate, setNewDate] = useState("");
   const updateStatus = useUpdateReminderStatus();
@@ -66,14 +68,22 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
     }
   };
 
+  const handleBookNow = () => {
+    if (reminder.professional_id) {
+      navigate(`/booking/${reminder.professional_id}`);
+    } else {
+      navigate('/stylists');
+    }
+  };
+
   const daysOverdue = getDaysOverdue();
   const isOverdue = daysOverdue > 0;
   const isUrgent = reminder.priority === 'high' || daysOverdue > 7;
 
   const priorityColors = {
-    low: 'border-blue-200 bg-blue-50',
-    medium: 'border-orange-200 bg-orange-50',
-    high: 'border-red-200 bg-red-50'
+    low: 'border-secondary/30 bg-secondary/5',
+    medium: 'border-accent/30 bg-accent/5',
+    high: 'border-destructive/30 bg-destructive/5'
   };
 
   const priorityIcons = {
@@ -84,7 +94,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
 
   return (
     <div className={`p-4 rounded-xl border-2 transition-all ${
-      isUrgent ? 'border-red-300 bg-red-50 shadow-md' : priorityColors[reminder.priority as keyof typeof priorityColors]
+      isUrgent ? 'border-destructive/50 bg-destructive/10 shadow-md' : priorityColors[reminder.priority as keyof typeof priorityColors]
     }`}>
       
       {/* Header */}
@@ -97,9 +107,6 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
             <h3 className="text-sm font-bold">{reminder.service_name}</h3>
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               {priorityIcons[reminder.priority as keyof typeof priorityIcons]} {reminder.priority.toUpperCase()}
-              {reminder.professionals && (
-                <> • {reminder.professionals.business_name}</>
-              )}
             </p>
           </div>
         </div>
@@ -114,7 +121,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
         
         <div className="flex items-center gap-2 text-xs">
           <Clock className="w-3 h-3" />
-          <span className={isOverdue ? 'text-red-600 font-semibold' : 'text-green-600'}>
+          <span className={isOverdue ? 'text-destructive font-semibold' : 'text-primary'}>
             {isOverdue 
               ? `In ritardo di ${daysOverdue} giorni` 
               : `Suggerito per il ${new Date(reminder.next_suggested_date).toLocaleDateString('it-IT')}`
@@ -139,24 +146,15 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
       {!showReschedule ? (
         <div className="flex gap-2">
           <button
-            onClick={() => window.open(`/booking/${reminder.professional_id}`, '_blank')}
+            onClick={handleBookNow}
             className="flex-1 py-2 px-3 rounded-lg gradient-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-1"
           >
             📅 Prenota Ora
           </button>
           
-          {reminder.professionals?.profiles && (
-            <button
-              className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs flex items-center justify-center"
-              onClick={() => window.open(`tel:${reminder.professionals?.profiles}`, '_self')}
-            >
-              <Phone className="w-3 h-3" />
-            </button>
-          )}
-          
           <button
             onClick={handleComplete}
-            className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs flex items-center justify-center"
+            className="px-3 py-2 rounded-lg bg-primary/80 text-primary-foreground text-xs flex items-center justify-center"
             title="Segna come completato"
           >
             <CheckCircle className="w-3 h-3" />
@@ -164,7 +162,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
           
           <button
             onClick={() => setShowReschedule(true)}
-            className="px-3 py-2 rounded-lg bg-blue-500 text-white text-xs"
+            className="px-3 py-2 rounded-lg bg-secondary text-secondary-foreground text-xs"
             title="Riprogramma"
           >
             📅
@@ -172,7 +170,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
           
           <button
             onClick={handleDismiss}
-            className="px-3 py-2 rounded-lg bg-gray-500 text-white text-xs flex items-center justify-center"
+            className="px-3 py-2 rounded-lg bg-muted text-muted-foreground text-xs flex items-center justify-center"
             title="Ignora"
           >
             <X className="w-3 h-3" />
@@ -185,7 +183,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
             value={newDate}
             onChange={(e) => setNewDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2 text-xs rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
           <div className="flex gap-2">
             <button
@@ -199,7 +197,7 @@ export default function SmartReminderCard({ reminder }: SmartReminderCardProps) 
                 setShowReschedule(false);
                 setNewDate("");
               }}
-              className="px-3 py-2 rounded-lg bg-gray-500 text-white text-xs"
+              className="px-3 py-2 rounded-lg bg-muted text-muted-foreground text-xs"
             >
               Annulla
             </button>
