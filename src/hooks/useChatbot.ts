@@ -184,13 +184,13 @@ export function useChatbot() {
     }
   };
 
-  // Auto-load suggestions when user logs in
+  // Auto-load suggestions when user logs in (less invasive)
   useEffect(() => {
     if (user && !showChatbot) {
-      // Wait a bit before showing suggestions to avoid overwhelming
+      // Wait longer before showing suggestions to be less invasive
       const timer = setTimeout(() => {
         loadSuggestions();
-      }, 3000);
+      }, 10000); // Increased from 3 seconds to 10 seconds
       return () => clearTimeout(timer);
     }
   }, [user?.id]);

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
+import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
 
