@@ -612,6 +612,81 @@ export type Database = {
         }
         Relationships: []
       }
+      chatbot_messages: {
+        Row: {
+          action_buttons: Json | null
+          clicked_at: string | null
+          content: string
+          dismissed_at: string | null
+          id: string
+          message_type: string
+          shown_at: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_buttons?: Json | null
+          clicked_at?: string | null
+          content: string
+          dismissed_at?: string | null
+          id?: string
+          message_type: string
+          shown_at?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_buttons?: Json | null
+          clicked_at?: string | null
+          content?: string
+          dismissed_at?: string | null
+          id?: string
+          message_type?: string
+          shown_at?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chatbot_suggestions_config: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          excludes_actions: string[] | null
+          id: string
+          max_frequency_hours: number | null
+          priority: number | null
+          requires_actions: string[] | null
+          suggestion_template: string
+          trigger_conditions: Json
+          user_type: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          excludes_actions?: string[] | null
+          id?: string
+          max_frequency_hours?: number | null
+          priority?: number | null
+          requires_actions?: string[] | null
+          suggestion_template: string
+          trigger_conditions: Json
+          user_type: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          excludes_actions?: string[] | null
+          id?: string
+          max_frequency_hours?: number | null
+          priority?: number | null
+          requires_actions?: string[] | null
+          suggestion_template?: string
+          trigger_conditions?: Json
+          user_type?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           created_at: string
@@ -3089,6 +3164,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_actions_tracking: {
+        Row: {
+          action_data: Json | null
+          action_type: string
+          created_at: string
+          id: string
+          page_context: string | null
+          user_id: string
+        }
+        Insert: {
+          action_data?: Json | null
+          action_type: string
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          user_id: string
+        }
+        Update: {
+          action_data?: Json | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          page_context?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -3228,6 +3330,36 @@ export type Database = {
           },
         ]
       }
+      user_suggestion_history: {
+        Row: {
+          id: string
+          last_shown_at: string
+          suggestion_type: string
+          times_clicked: number | null
+          times_dismissed: number | null
+          times_shown: number | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_shown_at?: string
+          suggestion_type: string
+          times_clicked?: number | null
+          times_dismissed?: number | null
+          times_shown?: number | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_shown_at?: string
+          suggestion_type?: string
+          times_clicked?: number | null
+          times_dismissed?: number | null
+          times_shown?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_requests: {
         Row: {
           address: string | null
@@ -3336,6 +3468,25 @@ export type Database = {
           _message: string
           _title: string
           _type?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      get_chatbot_suggestions: {
+        Args: { _user_id: string }
+        Returns: {
+          action_buttons: Json
+          content: string
+          message_type: string
+          priority: number
+          suggestion_id: string
+        }[]
+      }
+      track_user_action: {
+        Args: {
+          _action_data?: Json
+          _action_type: string
+          _page_context?: string
           _user_id: string
         }
         Returns: undefined
