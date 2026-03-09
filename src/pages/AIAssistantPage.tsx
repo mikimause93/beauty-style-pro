@@ -55,17 +55,6 @@ export default function AIAssistantPage() {
     startWakeWordListening,
     stopWakeWordListening
   } = useVoiceRecognition({
-    isListening,
-    transcript,
-    interimTranscript,
-    startListening,
-    stopListening,
-    resetTranscript,
-    isWakeWordListening,
-    wakeWordDetected,
-    startWakeWordListening,
-    stopWakeWordListening
-  } = useVoiceRecognition({
     continuous: false,
     interimResults: true,
     language: 'it-IT',
