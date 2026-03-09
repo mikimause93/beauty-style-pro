@@ -39,7 +39,7 @@ export default function BottomNav() {
                 </div>
                 <span className={cn(
                   "text-[10px] font-medium transition-all duration-200",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  isActive ? "text-primary" : "text-primary/50"
                 )}>
                   {tab.label}
                 </span>
