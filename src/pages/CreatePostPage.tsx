@@ -1,14 +1,38 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Upload, ChevronLeft, ChevronRight, Camera, Briefcase, ShoppingBag, Scissors, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+type ContentType = "image" | "before_after" | "job" | "service" | "product";
+
+interface ContentOption {
+  key: ContentType;
+  label: string;
+  desc: string;
+  Icon: React.ElementType;
+  proOnly?: boolean;
+}
+
+const CONTENT_OPTIONS: ContentOption[] = [
+  { key: "image", label: "Post", desc: "Foto o video per il feed", Icon: Camera },
+  { key: "before_after", label: "Prima & Dopo", desc: "Mostra la trasformazione", Icon: ArrowRight, proOnly: true },
+  { key: "job", label: "Lavoro", desc: "Pubblica un annuncio di lavoro", Icon: Briefcase, proOnly: true },
+  { key: "service", label: "Servizio", desc: "Offri un servizio ai clienti", Icon: Scissors, proOnly: true },
+  { key: "product", label: "Prodotto", desc: "Vendi un prodotto beauty", Icon: ShoppingBag, proOnly: true },
+];
 
 export default function CreatePostPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const isPro = profile?.user_type === "professional" || profile?.user_type === "business";
+
+  const [step, setStep] = useState<"select" | "create">(isPro ? "select" : "create");
+  const [contentType, setContentType] = useState<ContentType>("image");
+
   const [caption, setCaption] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -17,11 +41,18 @@ export default function CreatePostPage() {
   const [afterFile, setAfterFile] = useState<File | null>(null);
   const [afterPreview, setAfterPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [postType, setPostType] = useState<"image" | "before_after">("image");
   const [sliderPos, setSliderPos] = useState(50);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSelectType = (type: ContentType) => {
+    if (type === "job") { navigate("/hr/create-job"); return; }
+    if (type === "service") { navigate("/marketplace/create-request"); return; }
+    if (type === "product") { navigate("/manage-products"); return; }
+    setContentType(type);
+    setStep("create");
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "main" | "before" | "after") => {
     const file = e.target.files?.[0];
@@ -46,37 +77,29 @@ export default function CreatePostPage() {
 
   const handleSubmit = async () => {
     if (!user) { toast.error("Devi effettuare l'accesso"); navigate("/auth"); return; }
-
-    if (postType === "image" && !caption.trim() && !imageFile) {
+    if (contentType === "image" && !caption.trim() && !imageFile) {
       toast.error("Aggiungi un testo o un'immagine"); return;
     }
-    if (postType === "before_after" && (!beforeFile || !afterFile)) {
+    if (contentType === "before_after" && (!beforeFile || !afterFile)) {
       toast.error("Carica entrambe le foto Prima e Dopo"); return;
     }
-
     setLoading(true);
     try {
       let imageUrl = null, beforeUrl = null, afterUrl = null;
-
-      if (postType === "image" && imageFile) {
+      if (contentType === "image" && imageFile) {
         imageUrl = await uploadFile(imageFile, "post");
       }
-      if (postType === "before_after") {
+      if (contentType === "before_after") {
         [beforeUrl, afterUrl] = await Promise.all([
           uploadFile(beforeFile!, "before"),
           uploadFile(afterFile!, "after"),
         ]);
       }
-
       const { error } = await supabase.from("posts").insert({
-        user_id: user.id,
-        caption,
-        image_url: imageUrl,
-        before_image_url: beforeUrl,
-        after_image_url: afterUrl,
-        post_type: postType,
+        user_id: user.id, caption, image_url: imageUrl,
+        before_image_url: beforeUrl, after_image_url: afterUrl,
+        post_type: contentType,
       });
-
       if (error) throw error;
       toast.success("Post pubblicato!");
       navigate("/");
@@ -86,14 +109,55 @@ export default function CreatePostPage() {
     setLoading(false);
   };
 
+  const availableOptions = CONTENT_OPTIONS.filter(o => !o.proOnly || isPro);
+
+  // === TYPE SELECTOR STEP ===
+  if (step === "select") {
+    return (
+      <MobileLayout>
+        <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <X className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-display font-bold">Cosa vuoi pubblicare?</h1>
+        </header>
+
+        <div className="p-4 space-y-3">
+          {availableOptions.map((opt, i) => (
+            <motion.button
+              key={opt.key}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              onClick={() => handleSelectType(opt.key)}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all active:scale-[0.98] text-left"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <opt.Icon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">{opt.label}</p>
+                <p className="text-xs text-muted-foreground">{opt.desc}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </motion.button>
+          ))}
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // === CREATE POST STEP ===
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <X className="w-5 h-5" />
+          <button onClick={() => isPro ? setStep("select") : navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            {isPro ? <ChevronLeft className="w-5 h-5" /> : <X className="w-5 h-5" />}
           </button>
-          <h1 className="text-lg font-display font-bold">Nuovo Post</h1>
+          <h1 className="text-lg font-display font-bold">
+            {contentType === "before_after" ? "Prima & Dopo" : "Nuovo Post"}
+          </h1>
         </div>
         <button onClick={handleSubmit} disabled={loading}
           className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-semibold disabled:opacity-50">
@@ -102,17 +166,19 @@ export default function CreatePostPage() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* Post Type */}
-        <div className="flex gap-2">
-          <button onClick={() => setPostType("image")}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold ${postType === "image" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-            Foto/Video
-          </button>
-          <button onClick={() => setPostType("before_after")}
-            className={`flex-1 py-2 rounded-xl text-xs font-semibold ${postType === "before_after" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-            Prima & Dopo
-          </button>
-        </div>
+        {/* Post type tabs — only for clients or if already in create step */}
+        {!isPro && (
+          <div className="flex gap-2">
+            <button onClick={() => setContentType("image")}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold ${contentType === "image" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              Foto/Video
+            </button>
+            <button onClick={() => setContentType("before_after")}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold ${contentType === "before_after" ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              Prima & Dopo
+            </button>
+          </div>
+        )}
 
         {/* Caption */}
         <textarea value={caption} onChange={e => setCaption(e.target.value)}
@@ -120,7 +186,7 @@ export default function CreatePostPage() {
           className="w-full rounded-xl bg-card border border-border p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50" />
 
         {/* === IMAGE UPLOAD === */}
-        {postType === "image" && (
+        {contentType === "image" && (
           <>
             {imagePreview ? (
               <div className="relative rounded-xl overflow-hidden">
@@ -143,10 +209,9 @@ export default function CreatePostPage() {
         )}
 
         {/* === BEFORE/AFTER UPLOAD === */}
-        {postType === "before_after" && (
+        {contentType === "before_after" && (
           <div className="space-y-4">
-            {/* Preview with slider */}
-            {beforePreview && afterPreview ? (
+            {beforePreview && afterPreview && (
               <div className="relative aspect-square rounded-xl overflow-hidden">
                 <img src={afterPreview} alt="Dopo" className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
@@ -165,12 +230,13 @@ export default function CreatePostPage() {
                   onChange={e => setSliderPos(Number(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
               </div>
-            ) : null}
+            )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Before */}
               <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-2 text-center">📷 PRIMA</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2 text-center flex items-center justify-center gap-1">
+                  <Camera className="w-3 h-3" /> PRIMA
+                </p>
                 {beforePreview ? (
                   <div className="relative rounded-xl overflow-hidden">
                     <img src={beforePreview} alt="Before" className="w-full aspect-square object-cover" />
@@ -187,10 +253,10 @@ export default function CreatePostPage() {
                   </button>
                 )}
               </div>
-
-              {/* After */}
               <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-2 text-center">✨ DOPO</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2 text-center flex items-center justify-center gap-1">
+                  <ArrowRight className="w-3 h-3" /> DOPO
+                </p>
                 {afterPreview ? (
                   <div className="relative rounded-xl overflow-hidden">
                     <img src={afterPreview} alt="After" className="w-full aspect-square object-cover" />
