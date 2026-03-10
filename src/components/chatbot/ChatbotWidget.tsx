@@ -50,7 +50,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     {
       id: "welcome",
       role: "assistant",
-      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!`,
+      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
