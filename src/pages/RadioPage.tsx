@@ -198,7 +198,11 @@ export default function RadioPage() {
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       currentStation.id === station.id ? "bg-primary/10 border border-primary/30" : "bg-card hover:bg-muted"
                     }`}>
-                    <img src={coverImages[idx % coverImages.length]} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                      station.genre.includes("🇮🇹") ? "bg-green-500/10 text-green-600" : "bg-primary/10 text-primary"
+                    }`}>
+                      {station.name.slice(0, 2).toUpperCase()}
+                    </div>
                     <div className="flex-1 text-left">
                       <p className={`text-sm font-semibold ${currentStation.id === station.id ? "text-primary" : ""}`}>{station.name}</p>
                       <p className="text-[11px] text-muted-foreground">{station.genre}</p>
