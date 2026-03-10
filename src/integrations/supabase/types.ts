@@ -68,6 +68,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_module_configs: {
+        Row: {
+          active: boolean
+          ai_settings: Json
+          created_at: string
+          description: string | null
+          id: string
+          module_key: string
+          module_name: string
+          priority: number
+          roles: string[]
+          triggers: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          ai_settings?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_key: string
+          module_name: string
+          priority?: number
+          roles?: string[]
+          triggers?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          ai_settings?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_key?: string
+          module_name?: string
+          priority?: number
+          roles?: string[]
+          triggers?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ar_filters: {
         Row: {
           active: boolean
