@@ -144,7 +144,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Genera 4 messaggi brevi e professionali in italiano per l'app beauty Stayle. Contesto: contattare ${recipientName || "un professionista"} per ${context || "prenotare un servizio"}.`,
+              content: `Genera 4 messaggi brevi e professionali in italiano per l'app beauty Style. Contesto: contattare ${recipientName || "un professionista"} per ${context || "prenotare un servizio"}.`,
             },
             { role: "user", content: "Genera 4 messaggi suggeriti" },
           ],
