@@ -177,7 +177,7 @@ serve(async (req) => {
 
       return jsonResponse({
         messages: [
-          `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Stayle!`,
+          `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Style!`,
           `Sei disponibile per un appuntamento?`,
           `Vorrei prenotare un servizio.`,
           `Possiamo collaborare?`,
