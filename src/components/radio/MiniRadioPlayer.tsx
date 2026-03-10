@@ -7,7 +7,9 @@ import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty3 from "@/assets/beauty-3.jpg";
 
-const coverImages = [beauty2, stylist1, stylist2, beauty3];
+import beauty1 from "@/assets/beauty-1.jpg";
+
+const coverImages = [beauty2, stylist1, stylist2, beauty3, beauty1, beauty2, stylist1];
 
 interface MiniRadioPlayerProps {
   visible: boolean;
