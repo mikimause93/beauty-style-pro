@@ -33,7 +33,7 @@ export default function AIAssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!`,
+      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!`,
     },
   ]);
   const [input, setInput] = useState("");
