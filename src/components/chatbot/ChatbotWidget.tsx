@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MessageCircle, X, Send, Sparkles, Minimize2, Maximize2,
@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import useChatbot from "@/hooks/useChatbot";
+import { streamChat } from "@/lib/streamChat";
 import { toast } from "sonner";
 
 interface ChatMsg {
@@ -21,7 +21,7 @@ const quickActions = [
   { icon: Calendar, label: "Prenota", desc: "Trova professionisti", path: "/booking", color: "text-pink-400" },
   { icon: MapPin, label: "Mappa", desc: "Cerca vicino a te", path: "/map-search", color: "text-blue-400" },
   { icon: ShoppingBag, label: "Shop", desc: "Prodotti beauty", path: "/shop", color: "text-amber-400" },
-  { icon: Video, label: "Live", desc: "Streaming beauty", path: "/live", color: "text-red-400" },
+  { icon: Video, label: "Live", desc: "Streaming beauty", path: "/go-live", color: "text-red-400" },
   { icon: Wallet, label: "Wallet", desc: "Saldo e pagamenti", path: "/wallet", color: "text-green-400" },
   { icon: Briefcase, label: "Lavoro", desc: "Offerte beauty", path: "/hr", color: "text-purple-400" },
   { icon: Star, label: "Sfide", desc: "Missioni e premi", path: "/challenges", color: "text-yellow-400" },
@@ -37,7 +37,6 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const { user, profile } = useAuth();
   const {
     suggestions,
-    isLoading: suggestionsLoading,
     showChatbot,
     setShowChatbot,
     handleSuggestionClick,
@@ -51,7 +50,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     {
       id: "welcome",
       role: "assistant",
-      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI, il tuo assistente STYLE. Chiedimi qualsiasi cosa: consigli beauty, come prenotare, usare il wallet o trovare professionisti!`,
+      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -62,18 +61,17 @@ export default function ChatbotWidget({ className = "" }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  // Update welcome message when profile loads
   useEffect(() => {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
         m.id === "welcome" 
-          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella & Keplero AI, il tuo assistente STYLE. Chiedimi qualsiasi cosa: consigli beauty, come prenotare, usare il wallet o trovare professionisti!` }
+          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!` }
           : m
       ));
     }
   }, [profile?.display_name]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     const text = chatInput.trim();
     if (!text || isAILoading || !user) return;
 
@@ -82,44 +80,57 @@ export default function ChatbotWidget({ className = "" }: Props) {
     setChatInput("");
     setIsAILoading(true);
 
-    try {
-      const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-        role: m.role,
-        content: m.content,
-      }));
+    const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
 
-      const { data, error } = await supabase.functions.invoke("chatbot-assistant", {
-        body: {
-          action: "chat",
-          user_id: user.id,
-          data: { messages: history }
+    let assistantSoFar = "";
+
+    const upsertAssistant = (nextChunk: string) => {
+      assistantSoFar += nextChunk;
+      const currentContent = assistantSoFar;
+      setChatMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && last.id === "streaming") {
+          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+        }
+        return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
+      });
+    };
+
+    try {
+      await streamChat({
+        userId: user.id,
+        messages: history as any,
+        onDelta: (chunk) => upsertAssistant(chunk),
+        onDone: () => {
+          setChatMessages(prev => prev.map(m => 
+            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
+          ));
+          setIsAILoading(false);
+        },
+        onError: (error) => {
+          toast.error(error);
+          setChatMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "Mi dispiace, riprova tra poco! 🙏",
+          }]);
+          setIsAILoading(false);
         },
       });
-
-      if (error) throw error;
-
-      const aiContent = data?.response || "Mi dispiace, non riesco a rispondere in questo momento.";
-      setChatMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: aiContent,
-      }]);
     } catch (err: any) {
-      console.error("AI error:", err);
-      if (err?.message?.includes("429") || err?.status === 429) {
-        toast.error("Troppe richieste, riprova tra poco");
-      } else {
-        toast.error("Errore nella risposta AI");
-      }
+      console.error("AI stream error:", err);
+      toast.error("Errore nella risposta AI");
       setChatMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
+        content: "Mi dispiace, riprova tra poco! 🙏",
       }]);
-    } finally {
       setIsAILoading(false);
     }
-  };
+  }, [chatInput, isAILoading, user, chatMessages]);
 
   const suggestedQuestions = [
     "Quale taglio va di moda?",
@@ -154,20 +165,16 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Stella & Keplero AI</h4>
-                  <p className="text-[10px] text-muted-foreground">Assistente STYLE Beauty</p>
+                  <p className="text-[10px] text-muted-foreground">Assistente STYLE con streaming</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                  className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors"
-                >
+                <button onClick={() => setIsFullscreen(!isFullscreen)}
+                  className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors">
                   {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                 </button>
-                <button
-                  onClick={() => setIsMinimized(true)}
-                  className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors"
-                >
+                <button onClick={() => setIsMinimized(true)}
+                  className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -180,9 +187,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 { key: "actions" as const, label: "⚡ Azioni" },
                 { key: "tips" as const, label: `💡 Tips${suggestions.length > 0 ? ` (${suggestions.length})` : ""}` },
               ].map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                   className={`flex-1 px-2 py-2 text-[11px] font-semibold transition-colors ${
                     activeTab === tab.key
                       ? "bg-primary/10 text-primary border-b-2 border-primary"
@@ -196,7 +201,6 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
             {/* Content */}
             <div className="flex-1 overflow-hidden flex flex-col">
-              {/* ===== TAB: CHAT AI ===== */}
               {activeTab === "chat" && (
                 <>
                   <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
@@ -221,7 +225,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                       </div>
                     ))}
 
-                    {isAILoading && (
+                    {isAILoading && chatMessages[chatMessages.length - 1]?.id !== "streaming" && (
                       <div className="flex gap-2">
                         <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
                           <Bot className="w-3.5 h-3.5 text-primary-foreground" />
@@ -235,17 +239,13 @@ export default function ChatbotWidget({ className = "" }: Props) {
                       </div>
                     )}
 
-                    {/* Quick suggestions */}
                     {chatMessages.length <= 2 && !isAILoading && (
                       <div className="pt-1">
                         <p className="text-[10px] text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {suggestedQuestions.map(q => (
-                            <button
-                              key={q}
-                              onClick={() => setChatInput(q)}
-                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-[10px] hover:border-primary/40 transition-colors"
-                            >
+                            <button key={q} onClick={() => setChatInput(q)}
+                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-[10px] hover:border-primary/40 transition-colors">
                               {q}
                             </button>
                           ))}
@@ -256,7 +256,6 @@ export default function ChatbotWidget({ className = "" }: Props) {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Chat Input */}
                   <div className="border-t border-border/50 px-3 py-2.5">
                     <div className="flex gap-2">
                       <input
@@ -267,11 +266,8 @@ export default function ChatbotWidget({ className = "" }: Props) {
                         className="flex-1 h-9 rounded-full bg-muted/50 px-3.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
                         disabled={isAILoading}
                       />
-                      <button
-                        onClick={sendMessage}
-                        disabled={!chatInput.trim() || isAILoading}
-                        className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 transition-opacity"
-                      >
+                      <button onClick={sendMessage} disabled={!chatInput.trim() || isAILoading}
+                        className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 transition-opacity">
                         <Send className="w-4 h-4 text-primary-foreground" />
                       </button>
                     </div>
@@ -279,21 +275,14 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </>
               )}
 
-              {/* ===== TAB: QUICK ACTIONS ===== */}
               {activeTab === "actions" && (
                 <div className="flex-1 overflow-y-auto p-3">
                   <p className="text-[10px] text-muted-foreground font-medium mb-3">Cosa vuoi fare?</p>
                   <div className="grid grid-cols-2 gap-2">
                     {quickActions.map(action => (
-                      <motion.button
-                        key={action.path}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => {
-                          navigate(action.path);
-                          setIsMinimized(true);
-                        }}
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-muted/40 border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all"
-                      >
+                      <motion.button key={action.path} whileTap={{ scale: 0.97 }}
+                        onClick={() => { navigate(action.path); setIsMinimized(true); }}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-muted/40 border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all">
                         <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center">
                           <action.icon className={`w-5 h-5 ${action.color}`} />
                         </div>
@@ -305,7 +294,6 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
               )}
 
-              {/* ===== TAB: TIPS / SUGGESTIONS ===== */}
               {activeTab === "tips" && (
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
                   {suggestions.length === 0 ? (
@@ -316,17 +304,13 @@ export default function ChatbotWidget({ className = "" }: Props) {
                     </div>
                   ) : (
                     suggestions.map((suggestion) => (
-                      <motion.div
-                        key={suggestion.suggestion_id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-muted/40 rounded-xl p-3 border border-border/30"
-                      >
+                      <motion.div key={suggestion.suggestion_id}
+                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                        className="bg-muted/40 rounded-xl p-3 border border-border/30">
                         <p className="text-xs mb-2">{suggestion.content}</p>
                         <div className="flex gap-1.5 items-center">
                           {suggestion.action_buttons.map((btn, idx) => (
-                            <button
-                              key={idx}
+                            <button key={idx}
                               onClick={() => {
                                 handleSuggestionClick(suggestion, btn);
                                 if (btn.action === "navigate") setIsMinimized(true);
@@ -335,15 +319,12 @@ export default function ChatbotWidget({ className = "" }: Props) {
                                 btn.action === "dismiss"
                                   ? "bg-muted text-muted-foreground hover:bg-muted/80"
                                   : "bg-primary text-primary-foreground hover:bg-primary/90"
-                              }`}
-                            >
+                              }`}>
                               {btn.text}
                             </button>
                           ))}
-                          <button
-                            onClick={() => dismissSuggestion(suggestion)}
-                            className="ml-auto w-5 h-5 rounded text-muted-foreground hover:text-foreground flex items-center justify-center"
-                          >
+                          <button onClick={() => dismissSuggestion(suggestion)}
+                            className="ml-auto w-5 h-5 rounded text-muted-foreground hover:text-foreground flex items-center justify-center">
                             <X className="w-3 h-3" />
                           </button>
                         </div>
