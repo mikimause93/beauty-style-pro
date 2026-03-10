@@ -37,7 +37,7 @@ export default function HomeMusicWidget() {
   const searchYouTube = () => {
     if (!youtubeQuery.trim()) return;
     const encoded = encodeURIComponent(youtubeQuery.trim());
-    setYoutubeEmbed(`https://www.youtube.com/embed?listType=search&list=${encoded}`);
+    setYoutubeEmbed(`https://www.youtube.com/results?search_query=${encoded}`);
   };
 
   const spotifyPlaylists = [
