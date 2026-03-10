@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
