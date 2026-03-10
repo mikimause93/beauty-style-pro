@@ -1,27 +1,21 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon, Calendar, MapPin, ShoppingBag, Video, Wallet, Briefcase } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
+import { streamChat } from "@/lib/streamChat";
+import AIQuickActions from "@/components/ai/AIQuickActions";
+import AIChatMessages from "@/components/ai/AIChatMessages";
+import AIVoiceControls from "@/components/ai/AIVoiceControls";
 
 interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   content: string;
 }
-
-const quickActions = [
-  { icon: Calendar, label: "Prenota", path: "/booking" },
-  { icon: MapPin, label: "Mappa", path: "/map-search" },
-  { icon: ShoppingBag, label: "Shop", path: "/shop" },
-  { icon: Video, label: "Live", path: "/live" },
-  { icon: Wallet, label: "Wallet", path: "/wallet" },
-  { icon: Briefcase, label: "Lavoro", path: "/hr" },
-];
 
 const suggestedQuestions = [
   "Quale taglio va di moda questa stagione?",
@@ -52,23 +46,13 @@ export default function AIAssistantPage() {
   const { speak, cancel: cancelTTS } = useVoiceSynthesis();
   
   const {
-    isListening,
-    transcript,
-    startListening,
-    stopListening,
-    resetTranscript,
-    isWakeWordListening,
-    startWakeWordListening,
-    stopWakeWordListening
+    isListening, transcript, startListening, stopListening, resetTranscript,
+    isWakeWordListening, startWakeWordListening, stopWakeWordListening
   } = useVoiceRecognition({
-    continuous: false,
-    interimResults: true,
-    language: 'it-IT',
+    continuous: false, interimResults: true, language: 'it-IT',
     wakeWordEnabled,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
-    onWakeWordDetected: () => {
-      if (isTTSEnabled) speak("Ciao! Come posso aiutarti?");
-    }
+    onWakeWordDetected: () => { if (isTTSEnabled) speak("Ciao! Come posso aiutarti?"); }
   });
 
   useEffect(() => {
@@ -82,7 +66,7 @@ export default function AIAssistantPage() {
     }
   }, [transcript, isListening, resetTranscript]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
 
@@ -91,43 +75,59 @@ export default function AIAssistantPage() {
     setInput("");
     setIsLoading(true);
 
-    try {
-      const history = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-        role: m.role,
-        content: m.content,
-      }));
+    const history = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
 
-      const { data, error } = await supabase.functions.invoke("chatbot-assistant", {
-        body: {
-          action: "chat",
-          user_id: user.id,
-          data: { messages: history }
+    let assistantSoFar = "";
+
+    const upsertAssistant = (nextChunk: string) => {
+      assistantSoFar += nextChunk;
+      const currentContent = assistantSoFar;
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && last.id === "streaming") {
+          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+        }
+        return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
+      });
+    };
+
+    try {
+      await streamChat({
+        userId: user.id,
+        messages: history as any,
+        onDelta: (chunk) => upsertAssistant(chunk),
+        onDone: () => {
+          // Finalize the streaming message with a stable ID
+          setMessages(prev => prev.map(m => 
+            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
+          ));
+          setIsLoading(false);
+          if (isTTSEnabled && assistantSoFar) speak(assistantSoFar);
+        },
+        onError: (error) => {
+          toast.error(error);
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
+          }]);
+          setIsLoading(false);
         },
       });
-
-      if (error) throw error;
-
-      const aiContent = data?.response || "Mi dispiace, non riesco a rispondere in questo momento.";
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: aiContent,
-      }]);
-
-      if (isTTSEnabled) speak(aiContent);
     } catch (err: any) {
-      console.error("AI error:", err);
-      if (err?.message?.includes("429")) toast.error("Troppe richieste, riprova tra poco");
-      else toast.error("Errore nella risposta AI");
+      console.error("AI stream error:", err);
+      toast.error("Errore nella risposta AI");
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
       }]);
-    } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, isLoading, user, messages, isTTSEnabled, speak]);
 
   return (
     <MobileLayout>
@@ -141,106 +141,35 @@ export default function AIAssistantPage() {
         <div className="flex-1">
           <h1 className="text-sm font-bold">Stella & Keplero AI</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Il tuo assistente STYLE completo"}
+            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Assistente STYLE con streaming AI"}
           </p>
         </div>
       </header>
 
-      {/* Quick Actions Bar */}
-      <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-none">
-        {quickActions.map(a => (
-          <button
-            key={a.path}
-            onClick={() => navigate(a.path)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/30 text-xs font-medium whitespace-nowrap hover:border-primary/30 transition-colors"
-          >
-            <a.icon className="w-3.5 h-3.5 text-primary" />
-            {a.label}
-          </button>
-        ))}
-      </div>
+      <AIQuickActions />
 
-      {/* Messages */}
-      <div className="flex-1 px-4 py-4 space-y-4 min-h-[50vh]">
-        {messages.map(msg => (
-          <div key={msg.id} className={`flex gap-2.5 fade-in ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-              msg.role === "assistant" ? "gradient-primary" : "bg-muted"
-            }`}>
-              {msg.role === "assistant" ? (
-                <Bot className="w-4 h-4 text-primary-foreground" />
-              ) : (
-                <User className="w-4 h-4 text-muted-foreground" />
-              )}
-            </div>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-              msg.role === "user"
-                ? "gradient-primary text-primary-foreground rounded-br-md"
-                : "bg-card border border-border rounded-bl-md"
-            }`}>
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-            </div>
-          </div>
-        ))}
+      <AIChatMessages
+        messages={messages}
+        isLoading={isLoading}
+        suggestedQuestions={suggestedQuestions}
+        onSuggestionClick={setInput}
+        messagesEndRef={messagesEndRef}
+      />
 
-        {isLoading && (
-          <div className="flex gap-2.5 fade-in">
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span className="text-sm text-muted-foreground">Sto pensando...</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {messages.length <= 2 && !isLoading && (
-          <div className="space-y-2 pt-2">
-            <p className="text-xs text-muted-foreground font-medium">💡 Prova a chiedere:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestedQuestions.map(q => (
-                <button key={q} onClick={() => setInput(q)}
-                  className="px-3 py-1.5 rounded-full bg-card border border-border text-xs hover:border-primary/50 transition-colors">
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Voice Controls */}
-      <div className="sticky bottom-20 px-4 py-2 flex justify-center gap-2">
-        <button
-          onClick={() => {
-            setWakeWordEnabled(!wakeWordEnabled);
-            if (!wakeWordEnabled) { startWakeWordListening(); toast.success("Attivazione vocale abilitata"); }
-            else { stopWakeWordListening(); toast.success("Attivazione vocale disabilitata"); }
-          }}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            wakeWordEnabled ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          🎤 Wake Word {wakeWordEnabled ? "ON" : "OFF"}
-        </button>
-        <button
-          onClick={() => {
-            setIsTTSEnabled(!isTTSEnabled);
-            if (!isTTSEnabled) speak("Sintesi vocale attivata!");
-            else cancelTTS();
-          }}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            isTTSEnabled ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          🔊 Audio {isTTSEnabled ? "ON" : "OFF"}
-        </button>
-      </div>
+      <AIVoiceControls
+        wakeWordEnabled={wakeWordEnabled}
+        isTTSEnabled={isTTSEnabled}
+        onToggleWakeWord={() => {
+          setWakeWordEnabled(!wakeWordEnabled);
+          if (!wakeWordEnabled) { startWakeWordListening(); toast.success("Attivazione vocale abilitata"); }
+          else { stopWakeWordListening(); toast.success("Attivazione vocale disabilitata"); }
+        }}
+        onToggleTTS={() => {
+          setIsTTSEnabled(!isTTSEnabled);
+          if (!isTTSEnabled) speak("Sintesi vocale attivata!");
+          else cancelTTS();
+        }}
+      />
 
       {/* Input */}
       <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2">
