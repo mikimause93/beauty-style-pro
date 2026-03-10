@@ -9,6 +9,7 @@ import { toast } from "sonner";
 export default function AdminPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [tab, setTab] = useState<"overview" | "users" | "payments" | "reports" | "verify">("overview");
   const [stats, setStats] = useState({ users: 0, bookings: 0, professionals: 0, businesses: 0, posts: 0, products: 0, subscriptions: 0, boosts: 0, transactions: 0, totalQRC: 0 });
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
@@ -20,7 +21,40 @@ export default function AdminPage() {
   const [subBreakdown, setSubBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadStats(); }, [tab]);
+  // Check admin role from user_roles table
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+      setIsAdmin(data && data.length > 0);
+    });
+  }, [user]);
+
+  useEffect(() => { if (isAdmin) loadStats(); }, [tab, isAdmin]);
+
+  if (isAdmin === null) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+          <ShieldCheck className="w-16 h-16 text-destructive" />
+          <h1 className="text-xl font-bold">Accesso Negato</h1>
+          <p className="text-sm text-muted-foreground">Non hai i permessi per accedere al pannello amministrativo.</p>
+          <button onClick={() => navigate("/")} className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+            Torna alla Home
+          </button>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   const loadStats = async () => {
     setLoading(true);
