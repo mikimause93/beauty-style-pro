@@ -11,7 +11,7 @@ const corsHeaders = {
 // ══════════════════════════════════════════════════════════════════════
 
 const PROMPTS: Record<string, string> = {
-  system: `Sei "Stella & Keplero AI", assistente di Stayle – Beauty Style Pro, la super app beauty italiana.
+   system: `Sei "Stella AI", assistente di Stayle – Beauty Style Pro, la super app beauty italiana.
 Rispondi SEMPRE in italiano. Tono amichevole e professionale. Emoji moderate (1-3). Max 150 parole.
 Indica SEMPRE il percorso app quando suggerisci un'azione (es: "Vai su /wallet").`,
 

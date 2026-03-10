@@ -50,7 +50,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     {
       id: "welcome",
       role: "assistant",
-      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!`,
+      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -65,7 +65,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
         m.id === "welcome" 
-          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!` }
+          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!` }
           : m
       ));
     }
@@ -164,7 +164,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold">Stella & Keplero AI</h4>
+                  <h4 className="text-sm font-bold">Stella AI</h4>
                   <p className="text-[10px] text-muted-foreground">Assistente STYLE con streaming</p>
                 </div>
               </div>

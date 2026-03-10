@@ -8,12 +8,11 @@ const corsHeaders = {
 
 // ── Shared building blocks ──────────────────────────────────────────
 
-const BASE_IDENTITY = `Sei "Stella & Keplero AI", l'assistente virtuale intelligente di Stayle – Beauty Style Pro, la super app italiana per il settore beauty & wellness.
+const BASE_IDENTITY = `Sei "Stella AI", l'assistente virtuale intelligente di Stayle – Beauty Style Pro, la super app italiana per il settore beauty & wellness.
 
-IDENTITÀ UNIFICATA:
-- Stella: esperta beauty — consigli personalizzati su tagli, colori, skincare, trattamenti viso/corpo, tendenze stagionali, look per eventi, compatibilità prodotti
-- Keplero: assistente operativo & strategico — prenotazioni, pagamenti, navigazione app, supporto tecnico, marketing automatico, analytics, crescita business
-- Insieme formano un unico assistente omnicanale, proattivo e intelligente che si adatta dinamicamente al ruolo e al comportamento dell'utente
+IDENTITÀ:
+- Stella è un'assistente omnicanale completa: esperta beauty (tagli, colori, skincare, trattamenti, tendenze, look, prodotti) e assistente operativa & strategica (prenotazioni, pagamenti, navigazione app, supporto tecnico, marketing automatico, analytics, crescita business)
+- Si adatta dinamicamente al ruolo e al comportamento dell'utente
 - Wake word vocale: "Stella" — supporto hands-free completo`;
 
 const APP_MODULES = `
@@ -248,7 +247,7 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: `Sei Stella & Keplero AI di Stayle Beauty. Genera 2 suggerimenti personalizzati per ${isBusiness ? 'professionisti/business' : 'clienti/utenti'}.
+                content: `Sei Stella AI di Stayle Beauty. Genera 2 suggerimenti personalizzati per ${isBusiness ? 'professionisti/business' : 'clienti/utenti'}.
 Profilo: Tipo=${userType}, Posts=${postsRes.count || 0}, Booking=${bookingsRes.count || 0}, QRC=${profile?.qr_coins || 0}, Città=${profile?.city || '?'}, ProfiloCompleto=${profileComplete}, Abbonamento=${subsRes.data ? 'Attivo' : 'Free'}
 Regole: max 50 char per suggerimento, emoji, tono motivante, incentiva azioni specifiche.
 ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidature' : 'Focus: scoperta servizi, prenotazioni, shop, live, gamification, referral'}`
@@ -689,7 +688,7 @@ CONTESTO UTENTE ATTUALE:
           messages: [
             {
               role: "system",
-              content: `Sei Stella & Keplero AI di Stayle. Genera suggerimenti personalizzati basati sui moduli AI configurati.
+              content: `Sei Stella AI di Stayle. Genera suggerimenti personalizzati basati sui moduli AI configurati.
 Utente: ${userName}, Tipo: ${userType}, Città: ${profile?.city || "?"}, QRC: ${profile?.qr_coins || 0}
 ${triggerContext ? `Contesto: ${JSON.stringify(triggerContext)}` : ""}
 Regole: max 60 char per messaggio, emoji, tono motivante, CTA chiare. Italiano.`,

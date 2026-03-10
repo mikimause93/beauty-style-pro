@@ -29,7 +29,7 @@ const sections = [
   },
   {
     title: "7. AI e Suggerimenti Automatici",
-    content: "L'app utilizza sistemi di intelligenza artificiale (Stella & Keplero AI) per: suggerire azioni e funzionalità personalizzate, migliorare l'esperienza utente, consigliare servizi, professionisti e prodotti, analizzare engagement e proporre ottimizzazioni. Nessuna decisione legale o con effetti significativi viene presa in modo automatico. L'utente può disattivare i suggerimenti AI dalle impostazioni."
+    content: "L'app utilizza sistemi di intelligenza artificiale (Stella AI) per: suggerire azioni e funzionalità personalizzate, migliorare l'esperienza utente, consigliare servizi, professionisti e prodotti, analizzare engagement e proporre ottimizzazioni. Nessuna decisione legale o con effetti significativi viene presa in modo automatico. L'utente può disattivare i suggerimenti AI dalle impostazioni."
   },
   {
     title: "8. Conservazione Dati",
