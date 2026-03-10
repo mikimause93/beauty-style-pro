@@ -1,24 +1,27 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 
-const playlists = [
-  { name: "Salon Relax", id: "PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD" },
-  { name: "Lofi Beats", id: "PLofht4PTcKYnaH8w5olJCI-wUVxuoMHqM" },
-  { name: "Piano Music", id: "PL8F6B0753B2CCA128" },
-  { name: "Italian Pop", id: "PLgzTt0k8mXzEk586SfWBhQlrhxIGkpMl" },
-  { name: "Chill Mix", id: "PLRqcegS1mb4Isgh6YDcw-a_gQuSmQxCBj" },
-  { name: "Ambient", id: "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj" },
+// Use single popular music video IDs as defaults (these are stable)
+const defaultVideos = [
+  { name: "Relaxing Music", videoId: "lFcSrYw-ARY" },
+  { name: "Lofi Hip Hop", videoId: "jfKfPfyJRdk" },
+  { name: "Piano Music", videoId: "BjFWk0ncr70" },
+  { name: "Italian Hits", videoId: "kOkQ4T5WO9E" },
+  { name: "Chill Beats", videoId: "rUxyKA_-grg" },
+  { name: "Jazz Music", videoId: "Dx5qFachd3A" },
 ];
 
 export default function YouTubeEmbed() {
   const [query, setQuery] = useState("");
   const [embedUrl, setEmbedUrl] = useState(
-    `https://www.youtube.com/embed/videoseries?list=${playlists[0].id}`
+    `https://www.youtube.com/embed/${defaultVideos[0].videoId}?autoplay=0`
   );
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    setEmbedUrl(`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query.trim())}`);
+    // YouTube search results page embedded
+    const encoded = encodeURIComponent(query.trim());
+    setEmbedUrl(`https://www.youtube.com/embed?listType=search&list=${encoded}`);
   };
 
   return (
@@ -54,16 +57,16 @@ export default function YouTubeEmbed() {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {playlists.map(pl => (
+        {defaultVideos.map(v => (
           <button
-            key={pl.id}
+            key={v.videoId}
             onClick={() => {
-              setEmbedUrl(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
+              setEmbedUrl(`https://www.youtube.com/embed/${v.videoId}?autoplay=0`);
               setQuery("");
             }}
             className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[11px] font-semibold text-[#FF0000] whitespace-nowrap"
           >
-            {pl.name}
+            {v.name}
           </button>
         ))}
       </div>

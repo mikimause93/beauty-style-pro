@@ -20,7 +20,7 @@ export default function HomeMusicWidget() {
   const [spotifyQuery, setSpotifyQuery] = useState("");
   const [youtubeQuery, setYoutubeQuery] = useState("");
   const [spotifyEmbed, setSpotifyEmbed] = useState("https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0");
-  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/videoseries?list=PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD");
+  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/lFcSrYw-ARY?autoplay=0");
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
@@ -48,11 +48,11 @@ export default function HomeMusicWidget() {
     { name: "Pop Mix", id: "37i9dQZF1EQncLwOalG3K7" },
   ];
 
-  const youtubePlaylistIds = [
-    { name: "Salon Relax", id: "PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD" },
-    { name: "Lofi Beats", id: "PLofht4PTcKYnaH8w5olJCI-wUVxuoMHqM" },
-    { name: "Piano Music", id: "PL8F6B0753B2CCA128" },
-    { name: "Italian Pop", id: "PLgzTt0k8mXzEk586SfWBhQlrhxIGkpMl" },
+  const youtubeVideos = [
+    { name: "Relaxing", videoId: "lFcSrYw-ARY" },
+    { name: "Lofi Beats", videoId: "jfKfPfyJRdk" },
+    { name: "Piano", videoId: "BjFWk0ncr70" },
+    { name: "Jazz", videoId: "Dx5qFachd3A" },
   ];
 
   const sourceTabs: { key: SourceTab; label: string; icon: React.ReactNode }[] = [
@@ -277,16 +277,16 @@ export default function HomeMusicWidget() {
 
             {/* Quick playlists */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-              {youtubePlaylistIds.map(pl => (
+              {youtubeVideos.map(v => (
                 <button
-                  key={pl.id}
+                  key={v.videoId}
                   onClick={() => {
-                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
+                    setYoutubeEmbed(`https://www.youtube.com/embed/${v.videoId}?autoplay=0`);
                     setYoutubeQuery("");
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000] whitespace-nowrap shrink-0"
                 >
-                  {pl.name}
+                  {v.name}
                 </button>
               ))}
             </div>
