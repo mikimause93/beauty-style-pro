@@ -21,7 +21,7 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `Sei "Beauty AI", l'assistente virtuale di Stayle, la super app italiana per il settore beauty & wellness.
+    const systemPrompt = `Sei "Beauty AI", l'assistente virtuale di Style, la super app italiana per il settore beauty & wellness.
 
 Il tuo ruolo:
 - Consigliare tagli, colori, trattamenti e prodotti personalizzati
