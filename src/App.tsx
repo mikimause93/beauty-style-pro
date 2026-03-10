@@ -69,6 +69,8 @@ import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import RemindersPage from "./pages/RemindersPage";
 import SpaTermePage from "./pages/SpaTermePage";
+import QuizLivePage from "./pages/QuizLivePage";
+import TalentGamePage from "./pages/TalentGamePage";
 import NotFound from "./pages/NotFound";
 import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
