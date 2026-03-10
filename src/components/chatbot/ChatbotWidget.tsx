@@ -164,7 +164,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold">Stella & Keplero AI</h4>
+                  <h4 className="text-sm font-bold">Stella AI</h4>
                   <p className="text-[10px] text-muted-foreground">Assistente STYLE con streaming</p>
                 </div>
               </div>

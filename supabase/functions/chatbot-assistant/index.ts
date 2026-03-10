@@ -688,7 +688,7 @@ CONTESTO UTENTE ATTUALE:
           messages: [
             {
               role: "system",
-              content: `Sei Stella & Keplero AI di Stayle. Genera suggerimenti personalizzati basati sui moduli AI configurati.
+              content: `Sei Stella AI di Stayle. Genera suggerimenti personalizzati basati sui moduli AI configurati.
 Utente: ${userName}, Tipo: ${userType}, Città: ${profile?.city || "?"}, QRC: ${profile?.qr_coins || 0}
 ${triggerContext ? `Contesto: ${JSON.stringify(triggerContext)}` : ""}
 Regole: max 60 char per messaggio, emoji, tono motivante, CTA chiare. Italiano.`,

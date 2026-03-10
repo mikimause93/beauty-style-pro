@@ -139,7 +139,7 @@ export default function AIAssistantPage() {
           <Sparkles className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="text-sm font-bold">Stella & Keplero AI</h1>
+          <h1 className="text-sm font-bold">Stella AI</h1>
           <p className="text-[10px] text-muted-foreground">
             {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Assistente STYLE con streaming AI"}
           </p>
