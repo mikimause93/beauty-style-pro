@@ -298,6 +298,78 @@ export type Database = {
           },
         ]
       }
+      business_employees: {
+        Row: {
+          avatar_url: string | null
+          business_id: string
+          created_at: string
+          email: string | null
+          first_name: string
+          hired_at: string | null
+          id: string
+          invite_token: string | null
+          last_name: string
+          notes: string | null
+          permissions: string[]
+          phone: string | null
+          role: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          business_id: string
+          created_at?: string
+          email?: string | null
+          first_name: string
+          hired_at?: string | null
+          id?: string
+          invite_token?: string | null
+          last_name: string
+          notes?: string | null
+          permissions?: string[]
+          phone?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          business_id?: string
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          hired_at?: string | null
+          id?: string
+          invite_token?: string | null
+          last_name?: string
+          notes?: string | null
+          permissions?: string[]
+          phone?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_employees_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_employees_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           active: boolean | null
@@ -802,6 +874,99 @@ export type Database = {
           participant_2?: string
         }
         Relationships: []
+      }
+      employee_activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_activity_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "business_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_shifts: {
+        Row: {
+          business_id: string
+          created_at: string
+          employee_id: string
+          end_time: string
+          id: string
+          notes: string | null
+          shift_date: string
+          start_time: string
+          status: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          employee_id: string
+          end_time: string
+          id?: string
+          notes?: string | null
+          shift_date: string
+          start_time: string
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          employee_id?: string
+          end_time?: string
+          id?: string
+          notes?: string | null
+          shift_date?: string
+          start_time?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_shifts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shifts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shifts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "business_employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       error_logs: {
         Row: {

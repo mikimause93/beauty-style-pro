@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Users, Calendar, TrendingUp, Briefcase, Star, Settings, Plus, BarChart3, Building2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { ArrowLeft, Users, Calendar, TrendingUp, Briefcase, Star, Settings, Plus, BarChart3, Building2, CheckCircle, Clock, XCircle, ClipboardList, CalendarClock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -103,8 +103,10 @@ export default function BusinessDashboardPage() {
   const quickActions = [
     { icon: Plus, label: "Nuovo Annuncio", onClick: () => navigate("/hr/create-job") },
     { icon: Users, label: "Gestisci Team", onClick: () => navigate("/business/team") },
+    { icon: CalendarClock, label: "Turni Staff", onClick: () => navigate("/business/team/shifts") },
+    { icon: ClipboardList, label: "Attività Log", onClick: () => navigate("/business/team/activity") },
     { icon: Calendar, label: "Prenotazioni", onClick: () => navigate("/booking") },
-    { icon: BarChart3, label: "Analytics", onClick: () => {} },
+    { icon: BarChart3, label: "Analytics", onClick: () => navigate("/analytics") },
   ];
 
   if (!user) {
@@ -171,7 +173,7 @@ export default function BusinessDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {quickActions.map(action => {
             const Icon = action.icon;
             return (

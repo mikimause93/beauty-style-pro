@@ -71,6 +71,9 @@ import RemindersPage from "./pages/RemindersPage";
 import SpaTermePage from "./pages/SpaTermePage";
 import QuizLivePage from "./pages/QuizLivePage";
 import TalentGamePage from "./pages/TalentGamePage";
+import BusinessTeamPage from "./pages/BusinessTeamPage";
+import EmployeeShiftsPage from "./pages/EmployeeShiftsPage";
+import EmployeeActivityPage from "./pages/EmployeeActivityPage";
 import NotFound from "./pages/NotFound";
 import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -164,8 +167,10 @@ const App = () => {
             <Route path="/verify-account" element={<P><VerifyAccountPage /></P>} />
             {/* Business & HR */}
             <Route path="/business" element={<P><BusinessDashboardPage /></P>} />
-            <Route path="/business/team" element={<P><BusinessDashboardPage /></P>} />
-            <Route path="/business/team/invite" element={<P><BusinessDashboardPage /></P>} />
+            <Route path="/business/team" element={<P><BusinessTeamPage /></P>} />
+            <Route path="/business/team/invite" element={<P><BusinessTeamPage /></P>} />
+            <Route path="/business/team/shifts" element={<P><EmployeeShiftsPage /></P>} />
+            <Route path="/business/team/activity" element={<P><EmployeeActivityPage /></P>} />
             <Route path="/hr" element={<P><HRPage /></P>} />
             <Route path="/hr/create-job" element={<P><CreateJobPostPage /></P>} />
             <Route path="/hr/job/:id" element={<P><JobDetailPage /></P>} />
