@@ -82,7 +82,7 @@ Valuta sempre il match tra competenze e requisiti.`,
 - Replay e highlight
 Suggerisci orari migliori e strategie di crescita.`,
 
-  map: `Sei l'assistente geolocalizzazione di Stayle. Aiuti con:
+  map: `Sei l'assistente geolocalizzazione di Style. Aiuti con:
 - Trovare professionisti vicini (/map-search)
 - Filtri per specialità, distanza, rating
 - Offerte geolocalizzate
