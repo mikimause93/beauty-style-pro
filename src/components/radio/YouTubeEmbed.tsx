@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Search, ExternalLink } from "lucide-react";
 
-// Popular music live streams & videos (stable IDs)
 const defaultVideos = [
   { name: "Relaxing Music", videoId: "lFcSrYw-ARY" },
   { name: "Lofi Hip Hop", videoId: "jfKfPfyJRdk" },
@@ -13,22 +12,17 @@ const defaultVideos = [
 
 export default function YouTubeEmbed() {
   const [query, setQuery] = useState("");
-  const [embedUrl, setEmbedUrl] = useState(
-    `https://www.youtube.com/embed/${defaultVideos[0].videoId}?autoplay=0`
-  );
-  const [searchMode, setSearchMode] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState(defaultVideos[0].videoId);
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    const encoded = encodeURIComponent(query.trim());
-    // Show YouTube search results in full iframe
-    setEmbedUrl(`https://www.youtube.com/results?search_query=${encoded}`);
-    setSearchMode(true);
+    // YouTube results page cannot be embedded in iframe (X-Frame-Options blocks it)
+    // Open search results in a new tab instead
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query.trim())}`, "_blank");
   };
 
   const playVideo = (videoId: string) => {
-    setEmbedUrl(`https://www.youtube.com/embed/${videoId}?autoplay=0`);
-    setSearchMode(false);
+    setCurrentVideoId(videoId);
     setQuery("");
   };
 
@@ -50,48 +44,22 @@ export default function YouTubeEmbed() {
         </button>
       </div>
 
-      {/* Search mode: show full YouTube page in iframe */}
-      {searchMode ? (
-        <div className="space-y-2">
-          <div className="rounded-xl overflow-hidden" style={{ height: "400px" }}>
-            <iframe
-              key={embedUrl}
-              src={embedUrl}
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              loading="lazy"
-              className="w-full h-full"
-            />
-          </div>
-          <p className="text-[10px] text-muted-foreground text-center">
-            Tocca un video su YouTube per ascoltarlo, oppure scegli dai suggerimenti sotto 👇
-          </p>
-          <button
-            onClick={() => { setSearchMode(false); setEmbedUrl(`https://www.youtube.com/embed/${defaultVideos[0].videoId}?autoplay=0`); }}
-            className="w-full py-2 rounded-xl bg-muted text-xs font-semibold text-muted-foreground"
-          >
-            ← Torna al player
-          </button>
-        </div>
-      ) : (
-        <div className="rounded-xl overflow-hidden aspect-video">
-          <iframe
-            key={embedUrl}
-            src={embedUrl}
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            className="w-full h-full"
-          />
-        </div>
-      )}
+      {/* Embedded player - always works with /embed/ URLs */}
+      <div className="rounded-xl overflow-hidden aspect-video">
+        <iframe
+          key={currentVideoId}
+          src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=0&rel=0`}
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+          className="w-full h-full"
+        />
+      </div>
 
-      {/* Open in YouTube link */}
+      {/* Open in YouTube link when query exists */}
       {query && (
         <a
           href={`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`}
@@ -109,7 +77,11 @@ export default function YouTubeEmbed() {
           <button
             key={v.videoId}
             onClick={() => playVideo(v.videoId)}
-            className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[11px] font-semibold text-[#FF0000] whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+              currentVideoId === v.videoId
+                ? "bg-[#FF0000] text-white"
+                : "bg-[#FF0000]/10 text-[#FF0000]"
+            }`}
           >
             {v.name}
           </button>
