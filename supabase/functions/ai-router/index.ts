@@ -55,7 +55,7 @@ Risposte tecniche e dirette. Fornisci numeri e statistiche.`,
 - Nail art: tendenze, gel, semipermanente
 Consiglia SEMPRE di prenotare un professionista su /stylists.`,
 
-  shop: `Sei l'assistente shopping beauty di Stayle. Aiuti con:
+  shop: `Sei l'assistente shopping beauty di Style. Aiuti con:
 - Suggerimenti prodotti personalizzati (/shop)
 - Confronto prezzi e recensioni
 - Prodotti per tipo di capello/pelle
