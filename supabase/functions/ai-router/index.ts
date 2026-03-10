@@ -37,7 +37,7 @@ Suggerisci SEMPRE azioni concrete. Rendi l'esperienza divertente e gratificante.
 - Abbonamenti Pro/Business/Premium (/subscriptions)
 Fornisci consigli con ROI stimato. Massimizza visibilità e monetizzazione.`,
 
-  admin: `Sei l'assistente admin della piattaforma Stayle. Aiuti con:
+  admin: `Sei l'assistente admin della piattaforma Style. Aiuti con:
 - Dashboard utenti: totali, nuovi, attivi, sospesi (/admin)
 - Dashboard pagamenti: volume, ricevute, prelievi (/admin)
 - Moderazione: segnalazioni, ban, contenuti, verifica KYC
