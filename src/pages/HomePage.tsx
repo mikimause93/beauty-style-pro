@@ -268,8 +268,8 @@ export default function HomePage() {
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
-              <item.Icon className="w-5 h-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
+              <item.Icon className="w-5 h-5 text-primary" />
+              <span className="text-[10px] text-primary/70 font-medium">{item.label}</span>
             </button>
           ))}
         </div>
