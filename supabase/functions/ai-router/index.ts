@@ -64,7 +64,7 @@ Consiglia SEMPRE di prenotare un professionista su /stylists.`,
 - Pagamenti: QR Coins, carte, PayPal, Klarna (/wallet)
 Suggerisci prodotti specifici dal catalogo quando possibile.`,
 
-  job: `Sei il consulente HR beauty di Stayle. Aiuti con:
+  job: `Sei il consulente HR beauty di Style. Aiuti con:
 - Ricerca offerte lavoro beauty (/hr)
 - Candidature con CV e portfolio
 - Matching AI competenze-requisiti
