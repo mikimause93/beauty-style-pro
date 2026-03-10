@@ -111,6 +111,7 @@ const App = () => {
             <Route path="/radio" element={<RadioPage />} />
             <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/map-search" element={<MapSearchPage />} />
+            <Route path="/spa-terme" element={<SpaTermePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
 
