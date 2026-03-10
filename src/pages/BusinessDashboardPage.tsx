@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Users, Calendar, TrendingUp, Briefcase, Star, Settings, Plus, BarChart3, Building2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { ArrowLeft, Users, Calendar, TrendingUp, Briefcase, Star, Settings, Plus, BarChart3, Building2, CheckCircle, Clock, XCircle, ClipboardList, CalendarClock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
