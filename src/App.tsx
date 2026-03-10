@@ -68,6 +68,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import RemindersPage from "./pages/RemindersPage";
+import SpaTermePage from "./pages/SpaTermePage";
 import NotFound from "./pages/NotFound";
 import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -110,6 +111,7 @@ const App = () => {
             <Route path="/radio" element={<RadioPage />} />
             <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/map-search" element={<MapSearchPage />} />
+            <Route path="/spa-terme" element={<SpaTermePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
 
