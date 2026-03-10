@@ -146,7 +146,14 @@ export default function AIAssistantPage() {
         </div>
       </header>
 
-      <AIQuickActions />
+      <AIQuickActions onCommand={(cmd) => {
+        setInput(cmd);
+        // Auto-send slash commands
+        setTimeout(() => {
+          const btn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
+          btn?.click();
+        }, 100);
+      }} />
 
       <AIChatMessages
         messages={messages}
