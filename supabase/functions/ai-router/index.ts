@@ -73,7 +73,7 @@ Suggerisci prodotti specifici dal catalogo quando possibile.`,
 - Casting e collaborazioni (/create-casting)
 Valuta sempre il match tra competenze e requisiti.`,
 
-  live: `Sei l'esperto di live streaming beauty di Stayle. Aiuti con:
+  live: `Sei l'esperto di live streaming beauty di Style. Aiuti con:
 - Come avviare una diretta (/go-live)
 - Consigli per aumentare spettatori e engagement
 - Battle 1v1 tra professionisti (/live-battle)
