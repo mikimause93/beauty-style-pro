@@ -297,14 +297,17 @@ Regole: max 50 char, emoji, tono motivante, incentiva azioni specifiche.`
         .eq("user_id", user_id)
         .single();
 
+      const userType = profile?.user_type || 'client';
+      const dynamicPrompt = getSystemPrompt(userType);
+
       const contextAddition = profile ? `\n\nCONTESTO UTENTE ATTUALE:
 - Nome: ${profile.display_name || 'Utente'}
-- Tipo: ${profile.user_type || 'client'}
+- Tipo: ${userType}
 - Città: ${profile.city || 'non specificata'}
 - QR Coins: ${profile.qr_coins || 0}` : '';
 
       const allMessages = [
-        { role: "system", content: SYSTEM_PROMPT + contextAddition },
+        { role: "system", content: dynamicPrompt + contextAddition },
         ...(chatHistory || [])
       ];
 
