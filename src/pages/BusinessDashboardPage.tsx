@@ -173,7 +173,7 @@ export default function BusinessDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {quickActions.map(action => {
             const Icon = action.icon;
             return (
