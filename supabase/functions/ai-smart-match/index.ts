@@ -63,7 +63,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Sei l'agente AI di matching di STAYLE. Analizza professionisti e genera suggerimenti personalizzati per l'utente. Rispondi in italiano.`
+              content: `Sei l'agente AI di matching di STYLE. Analizza professionisti e genera suggerimenti personalizzati per l'utente. Rispondi in italiano.`
             },
             {
               role: "user",
