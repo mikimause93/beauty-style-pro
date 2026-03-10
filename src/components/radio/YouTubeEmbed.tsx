@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 
 const playlists = [
-  { name: "Salon Relax", id: "PLDfKAXSi6kOaiaFt8vMiJJMLNBeqaSMP8" },
-  { name: "Lofi Beats", id: "PLOzDu-MXXLliO9fBNZOQTBDddoA3FzZUo" },
-  { name: "Piano Music", id: "PLMIbGomroEscpWKsxpCY7LtZMBkMb7Riv" },
-  { name: "Italian Pop", id: "PLcfQmtiAG0X-fmM85dPlql5wfYbmFumzQ" },
-  { name: "Chill Mix", id: "PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Q5" },
-  { name: "Ambient", id: "PLQ_PIlf6OzqI34ZGU3pY-y0VDOAnKyNnP" },
+  { name: "Salon Relax", id: "PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD" },
+  { name: "Lofi Beats", id: "PLofht4PTcKYnaH8w5olJCI-wUVxuoMHqM" },
+  { name: "Piano Music", id: "PL8F6B0753B2CCA128" },
+  { name: "Italian Pop", id: "PLgzTt0k8mXzEk586SfWBhQlrhxIGkpMl" },
+  { name: "Chill Mix", id: "PLRqcegS1mb4Isgh6YDcw-a_gQuSmQxCBj" },
+  { name: "Ambient", id: "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj" },
 ];
 
 export default function YouTubeEmbed() {
