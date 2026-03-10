@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music, Play, Pause, SkipForward, Loader2, X, Search } from "lucide-react";
+import { Music, Play, Pause, SkipForward, Loader2, X, Search, ExternalLink } from "lucide-react";
 import { useRadio } from "@/contexts/RadioContext";
 import { useNavigate } from "react-router-dom";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -19,8 +19,8 @@ export default function HomeMusicWidget() {
   const [hidden, setHidden] = useState(false);
   const [spotifyQuery, setSpotifyQuery] = useState("");
   const [youtubeQuery, setYoutubeQuery] = useState("");
-  const [spotifyEmbed, setSpotifyEmbed] = useState("https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0");
-  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/lFcSrYw-ARY?autoplay=0");
+  const [spotifyPlaylistId, setSpotifyPlaylistId] = useState("37i9dQZF1DX4sWSpwq3LiO");
+  const [youtubeVideoId, setYoutubeVideoId] = useState("lFcSrYw-ARY");
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
@@ -29,15 +29,14 @@ export default function HomeMusicWidget() {
 
   const searchSpotify = () => {
     if (!spotifyQuery.trim()) return;
-    // Use Spotify's search embed - opens search results inside the embed
-    const encoded = encodeURIComponent(spotifyQuery.trim());
-    setSpotifyEmbed(`https://open.spotify.com/embed/search/${encoded}?utm_source=generator&theme=0`);
+    // Spotify embed doesn't support search URLs - open externally
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(spotifyQuery.trim())}`, "_blank");
   };
 
   const searchYouTube = () => {
     if (!youtubeQuery.trim()) return;
-    const encoded = encodeURIComponent(youtubeQuery.trim());
-    setYoutubeEmbed(`https://www.youtube.com/results?search_query=${encoded}`);
+    // YouTube results page can't be embedded (X-Frame-Options) - open externally
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeQuery.trim())}`, "_blank");
   };
 
   const spotifyPlaylists = [
@@ -187,7 +186,6 @@ export default function HomeMusicWidget() {
         {/* ===== SPOTIFY ===== */}
         {source === "spotify" && (
           <div className="px-4 py-3 space-y-2.5">
-            {/* Search bar */}
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -207,10 +205,21 @@ export default function HomeMusicWidget() {
               </button>
             </div>
 
-            {/* Spotify embed */}
+            {spotifyQuery && (
+              <a
+                href={`https://open.spotify.com/search/${encodeURIComponent(spotifyQuery)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#1DB954]/10 text-[10px] font-semibold text-[#1DB954]"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Apri "{spotifyQuery}" su Spotify
+              </a>
+            )}
+
             <iframe
-              key={spotifyEmbed}
-              src={spotifyEmbed}
+              key={spotifyPlaylistId}
+              src={`https://open.spotify.com/embed/playlist/${spotifyPlaylistId}?utm_source=generator&theme=0`}
               width="100%"
               height="352"
               frameBorder="0"
@@ -219,16 +228,19 @@ export default function HomeMusicWidget() {
               className="rounded-xl"
             />
 
-            {/* Quick playlists */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {spotifyPlaylists.map(pl => (
                 <button
                   key={pl.id}
                   onClick={() => {
-                    setSpotifyEmbed(`https://open.spotify.com/embed/playlist/${pl.id}?utm_source=generator&theme=0`);
+                    setSpotifyPlaylistId(pl.id);
                     setSpotifyQuery("");
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-[#1DB954]/10 text-[10px] font-semibold text-[#1DB954] whitespace-nowrap shrink-0"
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
+                    spotifyPlaylistId === pl.id
+                      ? "bg-[#1DB954] text-white"
+                      : "bg-[#1DB954]/10 text-[#1DB954]"
+                  }`}
                 >
                   {pl.name}
                 </button>
@@ -240,7 +252,6 @@ export default function HomeMusicWidget() {
         {/* ===== YOUTUBE ===== */}
         {source === "youtube" && (
           <div className="px-4 py-3 space-y-2.5">
-            {/* Search bar */}
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -260,11 +271,22 @@ export default function HomeMusicWidget() {
               </button>
             </div>
 
-            {/* YouTube embed */}
+            {youtubeQuery && (
+              <a
+                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeQuery)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000]"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Apri "{youtubeQuery}" su YouTube
+              </a>
+            )}
+
             <div className="rounded-xl overflow-hidden aspect-video">
               <iframe
-                key={youtubeEmbed}
-                src={youtubeEmbed}
+                key={youtubeVideoId}
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=0&rel=0`}
                 width="100%"
                 height="100%"
                 frameBorder="0"
@@ -275,16 +297,19 @@ export default function HomeMusicWidget() {
               />
             </div>
 
-            {/* Quick playlists */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {youtubeVideos.map(v => (
                 <button
                   key={v.videoId}
                   onClick={() => {
-                    setYoutubeEmbed(`https://www.youtube.com/embed/${v.videoId}?autoplay=0`);
+                    setYoutubeVideoId(v.videoId);
                     setYoutubeQuery("");
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000] whitespace-nowrap shrink-0"
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
+                    youtubeVideoId === v.videoId
+                      ? "bg-[#FF0000] text-white"
+                      : "bg-[#FF0000]/10 text-[#FF0000]"
+                  }`}
                 >
                   {v.name}
                 </button>
