@@ -34,7 +34,7 @@ export default function AIGrowthSuggestions() {
   };
 
   const visible = suggestions.filter((_, i) => !dismissed.has(i));
-  if (!user || visible.length === 0) return null;
+  if (visible.length === 0) return null;
 
   return (
     <div className="space-y-2">
