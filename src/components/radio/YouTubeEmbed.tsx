@@ -58,7 +58,7 @@ export default function YouTubeEmbed() {
           <button
             key={pl.id}
             onClick={() => {
-              setEmbedUrl(`https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=0`);
+              setEmbedUrl(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
               setQuery("");
             }}
             className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[11px] font-semibold text-[#FF0000] whitespace-nowrap"

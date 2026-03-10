@@ -281,7 +281,7 @@ export default function HomeMusicWidget() {
                 <button
                   key={pl.id}
                   onClick={() => {
-                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=0`);
+                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
                     setYoutubeQuery("");
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000] whitespace-nowrap shrink-0"
