@@ -126,9 +126,21 @@ Genera matching personalizzato.`
       });
 
       if (!response.ok) {
-        if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
-        if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
-        return jsonResponse({ error: "Errore AI" }, 500);
+        // Always return 200 with fallback data to prevent client crashes
+        const scored = (prosRes.data || []).map(p => {
+          let score = (p.rating || 0) * 20;
+          if (p.is_verified) score += 15;
+          if (p.city && user_city && p.city.toLowerCase() === user_city.toLowerCase()) score += 30;
+          if (p.review_count && p.review_count > 5) score += 10;
+          return { ...p, matchScore: Math.min(score, 100), reason: "Match basato su rating e posizione" };
+        }).sort((a, b) => b.matchScore - a.matchScore).slice(0, 5);
+
+        return jsonResponse({
+          nearbyPros: scored,
+          smartOffers: [],
+          aiTips: ["Esplora i professionisti sulla mappa! 📍"],
+          greeting: `Ciao! Ho trovato ${scored.length} professionisti per te.`
+        });
       }
 
       const result = await response.json();
