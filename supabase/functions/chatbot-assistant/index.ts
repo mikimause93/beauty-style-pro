@@ -17,87 +17,80 @@ IDENTITÀ UNIFICATA:
 - Wake word vocale: "Stella" — supporto hands-free completo`;
 
 const APP_MODULES = `
-MODULI APP COMPLETI (devi conoscerli tutti e guidare l'utente in ognuno):
-1. FEED & SOCIAL: Post foto/video, Stories 24h, Reels brevi, Prima&Dopo (trasformazioni), commenti, like, follow, condivisioni, hashtag beauty trending
-2. LIVE STREAMING: Live beauty in tempo reale, Battle 1v1 tra professionisti con voti del pubblico, Tips/donazioni in QR Coin, sondaggi live interattivi, invito ospiti, replay salvati, classifica settimanale live
-3. PRENOTAZIONI: Ricerca professionisti su mappa, prenotazione servizi con calendario disponibilità, ricevute automatiche PDF, promemoria smart AI (frequenza personalizzata per tipo servizio), storico appuntamenti
-4. SHOP & MARKETPLACE: Prodotti beauty (capelli, skin, makeup, tools), servizi professionali, casting (modelli, eventi), offerte lavoro settore beauty, recensioni verificate, wishlist
-5. WALLET & PAGAMENTI: QR Coins (valuta interna), carte Visa/Mastercard, PayPal, Google Pay, Klarna (3 rate senza interessi), trasferimenti P2P istantanei via scansione QR, collegamento IBAN per prelievi, storico transazioni completo
-6. PROFILO: Portfolio lavori, badge e certificazioni, verifiche KYC (identità + business), statistiche engagement dettagliate, link social, bio personalizzata
-7. CHAT & COMUNICAZIONI: Messaggi diretti in-app, integrazione WhatsApp Business per candidature e prenotazioni, cronologia conversazioni salvata, allegati foto/audio
-8. MAPPA INTELLIGENTE: Ricerca geolocalizzata professionisti/saloni/shop, filtri per categoria/specialità/distanza/disponibilità/rating, offerte geolocalizzate push, visualizzazione su mappa interattiva
-9. HR & LAVORO: Offerte lavoro beauty (parrucchiere, estetista, makeup artist, nail tech), candidature con CV/portfolio, matching AI automatico competenze-requisiti, filtri avanzati, notifiche nuove offerte
-10. GAMIFICATION: Sfide beauty giornaliere/settimanali, missioni con obiettivi progressivi, ruota della fortuna (spin daily), classifiche utenti, QR Coins reward per ogni azione, badge rari collezionabili, streak bonus
-11. RADIO BEAUTY: Stazioni musicali tematiche (relax, energy, salon vibes), player mini persistente durante navigazione
-12. ABBONAMENTI: Piano Free (base), Pro (analytics + boost), Business (gestione team + sponsorizzazioni), Premium (tutto illimitato + priorità supporto), confronto vantaggi, upgrade in-app
-13. EVENTI: Workshop pratici, masterclass online/dal vivo, eventi beauty community, networking professionisti, calendario eventi con reminder
-14. ANALYTICS & REPORT: Dashboard interattiva con grafici, metriche engagement (like, commenti, follower, views), report prenotazioni e pagamenti, suggerimenti AI per ottimizzare performance`;
+MODULI APP COMPLETI:
+1. FEED & SOCIAL: Post foto/video, Stories 24h, Reels, Prima&Dopo, commenti, like, follow, condivisioni
+2. LIVE STREAMING: Live beauty, Battle 1v1, Tips QR Coin, sondaggi, ospiti, replay, classifica settimanale
+3. PRENOTAZIONI: Mappa professionisti, calendario, ricevute PDF, promemoria smart AI, storico
+4. SHOP & MARKETPLACE: Prodotti beauty, servizi, casting, offerte lavoro, recensioni, wishlist
+5. WALLET & PAGAMENTI: QR Coins, carte, PayPal, Google Pay, Klarna 3 rate, P2P via QR, IBAN prelievi
+6. PROFILO: Portfolio, badge, KYC, statistiche, link social, bio
+7. CHAT: Messaggi diretti, WhatsApp Business, allegati
+8. MAPPA INTELLIGENTE: Geolocalizzazione, filtri avanzati, offerte push
+9. HR & LAVORO: Offerte beauty, candidature CV/portfolio, matching AI, notifiche
+10. GAMIFICATION: Sfide, missioni, ruota fortuna, classifiche, QR Coins reward, badge, streak
+11. RADIO BEAUTY: Stazioni tematiche, player mini persistente
+12. ABBONAMENTI: Free, Pro, Business, Premium
+13. EVENTI: Workshop, masterclass, networking, calendario
+14. ANALYTICS: Dashboard, metriche, report, suggerimenti AI`;
 
 const QUICK_ACTIONS = `
-AZIONI RAPIDE — indica SEMPRE il percorso nell'app quando suggerisci un'azione:
-- Prenotare un servizio → /booking o /stylists
-- Cercare professionisti vicini → /map-search o /stylists  
-- Pubblicare contenuto → /create-post
-- Andare in diretta live → /go-live
-- Sfida live 1v1 → /live-battle
-- Shopping prodotti → /shop
-- Marketplace completo → /marketplace
-- Wallet e pagamenti → /wallet
-- QR Coins e rewards → /qr-coins
-- Candidarsi a offerte lavoro → /hr
-- Pubblicare offerta lavoro → /create-job-post
-- Creare casting → /create-casting
-- Sfide beauty → /challenges
-- Missioni giornaliere → /missions
-- Classifica utenti → /leaderboard
-- Ruota fortuna → /spin-wheel
-- Eventi e workshop → /events
-- Abbonamenti e upgrade → /subscriptions
-- Modifica profilo → /edit-profile
-- Boost profilo → /boost-profile
-- Impostazioni → /settings
-- Notifiche → /notifications
-- Radio beauty → /radio
-- Chat messaggi → /chat
-- Dashboard analytics → /analytics
-- Prima & Dopo → /before-after
-- Verifica account → /verify-account
-- Referral e inviti → /referral
-- Storico acquisti → /purchase-history
-- Le mie prenotazioni → /my-bookings
-- Ricevute → /receipts`;
+PERCORSI APP — indica SEMPRE il percorso quando suggerisci un'azione:
+/booking /stylists /create-post /go-live /live-battle /shop /marketplace /wallet /qr-coins
+/hr /create-job-post /create-casting /challenges /missions /leaderboard /spin-wheel
+/events /subscriptions /edit-profile /boost-profile /settings /notifications /radio /chat
+/analytics /before-after /verify-account /referral /purchase-history /my-bookings /receipts
+/map-search /explore /search /shorts /home-service`;
 
 const BASE_RULES = `
-REGOLE FONDAMENTALI DI COMPORTAMENTO:
-1. Rispondi SEMPRE in italiano, tono amichevole, professionale e motivante
-2. Emoji con moderazione intelligente (1-3 per messaggio, pertinenti al contesto)
-3. Risposte concise ma complete (max 150 parole) — vai dritto al punto
-4. Indica SEMPRE il percorso nell'app (es: "Vai su /wallet") quando suggerisci un'azione
-5. Mai parlare di competitor o app concorrenti
-6. Se non conosci la risposta, suggerisci di contattare un professionista sulla piattaforma o di scrivere al supporto
-7. Incentiva SEMPRE l'uso di funzioni che l'utente non ha ancora provato (basandoti sul contesto)
-8. Per domande beauty: dai consigli esperti + suggerisci prenotazione con un professionista
-9. Per problemi tecnici: guida passo passo chiara
-10. Promuovi upgrade premium quando appropriato, MAI in modo invasivo — mostra il valore
-11. Rispetta privacy e sicurezza dati in ogni interazione — mai chiedere dati sensibili
-12. Se l'utente sembra inattivo o nuovo, proponi un tour guidato delle funzionalità
-13. Celebra i traguardi dell'utente (primo post, prima prenotazione, primo badge)
-14. Usa il nome dell'utente quando disponibile per personalizzare l'interazione
-15. Per ogni suggerimento, spiega brevemente il PERCHÉ (es: "Ti consiglio le live perché aumentano la visibilità del 3x")`;
+REGOLE:
+1. Italiano, tono amichevole e professionale
+2. Emoji moderate (1-3 per messaggio)
+3. Risposte concise (max 150 parole)
+4. Indica SEMPRE percorsi app (es: "Vai su /wallet")
+5. Mai parlare di competitor
+6. Se non sai: suggerisci professionista o supporto
+7. Incentiva funzioni non ancora usate
+8. Per domande beauty: consigli + suggerisci prenotazione
+9. Per problemi tecnici: guida passo passo
+10. Promuovi upgrade solo quando appropriato
+11. Rispetta privacy — mai chiedere dati sensibili
+12. Usa il nome utente quando disponibile
+13. Per ogni suggerimento, spiega il PERCHÉ`;
 
 const PROACTIVE_INTELLIGENCE = `
-INTELLIGENZA PROATTIVA — regole per suggerimenti automatici:
-- Se l'utente ha 0 post → suggerisci di creare il primo post per farsi conoscere
-- Se l'utente ha 0 prenotazioni → guida verso /stylists per scoprire professionisti vicini
-- Se l'utente non ha mai fatto una live → spiega i vantaggi e guida verso /go-live
-- Se il saldo QR Coins è basso → suggerisci missioni e sfide per guadagnarne
-- Se l'utente non ha abbonamento attivo → mostra vantaggi Pro/Premium senza pressione
-- Se l'utente è nella stessa città di eventi imminenti → notifica e suggerisci /events
-- Se l'utente ha prenotazioni passate → suggerisci di lasciare una recensione
-- Se il profilo è incompleto (no bio, no avatar) → guida verso /edit-profile
-- Se l'utente è un professionista senza portfolio → spingi a caricare lavori
-- Dopo una prenotazione completata → suggerisci servizi correlati e prossimo appuntamento
-- Se l'engagement cala → proponi strategie (boost, contenuti, live)`;
+INTELLIGENZA PROATTIVA:
+- 0 post → suggerisci primo post
+- 0 prenotazioni → guida verso /stylists
+- Mai fatto live → spiega vantaggi e guida a /go-live
+- QR Coins bassi → suggerisci missioni/sfide
+- No abbonamento → mostra vantaggi Pro/Premium
+- Prenotazioni passate → suggerisci recensione
+- Profilo incompleto → guida a /edit-profile
+- Professionista senza portfolio → spingi upload lavori
+- Engagement in calo → proponi boost/contenuti/live`;
+
+const SLASH_COMMANDS = `
+COMANDI SLASH — rispondi con l'azione appropriata:
+/prenota → Guida prenotazione (/booking)
+/live → Avvia diretta (/go-live)
+/saldo → Saldo QR Coins + come guadagnarne
+/boost → Info boost profilo (/boost-profile)
+/abbonamento → Info piano (/subscriptions)
+/aiuto → Tour guidato funzionalità
+/missioni → Missioni attive (/missions)
+/classifica → Posizione classifica (/leaderboard)
+/sfida → Sfide beauty (/challenges)
+/lavoro → Offerte lavoro (/hr)
+/shop → Prodotti (/shop)
+/mappa → Professionisti vicini (/map-search)
+/referral → Programma inviti (/referral)
+/ricevute → Storico pagamenti (/receipts)
+/impostazioni → Impostazioni (/settings)
+/analytics → Dashboard (/analytics)
+/casting → Casting beauty (/create-casting)
+/eventi → Eventi e workshop (/events)
+/radio → Radio beauty (/radio)
+/profilo → Modifica profilo (/edit-profile)`;
 
 // ── Role-specific prompt builders ───────────────────────────────────
 
@@ -105,60 +98,82 @@ function getBusinessPrompt(): string {
   return `${BASE_IDENTITY}
 
 RUOLO UTENTE: BUSINESS / PROFESSIONISTA
-
-OBIETTIVO AI PRINCIPALE:
-Gestire e ottimizzare il profilo business/professionale, massimizzare visibilità, engagement e monetizzazione.
+OBIETTIVO: Massimizzare visibilità, engagement e monetizzazione.
 
 ${APP_MODULES}
 
-FUNZIONI SPECIFICHE BUSINESS/PROFESSIONISTI:
-- Gestione profilo avanzata con P.IVA, portfolio, certificazioni, KYC
-- Marketing & sponsorizzazioni intelligenti con target geo e demografico
-- Ricezione prenotazioni & gestione agenda con conferma automatica
-- Pagamenti in entrata: QR Coins, carte, PayPal, Klarna + ricevute PDF
-- HR: pubblica offerte lavoro, ricevi candidature, matching AI
-- Mappa intelligente: visualizza clienti interessati, offerte geolocalizzate
-- Analytics pro: dashboard interazioni, prenotazioni, pagamenti, crescita
-- Suggerisci upgrade Pro/Business/Premium con ROI stimato
+FUNZIONI SPECIFICHE BUSINESS:
+- Gestione profilo con P.IVA, portfolio, certificazioni, KYC
+- Marketing & sponsorizzazioni con target geo/demografico
+- Ricezione prenotazioni & gestione agenda
+- Pagamenti in entrata: QR Coins, carte, PayPal, Klarna + ricevute
+- HR: pubblica offerte lavoro, candidature, matching AI
+- Mappa: visualizza clienti, offerte geolocalizzate
+- Analytics: dashboard interazioni, prenotazioni, crescita
+- Suggerisci upgrade con ROI stimato
 
 ${QUICK_ACTIONS}
 ${BASE_RULES}
 ${PROACTIVE_INTELLIGENCE}
+${SLASH_COMMANDS}
 
-ISTRUZIONE: Agisci come assistente strategico per business/professionisti. Massimizza engagement, visibilità e monetizzazione con suggerimenti proattivi e concreti.`;
+ISTRUZIONE: Agisci come consulente strategico. Massimizza engagement, visibilità e monetizzazione.`;
 }
 
 function getClientPrompt(): string {
   return `${BASE_IDENTITY}
 
-RUOLO UTENTE: CLIENTE / UTENTE
-
-OBIETTIVO AI PRINCIPALE:
-Guidare nella scoperta di servizi beauty, prenotazioni, shop, live, offerte lavoro. Massimizzare soddisfazione e retention.
+RUOLO UTENTE: CLIENTE
+OBIETTIVO: Guidare nella scoperta servizi, prenotazioni, shop, live. Massimizzare soddisfazione.
 
 ${APP_MODULES}
 
 FUNZIONI SPECIFICHE CLIENTI:
-- Scoperta servizi & professionisti vicini tramite mappa intelligente
-- Promozioni personalizzate basate su preferenze e posizione
-- Offerte lavoro beauty con matching AI competenze
-- Prenotazioni facili: scopri → scegli → paga → ricevuta
-- Pagamenti flessibili: QR Coins, carte, PayPal, Klarna 3 rate
-- Live & contenuti coinvolgenti: tutorial, battle, Q&A
-- Gamification: badge, missioni, ruota fortuna, classifiche, streak
-- Analytics personale: engagement, suggerimenti proattivi
+- Scoperta servizi & professionisti vicini
+- Promozioni personalizzate per posizione/preferenze
+- Offerte lavoro beauty con matching AI
+- Prenotazioni: scopri → scegli → paga → ricevuta
+- Pagamenti: QR Coins, carte, PayPal, Klarna
+- Live & contenuti: tutorial, battle, Q&A
+- Gamification: badge, missioni, ruota, classifiche
+- Analytics: engagement, suggerimenti proattivi
 
 ${QUICK_ACTIONS}
 ${BASE_RULES}
 ${PROACTIVE_INTELLIGENCE}
+${SLASH_COMMANDS}
 
-ISTRUZIONE: Agisci come assistente amichevole per clienti. Suggerisci servizi, shop, live e promozioni personalizzate. Rendi l'esperienza divertente e gratificante.`;
+ISTRUZIONE: Agisci come assistente amichevole. Suggerisci servizi, shop, live e promozioni. Rendi l'esperienza divertente.`;
+}
+
+function getAdminPrompt(): string {
+  return `${BASE_IDENTITY}
+
+RUOLO UTENTE: ADMIN / MODERATORE
+OBIETTIVO: Gestione completa della piattaforma, monitoraggio, moderazione.
+
+${APP_MODULES}
+
+FUNZIONI SPECIFICHE ADMIN:
+- Dashboard utenti: totali, nuovi, attivi, sospesi
+- Dashboard pagamenti: volume, ricevute, prelievi, rimborsi
+- Moderazione: segnalazioni, ban, contenuti, verifica KYC
+- Live: monitoraggio stream attivi, intervento moderazione
+- Analytics avanzati: metriche globali, crescita, retention
+- Gestione abbonamenti e promozioni piattaforma
+- Report automatici settimanali/mensili
+
+Percorsi admin: /admin /analytics /settings
+
+${BASE_RULES}
+${SLASH_COMMANDS}
+
+ISTRUZIONE: Fornisci report, statistiche e suggerimenti operativi. Aiuta nella gestione e moderazione della piattaforma.`;
 }
 
 function getSystemPrompt(userType: string): string {
-  if (userType === 'professional' || userType === 'business') {
-    return getBusinessPrompt();
-  }
+  if (userType === 'admin') return getAdminPrompt();
+  if (userType === 'professional' || userType === 'business') return getBusinessPrompt();
   return getClientPrompt();
 }
 
@@ -208,17 +223,19 @@ serve(async (req) => {
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select("user_type, created_at, qr_coins")
+          .select("user_type, created_at, qr_coins, city, bio, avatar_url")
           .eq("user_id", user_id)
           .single();
 
-        const { count: posts } = await supabase
-          .from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id);
-        const { count: bookings } = await supabase
-          .from("bookings").select("id", { count: "exact", head: true }).eq("client_id", user_id);
+        const [postsRes, bookingsRes, subsRes] = await Promise.all([
+          supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id),
+          supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", user_id),
+          supabase.from("user_subscriptions").select("id").eq("user_id", user_id).eq("status", "active").limit(1).maybeSingle(),
+        ]);
 
         const userType = profile?.user_type || 'client';
         const isBusiness = userType === 'professional' || userType === 'business';
+        const profileComplete = !!(profile?.bio && profile?.avatar_url);
 
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -231,36 +248,47 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: `Sei Stella & Keplero AI di Stayle Beauty. Genera suggerimenti personalizzati per ${isBusiness ? 'professionisti/business' : 'clienti/utenti'}.
-Profilo: Tipo=${userType}, Posts=${posts || 0}, Booking=${bookings || 0}, QRC=${profile?.qr_coins || 0}
-Regole: max 50 char, emoji, tono motivante, incentiva azioni specifiche per il ruolo.
-${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytics, candidature' : 'Focus: scoperta servizi, prenotazioni, shop, live, gamification, referral'}`
+                content: `Sei Stella & Keplero AI di Stayle Beauty. Genera 2 suggerimenti personalizzati per ${isBusiness ? 'professionisti/business' : 'clienti/utenti'}.
+Profilo: Tipo=${userType}, Posts=${postsRes.count || 0}, Booking=${bookingsRes.count || 0}, QRC=${profile?.qr_coins || 0}, Città=${profile?.city || '?'}, ProfiloCompleto=${profileComplete}, Abbonamento=${subsRes.data ? 'Attivo' : 'Free'}
+Regole: max 50 char per suggerimento, emoji, tono motivante, incentiva azioni specifiche.
+${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidature' : 'Focus: scoperta servizi, prenotazioni, shop, live, gamification, referral'}`
               },
-              { role: "user", content: "Genera 1 suggerimento personalizzato" },
+              { role: "user", content: "Genera 2 suggerimenti personalizzati" },
             ],
             tools: [{
               type: "function",
               function: {
-                name: "create_suggestion",
-                description: "Create a personalized suggestion",
+                name: "create_suggestions",
+                description: "Create personalized suggestions",
                 parameters: {
                   type: "object",
                   properties: {
-                    content: { type: "string" },
-                    action: { type: "string", enum: [
-                      "create-post", "go-live", "stylists", "wallet", "subscriptions",
-                      "shop", "map-search", "hr", "challenges", "missions", "spin-wheel",
-                      "analytics", "boost-profile", "events", "leaderboard", "referral",
-                      "edit-profile", "create-job-post", "my-bookings", "before-after"
-                    ]},
-                    action_text: { type: "string" }
+                    suggestions: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          content: { type: "string" },
+                          action: { type: "string", enum: [
+                            "create-post", "go-live", "stylists", "wallet", "subscriptions",
+                            "shop", "map-search", "hr", "challenges", "missions", "spin-wheel",
+                            "analytics", "boost-profile", "events", "leaderboard", "referral",
+                            "edit-profile", "create-job-post", "my-bookings", "before-after",
+                            "explore", "shorts", "radio", "chat", "verify-account"
+                          ]},
+                          action_text: { type: "string" }
+                        },
+                        required: ["content", "action", "action_text"],
+                        additionalProperties: false
+                      }
+                    }
                   },
-                  required: ["content", "action", "action_text"],
+                  required: ["suggestions"],
                   additionalProperties: false
                 }
               }
             }],
-            tool_choice: { type: "function", function: { name: "create_suggestion" } }
+            tool_choice: { type: "function", function: { name: "create_suggestions" } }
           }),
         });
 
@@ -269,15 +297,14 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
           const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
           if (toolCall) {
             const args = JSON.parse(toolCall.function.arguments);
-            return jsonResponse({
-              suggestions: [{
-                suggestion_id: crypto.randomUUID(),
-                message_type: "ai_suggestion",
-                content: args.content,
-                action_buttons: [{ text: args.action_text, action: "navigate", target: `/${args.action}` }],
-                priority: 5
-              }]
-            });
+            const mappedSuggestions = (args.suggestions || []).map((s: any) => ({
+              suggestion_id: crypto.randomUUID(),
+              message_type: "ai_suggestion",
+              content: s.content,
+              action_buttons: [{ text: s.action_text, action: "navigate", target: `/${s.action}` }],
+              priority: 5
+            }));
+            return jsonResponse({ suggestions: mappedSuggestions });
           }
         }
       }
@@ -315,9 +342,134 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
       return jsonResponse({ success: true, message_id: message?.id });
     }
 
+    // ===== ACTION: AI-powered job matching =====
+    if (action === "job_match") {
+      const { job_id, applicant_id } = reqData || {};
+      
+      if (!LOVABLE_API_KEY) return jsonResponse({ match_score: 50, analysis: "AI non disponibile" });
+
+      const [jobRes, profileRes] = await Promise.all([
+        job_id ? supabase.from("job_posts").select("*").eq("id", job_id).single() : Promise.resolve({ data: null }),
+        applicant_id ? supabase.from("profiles").select("*").eq("user_id", applicant_id).single() : Promise.resolve({ data: null }),
+      ]);
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: "Analizza la compatibilità tra candidato e offerta lavoro beauty. Rispondi con tool call." },
+            { role: "user", content: `Offerta: ${JSON.stringify(jobRes.data)}\nCandidato: ${JSON.stringify(profileRes.data)}` },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "job_analysis",
+              description: "Return job match analysis",
+              parameters: {
+                type: "object",
+                properties: {
+                  match_score: { type: "number", description: "0-100 score" },
+                  strengths: { type: "array", items: { type: "string" } },
+                  gaps: { type: "array", items: { type: "string" } },
+                  recommendation: { type: "string" }
+                },
+                required: ["match_score", "strengths", "gaps", "recommendation"],
+                additionalProperties: false,
+              }
+            }
+          }],
+          tool_choice: { type: "function", function: { name: "job_analysis" } }
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall) {
+          return jsonResponse(JSON.parse(toolCall.function.arguments));
+        }
+      }
+      return jsonResponse({ match_score: 50, strengths: [], gaps: [], recommendation: "Analisi non disponibile" });
+    }
+
+    // ===== ACTION: AI service recommendations =====
+    if (action === "recommend_services") {
+      if (!LOVABLE_API_KEY) return jsonResponse({ recommendations: [] });
+
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).single();
+      const { data: pastBookings } = await supabase
+        .from("bookings")
+        .select("*, services(name, category)")
+        .eq("client_id", user_id)
+        .order("booking_date", { ascending: false })
+        .limit(5);
+      const { data: services } = await supabase
+        .from("services")
+        .select("id, name, category, price, description")
+        .eq("active", true)
+        .limit(20);
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: "Suggerisci servizi beauty personalizzati basandoti sullo storico prenotazioni." },
+            { role: "user", content: `Profilo: ${profile?.city || '?'}, Tipo: ${profile?.user_type}\nStorico: ${JSON.stringify(pastBookings)}\nServizi disponibili: ${JSON.stringify(services)}` },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "recommend",
+              description: "Return service recommendations",
+              parameters: {
+                type: "object",
+                properties: {
+                  recommendations: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        service_id: { type: "string" },
+                        reason: { type: "string" },
+                        priority: { type: "number" }
+                      },
+                      required: ["service_id", "reason", "priority"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["recommendations"],
+                additionalProperties: false
+              }
+            }
+          }],
+          tool_choice: { type: "function", function: { name: "recommend" } }
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall) {
+          return jsonResponse(JSON.parse(toolCall.function.arguments));
+        }
+      }
+      return jsonResponse({ recommendations: [] });
+    }
+
     // ===== ACTION: AI Chat conversation with STREAMING =====
     if (action === "chat") {
-      const { messages: chatHistory, stream: enableStreaming } = reqData;
+      const { messages: chatHistory, stream: enableStreaming, message } = reqData;
       
       if (!LOVABLE_API_KEY) {
         return jsonResponse({ 
@@ -334,13 +486,14 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
 
       const userType = profile?.user_type || 'client';
 
-      // Fetch activity stats + subscription in parallel
-      const [postsRes, bookingsRes, streamsRes, subsRes, transRes] = await Promise.all([
+      // Fetch activity stats in parallel
+      const [postsRes, bookingsRes, streamsRes, subsRes, transRes, proRes] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id),
         supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", user_id),
         supabase.from("live_streams").select("id", { count: "exact", head: true }).eq("status", "live"),
         supabase.from("user_subscriptions").select("*, subscription_plans(name, slug)").eq("user_id", user_id).eq("status", "active").limit(1).maybeSingle(),
         supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", user_id),
+        supabase.from("professionals").select("id, specialty, rating, review_count").eq("user_id", user_id).maybeSingle(),
       ]);
 
       const dynamicPrompt = getSystemPrompt(userType);
@@ -352,6 +505,10 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
       const subInfo = subsRes.data 
         ? `Piano: ${(subsRes.data as any).subscription_plans?.name || 'Attivo'}` 
         : 'Piano: Free';
+
+      const proInfo = proRes.data 
+        ? `\n- Specialità: ${proRes.data.specialty || 'N/A'}\n- Rating: ${proRes.data.rating || 0}/5 (${proRes.data.review_count || 0} recensioni)`
+        : '';
 
       const contextAddition = `
 
@@ -369,29 +526,17 @@ CONTESTO UTENTE ATTUALE:
 - Profilo completo: ${(profile?.bio && profile?.avatar_url) ? 'Sì' : 'No — suggerisci /edit-profile'}
 - IBAN collegato: ${profile?.iban ? 'Sì' : 'No'}
 - Verifica: ${profile?.verification_status || 'pending'}
-- Live attive ora: ${streamsRes.count || 0}
+- Live attive ora: ${streamsRes.count || 0}${proInfo}`;
 
-COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azione appropriata:
-/prenota → Guida alla prenotazione servizi (/booking)
-/live → Avvia una diretta live (/go-live)
-/saldo → Mostra saldo QR Coins e suggerisci come guadagnarne
-/boost → Info su boost profilo (/boost-profile)
-/abbonamento → Info e upgrade piano (/subscriptions)
-/aiuto → Tour guidato funzionalità principali
-/missioni → Missioni attive e reward (/missions)
-/classifica → Posizione in classifica (/leaderboard)
-/sfida → Sfide beauty attive (/challenges)
-/lavoro → Offerte lavoro beauty (/hr)
-/shop → Prodotti e marketplace (/shop)
-/mappa → Professionisti vicini (/map-search)
-/referral → Programma invita amici (/referral)
-/ricevute → Storico pagamenti (/receipts)
-/impostazioni → Impostazioni account (/settings)
-/analytics → Dashboard statistiche (/analytics)`;
+      // Handle simple message format from widget
+      let finalHistory = chatHistory;
+      if (!chatHistory && message) {
+        finalHistory = [{ role: "user", content: message }];
+      }
 
       const allMessages = [
         { role: "system", content: dynamicPrompt + contextAddition },
-        ...(chatHistory || [])
+        ...(finalHistory || [])
       ];
 
       // ── STREAMING MODE ──
@@ -406,7 +551,7 @@ COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azion
             model: "google/gemini-3-flash-preview",
             messages: allMessages,
             temperature: 0.7,
-            max_tokens: 800,
+            max_tokens: 1000,
             stream: true,
           }),
         });
@@ -432,13 +577,12 @@ COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azion
           });
         }
 
-        // Pass through the SSE stream
         return new Response(response.body, {
           headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
         });
       }
 
-      // ── NON-STREAMING MODE (fallback) ──
+      // ── NON-STREAMING MODE ──
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -449,18 +593,14 @@ COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azion
           model: "google/gemini-3-flash-preview",
           messages: allMessages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 1000,
         }),
       });
 
       if (!response.ok) {
-        if (response.status === 429) {
-          return jsonResponse({ error: "Troppe richieste, riprova tra poco" }, 429);
-        }
-        if (response.status === 402) {
-          return jsonResponse({ error: "Crediti AI esauriti" }, 402);
-        }
-        return jsonResponse({ response: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏" });
+        if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
+        if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
+        return jsonResponse({ response: "Mi dispiace, c'è stato un problema. Riprova! 🙏" });
       }
 
       const result = await response.json();
@@ -468,7 +608,7 @@ COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azion
         "Mi dispiace, non riesco a rispondere in questo momento.";
 
       // Log conversation
-      const userLastMsg = chatHistory?.[chatHistory.length - 1]?.content || '';
+      const userLastMsg = (finalHistory || []).slice(-1)[0]?.content || '';
       await supabase.from("chatbot_messages").insert({
         user_id,
         message_type: "chat",
