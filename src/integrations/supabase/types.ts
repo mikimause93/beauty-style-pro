@@ -72,12 +72,17 @@ export type Database = {
         Row: {
           active: boolean
           ai_settings: Json
+          ai_smart: boolean
+          automation_enabled: boolean
           created_at: string
           description: string | null
+          geolocation: boolean
           id: string
           module_key: string
           module_name: string
+          personalization: boolean
           priority: number
+          push_enabled: boolean
           roles: string[]
           triggers: Json
           updated_at: string
@@ -85,12 +90,17 @@ export type Database = {
         Insert: {
           active?: boolean
           ai_settings?: Json
+          ai_smart?: boolean
+          automation_enabled?: boolean
           created_at?: string
           description?: string | null
+          geolocation?: boolean
           id?: string
           module_key: string
           module_name: string
+          personalization?: boolean
           priority?: number
+          push_enabled?: boolean
           roles?: string[]
           triggers?: Json
           updated_at?: string
@@ -98,12 +108,17 @@ export type Database = {
         Update: {
           active?: boolean
           ai_settings?: Json
+          ai_smart?: boolean
+          automation_enabled?: boolean
           created_at?: string
           description?: string | null
+          geolocation?: boolean
           id?: string
           module_key?: string
           module_name?: string
+          personalization?: boolean
           priority?: number
+          push_enabled?: boolean
           roles?: string[]
           triggers?: Json
           updated_at?: string
