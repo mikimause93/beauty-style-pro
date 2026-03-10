@@ -16,10 +16,13 @@ const coverImages = [beauty2, stylist1, stylist2, beauty3, beauty1, beauty2, sty
 
 type MusicSource = "radio" | "spotify" | "youtube";
 
+type RadioFilter = "all" | "italia" | "beauty";
+
 export default function RadioPage() {
   const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadio();
   const [liked, setLiked] = useState(false);
   const [source, setSource] = useState<MusicSource>("radio");
+  const [radioFilter, setRadioFilter] = useState<RadioFilter>("all");
   const { awardCoins } = useQRCoinRewards();
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
