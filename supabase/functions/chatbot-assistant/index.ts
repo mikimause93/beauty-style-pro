@@ -619,6 +619,133 @@ CONTESTO UTENTE ATTUALE:
       return jsonResponse({ response: aiResponseText });
     }
 
+    // ===== ACTION: Module-based AI suggestions =====
+    if (action === "module_suggestions") {
+      const { module_key, trigger, context: triggerContext } = reqData || {};
+
+      // Fetch module config
+      const moduleQuery = supabase.from("ai_module_configs").select("*").eq("active", true);
+      if (module_key) moduleQuery.eq("module_key", module_key);
+      const { data: modules } = await moduleQuery.order("priority", { ascending: false });
+
+      if (!modules || modules.length === 0) {
+        return jsonResponse({ suggestions: [] });
+      }
+
+      // Get user profile for role filtering and personalization
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_type, display_name, qr_coins, city")
+        .eq("user_id", user_id)
+        .single();
+
+      const userType = profile?.user_type || "client";
+      const userName = profile?.display_name || "Utente";
+
+      // Filter modules by user role
+      const relevantModules = modules.filter((m: any) => m.roles.includes(userType));
+
+      if (!LOVABLE_API_KEY) {
+        // Fallback: return static triggers with variable replacement
+        const staticSuggestions = relevantModules.flatMap((mod: any) => {
+          const triggers = mod.triggers as any[];
+          return triggers
+            .filter((t: any) => !trigger || t.trigger === trigger)
+            .slice(0, 1)
+            .map((t: any) => {
+              const msgKey = `message_${userType}`;
+              const rawMsg = t[msgKey] || t.message || t.message_client || "";
+              const msg = rawMsg
+                .replace("{name}", userName)
+                .replace("{balance}", String(profile?.qr_coins || 0));
+              return {
+                module: mod.module_key,
+                trigger: t.trigger,
+                message: msg,
+                cta: t.cta || [],
+                priority: mod.priority,
+              };
+            });
+        });
+        return jsonResponse({ suggestions: staticSuggestions });
+      }
+
+      // AI-enhanced: generate personalized message from module config
+      const moduleSummary = relevantModules.map((m: any) => ({
+        key: m.module_key,
+        name: m.module_name,
+        triggers: m.triggers,
+        settings: m.ai_settings,
+      }));
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            {
+              role: "system",
+              content: `Sei Stella & Keplero AI di Stayle. Genera suggerimenti personalizzati basati sui moduli AI configurati.
+Utente: ${userName}, Tipo: ${userType}, Città: ${profile?.city || "?"}, QRC: ${profile?.qr_coins || 0}
+${triggerContext ? `Contesto: ${JSON.stringify(triggerContext)}` : ""}
+Regole: max 60 char per messaggio, emoji, tono motivante, CTA chiare. Italiano.`,
+            },
+            {
+              role: "user",
+              content: `Moduli disponibili: ${JSON.stringify(moduleSummary)}${trigger ? `\nTrigger specifico: ${trigger}` : "\nGenera 1 suggerimento per i top 3 moduli più rilevanti"}`,
+            },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "generate_module_suggestions",
+                description: "Generate personalized module suggestions",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    suggestions: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          module: { type: "string" },
+                          message: { type: "string" },
+                          cta_text: { type: "string" },
+                          cta_route: { type: "string" },
+                          priority: { type: "number" },
+                        },
+                        required: ["module", "message", "cta_text", "cta_route", "priority"],
+                        additionalProperties: false,
+                      },
+                    },
+                  },
+                  required: ["suggestions"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "generate_module_suggestions" } },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall) {
+          const args = JSON.parse(toolCall.function.arguments);
+          return jsonResponse({ suggestions: args.suggestions || [] });
+        }
+      }
+
+      return jsonResponse({ suggestions: [] });
+    }
+
     return jsonResponse({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("chatbot-assistant error:", e);
