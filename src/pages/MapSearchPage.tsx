@@ -1,9 +1,11 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Search, MapPin, Navigation, Star, Filter, Sparkles, Home, Locate, ChevronRight } from "lucide-react";
+import InteractiveMap, { MapMarker } from "@/components/map/InteractiveMap";
+import { ArrowLeft, Search, MapPin, Star, Filter, Sparkles, Home, Locate, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import useGeolocation, { haversineDistance, getCoordsFromCity, ITALIAN_CITIES } from "@/hooks/useGeolocation";
 import { toast } from "sonner";
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
@@ -17,6 +19,8 @@ type Professional = {
   rating: number | null;
   review_count: number | null;
   hourly_rate: number | null;
+  latitude: number | null;
+  longitude: number | null;
   address: string | null;
   description: string | null;
   is_verified: boolean | null;
@@ -26,79 +30,41 @@ type Professional = {
 };
 
 const fallbackAvatars = [stylist1, stylist2, beauty1];
-const CITIES = ["Milano", "Roma", "Napoli", "Torino", "Firenze", "Bologna", "Palermo", "Genova", "Bari", "Catania"];
 const SPECIALTIES = ["Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist", "Makeup Artist", "Massaggiatore"];
-
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-const cityCoords: Record<string, [number, number]> = {
-  milano: [45.4642, 9.19], roma: [41.9028, 12.4964], napoli: [40.8518, 14.2681],
-  torino: [45.0703, 7.6869], firenze: [43.7696, 11.2558], bologna: [44.4949, 11.3426],
-  palermo: [38.1157, 13.3615], genova: [44.4056, 8.9463], bari: [41.1171, 16.8719],
-  catania: [37.5079, 15.09],
-};
 
 export default function MapSearchPage() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { position, coords, detectGPS, setCity, loading: gpsLoading } = useGeolocation();
   const [search, setSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [maxDistance, setMaxDistance] = useState(50);
   const [homeService, setHomeService] = useState(false);
-  const [professionals, setProfessionals] = useState<Professional[]>([]);
-  const [userCoords, setUserCoords] = useState<[number, number]>([45.4642, 9.19]);
-  const [userCity, setUserCity] = useState("Milano");
   const [showFilters, setShowFilters] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [aiSuggestion, setAiSuggestion] = useState("");
-  const mapRef = useRef<HTMLDivElement>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     loadProfessionals();
-    loadUserLocation();
+    loadUserPrefs();
   }, [user]);
 
-  const loadUserLocation = async () => {
+  const loadUserPrefs = async () => {
     if (!user) return;
     const { data } = await supabase.from("profiles").select("city, availability").eq("user_id", user.id).maybeSingle();
-    if (data?.city) setUserCity(data.city);
+    if (data?.city) setCity(data.city);
     const prefs = data?.availability as any;
     if (prefs?.latitude && prefs?.longitude) {
-      setUserCoords([prefs.latitude, prefs.longitude]);
-    } else if (data?.city) {
-      const c = cityCoords[data.city.toLowerCase()];
-      if (c) setUserCoords(c);
+      // user has saved coords — geolocation hook will handle via setCity
     }
     if (prefs?.search_distance) setMaxDistance(prefs.search_distance);
   };
 
-  const detectGPS = async () => {
-    try {
-      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
-      });
-      setUserCoords([pos.coords.latitude, pos.coords.longitude]);
-      let closest = "Milano"; let minDist = Infinity;
-      for (const [name, [clat, clng]] of Object.entries(cityCoords)) {
-        const d = Math.sqrt((pos.coords.latitude - clat) ** 2 + (pos.coords.longitude - clng) ** 2);
-        if (d < minDist) { minDist = d; closest = name.charAt(0).toUpperCase() + name.slice(1); }
-      }
-      setUserCity(closest);
-      toast.success(`Posizione: ${closest}`);
-    } catch {
-      toast.error("GPS non disponibile");
-    }
-  };
-
   const loadProfessionals = async () => {
-    const { data } = await supabase.from("professionals").select("*, profiles:user_id(avatar_url, display_name)");
+    const { data } = await supabase.from("professionals")
+      .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id, profiles:user_id(avatar_url, display_name)");
     if (data && data.length > 0) {
       setProfessionals(data.map((p: any) => ({
         ...p,
@@ -106,23 +72,24 @@ export default function MapSearchPage() {
       })));
     } else {
       setProfessionals([
-        { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, address: "Via Montenapoleone 12", description: "Specializzata in balayage", is_verified: true, avatar: stylist2 },
-        { id: "2", business_name: "Sylvie Leaciu", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, hourly_rate: 55, address: "Via del Corso 45", description: "Esperta colorazioni", is_verified: true, avatar: stylist1 },
-        { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, address: "Via Toledo 78", description: "Barber tradizionale", is_verified: false, avatar: beauty1 },
+        { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, latitude: 45.47, longitude: 9.19, address: "Via Montenapoleone 12", description: "Balayage specialist", is_verified: true, avatar: stylist2 },
+        { id: "2", business_name: "Sylvie Leaciu", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, hourly_rate: 55, latitude: 41.91, longitude: 12.49, address: "Via del Corso 45", description: "Colorazioni", is_verified: true, avatar: stylist1 },
+        { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, latitude: 40.85, longitude: 14.27, address: "Via Toledo 78", description: "Barber tradizionale", is_verified: false, avatar: beauty1 },
       ]);
     }
   };
 
   const professionalsWithDistance = useMemo(() => {
     return professionals.map(p => {
-      const pCoords = cityCoords[(p.city || "").toLowerCase()] || cityCoords.milano;
-      const distance = haversineDistance(userCoords[0], userCoords[1], pCoords[0], pCoords[1]);
+      const pLat = p.latitude || getCoordsFromCity(p.city || "Milano")[0];
+      const pLng = p.longitude || getCoordsFromCity(p.city || "Milano")[1];
+      const distance = haversineDistance(coords[0], coords[1], pLat, pLng);
       const aiScore = Math.min(100, Math.round(
         (p.rating || 0) * 12 + (p.review_count || 0) * 0.08 + (p.is_verified ? 15 : 0) + Math.max(0, 35 - distance * 0.08)
       ));
-      return { ...p, distance: Math.round(distance * 10) / 10, aiScore };
+      return { ...p, distance: Math.round(distance * 10) / 10, aiScore, latitude: pLat, longitude: pLng };
     });
-  }, [professionals, userCoords]);
+  }, [professionals, coords]);
 
   const filtered = useMemo(() => {
     return professionalsWithDistance
@@ -136,53 +103,58 @@ export default function MapSearchPage() {
       .sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
   }, [professionalsWithDistance, search, cityFilter, specialtyFilter, maxDistance]);
 
+  // Build map markers
+  const mapMarkers: MapMarker[] = useMemo(() => {
+    return filtered.slice(0, 30).map(p => ({
+      id: p.id,
+      lat: p.latitude!,
+      lng: p.longitude!,
+      label: p.business_name,
+      sublabel: `${p.specialty || "Beauty"} · ${p.distance}km`,
+      type: p.is_verified ? "premium" as const : "salon" as const,
+      rating: p.rating || undefined,
+      onClick: () => navigate(`/stylist/${p.id}`),
+    }));
+  }, [filtered, navigate]);
+
+  const mapZoom = useMemo(() => {
+    if (maxDistance > 200) return 6;
+    if (maxDistance > 100) return 7;
+    if (maxDistance > 50) return 9;
+    if (maxDistance > 20) return 10;
+    return 12;
+  }, [maxDistance]);
+
   const handleAiSearch = async () => {
     if (!search.trim()) { toast.error("Scrivi cosa cerchi..."); return; }
     setAiLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("ai-beauty", {
+      const { data, error } = await supabase.functions.invoke("ai-router", {
         body: {
-          type: "suggest_services",
-          preferences: search,
-          professionals: filtered.slice(0, 5).map(p => ({ name: p.business_name, specialty: p.specialty, city: p.city, rating: p.rating, distance: p.distance })),
+          role: "map",
+          user_id: user?.id,
+          message: `Cerca "${search}" nella zona di ${position.city}. Professionisti disponibili: ${filtered.slice(0, 5).map(p => `${p.business_name} (${p.specialty}, ${p.distance}km, rating ${p.rating}, match ${p.aiScore}%)`).join("; ")}`,
+          context: { city: position.city, lat: coords[0], lng: coords[1], results_count: filtered.length },
         },
       });
-      if (data?.suggestions) {
-        setAiSuggestion(data.suggestions);
+      if (data?.reply) {
+        setAiSuggestion(data.reply);
       } else {
-        const topMatch = filtered[0];
-        setAiSuggestion(topMatch
-          ? `Ho trovato ${filtered.length} professionisti per "${search}". Il migliore è ${topMatch.business_name} (${topMatch.specialty}) a ${topMatch.distance}km da te con score ${topMatch.aiScore}%.`
-          : `Nessun risultato per "${search}". Prova con un'altra ricerca.`
+        const top = filtered[0];
+        setAiSuggestion(top
+          ? `${filtered.length} risultati per "${search}". Consigliato: ${top.business_name} — ${top.aiScore}% match, ${top.distance}km.`
+          : `Nessun risultato per "${search}".`
         );
       }
     } catch {
-      const topMatch = filtered[0];
-      setAiSuggestion(topMatch
-        ? `${filtered.length} risultati per "${search}". Consigliato: ${topMatch.business_name} — ${topMatch.aiScore}% match.`
-        : `Nessun risultato per "${search}".`
+      const top = filtered[0];
+      setAiSuggestion(top
+        ? `${filtered.length} risultati. Top: ${top.business_name} (${top.aiScore}%).`
+        : `Nessun risultato.`
       );
     }
     setAiLoading(false);
   };
-
-  // Build Google Maps embed URL with markers
-  const mapEmbedUrl = useMemo(() => {
-    const center = `${userCoords[0]},${userCoords[1]}`;
-    const zoom = maxDistance > 100 ? 6 : maxDistance > 50 ? 8 : 10;
-    // Use OpenStreetMap embed as free alternative (no API key needed)
-    const bbox = (() => {
-      const delta = maxDistance / 111; // rough degrees
-      return `${userCoords[1] - delta},${userCoords[0] - delta},${userCoords[1] + delta},${userCoords[0] + delta}`;
-    })();
-    // Using an iframe with marker pins
-    let markers = filtered.slice(0, 10).map(p => {
-      const coords = cityCoords[(p.city || "").toLowerCase()] || cityCoords.milano;
-      return `${coords[0]},${coords[1]}`;
-    });
-    // Use OpenStreetMap
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${center}`;
-  }, [userCoords, filtered, maxDistance]);
 
   return (
     <MobileLayout>
@@ -193,10 +165,12 @@ export default function MapSearchPage() {
           </button>
           <h1 className="text-lg font-display font-bold">Trova Professionisti</h1>
           <div className="ml-auto flex gap-1.5">
-            <button onClick={detectGPS} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <Locate className="w-4 h-4 text-muted-foreground" />
+            <button onClick={detectGPS} disabled={gpsLoading}
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              <Locate className={`w-4 h-4 ${gpsLoading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
             </button>
-            <button onClick={() => setShowFilters(!showFilters)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={() => setShowFilters(!showFilters)}
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Filter className={`w-4 h-4 ${showFilters ? "text-primary" : "text-muted-foreground"}`} />
             </button>
           </div>
@@ -222,7 +196,7 @@ export default function MapSearchPage() {
               <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
                 className="flex-1 h-9 rounded-lg bg-muted border border-border/50 px-3 text-xs focus:outline-none">
                 <option value="">Tutte le città</option>
-                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {ITALIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <select value={specialtyFilter} onChange={e => setSpecialtyFilter(e.target.value)}
                 className="flex-1 h-9 rounded-lg bg-muted border border-border/50 px-3 text-xs focus:outline-none">
@@ -257,25 +231,26 @@ export default function MapSearchPage() {
         </div>
       )}
 
-      {/* Real Map Embed */}
-      <div className="mx-5 mt-3 rounded-2xl overflow-hidden border border-border/50 relative" style={{ height: 220 }}>
-        <iframe
-          src={mapEmbedUrl}
-          className="w-full h-full border-0"
-          title="Mappa professionisti"
-          loading="lazy"
-          referrerPolicy="no-referrer"
+      {/* Interactive Map */}
+      <div className="mx-5 mt-3">
+        <InteractiveMap
+          center={coords}
+          zoom={mapZoom}
+          markers={mapMarkers}
+          height={240}
+          showUserMarker={true}
+          onMarkerClick={(m) => navigate(`/stylist/${m.id}`)}
         />
-        <div className="absolute bottom-2 right-2 bg-card/90 backdrop-blur px-2 py-1 rounded-lg text-[8px] text-muted-foreground border border-border/50">
-          {userCity} · {filtered.length} risultati
+        <div className="flex items-center justify-between mt-1.5 px-1">
+          <span className="text-[10px] text-muted-foreground">📍 {position.city}</span>
+          <span className="text-[10px] text-primary font-medium">{filtered.length} professionisti</span>
         </div>
       </div>
 
       {/* Results */}
       <div className="px-5 py-4 space-y-2">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-muted-foreground">{filtered.length} professionisti</span>
-          <span className="text-[10px] text-primary font-semibold">AI Match ↓</span>
+          <span className="text-[10px] text-muted-foreground font-medium">Ordinati per AI Match ↓</span>
         </div>
 
         {filtered.map((p, i) => (
