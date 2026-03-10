@@ -41,6 +41,26 @@ export default function CheckoutPage() {
   const handlePay = async () => {
     setProcessing(true);
     try {
+      // Stripe-based payments (card, paypal, klarna)
+      if (selected === "card" || selected === "paypal" || selected === "klarna") {
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
+          body: {
+            priceId: null, // One-off payment
+            mode: "payment",
+            amount: Math.round(amount * 100),
+            description,
+            successUrl: `${window.location.origin}/wallet?payment=success`,
+            cancelUrl: `${window.location.origin}/checkout?amount=${amount}&desc=${description}&type=${type}&ref=${refId}`,
+          },
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.open(data.url, "_blank");
+          setProcessing(false);
+          return;
+        }
+      }
+
       if (selected === "wallet") {
         const balance = profile?.qr_coins || 0;
         if (balance < amount) {
@@ -51,7 +71,6 @@ export default function CheckoutPage() {
         await supabase.from("profiles").update({ qr_coins: balance - amount }).eq("user_id", user.id);
       }
 
-      // Create wallet transaction
       // Record purchase if product type
       if (type === "product" && refId) {
         await supabase.from("product_purchases").insert({
