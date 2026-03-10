@@ -60,7 +60,7 @@ serve(async (req) => {
           await supabase.from("notifications").insert({
             user_id: userId,
             title: "Abbonamento Attivato ✅",
-            message: "Il tuo abbonamento STAYLE è stato attivato con successo!",
+            message: "Il tuo abbonamento STYLE è stato attivato con successo!",
             type: "subscription",
           });
           logStep("Subscription notification sent");
