@@ -192,7 +192,7 @@ export default function HomePage() {
       {activeTab === "Nuovi" && <AIMatchBanner />}
 
       {/* AI Growth Suggestions */}
-      {activeTab === "Nuovi" && <AIGrowthSuggestions />}
+      {activeTab === "Nuovi" && <div className="px-5 mb-4"><AIGrowthSuggestions /></div>}
 
       {/* Auto Offers */}
       {activeTab === "Nuovi" && <AutoOffersBanner />}

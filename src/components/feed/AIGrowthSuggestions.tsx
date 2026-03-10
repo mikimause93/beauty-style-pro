@@ -6,33 +6,35 @@ import { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles, Chevron
 
 const ICONS: Record<string, any> = { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles };
 
+const FALLBACK_SUGGESTIONS = [
+  { icon: "Calendar", title: "Prenota il tuo primo appuntamento", description: "Scopri i migliori professionisti beauty vicino a te", target: "/booking" },
+  { icon: "Crown", title: "Completa il tuo profilo", description: "I profili completi ricevono 4x più interazioni", target: "/edit-profile" },
+  { icon: "Gift", title: "Invita amici, guadagna QR Coins", description: "Ogni invito vale 20 QRC per te e il tuo amico", target: "/referral" },
+];
+
 export default function AIGrowthSuggestions() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>(FALLBACK_SUGGESTIONS);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) loadSuggestions();
   }, [user]);
 
   const loadSuggestions = async () => {
-    setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("ai-growth-engine", {
+      const { data } = await supabase.functions.invoke("ai-growth-engine", {
         body: { action: "user_suggestions", user_id: user!.id },
       });
-      if (data?.suggestions) setSuggestions(data.suggestions);
+      if (data?.suggestions?.length) setSuggestions(data.suggestions);
     } catch (e) {
-      console.error("AI suggestions error:", e);
-    } finally {
-      setLoading(false);
+      // Keep fallback suggestions
     }
   };
 
   const visible = suggestions.filter((_, i) => !dismissed.has(i));
-  if (!user || visible.length === 0) return null;
+  if (visible.length === 0) return null;
 
   return (
     <div className="space-y-2">
