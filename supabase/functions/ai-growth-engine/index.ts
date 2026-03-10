@@ -125,7 +125,7 @@ serve(async (req) => {
       if (!LOVABLE_API_KEY) {
         return jsonResponse({
           messages: [
-            `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Stayle! Vorrei prenotare un servizio.`,
+            `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Style! Vorrei prenotare un servizio.`,
             `Ciao! Sei disponibile oggi per un appuntamento?`,
             `Mi piace molto il tuo profilo! Possiamo collaborare?`,
             `Ciao, quanto costa un ${context || "servizio"}?`,
