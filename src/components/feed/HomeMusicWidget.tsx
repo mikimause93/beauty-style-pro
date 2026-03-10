@@ -20,7 +20,7 @@ export default function HomeMusicWidget() {
   const [spotifyQuery, setSpotifyQuery] = useState("");
   const [youtubeQuery, setYoutubeQuery] = useState("");
   const [spotifyEmbed, setSpotifyEmbed] = useState("https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0");
-  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/videoseries?list=PLDfKAXSi6kOaiaFt8vMiJJMLNBeqaSMP8&autoplay=0");
+  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/videoseries?list=PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD");
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
