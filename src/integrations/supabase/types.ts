@@ -1051,6 +1051,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "job_posts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "job_posts_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
@@ -3010,6 +3017,13 @@ export type Database = {
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "team_members_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tracks: {
@@ -3470,7 +3484,180 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      businesses_public: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          bio: string | null
+          branding_theme: Json | null
+          business_name: string | null
+          business_type: string | null
+          categories: string[] | null
+          city: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          employee_count: number | null
+          facebook: string | null
+          featured: boolean | null
+          id: string | null
+          instagram: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string | null
+          updated_at: string | null
+          user_id: string | null
+          verified: boolean | null
+          website: string | null
+          working_hours: Json | null
+          zip_code: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          bio?: string | null
+          branding_theme?: Json | null
+          business_name?: string | null
+          business_type?: string | null
+          categories?: string[] | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          employee_count?: number | null
+          facebook?: string | null
+          featured?: boolean | null
+          id?: string | null
+          instagram?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+          working_hours?: Json | null
+          zip_code?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          bio?: string | null
+          branding_theme?: Json | null
+          business_name?: string | null
+          business_type?: string | null
+          categories?: string[] | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          employee_count?: number | null
+          facebook?: string | null
+          featured?: boolean | null
+          id?: string | null
+          instagram?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+          working_hours?: Json | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          desired_categories: string[] | null
+          display_name: string | null
+          experience_years: number | null
+          facebook: string | null
+          follower_count: number | null
+          following_count: number | null
+          id: string | null
+          instagram: string | null
+          phone_verified: boolean | null
+          portfolio_urls: string[] | null
+          qr_coins: number | null
+          skills: string[] | null
+          tiktok: string | null
+          user_id: string | null
+          user_type: string | null
+          username: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          desired_categories?: string[] | null
+          display_name?: string | null
+          experience_years?: number | null
+          facebook?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string | null
+          instagram?: string | null
+          phone_verified?: boolean | null
+          portfolio_urls?: string[] | null
+          qr_coins?: number | null
+          skills?: string[] | null
+          tiktok?: string | null
+          user_id?: string | null
+          user_type?: string | null
+          username?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          desired_categories?: string[] | null
+          display_name?: string | null
+          experience_years?: number | null
+          facebook?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string | null
+          instagram?: string | null
+          phone_verified?: boolean | null
+          portfolio_urls?: string[] | null
+          qr_coins?: number | null
+          skills?: string[] | null
+          tiktok?: string | null
+          user_id?: string | null
+          user_type?: string | null
+          username?: string | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_shipping_promo: {
