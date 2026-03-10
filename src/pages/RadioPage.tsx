@@ -16,10 +16,13 @@ const coverImages = [beauty2, stylist1, stylist2, beauty3, beauty1, beauty2, sty
 
 type MusicSource = "radio" | "spotify" | "youtube";
 
+type RadioFilter = "all" | "italia" | "beauty";
+
 export default function RadioPage() {
   const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadio();
   const [liked, setLiked] = useState(false);
   const [source, setSource] = useState<MusicSource>("radio");
+  const [radioFilter, setRadioFilter] = useState<RadioFilter>("all");
   const { awardCoins } = useQRCoinRewards();
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
@@ -161,13 +164,45 @@ export default function RadioPage() {
             {/* Stations */}
             <div className="mt-6">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Stazioni Radio</h3>
+              
+              {/* Filter tabs */}
+              <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
+                {([
+                  { key: "all" as RadioFilter, label: "Tutte" },
+                  { key: "italia" as RadioFilter, label: "🇮🇹 Nazionali" },
+                  { key: "beauty" as RadioFilter, label: "✨ Salon & Beauty" },
+                ]).map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setRadioFilter(f.key)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                      radioFilter === f.key
+                        ? "bg-foreground text-background"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="space-y-2">
-                {stations.map((station, idx) => (
+                {stations
+                  .filter(s => {
+                    if (radioFilter === "italia") return s.genre.includes("🇮🇹");
+                    if (radioFilter === "beauty") return s.genre.includes("✨");
+                    return true;
+                  })
+                  .map((station, idx) => (
                   <button key={station.id} onClick={() => play(station)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       currentStation.id === station.id ? "bg-primary/10 border border-primary/30" : "bg-card hover:bg-muted"
                     }`}>
-                    <img src={coverImages[idx % coverImages.length]} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${
+                      station.genre.includes("🇮🇹") ? "bg-green-500/10 text-green-600" : "bg-primary/10 text-primary"
+                    }`}>
+                      {station.name.slice(0, 2).toUpperCase()}
+                    </div>
                     <div className="flex-1 text-left">
                       <p className={`text-sm font-semibold ${currentStation.id === station.id ? "text-primary" : ""}`}>{station.name}</p>
                       <p className="text-[11px] text-muted-foreground">{station.genre}</p>
