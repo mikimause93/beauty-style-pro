@@ -93,6 +93,19 @@ export default function BusinessTeamPage() {
     },
   });
 
+  const updatePermissionsMutation = useMutation({
+    mutationFn: async ({ id, permissions, role }: { id: string; permissions: string[]; role: string }) => {
+      const { error } = await supabase.from("business_employees").update({ permissions, role }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["business_employees"] });
+      setEditEmployee(null);
+      toast({ title: "Permessi aggiornati", description: "Le modifiche sono state salvate" });
+    },
+    onError: () => toast({ title: "Errore", description: "Impossibile aggiornare i permessi", variant: "destructive" }),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("business_employees").delete().eq("id", id);
