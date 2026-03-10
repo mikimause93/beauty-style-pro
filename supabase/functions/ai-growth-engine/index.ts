@@ -234,7 +234,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: "Genera 4 idee di contenuto beauty per professionisti su Stayle. Brevi, azionabili, in italiano." },
+            { role: "system", content: "Genera 4 idee di contenuto beauty per professionisti su Style. Brevi, azionabili, in italiano." },
             { role: "user", content: `Profilo: ${profile?.user_type}, città: ${profile?.city}, bio: ${profile?.bio || 'nessuna'}` },
           ],
           tools: [{

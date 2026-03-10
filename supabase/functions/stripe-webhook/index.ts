@@ -85,7 +85,7 @@ serve(async (req) => {
             await supabase.from("receipts").insert({
               user_id: profile.user_id,
               receipt_type: "subscription",
-              service_name: "Abbonamento STAYLE",
+              service_name: "Abbonamento STYLE",
               amount: (invoice.amount_paid || 0) / 100,
               payment_method: "stripe",
               status: "paid",

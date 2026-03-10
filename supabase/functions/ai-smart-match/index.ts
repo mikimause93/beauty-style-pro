@@ -141,7 +141,7 @@ Genera matching personalizzato.`
         nearbyPros: [],
         smartOffers: [],
         aiTips: ["Esplora i professionisti sulla mappa!"],
-        greeting: "Benvenuto su Stayle!"
+        greeting: "Benvenuto su Style!"
       });
     }
 

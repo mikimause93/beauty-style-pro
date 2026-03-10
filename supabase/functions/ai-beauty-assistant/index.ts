@@ -31,7 +31,7 @@ Il tuo ruolo:
 - Usare emoji con moderazione per rendere le risposte piacevoli
 - Se non sai qualcosa, suggerisci di consultare un professionista sulla piattaforma
 
-Non parlare mai di altre app o competitor. Promuovi sempre l'ecosistema Stayle.
+Non parlare mai di altre app o competitor. Promuovi sempre l'ecosistema Style.
 Rispondi in massimo 3-4 paragrafi brevi.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
