@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music, Play, Pause, SkipForward, Loader2 } from "lucide-react";
+import { Music, Play, Pause, SkipForward, Loader2, X } from "lucide-react";
 import { useRadio } from "@/contexts/RadioContext";
 import { useNavigate } from "react-router-dom";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -16,9 +16,12 @@ export default function HomeMusicWidget() {
   const { isPlaying, loading, currentStation, toggle, nextStation, play, stations } = useRadio();
   const navigate = useNavigate();
   const [source, setSource] = useState<SourceTab>("radio");
+  const [hidden, setHidden] = useState(false);
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
+
+  if (hidden) return null;
 
   const sourceTabs: { key: SourceTab; label: string; icon: React.ReactNode }[] = [
     { key: "radio", label: "Radio", icon: <Music className="w-3 h-3" /> },
@@ -53,9 +56,14 @@ export default function HomeMusicWidget() {
             </div>
             <h3 className="text-sm font-display font-bold">Stayle Music</h3>
           </div>
-          <button onClick={() => navigate("/radio")} className="text-[10px] text-primary font-semibold">
-            Apri →
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/radio")} className="text-[10px] text-primary font-semibold">
+              Apri →
+            </button>
+            <button onClick={() => setHidden(true)} className="w-6 h-6 rounded-full bg-muted/60 flex items-center justify-center hover:bg-muted transition-colors">
+              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Source toggle */}
