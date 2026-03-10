@@ -277,16 +277,16 @@ export default function HomeMusicWidget() {
 
             {/* Quick playlists */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-              {youtubePlaylistIds.map(pl => (
+              {youtubeVideos.map(v => (
                 <button
-                  key={pl.id}
+                  key={v.videoId}
                   onClick={() => {
-                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
+                    setYoutubeEmbed(`https://www.youtube.com/embed/${v.videoId}?autoplay=0`);
                     setYoutubeQuery("");
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000] whitespace-nowrap shrink-0"
                 >
-                  {pl.name}
+                  {v.name}
                 </button>
               ))}
             </div>
