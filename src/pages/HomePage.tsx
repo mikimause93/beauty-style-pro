@@ -196,6 +196,9 @@ export default function HomePage() {
       {/* Auto Offers */}
       {activeTab === "Nuovi" && <AutoOffersBanner />}
 
+      {/* Music Widget */}
+      {activeTab === "Nuovi" && <HomeMusicWidget />}
+
       {/* Reels */}
       {activeTab === "Nuovi" && <ReelsSection />}
 
