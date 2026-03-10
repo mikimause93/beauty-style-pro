@@ -164,8 +164,36 @@ export default function RadioPage() {
             {/* Stations */}
             <div className="mt-6">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Stazioni Radio</h3>
+              
+              {/* Filter tabs */}
+              <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
+                {([
+                  { key: "all" as RadioFilter, label: "Tutte" },
+                  { key: "italia" as RadioFilter, label: "🇮🇹 Nazionali" },
+                  { key: "beauty" as RadioFilter, label: "✨ Salon & Beauty" },
+                ]).map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setRadioFilter(f.key)}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                      radioFilter === f.key
+                        ? "bg-foreground text-background"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="space-y-2">
-                {stations.map((station, idx) => (
+                {stations
+                  .filter(s => {
+                    if (radioFilter === "italia") return s.genre.includes("🇮🇹");
+                    if (radioFilter === "beauty") return s.genre.includes("✨");
+                    return true;
+                  })
+                  .map((station, idx) => (
                   <button key={station.id} onClick={() => play(station)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                       currentStation.id === station.id ? "bg-primary/10 border border-primary/30" : "bg-card hover:bg-muted"
