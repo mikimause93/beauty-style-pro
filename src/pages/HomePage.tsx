@@ -260,6 +260,8 @@ export default function HomePage() {
           {[
             { Icon: Target, label: "Missioni", path: "/missions" },
             { Icon: Sparkles, label: "AI Beauty", path: "/ai-assistant" },
+            { Icon: Zap, label: "Quiz Live", path: "/quiz-live" },
+            { Icon: Gamepad2, label: "Talent Game", path: "/talent-game" },
             { Icon: Film, label: "Shorts", path: "/shorts" },
             { Icon: Gift, label: "Gira&Vinci", path: "/spin" },
             { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
