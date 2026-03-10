@@ -457,7 +457,7 @@ export default function ShopPage() {
         <ShareMenu
           onClose={() => setShareProduct(null)}
           title={shareProduct.name}
-          url={`https://stayle.app/product/${shareProduct.id}`}
+          url={`https://style.app/product/${shareProduct.id}`}
         />
       )}
     </MobileLayout>
