@@ -201,6 +201,12 @@ export default function BusinessTeamPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
+                      <button onClick={() => {
+                        setEditEmployee(emp);
+                        setForm({ first_name: emp.first_name, last_name: emp.last_name, email: emp.email || "", phone: emp.phone || "", role: emp.role, permissions: emp.permissions || [] });
+                      }} className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20">
+                        <Settings2 className="w-4 h-4 text-primary" />
+                      </button>
                       {emp.status === "invited" && (
                         <button onClick={() => updateStatusMutation.mutate({ id: emp.id, status: "active" })} className="p-1.5 rounded-lg bg-success/10 hover:bg-success/20">
                           <UserCheck className="w-4 h-4 text-success" />
@@ -290,6 +296,67 @@ export default function BusinessTeamPage() {
               {addMutation.isPending ? "Invio..." : "Invia Invito"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Permissions Dialog */}
+      <Dialog open={!!editEmployee} onOpenChange={(open) => { if (!open) setEditEmployee(null); }}>
+        <DialogContent className="max-w-sm mx-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display">Modifica Permessi</DialogTitle>
+          </DialogHeader>
+          {editEmployee && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
+                  {editEmployee.first_name[0]}{editEmployee.last_name[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{editEmployee.first_name} {editEmployee.last_name}</p>
+                  <p className="text-[10px] text-muted-foreground">{editEmployee.email || editEmployee.phone}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Ruolo</p>
+                <div className="flex gap-2">
+                  {["staff", "manager"].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => setForm(f => ({ ...f, role: r }))}
+                      className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${form.role === r ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
+                    >
+                      {r === "manager" ? "👔 Manager" : "👤 Staff"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Permessi</p>
+                <div className="space-y-1.5">
+                  {PERMISSIONS_OPTIONS.map(p => (
+                    <button
+                      key={p.key}
+                      onClick={() => togglePermission(p.key)}
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-xs transition-all ${form.permissions.includes(p.key) ? "bg-primary/10 border border-primary/30 text-primary" : "bg-muted/50 border border-transparent text-muted-foreground"}`}
+                    >
+                      <span>{p.icon}</span>
+                      <span className="font-medium">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                className="w-full rounded-xl"
+                disabled={updatePermissionsMutation.isPending}
+                onClick={() => updatePermissionsMutation.mutate({ id: editEmployee.id, permissions: form.permissions, role: form.role })}
+              >
+                {updatePermissionsMutation.isPending ? "Salvataggio..." : "Salva Modifiche"}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </MobileLayout>
