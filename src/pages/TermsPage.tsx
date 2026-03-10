@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const sections = [
   {
     title: "1. Accettazione dei Termini",
-    content: "Utilizzando Stayle / Beauty Style Pro, accetti i presenti Termini di Servizio. Se non accetti, non utilizzare la piattaforma. L'uso continuato dopo eventuali modifiche costituisce accettazione della versione aggiornata."
+    content: "Utilizzando Style / Beauty Style Pro, accetti i presenti Termini di Servizio. Se non accetti, non utilizzare la piattaforma. L'uso continuato dopo eventuali modifiche costituisce accettazione della versione aggiornata."
   },
   {
     title: "2. Account Utente",
@@ -21,7 +21,7 @@ const sections = [
   },
   {
     title: "5. Servizi e Prenotazioni",
-    content: "Stayle è una piattaforma che connette clienti con professionisti del settore beauty & wellness. Le prenotazioni costituiscono accordi diretti tra utente e professionista. La piattaforma facilita il contatto ma non è responsabile per la qualità, puntualità o esecuzione dei servizi forniti dai professionisti."
+    content: "Style è una piattaforma che connette clienti con professionisti del settore beauty & wellness. Le prenotazioni costituiscono accordi diretti tra utente e professionista. La piattaforma facilita il contatto ma non è responsabile per la qualità, puntualità o esecuzione dei servizi forniti dai professionisti."
   },
   {
     title: "6. Pagamenti e Commissioni",
@@ -49,15 +49,15 @@ const sections = [
   },
   {
     title: "12. Proprietà Intellettuale",
-    content: "I contenuti pubblicati restano di proprietà dell'utente, che concede alla piattaforma una licenza non esclusiva per la visualizzazione e distribuzione all'interno dell'app. Il brand Stayle, il logo e l'interfaccia sono proprietà esclusiva della piattaforma."
+    content: "I contenuti pubblicati restano di proprietà dell'utente, che concede alla piattaforma una licenza non esclusiva per la visualizzazione e distribuzione all'interno dell'app. Il brand Style, il logo e l'interfaccia sono proprietà esclusiva della piattaforma."
   },
   {
     title: "13. Sospensione e Chiusura Account",
-    content: "Ci riserviamo il diritto di sospendere o chiudere account che violano i presenti termini, senza preavviso in caso di violazioni gravi. L'utente può richiedere la chiusura del proprio account in qualsiasi momento dalle impostazioni o contattando support@stayle.app."
+    content: "Ci riserviamo il diritto di sospendere o chiudere account che violano i presenti termini, senza preavviso in caso di violazioni gravi. L'utente può richiedere la chiusura del proprio account in qualsiasi momento dalle impostazioni o contattando support@style.app."
   },
   {
     title: "14. Limitazione di Responsabilità",
-    content: "Stayle non è responsabile per: danni indiretti derivanti dall'uso della piattaforma, interruzioni temporanee del servizio, azioni o omissioni di utenti terzi, perdite derivanti da servizi di professionisti. Il servizio viene fornito \"così com'è\" (as is)."
+    content: "Style non è responsabile per: danni indiretti derivanti dall'uso della piattaforma, interruzioni temporanee del servizio, azioni o omissioni di utenti terzi, perdite derivanti da servizi di professionisti. Il servizio viene fornito \"così com'è\" (as is)."
   },
   {
     title: "15. Legge Applicabile",
@@ -65,7 +65,7 @@ const sections = [
   },
   {
     title: "16. Contatti",
-    content: "Per domande sui termini di servizio: support@stayle.app"
+    content: "Per domande sui termini di servizio: support@style.app"
   }
 ];
 
@@ -81,7 +81,7 @@ export default function TermsPage() {
       </header>
       <div className="px-5 py-6 space-y-6 text-sm text-muted-foreground leading-relaxed">
         <p className="text-foreground font-medium">
-          Utilizzando Stayle / Beauty Style Pro accetti le seguenti condizioni d'uso.
+          Utilizzando Style / Beauty Style Pro accetti le seguenti condizioni d'uso.
         </p>
         {sections.map((s, i) => (
           <section key={i}>
