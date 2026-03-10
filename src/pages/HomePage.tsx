@@ -246,6 +246,7 @@ export default function HomePage() {
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
+            { Icon: Droplets, label: "Spa & Terme", path: "/spa-terme" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
