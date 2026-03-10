@@ -20,7 +20,7 @@ export default function HomeMusicWidget() {
   const [spotifyQuery, setSpotifyQuery] = useState("");
   const [youtubeQuery, setYoutubeQuery] = useState("");
   const [spotifyEmbed, setSpotifyEmbed] = useState("https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0");
-  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/videoseries?list=PLDfKAXSi6kOaiaFt8vMiJJMLNBeqaSMP8&autoplay=0");
+  const [youtubeEmbed, setYoutubeEmbed] = useState("https://www.youtube.com/embed/videoseries?list=PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD");
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
@@ -37,7 +37,7 @@ export default function HomeMusicWidget() {
   const searchYouTube = () => {
     if (!youtubeQuery.trim()) return;
     const encoded = encodeURIComponent(youtubeQuery.trim());
-    setYoutubeEmbed(`https://www.youtube.com/embed?listType=search&list=${encoded}&autoplay=0`);
+    setYoutubeEmbed(`https://www.youtube.com/embed?listType=search&list=${encoded}`);
   };
 
   const spotifyPlaylists = [
@@ -49,10 +49,10 @@ export default function HomeMusicWidget() {
   ];
 
   const youtubePlaylistIds = [
-    { name: "Salon Relax", id: "PLDfKAXSi6kOaiaFt8vMiJJMLNBeqaSMP8" },
-    { name: "Lofi Beats", id: "PLOzDu-MXXLliO9fBNZOQTBDddoA3FzZUo" },
-    { name: "Piano Music", id: "PLMIbGomroEscpWKsxpCY7LtZMBkMb7Riv" },
-    { name: "Italian Pop", id: "PLcfQmtiAG0X-fmM85dPlql5wfYbmFumzQ" },
+    { name: "Salon Relax", id: "PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD" },
+    { name: "Lofi Beats", id: "PLofht4PTcKYnaH8w5olJCI-wUVxuoMHqM" },
+    { name: "Piano Music", id: "PL8F6B0753B2CCA128" },
+    { name: "Italian Pop", id: "PLgzTt0k8mXzEk586SfWBhQlrhxIGkpMl" },
   ];
 
   const sourceTabs: { key: SourceTab; label: string; icon: React.ReactNode }[] = [
@@ -281,7 +281,7 @@ export default function HomeMusicWidget() {
                 <button
                   key={pl.id}
                   onClick={() => {
-                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}&autoplay=0`);
+                    setYoutubeEmbed(`https://www.youtube.com/embed/videoseries?list=${pl.id}`);
                     setYoutubeQuery("");
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000] whitespace-nowrap shrink-0"
