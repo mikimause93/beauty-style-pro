@@ -328,17 +328,19 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
       // Get enriched user context
       const { data: profile } = await supabase
         .from("profiles")
-        .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at")
+        .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
         .eq("user_id", user_id)
         .single();
 
       const userType = profile?.user_type || 'client';
 
-      // Fetch activity stats in parallel
-      const [postsRes, bookingsRes, streamsRes] = await Promise.all([
+      // Fetch activity stats + subscription in parallel
+      const [postsRes, bookingsRes, streamsRes, subsRes, transRes] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id),
         supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", user_id),
         supabase.from("live_streams").select("id", { count: "exact", head: true }).eq("status", "live"),
+        supabase.from("user_subscriptions").select("*, subscription_plans(name, slug)").eq("user_id", user_id).eq("status", "active").limit(1).maybeSingle(),
+        supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", user_id),
       ]);
 
       const dynamicPrompt = getSystemPrompt(userType);
@@ -347,6 +349,10 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
         ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
         : 0;
 
+      const subInfo = subsRes.data 
+        ? `Piano: ${(subsRes.data as any).subscription_plans?.name || 'Attivo'}` 
+        : 'Piano: Free';
+
       const contextAddition = `
 
 CONTESTO UTENTE ATTUALE:
@@ -354,12 +360,34 @@ CONTESTO UTENTE ATTUALE:
 - Tipo: ${userType}
 - Città: ${profile?.city || 'non specificata'}
 - QR Coins: ${profile?.qr_coins || 0}
+- ${subInfo}
 - Follower: ${profile?.follower_count || 0} | Following: ${profile?.following_count || 0}
 - Post: ${postsRes.count || 0}
 - Prenotazioni: ${bookingsRes.count || 0}
+- Transazioni: ${transRes.count || 0}
 - Giorni attivo: ${daysActive}
 - Profilo completo: ${(profile?.bio && profile?.avatar_url) ? 'Sì' : 'No — suggerisci /edit-profile'}
-- Live attive ora: ${streamsRes.count || 0}`;
+- IBAN collegato: ${profile?.iban ? 'Sì' : 'No'}
+- Verifica: ${profile?.verification_status || 'pending'}
+- Live attive ora: ${streamsRes.count || 0}
+
+COMANDI SLASH — Se l'utente scrive uno di questi comandi, rispondi con l'azione appropriata:
+/prenota → Guida alla prenotazione servizi (/booking)
+/live → Avvia una diretta live (/go-live)
+/saldo → Mostra saldo QR Coins e suggerisci come guadagnarne
+/boost → Info su boost profilo (/boost-profile)
+/abbonamento → Info e upgrade piano (/subscriptions)
+/aiuto → Tour guidato funzionalità principali
+/missioni → Missioni attive e reward (/missions)
+/classifica → Posizione in classifica (/leaderboard)
+/sfida → Sfide beauty attive (/challenges)
+/lavoro → Offerte lavoro beauty (/hr)
+/shop → Prodotti e marketplace (/shop)
+/mappa → Professionisti vicini (/map-search)
+/referral → Programma invita amici (/referral)
+/ricevute → Storico pagamenti (/receipts)
+/impostazioni → Impostazioni account (/settings)
+/analytics → Dashboard statistiche (/analytics)`;
 
       const allMessages = [
         { role: "system", content: dynamicPrompt + contextAddition },

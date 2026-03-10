@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, stream } = await req.json();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!apiKey) {
@@ -48,27 +48,32 @@ Rispondi in massimo 3-4 paragrafi brevi.`;
         ],
         temperature: 0.7,
         max_tokens: 800,
+        stream: !!stream,
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Troppe richieste, riprova tra poco" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Crediti AI esauriti" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const text = await response.text();
       console.error("AI gateway error:", response.status, text);
       return new Response(JSON.stringify({ error: "Errore AI gateway" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Stream mode - pass through SSE
+    if (stream) {
+      return new Response(response.body, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }
 

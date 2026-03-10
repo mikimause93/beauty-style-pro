@@ -140,16 +140,25 @@ export default function WalletPage() {
     const balance = profile?.qr_coins || 0;
     if (amt > balance) { toast.error("Saldo insufficiente"); return; }
     if (!profile?.iban) { toast.error("Collega prima un conto bancario"); return; }
+    if (amt < 10) { toast.error("Importo minimo: €10"); return; }
 
-    await supabase.from("profiles").update({ qr_coins: balance - amt }).eq("user_id", user!.id);
-    await supabase.from("wallet_transactions").insert({
-      user_id: user!.id, type: "withdraw", amount: -amt, description: `Prelievo su IBAN •••• ${profile.iban.slice(-4)}`, payment_method: "bank_transfer", status: "pending",
-    });
-    await refreshProfile();
-    loadTransactions();
-    setShowWithdraw(false);
-    setWithdrawAmount("");
-    toast.success("Prelievo richiesto!");
+    try {
+      const { data, error } = await supabase.functions.invoke("process-withdrawal", {
+        body: { amount: amt, iban: profile.iban, holderName: profile.bank_holder_name },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await refreshProfile();
+      loadTransactions();
+      setShowWithdraw(false);
+      setWithdrawAmount("");
+      toast.success(`Prelievo di €${amt} in elaborazione! 🏦`, {
+        description: data?.estimatedArrival || "2-5 giorni lavorativi",
+      });
+    } catch (e: any) {
+      toast.error(e.message || "Errore nel prelievo");
+    }
   };
 
   const balance = profile?.qr_coins || 0;
