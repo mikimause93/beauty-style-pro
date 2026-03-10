@@ -103,8 +103,10 @@ export default function BusinessDashboardPage() {
   const quickActions = [
     { icon: Plus, label: "Nuovo Annuncio", onClick: () => navigate("/hr/create-job") },
     { icon: Users, label: "Gestisci Team", onClick: () => navigate("/business/team") },
+    { icon: CalendarClock, label: "Turni Staff", onClick: () => navigate("/business/team/shifts") },
+    { icon: ClipboardList, label: "Attività Log", onClick: () => navigate("/business/team/activity") },
     { icon: Calendar, label: "Prenotazioni", onClick: () => navigate("/booking") },
-    { icon: BarChart3, label: "Analytics", onClick: () => {} },
+    { icon: BarChart3, label: "Analytics", onClick: () => navigate("/analytics") },
   ];
 
   if (!user) {
