@@ -34,9 +34,16 @@ export default function AIMatchBanner() {
           user_type: profile?.user_type || "client",
         },
       });
-      if (!error && data) setSuggestions(data);
+      // Handle 402/429 or error responses gracefully — just hide the banner
+      if (error || data?.error) {
+        console.warn("AI match unavailable:", data?.error || error);
+        setDismissed(true);
+      } else if (data) {
+        setSuggestions(data);
+      }
     } catch (e) {
       console.error("AI match error:", e);
+      setDismissed(true);
     }
     setLoading(false);
   };
