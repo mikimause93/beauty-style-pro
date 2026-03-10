@@ -48,11 +48,11 @@ export default function HomeMusicWidget() {
     { name: "Pop Mix", id: "37i9dQZF1EQncLwOalG3K7" },
   ];
 
-  const youtubePlaylistIds = [
-    { name: "Salon Relax", id: "PLMWjhejkSIMpGNUfMIBGbrkiRMIJSn1cD" },
-    { name: "Lofi Beats", id: "PLofht4PTcKYnaH8w5olJCI-wUVxuoMHqM" },
-    { name: "Piano Music", id: "PL8F6B0753B2CCA128" },
-    { name: "Italian Pop", id: "PLgzTt0k8mXzEk586SfWBhQlrhxIGkpMl" },
+  const youtubeVideos = [
+    { name: "Relaxing", videoId: "lFcSrYw-ARY" },
+    { name: "Lofi Beats", videoId: "jfKfPfyJRdk" },
+    { name: "Piano", videoId: "BjFWk0ncr70" },
+    { name: "Jazz", videoId: "Dx5qFachd3A" },
   ];
 
   const sourceTabs: { key: SourceTab; label: string; icon: React.ReactNode }[] = [
