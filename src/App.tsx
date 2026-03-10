@@ -69,6 +69,8 @@ import PrivacyPage from "./pages/PrivacyPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import RemindersPage from "./pages/RemindersPage";
 import SpaTermePage from "./pages/SpaTermePage";
+import QuizLivePage from "./pages/QuizLivePage";
+import TalentGamePage from "./pages/TalentGamePage";
 import NotFound from "./pages/NotFound";
 import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -146,6 +148,8 @@ const App = () => {
             <Route path="/go-live" element={<P><GoLivePage /></P>} />
             <Route path="/transformation-challenge" element={<P><TransformationChallengePage /></P>} />
             <Route path="/live-battle" element={<P><LiveBattlePage /></P>} />
+            <Route path="/quiz-live" element={<P><QuizLivePage /></P>} />
+            <Route path="/talent-game" element={<P><TalentGamePage /></P>} />
             <Route path="/manage-products" element={<P><ManageProductsPage /></P>} />
             <Route path="/wallet" element={<P><WalletPage /></P>} />
             <Route path="/admin" element={<P><AdminPage /></P>} />

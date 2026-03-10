@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2 } from "lucide-react";
 import TrendingClips from "@/components/feed/TrendingClips";
 import StoriesBar from "@/components/feed/StoriesBar";
 import ReelsSection from "@/components/feed/ReelsSection";
@@ -260,6 +260,8 @@ export default function HomePage() {
           {[
             { Icon: Target, label: "Missioni", path: "/missions" },
             { Icon: Sparkles, label: "AI Beauty", path: "/ai-assistant" },
+            { Icon: Zap, label: "Quiz Live", path: "/quiz-live" },
+            { Icon: Gamepad2, label: "Talent Game", path: "/talent-game" },
             { Icon: Film, label: "Shorts", path: "/shorts" },
             { Icon: Gift, label: "Gira&Vinci", path: "/spin" },
             { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
