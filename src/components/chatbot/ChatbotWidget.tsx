@@ -65,7 +65,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
         m.id === "welcome" 
-          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella & Keplero AI. Chiedimi qualsiasi cosa!` }
+          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!` }
           : m
       ));
     }
