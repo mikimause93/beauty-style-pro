@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon, Calendar, MapPin, ShoppingBag, Video, Wallet, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
@@ -14,13 +14,22 @@ interface ChatMsg {
   content: string;
 }
 
+const quickActions = [
+  { icon: Calendar, label: "Prenota", path: "/booking" },
+  { icon: MapPin, label: "Mappa", path: "/map-search" },
+  { icon: ShoppingBag, label: "Shop", path: "/shop" },
+  { icon: Video, label: "Live", path: "/live" },
+  { icon: Wallet, label: "Wallet", path: "/wallet" },
+  { icon: Briefcase, label: "Lavoro", path: "/hr" },
+];
+
 const suggestedQuestions = [
   "Quale taglio va di moda questa stagione?",
   "Come curare i capelli ricci?",
   "Consigliami un trattamento viso",
-  "Miglior colore per pelle chiara?",
-  "Come mantenere la tinta più a lungo?",
-  "Routine skincare serale consigliata",
+  "Come funziona il wallet QR Coins?",
+  "Come prenotare un servizio?",
+  "Come andare in live?",
 ];
 
 export default function AIAssistantPage() {
@@ -30,7 +39,7 @@ export default function AIAssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Ciao! Sono Stella, la tua assistente beauty AI. Chiedimi qualsiasi cosa su tagli, colori, skincare, trattamenti o prodotti. Sono qui per aiutarti!",
+      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella & Keplero AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -38,32 +47,27 @@ export default function AIAssistantPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [isTTSEnabled, setIsTTSEnabled] = useState(false);
-  const [isSTTActive, setIsSTTActive] = useState(false);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
   
-  const { speak, cancel: cancelTTS, speaking, voices } = useVoiceSynthesis();
+  const { speak, cancel: cancelTTS } = useVoiceSynthesis();
   
   const {
     isListening,
     transcript,
-    interimTranscript,
     startListening,
     stopListening,
     resetTranscript,
     isWakeWordListening,
-    wakeWordDetected,
     startWakeWordListening,
     stopWakeWordListening
   } = useVoiceRecognition({
     continuous: false,
     interimResults: true,
     language: 'it-IT',
-    wakeWordEnabled: wakeWordEnabled,
+    wakeWordEnabled,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
     onWakeWordDetected: () => {
-      if (isTTSEnabled) {
-        speak("Ciao! Sono Stella, la tua assistente beauty. Come posso aiutarti?");
-      }
+      if (isTTSEnabled) speak("Ciao! Come posso aiutarti?");
     }
   });
 
@@ -71,7 +75,6 @@ export default function AIAssistantPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle transcript changes
   useEffect(() => {
     if (transcript && !isListening) {
       setInput(transcript);
@@ -81,7 +84,7 @@ export default function AIAssistantPage() {
 
   const sendMessage = async () => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || !user) return;
 
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
@@ -89,36 +92,33 @@ export default function AIAssistantPage() {
     setIsLoading(true);
 
     try {
-      const allMessages = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+      const history = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
         role: m.role,
         content: m.content,
       }));
 
-      const { data, error } = await supabase.functions.invoke("ai-beauty-assistant", {
-        body: { messages: allMessages },
+      const { data, error } = await supabase.functions.invoke("chatbot-assistant", {
+        body: {
+          action: "chat",
+          user_id: user.id,
+          data: { messages: history }
+        },
       });
 
       if (error) throw error;
 
-      const aiContent = data?.content || data?.choices?.[0]?.message?.content || "Mi dispiace, non riesco a rispondere in questo momento.";
-
+      const aiContent = data?.response || "Mi dispiace, non riesco a rispondere in questo momento.";
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: aiContent,
       }]);
 
-      // Speak the response if TTS is enabled
-      if (isTTSEnabled) {
-        speak(aiContent);
-      }
+      if (isTTSEnabled) speak(aiContent);
     } catch (err: any) {
       console.error("AI error:", err);
-      if (err?.message?.includes("429") || err?.status === 429) {
-        toast.error("Troppe richieste, riprova tra poco");
-      } else {
-        toast.error("Errore nella risposta AI");
-      }
+      if (err?.message?.includes("429")) toast.error("Troppe richieste, riprova tra poco");
+      else toast.error("Errore nella risposta AI");
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -127,10 +127,6 @@ export default function AIAssistantPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSuggestion = (q: string) => {
-    setInput(q);
   };
 
   return (
@@ -143,12 +139,26 @@ export default function AIAssistantPage() {
           <Sparkles className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="text-sm font-bold">Stella - Beauty AI Assistant</h1>
+          <h1 className="text-sm font-bold">Stella & Keplero AI</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Consigli personalizzati in tempo reale"}
+            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Il tuo assistente STYLE completo"}
           </p>
         </div>
       </header>
+
+      {/* Quick Actions Bar */}
+      <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-none">
+        {quickActions.map(a => (
+          <button
+            key={a.path}
+            onClick={() => navigate(a.path)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/30 text-xs font-medium whitespace-nowrap hover:border-primary/30 transition-colors"
+          >
+            <a.icon className="w-3.5 h-3.5 text-primary" />
+            {a.label}
+          </button>
+        ))}
+      </div>
 
       {/* Messages */}
       <div className="flex-1 px-4 py-4 space-y-4 min-h-[50vh]">
@@ -187,17 +197,13 @@ export default function AIAssistantPage() {
           </div>
         )}
 
-        {/* Suggestions */}
         {messages.length <= 2 && !isLoading && (
           <div className="space-y-2 pt-2">
             <p className="text-xs text-muted-foreground font-medium">💡 Prova a chiedere:</p>
             <div className="flex flex-wrap gap-2">
               {suggestedQuestions.map(q => (
-                <button
-                  key={q}
-                  onClick={() => handleSuggestion(q)}
-                  className="px-3 py-1.5 rounded-full bg-card border border-border text-xs hover:border-primary/50 transition-colors"
-                >
+                <button key={q} onClick={() => setInput(q)}
+                  className="px-3 py-1.5 rounded-full bg-card border border-border text-xs hover:border-primary/50 transition-colors">
                   {q}
                 </button>
               ))}
@@ -213,36 +219,23 @@ export default function AIAssistantPage() {
         <button
           onClick={() => {
             setWakeWordEnabled(!wakeWordEnabled);
-            if (!wakeWordEnabled) {
-              startWakeWordListening();
-              toast.success("Attivazione vocale 'Stella' abilitata");
-            } else {
-              stopWakeWordListening();
-              toast.success("Attivazione vocale disabilitata");
-            }
+            if (!wakeWordEnabled) { startWakeWordListening(); toast.success("Attivazione vocale abilitata"); }
+            else { stopWakeWordListening(); toast.success("Attivazione vocale disabilitata"); }
           }}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            wakeWordEnabled 
-              ? "bg-green-500/20 text-green-400 border border-green-500/30" 
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
+            wakeWordEnabled ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-muted text-muted-foreground"
           }`}
         >
           🎤 Wake Word {wakeWordEnabled ? "ON" : "OFF"}
         </button>
-        
         <button
           onClick={() => {
             setIsTTSEnabled(!isTTSEnabled);
-            if (!isTTSEnabled) {
-              speak("Sintesi vocale attivata!");
-            } else {
-              cancelTTS();
-            }
+            if (!isTTSEnabled) speak("Sintesi vocale attivata!");
+            else cancelTTS();
           }}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            isTTSEnabled 
-              ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
+            isTTSEnabled ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-muted text-muted-foreground"
           }`}
         >
           🔊 Audio {isTTSEnabled ? "ON" : "OFF"}
@@ -255,35 +248,20 @@ export default function AIAssistantPage() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder={isWakeWordListening ? "Dì 'Stella' per attivare..." : "Chiedi qualcosa sulla bellezza..."}
+          placeholder="Chiedi qualsiasi cosa..."
           className="flex-1 h-11 rounded-full bg-muted px-4 text-sm focus:outline-none"
           disabled={isLoading}
         />
-        
         <button
-          onClick={() => {
-            if (isListening) {
-              stopListening();
-              setIsSTTActive(false);
-            } else {
-              startListening();
-              setIsSTTActive(true);
-            }
-          }}
+          onClick={() => { if (isListening) stopListening(); else startListening(); }}
           className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            isListening 
-              ? "bg-red-500 text-white animate-pulse" 
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
+            isListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
           }`}
         >
           <MicIcon className="w-5 h-5" />
         </button>
-
-        <button
-          onClick={sendMessage}
-          disabled={!input.trim() || isLoading}
-          className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50"
-        >
+        <button onClick={sendMessage} disabled={!input.trim() || isLoading}
+          className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50">
           <Send className="w-5 h-5 text-primary-foreground" />
         </button>
       </div>
