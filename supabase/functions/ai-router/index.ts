@@ -1,0 +1,276 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// PROMPT REGISTRY — Role-based prompts for different AI contexts
+// ══════════════════════════════════════════════════════════════════════
+
+const PROMPTS: Record<string, string> = {
+  system: `Sei "Stella & Keplero AI", assistente di Stayle – Beauty Style Pro, la super app beauty italiana.
+Rispondi SEMPRE in italiano. Tono amichevole e professionale. Emoji moderate (1-3). Max 150 parole.
+Indica SEMPRE il percorso app quando suggerisci un'azione (es: "Vai su /wallet").`,
+
+  user: `Sei l'assistente beauty personale dell'utente. Aiuti con:
+- Prenotazioni servizi beauty (/booking, /stylists)
+- Trovare saloni e professionisti vicini (/map-search)
+- Shopping prodotti beauty (/shop)
+- Consigli personalizzati su tagli, colori, skincare, trattamenti
+- Wallet e pagamenti (/wallet, /qr-coins)
+- Live streaming beauty (/go-live)
+- Sfide e gamification (/challenges, /missions, /spin-wheel)
+- Offerte lavoro beauty (/hr)
+Suggerisci SEMPRE azioni concrete. Rendi l'esperienza divertente e gratificante.`,
+
+  business: `Sei il consulente strategico per professionisti e business beauty. Aiuti con:
+- Gestione profilo e portfolio (/edit-profile, /verify-account)
+- Marketing e sponsorizzazioni (/boost-profile)
+- Ricezione prenotazioni e gestione agenda (/my-bookings)
+- Analytics e crescita (/analytics)
+- Pubblicazione contenuti e live (/create-post, /go-live)
+- HR: offerte lavoro e candidature (/create-job-post, /hr)
+- Wallet, pagamenti e prelievi (/wallet)
+- Abbonamenti Pro/Business/Premium (/subscriptions)
+Fornisci consigli con ROI stimato. Massimizza visibilità e monetizzazione.`,
+
+  admin: `Sei l'assistente admin della piattaforma Stayle. Aiuti con:
+- Dashboard utenti: totali, nuovi, attivi, sospesi (/admin)
+- Dashboard pagamenti: volume, ricevute, prelievi (/admin)
+- Moderazione: segnalazioni, ban, contenuti, verifica KYC
+- Monitoraggio live stream attivi
+- Analytics globali e crescita (/analytics)
+- Gestione abbonamenti e promozioni
+Risposte tecniche e dirette. Fornisci numeri e statistiche.`,
+
+  beauty: `Sei un'esperta beauty di alto livello. Consigli su:
+- Tagli: tendenze stagionali, forme viso, texture capelli
+- Colori: balayage, meches, toni caldi/freddi, compatibilità
+- Skincare: routine personalizzate, ingredienti attivi, SPF
+- Trattamenti viso e corpo: peeling, laser, botox, filler
+- Makeup: tecniche, prodotti, look per eventi
+- Nail art: tendenze, gel, semipermanente
+Consiglia SEMPRE di prenotare un professionista su /stylists.`,
+
+  shop: `Sei l'assistente shopping beauty di Stayle. Aiuti con:
+- Suggerimenti prodotti personalizzati (/shop)
+- Confronto prezzi e recensioni
+- Prodotti per tipo di capello/pelle
+- Offerte e promozioni attive (/marketplace)
+- Storico acquisti (/purchase-history)
+- Pagamenti: QR Coins, carte, PayPal, Klarna (/wallet)
+Suggerisci prodotti specifici dal catalogo quando possibile.`,
+
+  job: `Sei il consulente HR beauty di Stayle. Aiuti con:
+- Ricerca offerte lavoro beauty (/hr)
+- Candidature con CV e portfolio
+- Matching AI competenze-requisiti
+- Consigli per il colloquio
+- Pubblicazione offerte (/create-job-post)
+- Casting e collaborazioni (/create-casting)
+Valuta sempre il match tra competenze e requisiti.`,
+
+  live: `Sei l'esperto di live streaming beauty di Stayle. Aiuti con:
+- Come avviare una diretta (/go-live)
+- Consigli per aumentare spettatori e engagement
+- Battle 1v1 tra professionisti (/live-battle)
+- Tips e donazioni in QR Coins
+- Sondaggi live interattivi
+- Replay e highlight
+Suggerisci orari migliori e strategie di crescita.`,
+
+  map: `Sei l'assistente geolocalizzazione di Stayle. Aiuti con:
+- Trovare professionisti vicini (/map-search)
+- Filtri per specialità, distanza, rating
+- Offerte geolocalizzate
+- Calcolo distanze e tempi
+- Suggerimenti basati sulla posizione
+Indica SEMPRE la distanza e il rating dei professionisti.`,
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// AI PROVIDER — Lovable AI Gateway with fallback
+// ══════════════════════════════════════════════════════════════════════
+
+async function callAI(
+  apiKey: string,
+  systemPrompt: string,
+  messages: Array<{ role: string; content: string }>,
+  options: { stream?: boolean; tools?: any[]; tool_choice?: any; max_tokens?: number } = {}
+) {
+  const body: any = {
+    model: "google/gemini-3-flash-preview",
+    messages: [
+      { role: "system", content: systemPrompt },
+      ...messages,
+    ],
+    temperature: 0.7,
+    max_tokens: options.max_tokens || 1000,
+  };
+
+  if (options.stream) body.stream = true;
+  if (options.tools) body.tools = options.tools;
+  if (options.tool_choice) body.tool_choice = options.tool_choice;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  return response;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CONTEXT BUILDER — Enriches prompts with user data
+// ══════════════════════════════════════════════════════════════════════
+
+async function buildUserContext(supabase: any, userId: string): Promise<string> {
+  const [profileRes, postsRes, bookingsRes, subsRes, transRes, proRes] = await Promise.all([
+    supabase.from("profiles")
+      .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
+      .eq("user_id", userId).single(),
+    supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", userId),
+    supabase.from("user_subscriptions").select("*, subscription_plans(name)")
+      .eq("user_id", userId).eq("status", "active").limit(1).maybeSingle(),
+    supabase.from("transactions").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("professionals").select("id, specialty, rating, review_count")
+      .eq("user_id", userId).maybeSingle(),
+  ]);
+
+  const p = profileRes.data;
+  if (!p) return "\nCONTESTO: Utente non trovato.";
+
+  const daysActive = p.created_at ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) : 0;
+  const sub = subsRes.data ? `${(subsRes.data as any).subscription_plans?.name || 'Attivo'}` : 'Free';
+  const pro = proRes.data;
+
+  return `
+
+CONTESTO UTENTE:
+- Nome: ${p.display_name || 'Utente'} | Tipo: ${p.user_type} | Città: ${p.city || '?'}
+- QRC: ${p.qr_coins || 0} | Piano: ${sub} | Giorni attivo: ${daysActive}
+- Follower: ${p.follower_count || 0} | Following: ${p.following_count || 0}
+- Post: ${postsRes.count || 0} | Prenotazioni: ${bookingsRes.count || 0} | Transazioni: ${transRes.count || 0}
+- Profilo completo: ${(p.bio && p.avatar_url) ? 'Sì' : 'No'} | IBAN: ${p.iban ? 'Sì' : 'No'} | Verifica: ${p.verification_status || 'pending'}${
+  pro ? `\n- Specialità: ${pro.specialty || 'N/A'} | Rating: ${pro.rating || 0}/5 (${pro.review_count || 0} rec.)` : ''
+}`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ROUTE RESOLVER — Maps role to prompt
+// ══════════════════════════════════════════════════════════════════════
+
+function resolvePrompt(role: string, userType?: string): string {
+  // Direct role match
+  if (PROMPTS[role]) return PROMPTS.system + "\n\n" + PROMPTS[role];
+
+  // Auto-detect from user type
+  if (userType === 'admin') return PROMPTS.system + "\n\n" + PROMPTS.admin;
+  if (userType === 'professional' || userType === 'business') return PROMPTS.system + "\n\n" + PROMPTS.business;
+  return PROMPTS.system + "\n\n" + PROMPTS.user;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// EDGE FUNCTION HANDLER
+// ══════════════════════════════════════════════════════════════════════
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return jsonResponse({ error: "AI non configurata" }, 500);
+    }
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const { role, message, messages, user_id, context, stream } = await req.json();
+
+    // Build prompt from role
+    let userType: string | undefined;
+    if (user_id) {
+      const { data: profile } = await supabase.from("profiles").select("user_type").eq("user_id", user_id).single();
+      userType = profile?.user_type;
+    }
+
+    const systemPrompt = resolvePrompt(role || "auto", userType);
+    
+    // Build enriched context
+    let enrichedPrompt = systemPrompt;
+    if (user_id) {
+      const userContext = await buildUserContext(supabase, user_id);
+      enrichedPrompt += userContext;
+    }
+    if (context) {
+      enrichedPrompt += `\n\nCONTESTO AGGIUNTIVO: ${JSON.stringify(context)}`;
+    }
+
+    // Build message array
+    const chatMessages = messages || (message ? [{ role: "user", content: message }] : []);
+
+    if (chatMessages.length === 0) {
+      return jsonResponse({ error: "Nessun messaggio fornito" }, 400);
+    }
+
+    // ── STREAMING ──
+    if (stream) {
+      const response = await callAI(LOVABLE_API_KEY, enrichedPrompt, chatMessages, { stream: true });
+
+      if (!response.ok) {
+        if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
+        if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
+        return jsonResponse({ error: "Errore AI" }, 500);
+      }
+
+      return new Response(response.body, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    }
+
+    // ── NON-STREAMING ──
+    const response = await callAI(LOVABLE_API_KEY, enrichedPrompt, chatMessages);
+
+    if (!response.ok) {
+      if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
+      if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
+      return jsonResponse({ error: "Errore AI" }, 500);
+    }
+
+    const result = await response.json();
+    const reply = result.choices?.[0]?.message?.content || "Mi dispiace, riprova.";
+
+    // Log conversation
+    if (user_id) {
+      const userMsg = chatMessages.slice(-1)[0]?.content || '';
+      await supabase.from("chatbot_messages").insert({
+        user_id,
+        message_type: role || "chat",
+        content: `User: ${userMsg}\nBot: ${reply}`,
+        status: "completed"
+      }).catch(() => {});
+    }
+
+    return jsonResponse({ reply, role: role || "auto" });
+  } catch (e) {
+    console.error("ai-router error:", e);
+    return jsonResponse({ error: e.message }, 500);
+  }
+});
+
+function jsonResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
