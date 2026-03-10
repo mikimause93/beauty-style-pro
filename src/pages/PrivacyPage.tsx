@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const sections = [
   {
     title: "1. Titolare del Trattamento",
-    content: "Il titolare del trattamento dei dati è Stayle App (\"Beauty Style Pro\"). Email: support@stayle.app — Paese: Italia."
+    content: "Il titolare del trattamento dei dati è Style App (\"Beauty Style Pro\"). Email: support@style.app — Paese: Italia."
   },
   {
     title: "2. Dati Raccolti",
@@ -33,11 +33,11 @@ const sections = [
   },
   {
     title: "8. Conservazione Dati",
-    content: "I dati personali sono conservati per tutta la durata dell'account attivo e per il periodo necessario agli obblighi di legge. L'utente può richiedere la cancellazione completa dei propri dati contattando: support@stayle.app. La cancellazione sarà eseguita entro 30 giorni dalla richiesta."
+    content: "I dati personali sono conservati per tutta la durata dell'account attivo e per il periodo necessario agli obblighi di legge. L'utente può richiedere la cancellazione completa dei propri dati contattando: support@style.app. La cancellazione sarà eseguita entro 30 giorni dalla richiesta."
   },
   {
     title: "9. Diritti dell'Utente (GDPR Art. 15-22)",
-    content: "L'utente ha diritto a: accedere ai propri dati personali, rettificare dati inesatti, cancellare i propri dati (diritto all'oblio), limitare il trattamento, portabilità dei dati, opposizione al trattamento, revoca del consenso in qualsiasi momento. Per esercitare questi diritti: support@stayle.app"
+    content: "L'utente ha diritto a: accedere ai propri dati personali, rettificare dati inesatti, cancellare i propri dati (diritto all'oblio), limitare il trattamento, portabilità dei dati, opposizione al trattamento, revoca del consenso in qualsiasi momento. Per esercitare questi diritti: support@style.app"
   },
   {
     title: "10. Sicurezza",
@@ -61,7 +61,7 @@ const sections = [
   },
   {
     title: "15. Contatti DPO",
-    content: "Per qualsiasi domanda relativa alla privacy e al trattamento dei dati: support@stayle.app"
+    content: "Per qualsiasi domanda relativa alla privacy e al trattamento dei dati: support@style.app"
   }
 ];
 
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
       </header>
       <div className="px-5 py-6 space-y-6 text-sm text-muted-foreground leading-relaxed">
         <p className="text-foreground font-medium">
-          Stayle / Beauty Style Pro rispetta la privacy degli utenti e protegge i dati personali in conformità al Regolamento UE 2016/679 (GDPR).
+          Style / Beauty Style Pro rispetta la privacy degli utenti e protegge i dati personali in conformità al Regolamento UE 2016/679 (GDPR).
         </p>
         {sections.map((s, i) => (
           <section key={i}>

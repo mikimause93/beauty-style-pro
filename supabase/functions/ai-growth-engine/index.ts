@@ -125,7 +125,7 @@ serve(async (req) => {
       if (!LOVABLE_API_KEY) {
         return jsonResponse({
           messages: [
-            `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Stayle! Vorrei prenotare un servizio.`,
+            `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Style! Vorrei prenotare un servizio.`,
             `Ciao! Sei disponibile oggi per un appuntamento?`,
             `Mi piace molto il tuo profilo! Possiamo collaborare?`,
             `Ciao, quanto costa un ${context || "servizio"}?`,
@@ -144,7 +144,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Genera 4 messaggi brevi e professionali in italiano per l'app beauty Stayle. Contesto: contattare ${recipientName || "un professionista"} per ${context || "prenotare un servizio"}.`,
+              content: `Genera 4 messaggi brevi e professionali in italiano per l'app beauty Style. Contesto: contattare ${recipientName || "un professionista"} per ${context || "prenotare un servizio"}.`,
             },
             { role: "user", content: "Genera 4 messaggi suggeriti" },
           ],
@@ -177,7 +177,7 @@ serve(async (req) => {
 
       return jsonResponse({
         messages: [
-          `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Stayle!`,
+          `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Style!`,
           `Sei disponibile per un appuntamento?`,
           `Vorrei prenotare un servizio.`,
           `Possiamo collaborare?`,
@@ -234,7 +234,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: "Genera 4 idee di contenuto beauty per professionisti su Stayle. Brevi, azionabili, in italiano." },
+            { role: "system", content: "Genera 4 idee di contenuto beauty per professionisti su Style. Brevi, azionabili, in italiano." },
             { role: "user", content: `Profilo: ${profile?.user_type}, città: ${profile?.city}, bio: ${profile?.bio || 'nessuna'}` },
           ],
           tools: [{

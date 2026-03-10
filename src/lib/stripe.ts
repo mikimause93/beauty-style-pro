@@ -1,4 +1,4 @@
-// Stripe product/price mapping for STAYLE subscriptions
+// Stripe product/price mapping for STYLE subscriptions
 export const STRIPE_PLANS = {
   pro: {
     product_id: "prod_U7isszXMRTPvtS",

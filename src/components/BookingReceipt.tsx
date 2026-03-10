@@ -103,7 +103,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
 
         {/* Footer */}
         <p className="text-[10px] text-center text-muted-foreground pt-2">
-          STAYLE · {new Date().toLocaleDateString("it-IT")} · Grazie per la prenotazione!
+          STYLE · {new Date().toLocaleDateString("it-IT")} · Grazie per la prenotazione!
         </p>
       </div>
     </div>

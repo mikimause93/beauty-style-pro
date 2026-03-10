@@ -63,7 +63,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Sei l'agente AI di matching di STAYLE. Analizza professionisti e genera suggerimenti personalizzati per l'utente. Rispondi in italiano.`
+              content: `Sei l'agente AI di matching di STYLE. Analizza professionisti e genera suggerimenti personalizzati per l'utente. Rispondi in italiano.`
             },
             {
               role: "user",
@@ -141,7 +141,7 @@ Genera matching personalizzato.`
         nearbyPros: [],
         smartOffers: [],
         aiTips: ["Esplora i professionisti sulla mappa!"],
-        greeting: "Benvenuto su Stayle!"
+        greeting: "Benvenuto su Style!"
       });
     }
 
