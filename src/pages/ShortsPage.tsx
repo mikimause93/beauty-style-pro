@@ -109,7 +109,7 @@ export default function ShortsPage() {
         likes: p.like_count || 0,
         comments: p.comment_count || 0,
         shares: 0,
-        music: "Stayle Radio",
+        music: "Style Radio",
         liked: false,
         saved: false,
       }));

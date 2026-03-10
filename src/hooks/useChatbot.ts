@@ -70,7 +70,7 @@ export function useChatbot() {
       setSuggestions([{
         suggestion_id: "fallback",
         message_type: "welcome",
-        content: "Benvenuto su Stayle! 🌟 Esplora tutte le funzioni",
+        content: "Benvenuto su Style! 🌟 Esplora tutte le funzioni",
         action_buttons: [{ text: "Scopri", action: "dismiss" }],
         priority: 1
       }]);

@@ -144,7 +144,7 @@ export default function MarketplacePage() {
                   </button>
                   <button
                     onClick={() => {
-                      const text = encodeURIComponent(`Ciao! Ho visto la tua richiesta "${req.title}" su Stayle`);
+                      const text = encodeURIComponent(`Ciao! Ho visto la tua richiesta "${req.title}" su Style`);
                       window.open(`https://wa.me/?text=${text}`, "_blank");
                     }}
                     className="py-2 px-4 rounded-xl bg-success/10 text-success text-xs font-semibold"

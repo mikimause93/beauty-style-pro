@@ -31,7 +31,7 @@ export default function AutoMessageSuggestions({ recipientName, context, onSelec
     } catch (e) {
       // Fallback
       setMessages([
-        `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Stayle!`,
+        `Ciao${recipientName ? " " + recipientName : ""}, ti ho trovato su Style!`,
         "Sei disponibile per un appuntamento?",
         "Vorrei prenotare un servizio.",
         "Possiamo collaborare?",
