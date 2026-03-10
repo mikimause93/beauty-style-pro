@@ -13,7 +13,7 @@ const playlists = [
 export default function YouTubeEmbed() {
   const [query, setQuery] = useState("");
   const [embedUrl, setEmbedUrl] = useState(
-    `https://www.youtube.com/embed/videoseries?list=${playlists[0].id}&autoplay=0`
+    `https://www.youtube.com/embed/videoseries?list=${playlists[0].id}`
   );
 
   const handleSearch = () => {
