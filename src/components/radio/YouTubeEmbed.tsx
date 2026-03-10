@@ -18,7 +18,7 @@ export default function YouTubeEmbed() {
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    setEmbedUrl(`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query.trim())}&autoplay=0`);
+    setEmbedUrl(`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query.trim())}`);
   };
 
   return (
