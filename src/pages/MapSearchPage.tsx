@@ -1,6 +1,6 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import InteractiveMap, { MapMarker } from "@/components/map/InteractiveMap";
-import { ArrowLeft, Search, MapPin, Star, Filter, Sparkles, Home, Locate, ChevronRight } from "lucide-react";
+import { ArrowLeft, Search, MapPin, Star, Filter, Sparkles, Home, Locate, Briefcase, Calendar, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,8 +29,26 @@ type Professional = {
   aiScore?: number;
 };
 
+type JobPost = {
+  id: string;
+  title: string;
+  location: string;
+  latitude: number | null;
+  longitude: number | null;
+  category: string;
+};
+
+type EventItem = {
+  id: string;
+  title: string;
+  location: string | null;
+  start_date: string;
+};
+
 const fallbackAvatars = [stylist1, stylist2, beauty1];
 const SPECIALTIES = ["Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist", "Makeup Artist", "Massaggiatore"];
+
+type MarkerFilter = "all" | "salon" | "job" | "event";
 
 export default function MapSearchPage() {
   const navigate = useNavigate();
@@ -43,32 +61,32 @@ export default function MapSearchPage() {
   const [homeService, setHomeService] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [jobs, setJobs] = useState<JobPost[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [markerFilter, setMarkerFilter] = useState<MarkerFilter>("all");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     loadProfessionals();
+    loadJobs();
+    loadEvents();
     loadUserPrefs();
   }, [user]);
 
   const loadUserPrefs = async () => {
     if (!user) return;
-    const { data } = await supabase.from("profiles").select("city, availability").eq("user_id", user.id).maybeSingle();
+    const { data } = await supabase.from("profiles").select("city, latitude, longitude").eq("user_id", user.id).maybeSingle();
     if (data?.city) setCity(data.city);
-    const prefs = data?.availability as any;
-    if (prefs?.latitude && prefs?.longitude) {
-      // user has saved coords — geolocation hook will handle via setCity
-    }
-    if (prefs?.search_distance) setMaxDistance(prefs.search_distance);
   };
 
   const loadProfessionals = async () => {
     const { data } = await supabase.from("professionals")
-      .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id, profiles:user_id(avatar_url, display_name)");
+      .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id");
     if (data && data.length > 0) {
       setProfessionals(data.map((p: any) => ({
         ...p,
-        avatar: (Array.isArray(p.profiles) ? p.profiles[0]?.avatar_url : p.profiles?.avatar_url) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
       })));
     } else {
       setProfessionals([
@@ -77,6 +95,26 @@ export default function MapSearchPage() {
         { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, latitude: 40.85, longitude: 14.27, address: "Via Toledo 78", description: "Barber tradizionale", is_verified: false, avatar: beauty1 },
       ]);
     }
+  };
+
+  const loadJobs = async () => {
+    const { data } = await supabase.from("job_posts")
+      .select("id, title, location, latitude, longitude, category")
+      .eq("status", "active")
+      .limit(50);
+    if (data) setJobs(data);
+  };
+
+  const loadEvents = async () => {
+    const { data } = await supabase.from("events")
+      .select("id, title, location, start_date")
+      .gte("end_date", new Date().toISOString())
+      .limit(50);
+    if (data) setEvents(data);
+  };
+
+  const handleDetectGPS = () => {
+    detectGPS(user?.id);
   };
 
   const professionalsWithDistance = useMemo(() => {
@@ -103,19 +141,62 @@ export default function MapSearchPage() {
       .sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
   }, [professionalsWithDistance, search, cityFilter, specialtyFilter, maxDistance]);
 
-  // Build map markers
+  // Build map markers — multi-type
   const mapMarkers: MapMarker[] = useMemo(() => {
-    return filtered.slice(0, 30).map(p => ({
-      id: p.id,
-      lat: p.latitude!,
-      lng: p.longitude!,
-      label: p.business_name,
-      sublabel: `${p.specialty || "Beauty"} · ${p.distance}km`,
-      type: p.is_verified ? "premium" as const : "salon" as const,
-      rating: p.rating || undefined,
-      onClick: () => navigate(`/stylist/${p.id}`),
-    }));
-  }, [filtered, navigate]);
+    const markers: MapMarker[] = [];
+
+    // Salon markers
+    if (markerFilter === "all" || markerFilter === "salon") {
+      filtered.slice(0, 30).forEach(p => {
+        markers.push({
+          id: p.id,
+          lat: p.latitude!,
+          lng: p.longitude!,
+          label: p.business_name,
+          sublabel: `${p.specialty || "Beauty"} · ${p.distance}km`,
+          type: p.is_verified ? "premium" : "salon",
+          rating: p.rating || undefined,
+          onClick: () => navigate(`/stylist/${p.id}`),
+        });
+      });
+    }
+
+    // Job markers
+    if (markerFilter === "all" || markerFilter === "job") {
+      jobs.forEach(j => {
+        const jCoords = j.latitude && j.longitude
+          ? [j.latitude, j.longitude]
+          : getCoordsFromCity(j.location || "Milano");
+        markers.push({
+          id: `job-${j.id}`,
+          lat: jCoords[0],
+          lng: jCoords[1],
+          label: j.title,
+          sublabel: `${j.category} · ${j.location}`,
+          type: "job",
+          onClick: () => navigate(`/job/${j.id}`),
+        });
+      });
+    }
+
+    // Event markers
+    if (markerFilter === "all" || markerFilter === "event") {
+      events.forEach(e => {
+        const eCoords = getCoordsFromCity(e.location || "Milano");
+        markers.push({
+          id: `event-${e.id}`,
+          lat: eCoords[0],
+          lng: eCoords[1],
+          label: e.title,
+          sublabel: new Date(e.start_date).toLocaleDateString("it-IT"),
+          type: "event",
+          onClick: () => navigate(`/events`),
+        });
+      });
+    }
+
+    return markers;
+  }, [filtered, jobs, events, markerFilter, navigate]);
 
   const mapZoom = useMemo(() => {
     if (maxDistance > 200) return 6;
@@ -133,7 +214,7 @@ export default function MapSearchPage() {
         body: {
           role: "map",
           user_id: user?.id,
-          message: `Cerca "${search}" nella zona di ${position.city}. Professionisti disponibili: ${filtered.slice(0, 5).map(p => `${p.business_name} (${p.specialty}, ${p.distance}km, rating ${p.rating}, match ${p.aiScore}%)`).join("; ")}`,
+          message: `Cerca "${search}" nella zona di ${position.city}. Professionisti disponibili: ${filtered.slice(0, 5).map(p => `${p.business_name} (${p.specialty}, ${p.distance}km, rating ${p.rating}, match ${p.aiScore}%)`).join("; ")}. Lavori: ${jobs.length}. Eventi: ${events.length}.`,
           context: { city: position.city, lat: coords[0], lng: coords[1], results_count: filtered.length },
         },
       });
@@ -156,6 +237,13 @@ export default function MapSearchPage() {
     setAiLoading(false);
   };
 
+  const filterButtons: { key: MarkerFilter; label: string; icon: any; count: number }[] = [
+    { key: "all", label: "Tutti", icon: MapPin, count: filtered.length + jobs.length + events.length },
+    { key: "salon", label: "Saloni", icon: Star, count: filtered.length },
+    { key: "job", label: "Lavoro", icon: Briefcase, count: jobs.length },
+    { key: "event", label: "Eventi", icon: Calendar, count: events.length },
+  ];
+
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-5 py-3">
@@ -165,7 +253,7 @@ export default function MapSearchPage() {
           </button>
           <h1 className="text-lg font-display font-bold">Trova Professionisti</h1>
           <div className="ml-auto flex gap-1.5">
-            <button onClick={detectGPS} disabled={gpsLoading}
+            <button onClick={handleDetectGPS} disabled={gpsLoading}
               className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Locate className={`w-4 h-4 ${gpsLoading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
             </button>
@@ -188,6 +276,22 @@ export default function MapSearchPage() {
             <Sparkles className="w-4 h-4" />
             {aiLoading ? "..." : "AI"}
           </button>
+        </div>
+
+        {/* Marker type filter chips */}
+        <div className="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar">
+          {filterButtons.map(f => (
+            <button key={f.key} onClick={() => setMarkerFilter(f.key)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${
+                markerFilter === f.key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}>
+              <f.icon className="w-3 h-3" />
+              {f.label}
+              <span className="text-[10px] opacity-70">({f.count})</span>
+            </button>
+          ))}
         </div>
 
         {showFilters && (
@@ -237,13 +341,15 @@ export default function MapSearchPage() {
           center={coords}
           zoom={mapZoom}
           markers={mapMarkers}
-          height={240}
+          height={260}
           showUserMarker={true}
-          onMarkerClick={(m) => navigate(`/stylist/${m.id}`)}
+          onMarkerClick={(m) => {
+            if (m.onClick) m.onClick();
+          }}
         />
         <div className="flex items-center justify-between mt-1.5 px-1">
           <span className="text-[10px] text-muted-foreground">📍 {position.city}</span>
-          <span className="text-[10px] text-primary font-medium">{filtered.length} professionisti</span>
+          <span className="text-[10px] text-primary font-medium">{mapMarkers.length} risultati sulla mappa</span>
         </div>
       </div>
 
