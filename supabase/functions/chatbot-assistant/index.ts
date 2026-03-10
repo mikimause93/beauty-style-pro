@@ -107,84 +107,25 @@ function getBusinessPrompt(): string {
 RUOLO UTENTE: BUSINESS / PROFESSIONISTA
 
 OBIETTIVO AI PRINCIPALE:
-Gestire e ottimizzare il profilo business/professionale, massimizzare visibilità, engagement e monetizzazione. Promuovere servizi, gestire prenotazioni e pagamenti in entrata, ricevere e filtrare candidature, sfruttare mappa intelligente e marketing automatico AI.
+Gestire e ottimizzare il profilo business/professionale, massimizzare visibilità, engagement e monetizzazione.
 
 ${APP_MODULES}
 
 FUNZIONI SPECIFICHE BUSINESS/PROFESSIONISTI:
-
-📋 GESTIONE PROFILO AVANZATA:
-- Profilo completo con dati aziendali, P.IVA, posizione GPS attiva, verifica business KYC
-- Portfolio lavori con foto Prima&Dopo, video showcase, certificazioni
-- Storico completo: prenotazioni ricevute, candidature, transazioni, analytics
-- Suggerisci ottimizzazione profilo (foto professionale, bio completa, orari aggiornati)
-
-📣 MARKETING & SPONSORIZZAZIONI INTELLIGENTI:
-- Suggerisci campagne sponsorizzate basate su target geografico e demografico
-- Analizza engagement dei contenuti pubblicati e proponi ottimizzazioni
-- Promozioni contestuali: sconti primo appuntamento, pacchetti servizi, offerte stagionali
-- Consiglia quando pubblicare (orari migliori basati su analytics)
-- Proponi collaborazioni con altri professionisti per cross-promotion
-- Spingi creazione contenuti video/reels per massimizzare reach organico
-
-📅 RICEZIONE PRENOTAZIONI & GESTIONE AGENDA:
-- Gestisci prenotazioni in arrivo dai clienti con conferma automatica
-- Calendario disponibilità sincronizzato, slot liberi visibili su mappa
-- Promemoria smart pre-appuntamento per cliente e professionista
-- Gestione cancellazioni, riprogrammazioni e no-show
-- Suggerisci ottimizzazione orari basata su dati storici affluenza
-
-💰 PAGAMENTI IN ENTRATA & WALLET BUSINESS:
-- Ricevi pagamenti: QR Coins, carte Visa/MC, PayPal, Klarna (3 rate)
-- Generazione automatica ricevute PDF per ogni transazione
-- Saldo wallet collegato a IBAN per prelievi su conto corrente
-- Dashboard incassi: giornaliero, settimanale, mensile con grafici
-- Notifiche in tempo reale per ogni pagamento ricevuto
-
-👥 HR & OFFERTE LAVORO:
-- Pubblica offerte lavoro con requisiti, competenze, compenso, località
-- Ricevi candidature dirette via chat interna o WhatsApp Business
-- Filtri AI match automatico: competenze candidato vs requisiti richiesti
-- Gestisci candidature: visualizza, rispondi, schedula colloqui
-- Suggerisci miglioramenti all'annuncio per attrarre più candidati
-
-🗺️ MAPPA INTELLIGENTE BUSINESS:
-- Visualizza clienti interessati a servizi nella tua zona
-- Spingi offerte geolocalizzate automatiche basate su distanza e categoria
-- Analizza densità competitor nella zona e suggerisci differenziazione
-- Ottimizza posizionamento su mappa con profilo completo e recensioni
-
-📊 ANALYTICS PRO & REPORT AI:
-- Dashboard completa: interazioni, prenotazioni, pagamenti, follower growth
-- Report settimanale AI con insights e suggerimenti operativi
-- Analisi retention clienti: chi torna, chi non torna, perché
-- Confronto performance vs media della piattaforma
-- Suggerimenti per ottimizzare conversioni (visite profilo → prenotazioni)
-- Identificazione orari/giorni più profittevoli
-
-⭐ ABBONAMENTI & CRESCITA:
-- Suggerisci upgrade a piani Pro/Business/Premium con ROI stimato
-- Incentivi primi iscritti (1 mese gratis, sconto primo trimestre)
-- Sistema referral: invita colleghi e guadagna QR Coins bonus
-- Vantaggi esclusivi: badge verificato, priorità ricerca, analytics avanzati
-
-🎯 STRATEGIA PROATTIVA BUSINESS:
-- Analizza performance profilo e suggerisci 3 azioni concrete di miglioramento
-- Proponi campagne boost quando l'engagement cala sotto la media
-- Ricorda di aggiornare portfolio, orari e disponibilità regolarmente
-- Suggerisci partecipazione a eventi e live per aumentare autorevolezza
-- Promuovi sistema referral per crescita organica della clientela
-- Identifica trend stagionali e suggerisci servizi/promozioni ad hoc
-- Monitora recensioni e suggerisci come rispondere e migliorare rating
+- Gestione profilo avanzata con P.IVA, portfolio, certificazioni, KYC
+- Marketing & sponsorizzazioni intelligenti con target geo e demografico
+- Ricezione prenotazioni & gestione agenda con conferma automatica
+- Pagamenti in entrata: QR Coins, carte, PayPal, Klarna + ricevute PDF
+- HR: pubblica offerte lavoro, ricevi candidature, matching AI
+- Mappa intelligente: visualizza clienti interessati, offerte geolocalizzate
+- Analytics pro: dashboard interazioni, prenotazioni, pagamenti, crescita
+- Suggerisci upgrade Pro/Business/Premium con ROI stimato
 
 ${QUICK_ACTIONS}
-
 ${BASE_RULES}
-
 ${PROACTIVE_INTELLIGENCE}
 
-ISTRUZIONE PRINCIPALE:
-"Agisci come assistente completo e strategico per profili business/professionisti. Promuovi servizi, gestisci prenotazioni e candidature, ottimizza pagamenti. Suggerisci upgrade premium, campagne sponsorizzate e opportunità geolocalizzate tramite mappa. Analizza dati e proponi strategie concrete per massimizzare engagement, visibilità e monetizzazione. Sii proattivo, motivante e orientato ai risultati."`;
+ISTRUZIONE: Agisci come assistente strategico per business/professionisti. Massimizza engagement, visibilità e monetizzazione con suggerimenti proattivi e concreti.`;
 }
 
 function getClientPrompt(): string {
@@ -193,83 +134,25 @@ function getClientPrompt(): string {
 RUOLO UTENTE: CLIENTE / UTENTE
 
 OBIETTIVO AI PRINCIPALE:
-Guidare gli utenti nella scoperta completa della piattaforma: servizi beauty, prenotazioni, shop, live streaming, offerte lavoro e contenuti social. Massimizzare interazione, soddisfazione e retention con consigli proattivi, flussi automatici e gamification coinvolgente.
+Guidare nella scoperta di servizi beauty, prenotazioni, shop, live, offerte lavoro. Massimizzare soddisfazione e retention.
 
 ${APP_MODULES}
 
-FUNZIONI SPECIFICHE CLIENTI/UTENTI:
-
-🔍 SCOPERTA SERVIZI & PROFESSIONISTI:
-- Suggerisci saloni, professionisti, negozi e servizi vicini tramite mappa intelligente
-- Filtra per categoria (capelli, estetica, makeup, nails, barba), distanza, rating, disponibilità
-- Mostra profili con portfolio, recensioni verificate e prezzi trasparenti
-- Consiglia professionisti basandoti su preferenze espresse e cronologia prenotazioni
-- Notifica nuovi professionisti nella zona dell'utente
-
-🎁 PROMOZIONI & OFFERTE PERSONALIZZATE:
-- Consiglia offerte e promozioni basate su preferenze, posizione e stagione
-- Notifica sconti primo appuntamento, pacchetti risparmio, flash sale
-- Suggerisci prodotti complementari dopo un servizio (es: dopo taglio → prodotti styling)
-- Spingi offerte limitate nel tempo con senso di urgenza positivo
-
-💼 OFFERTE LAVORO & CANDIDATURE:
-- Filtra offerte lavoro beauty in base al profilo, competenze e posizione
-- Candidatura diretta via chat interna o WhatsApp con CV/portfolio
-- Matching AI: suggerisci offerte con alta compatibilità
-- Notifica nuove offerte rilevanti in tempo reale
-
-📅 PRENOTAZIONI FACILI & VELOCI:
-- Flusso intuitivo: scopri → scegli servizio → seleziona data/ora → paga → ricevuta automatica
-- Suggerisci orari migliori in base alla disponibilità
-- Promemoria smart pre-appuntamento (24h e 1h prima)
-- Dopo l'appuntamento: chiedi recensione e suggerisci prossimo servizio
-- Storico prenotazioni completo con possibilità di ri-prenotare
-
-💳 PAGAMENTI FLESSIBILI & SICURI:
-- Paga con: QR Coins, carte Visa/MC, PayPal, Google Pay, Klarna (3 rate senza interessi)
-- Notifiche conferma pagamento e ricevute automatiche
-- Trasferimenti P2P via QR per pagamenti tra utenti
-- Storico transazioni completo e trasparente
-
-🎬 LIVE & CONTENUTI COINVOLGENTI:
-- Spingi a scoprire live beauty in corso (tutorial, trasformazioni, Q&A)
-- Suggerisci live battle tra professionisti da seguire e votare
-- Notifica eventi live imminenti basati su interessi
-- Consiglia tutorial e contenuti Prima&Dopo rilevanti
-- Incentiva la partecipazione attiva (commenti, tip, sondaggi)
-
-🏆 GAMIFICATION & ENGAGEMENT:
-- Badge collezionabili per traguardi (primo post, prima prenotazione, 10 like, ecc.)
-- Missioni giornaliere con reward QR Coins (pubblica, commenta, prenota, condividi)
-- Ruota della fortuna giornaliera (spin per vincere QR Coins, sconti, badge rari)
-- Classifiche settimanali utenti più attivi
-- Streak bonus: accedi ogni giorno per moltiplicare i reward
-- Incentivi referral: invita amici e guadagna QR Coins per entrambi
-
-📊 ANALYTICS PERSONALE:
-- Monitora il tuo engagement: like ricevuti, follower, interazioni
-- Suggerisci azioni per non perdere offerte flash o live imminenti
-- Ottimizza feed personalizzato in base ai tuoi interessi
-- Notifiche push intelligenti (non invasive, pertinenti, tempestive)
-
-🎯 STRATEGIA PROATTIVA CLIENTI:
-- Suggerisci funzionalità che l'utente non ha ancora provato con spiegazione del valore
-- Ricorda appuntamenti imminenti e scadenze offerte salvate
-- Proponi servizi correlati e complementari dopo ogni prenotazione
-- Incentiva partecipazione a sfide e missioni per guadagnare QR Coins
-- Consiglia professionisti nuovi in base alla cronologia e preferenze
-- Promuovi eventi e live imminenti nella zona dell'utente
-- Celebra traguardi personali (100 like, primo badge, 5 prenotazioni)
-- Suggerisci di completare il profilo per ricevere suggerimenti migliori
+FUNZIONI SPECIFICHE CLIENTI:
+- Scoperta servizi & professionisti vicini tramite mappa intelligente
+- Promozioni personalizzate basate su preferenze e posizione
+- Offerte lavoro beauty con matching AI competenze
+- Prenotazioni facili: scopri → scegli → paga → ricevuta
+- Pagamenti flessibili: QR Coins, carte, PayPal, Klarna 3 rate
+- Live & contenuti coinvolgenti: tutorial, battle, Q&A
+- Gamification: badge, missioni, ruota fortuna, classifiche, streak
+- Analytics personale: engagement, suggerimenti proattivi
 
 ${QUICK_ACTIONS}
-
 ${BASE_RULES}
-
 ${PROACTIVE_INTELLIGENCE}
 
-ISTRUZIONE PRINCIPALE:
-"Agisci come assistente completo e amichevole per utenti/clienti. Suggerisci servizi, offerte lavoro, shop, live e promozioni personalizzate in base al profilo, posizione e comportamento. Gestisci prenotazioni e pagamenti con flussi semplici. Invia consigli proattivi, celebra i traguardi e massimizza interazioni, soddisfazione e retention. Rendi l'esperienza divertente e gratificante."`;
+ISTRUZIONE: Agisci come assistente amichevole per clienti. Suggerisci servizi, shop, live e promozioni personalizzate. Rendi l'esperienza divertente e gratificante.`;
 }
 
 function getSystemPrompt(userType: string): string {
@@ -432,9 +315,9 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
       return jsonResponse({ success: true, message_id: message?.id });
     }
 
-    // ===== ACTION: AI Chat conversation (unified Stella + Keplero) =====
+    // ===== ACTION: AI Chat conversation with STREAMING =====
     if (action === "chat") {
-      const { messages: chatHistory } = reqData;
+      const { messages: chatHistory, stream: enableStreaming } = reqData;
       
       if (!LOVABLE_API_KEY) {
         return jsonResponse({ 
@@ -466,23 +349,68 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni in entrata, marketing, analytic
 
       const contextAddition = `
 
-CONTESTO UTENTE ATTUALE (usa per personalizzare le risposte):
+CONTESTO UTENTE ATTUALE:
 - Nome: ${profile?.display_name || 'Utente'}
-- Tipo account: ${userType}
+- Tipo: ${userType}
 - Città: ${profile?.city || 'non specificata'}
 - QR Coins: ${profile?.qr_coins || 0}
 - Follower: ${profile?.follower_count || 0} | Following: ${profile?.following_count || 0}
-- Post pubblicati: ${postsRes.count || 0}
-- Prenotazioni effettuate: ${bookingsRes.count || 0}
+- Post: ${postsRes.count || 0}
+- Prenotazioni: ${bookingsRes.count || 0}
 - Giorni attivo: ${daysActive}
-- Profilo completo: ${(profile?.bio && profile?.avatar_url) ? 'Sì' : 'No — suggerisci di completarlo'}
-- Live attive ora in piattaforma: ${streamsRes.count || 0}`;
+- Profilo completo: ${(profile?.bio && profile?.avatar_url) ? 'Sì' : 'No — suggerisci /edit-profile'}
+- Live attive ora: ${streamsRes.count || 0}`;
 
       const allMessages = [
         { role: "system", content: dynamicPrompt + contextAddition },
         ...(chatHistory || [])
       ];
 
+      // ── STREAMING MODE ──
+      if (enableStreaming) {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: allMessages,
+            temperature: 0.7,
+            max_tokens: 800,
+            stream: true,
+          }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            return new Response(JSON.stringify({ error: "Troppe richieste, riprova tra poco" }), {
+              status: 429,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          if (response.status === 402) {
+            return new Response(JSON.stringify({ error: "Crediti AI esauriti" }), {
+              status: 402,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          const errText = await response.text();
+          console.error("AI gateway streaming error:", response.status, errText);
+          return new Response(JSON.stringify({ error: "Errore AI gateway" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Pass through the SSE stream
+        return new Response(response.body, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+
+      // ── NON-STREAMING MODE (fallback) ──
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
