@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,81 +9,90 @@ import { RadioProvider } from "@/contexts/RadioContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
-import HomePage from "./pages/HomePage";
-import LiveStreamPage from "./pages/LiveStreamPage";
-import RadioPage from "./pages/RadioPage";
-import ShopPage from "./pages/ShopPage";
-import ProfilePage from "./pages/ProfilePage";
-import AuthPage from "./pages/AuthPage";
-import OnboardingPage from "./pages/OnboardingPage";
-import BookingPage from "./pages/BookingPage";
-import BookingDetailPage from "./pages/BookingDetailPage";
-import MyBookingsPage from "./pages/MyBookingsPage";
-import EventsPage from "./pages/EventsPage";
-import CreatePostPage from "./pages/CreatePostPage";
-import StylistsPage from "./pages/StylistsPage";
-import StylistDetailPage from "./pages/StylistDetailPage";
-import ServiceDetailPage from "./pages/ServiceDetailPage";
-import BusinessProfilePage from "./pages/BusinessProfilePage";
-import ChatPage from "./pages/ChatPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import EditProfilePage from "./pages/EditProfilePage";
-import BeforeAfterPage from "./pages/BeforeAfterPage";
-import QRCoinsPage from "./pages/QRCoinsPage";
-import ChallengesPage from "./pages/ChallengesPage";
-import SpinWheelPage from "./pages/SpinWheelPage";
-import LeaderboardPage from "./pages/LeaderboardPage";
-import BusinessDashboardPage from "./pages/BusinessDashboardPage";
-import HRPage from "./pages/HRPage";
-import CreateJobPostPage from "./pages/CreateJobPostPage";
-import JobDetailPage from "./pages/JobDetailPage";
-import MapSearchPage from "./pages/MapSearchPage";
-import HomeServicePage from "./pages/HomeServicePage";
-import SettingsPage from "./pages/SettingsPage";
-import ReviewPage from "./pages/ReviewPage";
-import ReferralPage from "./pages/ReferralPage";
-import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
-import InstallmentsPage from "./pages/InstallmentsPage";
-import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
-import MissionsPage from "./pages/MissionsPage";
-import AIAssistantPage from "./pages/AIAssistantPage";
-import ShortsPage from "./pages/ShortsPage";
-import GoLivePage from "./pages/GoLivePage";
-import TransformationChallengePage from "./pages/TransformationChallengePage";
-import LiveBattlePage from "./pages/LiveBattlePage";
-import SearchPage from "./pages/SearchPage";
-import ExplorePage from "./pages/ExplorePage";
-import ManageProductsPage from "./pages/ManageProductsPage";
-import WalletPage from "./pages/WalletPage";
-import AdminPage from "./pages/AdminPage";
-import CreatorApplicationPage from "./pages/CreatorApplicationPage";
-import SubscriptionPage from "./pages/SubscriptionPage";
-import BoostProfilePage from "./pages/BoostProfilePage";
-import MarketplacePage from "./pages/MarketplacePage";
-import CreateServiceRequestPage from "./pages/CreateServiceRequestPage";
-import CreateCastingPage from "./pages/CreateCastingPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import ReceiptsPage from "./pages/ReceiptsPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
-import VerifyAccountPage from "./pages/VerifyAccountPage";
-import RemindersPage from "./pages/RemindersPage";
-import SpaTermePage from "./pages/SpaTermePage";
-import QuizLivePage from "./pages/QuizLivePage";
-import TalentGamePage from "./pages/TalentGamePage";
-import BusinessTeamPage from "./pages/BusinessTeamPage";
-import EmployeeShiftsPage from "./pages/EmployeeShiftsPage";
-import EmployeeActivityPage from "./pages/EmployeeActivityPage";
-import NotFound from "./pages/NotFound";
-import DebugPanelPage from "./pages/DebugPanelPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
+import { Loader2 } from "lucide-react";
 
 initGlobalErrorHandler();
+
+// Lazy load all pages
+const HomePage = lazy(() => import("./pages/HomePage"));
+const LiveStreamPage = lazy(() => import("./pages/LiveStreamPage"));
+const RadioPage = lazy(() => import("./pages/RadioPage"));
+const ShopPage = lazy(() => import("./pages/ShopPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const BookingPage = lazy(() => import("./pages/BookingPage"));
+const BookingDetailPage = lazy(() => import("./pages/BookingDetailPage"));
+const MyBookingsPage = lazy(() => import("./pages/MyBookingsPage"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const CreatePostPage = lazy(() => import("./pages/CreatePostPage"));
+const StylistsPage = lazy(() => import("./pages/StylistsPage"));
+const StylistDetailPage = lazy(() => import("./pages/StylistDetailPage"));
+const ServiceDetailPage = lazy(() => import("./pages/ServiceDetailPage"));
+const BusinessProfilePage = lazy(() => import("./pages/BusinessProfilePage"));
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const EditProfilePage = lazy(() => import("./pages/EditProfilePage"));
+const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage"));
+const QRCoinsPage = lazy(() => import("./pages/QRCoinsPage"));
+const ChallengesPage = lazy(() => import("./pages/ChallengesPage"));
+const SpinWheelPage = lazy(() => import("./pages/SpinWheelPage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const BusinessDashboardPage = lazy(() => import("./pages/BusinessDashboardPage"));
+const HRPage = lazy(() => import("./pages/HRPage"));
+const CreateJobPostPage = lazy(() => import("./pages/CreateJobPostPage"));
+const JobDetailPage = lazy(() => import("./pages/JobDetailPage"));
+const MapSearchPage = lazy(() => import("./pages/MapSearchPage"));
+const HomeServicePage = lazy(() => import("./pages/HomeServicePage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const ReviewPage = lazy(() => import("./pages/ReviewPage"));
+const ReferralPage = lazy(() => import("./pages/ReferralPage"));
+const AnalyticsDashboardPage = lazy(() => import("./pages/AnalyticsDashboardPage"));
+const InstallmentsPage = lazy(() => import("./pages/InstallmentsPage"));
+const PurchaseHistoryPage = lazy(() => import("./pages/PurchaseHistoryPage"));
+const MissionsPage = lazy(() => import("./pages/MissionsPage"));
+const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
+const ShortsPage = lazy(() => import("./pages/ShortsPage"));
+const GoLivePage = lazy(() => import("./pages/GoLivePage"));
+const TransformationChallengePage = lazy(() => import("./pages/TransformationChallengePage"));
+const LiveBattlePage = lazy(() => import("./pages/LiveBattlePage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const ExplorePage = lazy(() => import("./pages/ExplorePage"));
+const ManageProductsPage = lazy(() => import("./pages/ManageProductsPage"));
+const WalletPage = lazy(() => import("./pages/WalletPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const CreatorApplicationPage = lazy(() => import("./pages/CreatorApplicationPage"));
+const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"));
+const BoostProfilePage = lazy(() => import("./pages/BoostProfilePage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const CreateServiceRequestPage = lazy(() => import("./pages/CreateServiceRequestPage"));
+const CreateCastingPage = lazy(() => import("./pages/CreateCastingPage"));
+const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const ReceiptsPage = lazy(() => import("./pages/ReceiptsPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const VerifyAccountPage = lazy(() => import("./pages/VerifyAccountPage"));
+const RemindersPage = lazy(() => import("./pages/RemindersPage"));
+const SpaTermePage = lazy(() => import("./pages/SpaTermePage"));
+const QuizLivePage = lazy(() => import("./pages/QuizLivePage"));
+const TalentGamePage = lazy(() => import("./pages/TalentGamePage"));
+const BusinessTeamPage = lazy(() => import("./pages/BusinessTeamPage"));
+const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
+const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 
 const queryClient = new QueryClient();
 
 const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{children}</ProtectedRoute>;
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  </div>
+);
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
@@ -100,8 +109,9 @@ const App = () => {
         <AuthProvider>
         <RadioProvider>
           <PageTracker />
+          <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Public routes - accessible without login */}
+            {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
@@ -120,7 +130,7 @@ const App = () => {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
 
-            {/* Protected routes - require login */}
+            {/* Protected routes */}
             <Route path="/profile" element={<P><ProfilePage /></P>} />
             <Route path="/profile/:id" element={<P><ProfilePage /></P>} />
             <Route path="/profile/edit" element={<P><EditProfilePage /></P>} />
@@ -179,6 +189,7 @@ const App = () => {
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </RadioProvider>
         </AuthProvider>
       </BrowserRouter>
