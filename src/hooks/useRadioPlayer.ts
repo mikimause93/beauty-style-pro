@@ -9,7 +9,7 @@ export interface RadioStation {
   listener_count: number;
 }
 
-// Working public radio streams
+// Verified working public radio streams (updated March 2026)
 export const defaultStations: RadioStation[] = [
   // === Stazioni Nazionali Italiane ===
   {
@@ -102,12 +102,16 @@ export function useRadioPlayer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [volume, setVolume] = useState(0.8);
+  const retryCountRef = useRef(0);
+  const maxRetries = 2;
 
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
       audioRef.current.volume = volume;
       audioRef.current.preload = "none";
+      // CORS: try anonymous crossorigin for broader compat
+      audioRef.current.crossOrigin = "anonymous";
     }
     return () => {
       if (audioRef.current) {
@@ -128,28 +132,75 @@ export function useRadioPlayer() {
     try {
       if (station && station.id !== currentStation.id) {
         audio.pause();
+        // Remove crossOrigin if it causes issues for some streams
+        audio.crossOrigin = "anonymous";
         audio.src = station.stream_url;
         audio.load();
         setCurrentStation(station);
+        retryCountRef.current = 0;
       } else if (!audio.src || audio.src === "" || audio.src === window.location.href) {
         audio.src = target.stream_url;
         audio.load();
       }
 
       audio.onerror = () => {
-        console.warn("Stream error for:", target.name);
+        console.warn("Stream error for:", target.name, "- retrying without CORS...");
+        
+        // Retry without crossOrigin (some streams block it)
+        if (retryCountRef.current === 0 && audio.crossOrigin) {
+          retryCountRef.current = 1;
+          audio.crossOrigin = null as any;
+          audio.src = target.stream_url;
+          audio.load();
+          audio.play().catch(() => {
+            setError("Stream non disponibile");
+            setIsPlaying(false);
+            setLoading(false);
+          });
+          return;
+        }
+        
+        // Auto-skip to next station after max retries
+        if (retryCountRef.current >= maxRetries) {
+          setError("Stream non disponibile — provo la prossima...");
+          setIsPlaying(false);
+          setLoading(false);
+          // Auto-skip after 1.5s
+          const idx = defaultStations.findIndex(s => s.id === target.id);
+          const nextIdx = (idx + 1) % defaultStations.length;
+          setTimeout(() => {
+            retryCountRef.current = 0;
+            play(defaultStations[nextIdx]);
+          }, 1500);
+          return;
+        }
+        
+        retryCountRef.current++;
         setError("Stream non disponibile");
         setIsPlaying(false);
         setLoading(false);
       };
 
       audio.oncanplay = () => setLoading(false);
-      audio.onplaying = () => { setLoading(false); setIsPlaying(true); };
+      audio.onplaying = () => { setLoading(false); setIsPlaying(true); setError(null); };
 
       await audio.play();
       setIsPlaying(true);
     } catch (err: any) {
       console.error("Radio play error:", err);
+      // If it's a CORS issue, retry without crossOrigin
+      if (audio.crossOrigin && retryCountRef.current === 0) {
+        retryCountRef.current = 1;
+        audio.crossOrigin = null as any;
+        audio.src = (station || currentStation).stream_url;
+        audio.load();
+        try {
+          await audio.play();
+          setIsPlaying(true);
+          setLoading(false);
+          return;
+        } catch {}
+      }
       setError("Impossibile riprodurre");
       setIsPlaying(false);
     }
@@ -168,12 +219,14 @@ export function useRadioPlayer() {
   const nextStation = useCallback(() => {
     const idx = defaultStations.findIndex(s => s.id === currentStation.id);
     const next = defaultStations[(idx + 1) % defaultStations.length];
+    retryCountRef.current = 0;
     play(next);
   }, [currentStation, play]);
 
   const prevStation = useCallback(() => {
     const idx = defaultStations.findIndex(s => s.id === currentStation.id);
     const prev = defaultStations[(idx - 1 + defaultStations.length) % defaultStations.length];
+    retryCountRef.current = 0;
     play(prev);
   }, [currentStation, play]);
 
