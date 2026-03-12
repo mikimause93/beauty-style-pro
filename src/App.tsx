@@ -95,9 +95,7 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("style_splash_shown");
-  });
+  const [showSplash, setShowSplash] = useState(true);
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
