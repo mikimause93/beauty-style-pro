@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music, Play, Pause, SkipForward, Loader2, X, Search, ExternalLink, Radio as RadioIcon } from "lucide-react";
+import { Music, Play, Pause, SkipForward, Loader2, X, Search, Radio as RadioIcon } from "lucide-react";
 import { useRadio } from "@/contexts/RadioContext";
 import { useNavigate } from "react-router-dom";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -22,7 +22,7 @@ export default function HomeMusicWidget() {
   const [spotifyQuery, setSpotifyQuery] = useState("");
   const [spotifyPlaylistId, setSpotifyPlaylistId] = useState("37i9dQZF1DX4sWSpwq3LiO");
 
-  // YouTube state
+  // YouTube state - always in-app embed
   const [youtubeQuery, setYoutubeQuery] = useState("");
   const [youtubeVideoId, setYoutubeVideoId] = useState("lFcSrYw-ARY");
 
@@ -31,14 +31,12 @@ export default function HomeMusicWidget() {
 
   if (hidden) return null;
 
-  const searchSpotify = () => {
-    if (!spotifyQuery.trim()) return;
-    window.open(`https://open.spotify.com/search/${encodeURIComponent(spotifyQuery.trim())}`, "_blank");
-  };
-
-  const searchYouTube = () => {
+  // Search YouTube in-app by changing the embed to a search results embed
+  const searchYouTubeInApp = () => {
     if (!youtubeQuery.trim()) return;
-    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeQuery.trim())}`, "_blank");
+    // Use YouTube embed search - plays first result in-app
+    const query = encodeURIComponent(youtubeQuery.trim());
+    setYoutubeVideoId(`videoseries?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf&search_query=${query}`);
   };
 
   const spotifyPlaylists = [
@@ -54,6 +52,8 @@ export default function HomeMusicWidget() {
     { name: "Lofi Beats", videoId: "jfKfPfyJRdk" },
     { name: "Piano", videoId: "BjFWk0ncr70" },
     { name: "Jazz", videoId: "Dx5qFachd3A" },
+    { name: "Pop Hits", videoId: "kXYiU_JCYtU" },
+    { name: "Chill", videoId: "5qap5aO4i9A" },
   ];
 
   const togglePanel = (panel: ActivePanel) => {
@@ -109,18 +109,18 @@ export default function HomeMusicWidget() {
             onClick={() => togglePanel("spotify")}
             className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all border ${
               activePanel === "spotify"
-                ? "bg-[#1DB954]/10 border-[#1DB954]/40 shadow-sm"
+                ? "bg-[hsl(141,73%,42%)]/10 border-[hsl(141,73%,42%)]/40 shadow-sm"
                 : "bg-muted/40 border-transparent hover:bg-muted/70"
             }`}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              activePanel === "spotify" ? "bg-[#1DB954]/20" : "bg-[#1DB954]/10"
+              activePanel === "spotify" ? "bg-[hsl(141,73%,42%)]/20" : "bg-[hsl(141,73%,42%)]/10"
             }`}>
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#1DB954]">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[hsl(141,73%,42%)]">
                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
               </svg>
             </div>
-            <span className={`text-[10px] font-bold ${activePanel === "spotify" ? "text-[#1DB954]" : "text-muted-foreground"}`}>
+            <span className={`text-[10px] font-bold ${activePanel === "spotify" ? "text-[hsl(141,73%,42%)]" : "text-muted-foreground"}`}>
               Spotify
             </span>
           </button>
@@ -130,18 +130,18 @@ export default function HomeMusicWidget() {
             onClick={() => togglePanel("youtube")}
             className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all border ${
               activePanel === "youtube"
-                ? "bg-[#FF0000]/10 border-[#FF0000]/40 shadow-sm"
+                ? "bg-[hsl(0,100%,50%)]/10 border-[hsl(0,100%,50%)]/40 shadow-sm"
                 : "bg-muted/40 border-transparent hover:bg-muted/70"
             }`}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              activePanel === "youtube" ? "bg-[#FF0000]/20" : "bg-[#FF0000]/10"
+              activePanel === "youtube" ? "bg-[hsl(0,100%,50%)]/20" : "bg-[hsl(0,100%,50%)]/10"
             }`}>
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#FF0000]">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[hsl(0,100%,50%)]">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
               </svg>
             </div>
-            <span className={`text-[10px] font-bold ${activePanel === "youtube" ? "text-[#FF0000]" : "text-muted-foreground"}`}>
+            <span className={`text-[10px] font-bold ${activePanel === "youtube" ? "text-[hsl(0,100%,50%)]" : "text-muted-foreground"}`}>
               YouTube
             </span>
           </button>
@@ -203,27 +203,6 @@ export default function HomeMusicWidget() {
         {/* ===== SPOTIFY PANEL ===== */}
         {activePanel === "spotify" && (
           <div className="border-t border-border/30 px-4 py-3 space-y-2.5 animate-in slide-in-from-top-2 duration-200">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <input value={spotifyQuery} onChange={e => setSpotifyQuery(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && searchSpotify()}
-                  placeholder="Cerca su Spotify..."
-                  className="w-full h-8 pl-8 pr-3 rounded-lg bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-[#1DB954]/50" />
-              </div>
-              <button onClick={searchSpotify} className="h-8 px-3 rounded-lg bg-[#1DB954] text-white text-[10px] font-bold shrink-0">
-                Cerca
-              </button>
-            </div>
-
-            {spotifyQuery && (
-              <a href={`https://open.spotify.com/search/${encodeURIComponent(spotifyQuery)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#1DB954]/10 text-[10px] font-semibold text-[#1DB954]">
-                <ExternalLink className="w-3 h-3" /> Apri "{spotifyQuery}" su Spotify
-              </a>
-            )}
-
             <iframe key={spotifyPlaylistId}
               src={`https://open.spotify.com/embed/playlist/${spotifyPlaylistId}?utm_source=generator&theme=0`}
               width="100%" height="280" frameBorder="0"
@@ -233,39 +212,19 @@ export default function HomeMusicWidget() {
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {spotifyPlaylists.map(pl => (
                 <button key={pl.id}
-                  onClick={() => { setSpotifyPlaylistId(pl.id); setSpotifyQuery(""); }}
+                  onClick={() => setSpotifyPlaylistId(pl.id)}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
-                    spotifyPlaylistId === pl.id ? "bg-[#1DB954] text-white" : "bg-[#1DB954]/10 text-[#1DB954]"
+                    spotifyPlaylistId === pl.id ? "bg-[hsl(141,73%,42%)] text-white" : "bg-[hsl(141,73%,42%)]/10 text-[hsl(141,73%,42%)]"
                   }`}>{pl.name}</button>
               ))}
             </div>
           </div>
         )}
 
-        {/* ===== YOUTUBE PANEL ===== */}
+        {/* ===== YOUTUBE PANEL — always in-app ===== */}
         {activePanel === "youtube" && (
           <div className="border-t border-border/30 px-4 py-3 space-y-2.5 animate-in slide-in-from-top-2 duration-200">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <input value={youtubeQuery} onChange={e => setYoutubeQuery(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && searchYouTube()}
-                  placeholder="Cerca su YouTube..."
-                  className="w-full h-8 pl-8 pr-3 rounded-lg bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-[#FF0000]/50" />
-              </div>
-              <button onClick={searchYouTube} className="h-8 px-3 rounded-lg bg-[#FF0000] text-white text-[10px] font-bold shrink-0">
-                Cerca
-              </button>
-            </div>
-
-            {youtubeQuery && (
-              <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeQuery)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#FF0000]/10 text-[10px] font-semibold text-[#FF0000]">
-                <ExternalLink className="w-3 h-3" /> Apri "{youtubeQuery}" su YouTube
-              </a>
-            )}
-
+            {/* YouTube embed player - stays in-app */}
             <div className="rounded-xl overflow-hidden aspect-video">
               <iframe key={youtubeVideoId}
                 src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=0&rel=0`}
@@ -274,12 +233,13 @@ export default function HomeMusicWidget() {
                 allowFullScreen loading="lazy" className="w-full h-full" />
             </div>
 
+            {/* Quick select videos - all play in-app via embed */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {youtubeVideos.map(v => (
                 <button key={v.videoId}
                   onClick={() => { setYoutubeVideoId(v.videoId); setYoutubeQuery(""); }}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
-                    youtubeVideoId === v.videoId ? "bg-[#FF0000] text-white" : "bg-[#FF0000]/10 text-[#FF0000]"
+                    youtubeVideoId === v.videoId ? "bg-[hsl(0,100%,50%)] text-white" : "bg-[hsl(0,100%,50%)]/10 text-[hsl(0,100%,50%)]"
                   }`}>{v.name}</button>
               ))}
             </div>

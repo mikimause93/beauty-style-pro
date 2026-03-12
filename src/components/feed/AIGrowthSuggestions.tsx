@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,30 +9,46 @@ const ICONS: Record<string, any> = { MapPin, Calendar, Camera, Crown, Rocket, Vi
 
 const FALLBACK_SUGGESTIONS = [
   { icon: "Calendar", title: "Prenota il tuo primo appuntamento", description: "Scopri i migliori professionisti beauty vicino a te", target: "/booking" },
-  { icon: "Crown", title: "Completa il tuo profilo", description: "I profili completi ricevono 4x più interazioni", target: "/edit-profile" },
+  { icon: "Crown", title: "Completa il tuo profilo", description: "I profili completi ricevono 4x più interazioni", target: "/profile/edit" },
   { icon: "Gift", title: "Invita amici, guadagna QR Coins", description: "Ogni invito vale 20 QRC per te e il tuo amico", target: "/referral" },
 ];
 
-const ROTATE_INTERVAL = 5000;
+const SHOW_DURATION = 6000; // visible for 6 seconds
+const HIDE_DURATION = 8000; // hidden for 8 seconds between appearances
 
 export default function AIGrowthSuggestions() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState<any[]>(FALLBACK_SUGGESTIONS);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     if (user) loadSuggestions();
   }, [user]);
 
+  // Auto show/hide cycle
   useEffect(() => {
     if (dismissed || suggestions.length === 0) return;
-    const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % suggestions.length);
-    }, ROTATE_INTERVAL);
-    return () => clearInterval(timer);
-  }, [suggestions.length, dismissed]);
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (visible) {
+      // After SHOW_DURATION, hide and move to next
+      timer = setTimeout(() => {
+        setVisible(false);
+        setCurrentIndex(prev => (prev + 1) % suggestions.length);
+      }, SHOW_DURATION);
+    } else {
+      // After HIDE_DURATION, show again
+      timer = setTimeout(() => {
+        setVisible(true);
+      }, HIDE_DURATION);
+    }
+
+    return () => clearTimeout(timer);
+  }, [visible, dismissed, suggestions.length]);
 
   const loadSuggestions = async () => {
     try {
@@ -45,45 +61,44 @@ export default function AIGrowthSuggestions() {
     }
   };
 
+  const handleDismiss = useCallback(() => {
+    setVisible(false);
+    // Temporarily dismiss - will reappear after HIDE_DURATION
+    setTimeout(() => {
+      setCurrentIndex(prev => (prev + 1) % suggestions.length);
+      setVisible(true);
+    }, HIDE_DURATION);
+  }, [suggestions.length]);
+
   if (dismissed || suggestions.length === 0) return null;
 
   const s = suggestions[currentIndex];
   const Icon = ICONS[s.icon] || Sparkles;
 
   return (
-    <div className="relative">
-      <div className="flex items-center gap-2 px-1 mb-2">
-        <Sparkles className="w-4 h-4 text-primary" />
-        <span className="text-xs font-bold text-primary">AI Suggerimenti</span>
-        <div className="flex-1" />
-        <div className="flex gap-1">
-          {suggestions.map((_, i) => (
-            <span key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? "bg-primary" : "bg-muted-foreground/30"}`} />
-          ))}
-        </div>
-        <button onClick={() => setDismissed(true)} className="ml-1 text-muted-foreground hover:text-foreground">
-          <X className="w-3.5 h-3.5" />
-        </button>
-      </div>
-      <AnimatePresence mode="wait">
+    <AnimatePresence>
+      {visible && (
         <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.35 }}
-          className="flex items-center gap-3 p-3 rounded-2xl bg-card border border-border/50"
+          initial={{ opacity: 0, y: -10, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: "auto" }}
+          exit={{ opacity: 0, y: -10, height: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="overflow-hidden"
         >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary/5 border border-primary/15">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Icon className="w-4 h-4 text-primary" />
+            </div>
+            <button onClick={() => s.target && navigate(s.target)} className="flex-1 min-w-0 text-left">
+              <p className="text-xs font-semibold truncate">{s.title}</p>
+              <p className="text-[10px] text-muted-foreground line-clamp-1">{s.description}</p>
+            </button>
+            <button onClick={handleDismiss} className="w-6 h-6 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
+              <X className="w-3 h-3 text-muted-foreground" />
+            </button>
           </div>
-          <button onClick={() => s.target && navigate(s.target)} className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-semibold truncate">{s.title}</p>
-            <p className="text-[11px] text-muted-foreground line-clamp-1">{s.description}</p>
-          </button>
-          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         </motion.div>
-      </AnimatePresence>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }
