@@ -235,9 +235,6 @@ export default function HomePage() {
       {/* AI Smart Match */}
       {activeTab === "Nuovi" && <AIMatchBanner />}
 
-      {/* Reels */}
-      {activeTab === "Nuovi" && <ReelsSection />}
-
       {/* Trending Clips */}
       {activeTab === "Nuovi" && <TrendingClips />}
 
