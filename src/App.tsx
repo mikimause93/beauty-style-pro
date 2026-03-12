@@ -95,16 +95,14 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("style_splash_shown");
-  });
+  const [showSplash, setShowSplash] = useState(true);
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <PWAInstallPrompt />
-      {showSplash && <SplashScreen onComplete={() => { sessionStorage.setItem("style_splash_shown", "1"); setShowSplash(false); }} />}
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       <BrowserRouter>
         <AuthProvider>
         <RadioProvider>
