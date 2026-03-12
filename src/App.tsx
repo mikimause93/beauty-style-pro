@@ -96,7 +96,7 @@ const PageLoader = () => (
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
-    return !localStorage.getItem("style_splash_shown");
+    return !sessionStorage.getItem("style_splash_shown");
   });
   return (
   <QueryClientProvider client={queryClient}>
