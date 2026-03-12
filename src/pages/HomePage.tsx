@@ -2,7 +2,7 @@ import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, 
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
 import StoriesBar from "@/components/feed/StoriesBar";
-import ReelsSection from "@/components/feed/ReelsSection";
+
 import SponsorBanner from "@/components/feed/SponsorBanner";
 import AIMatchBanner from "@/components/feed/AIMatchBanner";
 import AIGrowthSuggestions from "@/components/feed/AIGrowthSuggestions";
@@ -235,9 +235,6 @@ export default function HomePage() {
       {/* AI Smart Match */}
       {activeTab === "Nuovi" && <AIMatchBanner />}
 
-      {/* Reels */}
-      {activeTab === "Nuovi" && <ReelsSection />}
-
       {/* Trending Clips */}
       {activeTab === "Nuovi" && <TrendingClips />}
 
@@ -277,46 +274,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Quick Actions — minimal grid */}
-      {activeTab === "Nuovi" && (
-        <>
-        <div className="flex gap-2.5 px-5 mb-3 overflow-x-auto no-scrollbar -mx-5 pl-5">
-          {[
-            { Icon: Scissors, label: "Stilisti", path: "/stylists" },
-            { Icon: CalendarDays, label: "Prenota", path: "/booking" },
-            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
-            { Icon: Droplets, label: "Spa & Terme", path: "/spa-terme" },
-            { Icon: Home, label: "Domicilio", path: "/map-search" },
-          ].map(item => (
-            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
-              <item.Icon className="w-5 h-5 text-primary" />
-              <span className="text-[10px] text-primary/70 font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2.5 px-5 mb-5 overflow-x-auto no-scrollbar -mx-5 pl-5">
-          {[
-            { Icon: Target, label: "Missioni", path: "/missions" },
-            { Icon: Sparkles, label: "AI Beauty", path: "/ai-assistant" },
-            { Icon: Zap, label: "Quiz Live", path: "/quiz-live" },
-            { Icon: Gamepad2, label: "Talent Game", path: "/talent-game" },
-            { Icon: Film, label: "Shorts", path: "/shorts" },
-            { Icon: Gift, label: "Gira&Vinci", path: "/spin" },
-            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
-            { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
-            { Icon: Radio, label: "Radio", path: "/radio" },
-            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
-          ].map(item => (
-            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1.5 py-3.5 min-w-[72px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
-              <item.Icon className="w-5 h-5 text-primary" />
-              <span className="text-[10px] text-primary/70 font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-        </>
-      )}
 
       {/* Content */}
       <div className="space-y-4 px-5 pb-6">
