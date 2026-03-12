@@ -188,17 +188,52 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* AI Smart Match */}
-      {activeTab === "Nuovi" && <AIMatchBanner />}
+      {/* Quick Actions — single compact scrollable row under stories */}
+      {activeTab === "Nuovi" && (
+        <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
+          {[
+            { Icon: Scissors, label: "Stilisti", path: "/stylists" },
+            { Icon: CalendarDays, label: "Prenota", path: "/booking" },
+            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
+            { Icon: Droplets, label: "Spa", path: "/spa-terme" },
+            { Icon: Home, label: "Domicilio", path: "/map-search" },
+            { Icon: Target, label: "Missioni", path: "/missions" },
+            { Icon: Sparkles, label: "AI", path: "/ai-assistant" },
+            { Icon: Zap, label: "Quiz", path: "/quiz-live" },
+            { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
+            { Icon: Film, label: "Shorts", path: "/shorts" },
+            { Icon: Gift, label: "Vinci", path: "/spin" },
+            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
+            { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
+            { Icon: Radio, label: "Radio", path: "/radio" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+          ].map(item => (
+            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
+              className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <item.Icon className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-[9px] text-primary/70 font-medium leading-tight">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* AI Growth Suggestions */}
-      {activeTab === "Nuovi" && <div className="px-5 mb-4"><AIGrowthSuggestions /></div>}
+      {/* AI Suggestions — temporary popup */}
+      {activeTab === "Nuovi" && (
+        <div className="px-5 mb-3">
+          <AIGrowthSuggestions />
+        </div>
+      )}
+
+      {/* Music Widget */}
+      {activeTab === "Nuovi" && <HomeMusicWidget />}
 
       {/* Auto Offers */}
       {activeTab === "Nuovi" && <AutoOffersBanner />}
 
-      {/* Music Widget */}
-      {activeTab === "Nuovi" && <HomeMusicWidget />}
+      {/* AI Smart Match */}
+      {activeTab === "Nuovi" && <AIMatchBanner />}
 
       {/* Reels */}
       {activeTab === "Nuovi" && <ReelsSection />}
