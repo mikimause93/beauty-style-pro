@@ -104,7 +104,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <PWAInstallPrompt />
-      {showSplash && <SplashScreen onComplete={() => { localStorage.setItem("style_splash_shown", "1"); setShowSplash(false); }} />}
+      {showSplash && <SplashScreen onComplete={() => { sessionStorage.setItem("style_splash_shown", "1"); setShowSplash(false); }} />}
       <BrowserRouter>
         <AuthProvider>
         <RadioProvider>
