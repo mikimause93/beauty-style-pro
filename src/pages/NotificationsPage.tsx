@@ -89,9 +89,9 @@ export default function NotificationsPage() {
     const type = notification.type || "info";
     const data = notification.data || {};
 
-    if (type === "like" && data.post_id) navigate("/");
-    else if (type === "comment" && data.post_id) navigate("/");
-    else if (type === "message" && data.conversation_id) navigate(`/chat/${data.conversation_id}`);
+    if ((type === "like" || type === "comment") && data.post_id) {
+      navigate(`/?post=${data.post_id}`);
+    } else if (type === "message" && data.conversation_id) navigate(`/chat/${data.conversation_id}`);
     else if (type === "follow" && data.follower_id) navigate(`/profile/${data.follower_id}`);
     else if (type === "booking") navigate("/my-bookings");
     else if (type === "tip") navigate("/wallet");
