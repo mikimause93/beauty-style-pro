@@ -121,9 +121,9 @@ export default function ChatbotWidget({ className = "" }: Props) {
     setVoicePhase("processing");
     
     // Try voice action first
-    const handled = executeVoiceCommand(command);
+    const result = executeVoiceCommand(command);
     
-    if (handled) {
+    if (result.matched) {
       setVoicePhase("speaking");
       setTimeout(() => {
         endVoiceCall();
