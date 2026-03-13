@@ -63,7 +63,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
   
-  const { executeVoiceCommand } = useStellaVoiceActions();
+  const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
 
   // Wake word detection
   const {
