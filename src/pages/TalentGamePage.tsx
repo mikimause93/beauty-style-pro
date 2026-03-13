@@ -167,7 +167,20 @@ export default function TalentGamePage() {
                 className="flex-1 py-3 rounded-xl glass text-sm font-semibold flex items-center justify-center gap-2">
                 <Mic className="w-4 h-4" /> Messaggio
               </button>
+              <button onClick={() => { setReportTarget(selectedContestant.id); setShowReport(true); }}
+                className="w-12 py-3 rounded-xl glass flex items-center justify-center">
+                <Flag className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
+
+            {showReport && (
+              <ReportDialog
+                open={showReport}
+                onClose={() => setShowReport(false)}
+                targetUserId={reportTarget}
+                contentType="profile"
+              />
+            )}
           </div>
         </div>
       </MobileLayout>

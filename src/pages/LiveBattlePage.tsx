@@ -307,6 +307,16 @@ export default function LiveBattlePage() {
             </div>
           </div>
 
+          {/* Report */}
+          {showReport && (
+            <ReportDialog
+              open={showReport}
+              onClose={() => setShowReport(false)}
+              targetContentId={selectedBattle.id}
+              contentType="post"
+            />
+          )}
+
           {/* Shop Panel */}
           {showShop && <LiveShopPanel onClose={() => setShowShop(false)} />}
 

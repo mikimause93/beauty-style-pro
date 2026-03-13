@@ -532,6 +532,16 @@ export default function LiveStreamPage() {
             </div>
           )}
 
+          {showReport && (
+            <ReportDialog
+              open={showReport}
+              onClose={() => setShowReport(false)}
+              targetUserId={selectedStream.professional?.id}
+              targetContentId={selectedStream.id}
+              contentType="post"
+            />
+          )}
+
           {showPostStats && (
             <PostLiveStats
               stats={{
