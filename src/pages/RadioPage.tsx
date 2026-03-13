@@ -1,6 +1,8 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { SpotifyIcon, YouTubeIcon, RadioTowerIcon } from "@/components/icons/BrandIcons";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import { toast } from "sonner";
@@ -19,6 +21,7 @@ type MusicSource = "radio" | "spotify" | "youtube";
 type RadioFilter = "all" | "italia" | "beauty";
 
 export default function RadioPage() {
+  const navigate = useNavigate();
   const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadio();
   const [liked, setLiked] = useState(false);
   const [source, setSource] = useState<MusicSource>("radio");
@@ -42,10 +45,10 @@ export default function RadioPage() {
     awardCoins("share");
   };
 
-  const sourceTabs: { key: MusicSource; label: string; color: string }[] = [
-    { key: "radio", label: "Radio", color: "text-primary" },
-    { key: "spotify", label: "Spotify", color: "text-[#1DB954]" },
-    { key: "youtube", label: "YouTube", color: "text-[#FF0000]" },
+  const sourceTabs: { key: MusicSource; label: string; color: string; icon: React.ReactNode }[] = [
+    { key: "radio", label: "Radio", color: "text-primary", icon: <RadioTowerIcon className="w-4 h-4" /> },
+    { key: "spotify", label: "Spotify", color: "text-[#1DB954]", icon: <SpotifyIcon className="w-4 h-4" /> },
+    { key: "youtube", label: "YouTube", color: "text-[#FF0000]", icon: <YouTubeIcon className="w-4 h-4" /> },
   ];
 
   return (
@@ -53,9 +56,9 @@ export default function RadioPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
-              <RadioIcon className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <div>
               <h1 className="text-lg font-display font-bold">Beauty Music</h1>
               <p className="text-[10px] text-muted-foreground">Radio · Spotify · YouTube</p>
@@ -74,12 +77,12 @@ export default function RadioPage() {
             <button
               key={tab.key}
               onClick={() => setSource(tab.key)}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                 source === tab.key
-                  ? `bg-foreground text-background`
+                  ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
+              }`}>
+              <span className={source === tab.key ? "" : tab.color}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}
