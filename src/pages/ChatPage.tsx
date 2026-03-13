@@ -429,6 +429,30 @@ export default function ChatPage() {
             <Languages className="w-4 h-4 text-muted-foreground" />
           </button>
         </header>
+        {/* In-call overlay */}
+        {inCall && (
+          <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-semibold">{inCall === "voice" ? "Chiamata vocale" : "Videochiamata"} in corso...</span>
+            </div>
+            <button onClick={endCall} className="px-4 py-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
+              Termina
+            </button>
+          </div>
+        )}
+
+        {/* Language picker */}
+        {showLangPicker && (
+          <div className="px-4 py-2 bg-card border-b border-border flex gap-2 flex-wrap fade-in">
+            {LANGUAGES.map(lang => (
+              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setShowLangPicker(false); toast.success(`Traduzione: ${lang.label}`); }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${targetLang === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                {lang.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 px-4 py-4 space-y-3 min-h-[60vh]">
