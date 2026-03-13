@@ -240,8 +240,8 @@ export default function MapSearchPage() {
     if (maxDistance > 100) return 7;
     if (maxDistance > 50) return 9;
     if (maxDistance > 20) return 11;
-    if (maxDistance > 10) return 12;
-    return 14;
+    if (maxDistance > 10) return 13;
+    return 15;
   }, [maxDistance]);
 
   const handleAiSearch = async () => {
