@@ -564,7 +564,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
         >
           <Sparkles className="w-6 h-6 text-primary-foreground" />
           {isWakeWordListening && (
-            <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+            <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-accent border-2 border-background animate-pulse" />
           )}
           {suggestions.length > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
