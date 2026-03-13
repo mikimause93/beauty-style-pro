@@ -95,7 +95,14 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    const shown = sessionStorage.getItem("style_splash_shown");
+    return !shown;
+  });
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem("style_splash_shown", "1");
+    setShowSplash(false);
+  }, []);
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
