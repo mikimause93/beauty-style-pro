@@ -63,10 +63,18 @@ export default function AIAssistantPage() {
 
   useEffect(() => {
     if (transcript && !isListening) {
+      // Try voice command first
+      const { matched, response } = processVoiceCommand(transcript);
+      if (matched) {
+        if (isTTSEnabled) speak(response);
+        toast.success(response);
+        resetTranscript();
+        return;
+      }
       setInput(transcript);
       resetTranscript();
     }
-  }, [transcript, isListening, resetTranscript]);
+  }, [transcript, isListening, resetTranscript, processVoiceCommand, isTTSEnabled, speak]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
