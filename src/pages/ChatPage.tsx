@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -34,6 +34,12 @@ interface Message {
   duration?: number;
 }
 
+interface SearchedUser {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
 const fallbackAvatars = [stylist2, stylist1, beauty2];
 
 export default function ChatPage() {
@@ -50,6 +56,8 @@ export default function ChatPage() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [playingVoice, setPlayingVoice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchedUsers, setSearchedUsers] = useState<SearchedUser[]>([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +65,7 @@ export default function ChatPage() {
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioPlayRef = useRef<HTMLAudioElement | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (user) loadConversations();
@@ -72,6 +81,26 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Search registered users when typing
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      setSearchedUsers([]);
+      return;
+    }
+    searchTimeoutRef.current = setTimeout(async () => {
+      setSearchingUsers(true);
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .ilike("display_name", `%${searchQuery}%`)
+        .neq("user_id", user?.id || "")
+        .limit(10);
+      setSearchedUsers(data || []);
+      setSearchingUsers(false);
+    }, 300);
+  }, [searchQuery, user]);
 
   // Realtime subscription for messages
   useEffect(() => {
@@ -155,8 +184,46 @@ export default function ChatPage() {
         type: (m.message_type || "text") as MessageType,
         mediaUrl: m.image_url || undefined,
       })));
-      // Mark as read
       await supabase.from("messages").update({ read: true }).eq("conversation_id", conversationId).neq("sender_id", user?.id || "");
+    }
+  };
+
+  const startNewChat = async (otherUser: SearchedUser) => {
+    if (!user) return;
+    // Check if conversation already exists
+    const existing = conversations.find(c => c.otherUserId === otherUser.user_id);
+    if (existing) {
+      setSelectedChat(existing);
+      loadMessages(existing.id);
+      navigate(`/chat/${existing.id}`);
+      setSearchQuery("");
+      setSearchedUsers([]);
+      return;
+    }
+
+    // Create new conversation
+    const { data, error } = await supabase.from("conversations").insert({
+      participant_1: user.id,
+      participant_2: otherUser.user_id,
+    }).select().single();
+
+    if (data && !error) {
+      const newConv: Conversation = {
+        id: data.id,
+        name: otherUser.display_name || "Utente",
+        avatar: otherUser.avatar_url || fallbackAvatars[0],
+        lastMessage: "Nessun messaggio",
+        time: "",
+        unread: 0,
+        online: false,
+        otherUserId: otherUser.user_id,
+      };
+      setConversations(prev => [newConv, ...prev]);
+      setSelectedChat(newConv);
+      setMessages([]);
+      navigate(`/chat/${data.id}`);
+      setSearchQuery("");
+      setSearchedUsers([]);
     }
   };
 
@@ -164,13 +231,9 @@ export default function ChatPage() {
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || !user) return;
-
     const content = newMessage;
     setNewMessage("");
-
-    // Optimistic update
     setMessages(prev => [...prev, { id: Date.now().toString(), sender: "me", content, time: now(), type: "text" }]);
-
     await supabase.from("messages").insert({
       conversation_id: selectedChat.id,
       sender_id: user.id,
@@ -182,10 +245,8 @@ export default function ChatPage() {
   const uploadFile = async (file: File, type: MessageType) => {
     if (!selectedChat || !user) return;
     if (file.size > 20 * 1024 * 1024) { toast.error("File troppo grande (max 20MB)"); return; }
-
     const fileName = `${Date.now()}_${file.name}`;
     const { data } = await supabase.storage.from("posts").upload(`chat/${fileName}`, file);
-
     let mediaUrl: string;
     if (data) {
       const { data: urlData } = supabase.storage.from("posts").getPublicUrl(`chat/${fileName}`);
@@ -193,12 +254,7 @@ export default function ChatPage() {
     } else {
       mediaUrl = URL.createObjectURL(file);
     }
-
-    setMessages(prev => [...prev, {
-      id: Date.now().toString(), sender: "me", content: "",
-      time: now(), type, mediaUrl, fileName: file.name,
-    }]);
-
+    setMessages(prev => [...prev, { id: Date.now().toString(), sender: "me", content: "", time: now(), type, mediaUrl, fileName: file.name }]);
     await supabase.from("messages").insert({
       conversation_id: selectedChat.id,
       sender_id: user.id,
@@ -206,7 +262,6 @@ export default function ChatPage() {
       message_type: type,
       image_url: mediaUrl,
     });
-
     setShowAttachMenu(false);
     toast.success(`${type === "image" ? "Immagine" : type === "video" ? "Video" : "File"} inviato!`);
   };
@@ -217,34 +272,27 @@ export default function ChatPage() {
     e.target.value = "";
   };
 
-  // Voice recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         const duration = recordingTime;
-        const fileName = `voice_${Date.now()}.webm`;
-        const { data } = await supabase.storage.from("posts").upload(`chat/${fileName}`, audioBlob);
+        const fName = `voice_${Date.now()}.webm`;
+        const { data } = await supabase.storage.from("posts").upload(`chat/${fName}`, audioBlob);
         let mediaUrl: string;
         if (data) {
-          const { data: urlData } = supabase.storage.from("posts").getPublicUrl(`chat/${fileName}`);
+          const { data: urlData } = supabase.storage.from("posts").getPublicUrl(`chat/${fName}`);
           mediaUrl = urlData.publicUrl;
         } else {
           mediaUrl = URL.createObjectURL(audioBlob);
         }
-
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(), sender: "me", content: "",
-          time: now(), type: "voice", mediaUrl, duration,
-        }]);
-
+        setMessages(prev => [...prev, { id: Date.now().toString(), sender: "me", content: "", time: now(), type: "voice", mediaUrl, duration }]);
         if (selectedChat && user) {
           await supabase.from("messages").insert({
             conversation_id: selectedChat.id,
@@ -255,7 +303,6 @@ export default function ChatPage() {
           });
         }
       };
-
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
@@ -284,7 +331,8 @@ export default function ChatPage() {
 
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
-  const openWhatsApp = (name: string) => {
+  const openWhatsApp = (name: string, otherUserId: string) => {
+    // Use wa.me with a direct link - works even if not in contacts
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
   };
 
@@ -292,7 +340,6 @@ export default function ChatPage() {
     !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Voice bubble with real audio playback
   const toggleVoicePlay = (msg: Message) => {
     if (playingVoice === msg.id) {
       audioPlayRef.current?.pause();
@@ -337,18 +384,21 @@ export default function ChatPage() {
           <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2 flex-1">
+          <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
             <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
               <p className="text-[10px] text-muted-foreground">Chat</p>
             </div>
-          </div>
-          <button onClick={() => openWhatsApp(selectedChat.name)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
+          </button>
+          <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
             <MessageCircle className="w-4 h-4 text-primary-foreground" />
           </button>
           <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <Phone className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <Video className="w-4 h-4 text-muted-foreground" />
           </button>
         </header>
 
@@ -477,22 +527,54 @@ export default function ChatPage() {
           <input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Cerca conversazione..."
+            placeholder="Cerca persone o conversazioni..."
             className="w-full h-10 rounded-full bg-muted pl-10 pr-4 text-sm focus:outline-none"
           />
         </div>
       </header>
 
       <div className="p-4 space-y-2">
+        {/* Search results - show registered users */}
+        {searchQuery.length >= 2 && searchedUsers.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2 px-1">Utenti registrati</p>
+            {searchedUsers.map(u => (
+              <button
+                key={u.user_id}
+                onClick={() => startNewChat(u)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all"
+              >
+                <img
+                  src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.user_id}`}
+                  alt=""
+                  className="w-11 h-11 rounded-full object-cover"
+                />
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-sm">{u.display_name || "Utente"}</p>
+                  <p className="text-[10px] text-muted-foreground">Tocca per iniziare una chat</p>
+                </div>
+                <UserPlus className="w-4 h-4 text-primary" />
+              </button>
+            ))}
+            {filteredConversations.length > 0 && (
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mt-4 mb-2 px-1">Conversazioni</p>
+            )}
+          </div>
+        )}
+
+        {searchQuery.length >= 2 && searchedUsers.length === 0 && !searchingUsers && (
+          <p className="text-xs text-muted-foreground text-center py-2">Nessun utente trovato per "{searchQuery}"</p>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : filteredConversations.length === 0 ? (
+        ) : filteredConversations.length === 0 && searchedUsers.length === 0 ? (
           <div className="text-center py-16">
             <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">Nessuna conversazione</p>
-            <p className="text-xs text-muted-foreground mt-1">Inizia una chat dal profilo di uno stilista</p>
+            <p className="text-xs text-muted-foreground mt-1">Cerca un utente per iniziare una chat</p>
           </div>
         ) : (
           filteredConversations.map(conv => (
