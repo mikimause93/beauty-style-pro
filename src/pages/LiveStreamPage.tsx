@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords, Scissors, Palette, Heart, Droplets, BookOpen, Paintbrush, Gem, Video } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, X, Share2, Users, Crown, Sparkles, ShoppingBag, UserPlus, Trophy, Filter, Flame, Shield, Mic, Music, Wand2, Swords, Scissors, Palette, Heart, Droplets, BookOpen, Paintbrush, Gem, Video, Flag, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRadio } from "@/contexts/RadioContext";
@@ -17,6 +17,7 @@ import BattleChallengeButton from "@/components/live/BattleChallengeButton";
 import LiveGuestPanel from "@/components/live/LiveGuestPanel";
 import ApplauseAnimation, { useApplause } from "@/components/live/ApplauseAnimation";
 import VoiceNoteButton from "@/components/live/VoiceNoteButton";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 
 interface LiveStream {
@@ -93,6 +94,7 @@ export default function LiveStreamPage() {
   const { awardCoins } = useQRCoinRewards();
   const { pause: pauseRadio } = useRadio();
   const { claps, triggerApplause } = useApplause();
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
@@ -325,6 +327,9 @@ export default function LiveStreamPage() {
                   <Shield className="w-3 h-3" /> MOD
                 </span>
               )}
+              <button onClick={() => setShowReport(true)} className="w-9 h-9 rounded-full glass flex items-center justify-center">
+                <Flag className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
           </div>
 
@@ -525,6 +530,16 @@ export default function LiveStreamPage() {
                 </button>
               </div>
             </div>
+          )}
+
+          {showReport && (
+            <ReportDialog
+              open={showReport}
+              onClose={() => setShowReport(false)}
+              targetUserId={selectedStream.professional?.id}
+              targetContentId={selectedStream.id}
+              contentType="post"
+            />
           )}
 
           {showPostStats && (

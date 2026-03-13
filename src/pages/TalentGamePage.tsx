@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, Trophy, Star, Users, Crown, Heart, Flame, Sparkles, Play, Eye, Music, Video, Mic, Share2, ChevronRight, Award, Zap } from "lucide-react";
+import { ArrowLeft, Coins, Trophy, Star, Users, Crown, Heart, Flame, Sparkles, Play, Eye, Music, Video, Mic, Share2, ChevronRight, Award, Zap, Flag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -50,6 +51,8 @@ export default function TalentGamePage() {
   const [selectedContestant, setSelectedContestant] = useState<Contestant | null>(null);
   const [hasVoted, setHasVoted] = useState<string[]>([]);
   const [voteAnimation, setVoteAnimation] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [reportTarget, setReportTarget] = useState<string>("");
 
   const filtered = activeCategory === "Tutti" ? contestants : contestants.filter(c => c.category === activeCategory);
 
@@ -164,7 +167,20 @@ export default function TalentGamePage() {
                 className="flex-1 py-3 rounded-xl glass text-sm font-semibold flex items-center justify-center gap-2">
                 <Mic className="w-4 h-4" /> Messaggio
               </button>
+              <button onClick={() => { setReportTarget(selectedContestant.id); setShowReport(true); }}
+                className="w-12 py-3 rounded-xl glass flex items-center justify-center">
+                <Flag className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
+
+            {showReport && (
+              <ReportDialog
+                open={showReport}
+                onClose={() => setShowReport(false)}
+                targetUserId={reportTarget}
+                contentType="profile"
+              />
+            )}
           </div>
         </div>
       </MobileLayout>

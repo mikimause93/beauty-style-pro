@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer, Heart, Sparkles, Zap, Video, Circle } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer, Heart, Sparkles, Zap, Video, Circle, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
 import LiveShopPanel from "@/components/live/LiveShopPanel";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 
 interface Battle {
@@ -56,6 +57,7 @@ export default function LiveBattlePage() {
   const [tipSide, setTipSide] = useState<"a" | "b">("a");
   const [tipAmount, setTipAmount] = useState(5);
   const [loading, setLoading] = useState(true);
+  const [showReport, setShowReport] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchBattles(); }, []);
@@ -164,9 +166,14 @@ export default function LiveBattlePage() {
                   <Coins className="w-3 h-3 text-gold" /> {selectedBattle.prize_pool} QRC
                 </span>
               </div>
-              <button onClick={shareBattle} className="w-10 h-10 rounded-full glass flex items-center justify-center">
-                <Share2 className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShowReport(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                  <Flag className="w-5 h-5 text-muted-foreground" />
+                </button>
+                <button onClick={shareBattle} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                  <Share2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </header>
 
@@ -299,6 +306,16 @@ export default function LiveBattlePage() {
               </button>
             </div>
           </div>
+
+          {/* Report */}
+          {showReport && (
+            <ReportDialog
+              open={showReport}
+              onClose={() => setShowReport(false)}
+              targetContentId={selectedBattle.id}
+              contentType="post"
+            />
+          )}
 
           {/* Shop Panel */}
           {showShop && <LiveShopPanel onClose={() => setShowShop(false)} />}
