@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer, Heart, Sparkles, Zap, Video, Circle } from "lucide-react";
+import { ArrowLeft, Eye, Gift, Send, Coins, Trophy, Flame, Crown, Swords, ShoppingBag, UserPlus, Share2, ThumbsUp, Timer, Heart, Sparkles, Zap, Video, Circle, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
