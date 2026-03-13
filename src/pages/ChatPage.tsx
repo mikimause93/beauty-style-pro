@@ -1,6 +1,7 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Languages } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -66,6 +67,10 @@ export default function ChatPage() {
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioPlayRef = useRef<HTMLAudioElement | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [inCall, setInCall] = useState<"voice" | "video" | null>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
+  const { translate, translating, targetLang, setTargetLang, LANGUAGES } = useTranslation();
+  const [showLangPicker, setShowLangPicker] = useState(false);
 
   useEffect(() => {
     if (user) loadConversations();
@@ -332,8 +337,27 @@ export default function ChatPage() {
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   const openWhatsApp = (name: string, otherUserId: string) => {
-    // Use wa.me with a direct link - works even if not in contacts
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
+  };
+
+  const startCall = (type: "voice" | "video") => {
+    setInCall(type);
+    toast.info(type === "voice" ? "Chiamata vocale avviata..." : "Videochiamata avviata...");
+    // WebRTC placeholder - in production use Agora/Twilio
+  };
+
+  const endCall = () => {
+    setInCall(null);
+    toast.success("Chiamata terminata");
+  };
+
+  const translateMessage = async (msgId: string, text: string) => {
+    if (translatedMessages[msgId]) {
+      setTranslatedMessages(prev => { const n = { ...prev }; delete n[msgId]; return n; });
+      return;
+    }
+    const translated = await translate(text);
+    setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
   };
 
   const filteredConversations = conversations.filter(c =>
@@ -394,13 +418,40 @@ export default function ChatPage() {
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
             <MessageCircle className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Phone className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+            <Phone className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Video className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+            <Video className="w-4 h-4 text-primary-foreground" />
+          </button>
+          <button onClick={() => setShowLangPicker(!showLangPicker)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
+            <Languages className="w-4 h-4 text-muted-foreground" />
           </button>
         </header>
+        {/* In-call overlay */}
+        {inCall && (
+          <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-semibold">{inCall === "voice" ? "Chiamata vocale" : "Videochiamata"} in corso...</span>
+            </div>
+            <button onClick={endCall} className="px-4 py-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
+              Termina
+            </button>
+          </div>
+        )}
+
+        {/* Language picker */}
+        {showLangPicker && (
+          <div className="px-4 py-2 bg-card border-b border-border flex gap-2 flex-wrap fade-in">
+            {LANGUAGES.map(lang => (
+              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setShowLangPicker(false); toast.success(`Traduzione: ${lang.label}`); }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${targetLang === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                {lang.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 px-4 py-4 space-y-3 min-h-[60vh]">
@@ -438,6 +489,14 @@ export default function ChatPage() {
                   </a>
                 )}
                 {msg.content && <p className="text-sm">{msg.content}</p>}
+                {msg.content && translatedMessages[msg.id] && (
+                  <p className="text-xs italic text-muted-foreground mt-1 border-t border-border/30 pt-1">🌐 {translatedMessages[msg.id]}</p>
+                )}
+                {msg.content && msg.sender === "other" && (
+                  <button onClick={() => translateMessage(msg.id, msg.content)} className="text-[9px] text-primary hover:underline mt-0.5">
+                    {translating ? "⏳" : translatedMessages[msg.id] ? "Originale" : "🌐 Traduci"}
+                  </button>
+                )}
                 {msg.type !== "image" && msg.type !== "video" && (
                   <p className={`text-[10px] mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</p>
                 )}

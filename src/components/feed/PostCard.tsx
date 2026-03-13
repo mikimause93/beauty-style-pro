@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight, ThumbsUp, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight, ThumbsUp, Sparkles, HandMetal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,6 +49,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
   const [loadingComments, setLoadingComments] = useState(false);
   const [sliderPos, setSliderPos] = useState(50);
   const [likerNames, setLikerNames] = useState<string[]>([]);
+  const [applauded, setApplauded] = useState(false);
+  const [applauseCount, setApplauseCount] = useState(0);
 
   // Check if user already liked this post
   useEffect(() => {
@@ -254,9 +256,15 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         <div className="flex items-center gap-4">
           <button onClick={toggleLike} className="flex items-center gap-1.5 group">
             <Heart className={`w-[22px] h-[22px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
+            {likeCount > 0 && <span className="text-xs text-muted-foreground">{likeCount}</span>}
+          </button>
+          <button onClick={() => { if (!user) { navigate("/auth"); return; } setApplauded(!applauded); setApplauseCount(prev => applauded ? Math.max(prev-1,0) : prev+1); }} className="flex items-center gap-1.5 group">
+            <span className={`text-[20px] transition-all duration-200 ${applauded ? "scale-125" : "grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0"}`}>👏</span>
+            {applauseCount > 0 && <span className="text-xs text-muted-foreground">{applauseCount}</span>}
           </button>
           <button onClick={toggleComments} className="flex items-center gap-1.5 group">
             <MessageCircle className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            {commentCount > 0 && <span className="text-xs text-muted-foreground">{commentCount}</span>}
           </button>
           <button onClick={onShare} className="group">
             <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />

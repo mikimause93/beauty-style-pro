@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -44,6 +45,7 @@ export default function AIAssistantPage() {
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
   
   const { speak, cancel: cancelTTS } = useVoiceSynthesis();
+  const { processVoiceCommand } = useStellaVoiceActions();
   
   const {
     isListening, transcript, startListening, stopListening, resetTranscript,
@@ -61,10 +63,18 @@ export default function AIAssistantPage() {
 
   useEffect(() => {
     if (transcript && !isListening) {
+      // Try voice command first
+      const { matched, response } = processVoiceCommand(transcript);
+      if (matched) {
+        if (isTTSEnabled) speak(response);
+        toast.success(response);
+        resetTranscript();
+        return;
+      }
       setInput(transcript);
       resetTranscript();
     }
-  }, [transcript, isListening, resetTranscript]);
+  }, [transcript, isListening, resetTranscript, processVoiceCommand, isTTSEnabled, speak]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
