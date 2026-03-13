@@ -4,6 +4,7 @@ import { ArrowLeft, Coins, Trophy, Star, Users, Crown, Heart, Flame, Sparkles, P
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
