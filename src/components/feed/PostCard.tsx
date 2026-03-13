@@ -300,7 +300,34 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
 
         {/* Like count with names - visible to all */}
         {likeCount > 0 && (
-          <p className="text-xs font-semibold">{getLikeLabel()}</p>
+          <button onClick={loadAllLikers} className="text-xs font-semibold hover:text-primary transition-colors text-left">
+            {getLikeLabel()}
+          </button>
+        )}
+
+        {/* Likers list modal */}
+        {showLikersList && (
+          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end justify-center" onClick={() => setShowLikersList(false)}>
+            <div className="w-full max-w-md bg-card rounded-t-2xl border border-border p-4 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold">Piace a {likeCount} {likeCount === 1 ? "persona" : "persone"}</h3>
+                <button onClick={() => setShowLikersList(false)} className="text-xs text-muted-foreground">✕</button>
+              </div>
+              {allLikers.map(liker => (
+                <button key={liker.user_id} onClick={() => { setShowLikersList(false); navigate(`/profile/${liker.user_id}`); }}
+                  className="w-full flex items-center gap-3 py-2.5 hover:bg-muted rounded-xl px-2 transition-colors">
+                  <img src={liker.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${liker.user_id}`}
+                    alt="" className="w-10 h-10 rounded-full object-cover" />
+                  <span className="text-sm font-semibold">{liker.display_name}</span>
+                </button>
+              ))}
+              {allLikers.length === 0 && (
+                <div className="flex justify-center py-4">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Caption with username */}
