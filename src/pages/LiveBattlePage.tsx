@@ -166,9 +166,14 @@ export default function LiveBattlePage() {
                   <Coins className="w-3 h-3 text-gold" /> {selectedBattle.prize_pool} QRC
                 </span>
               </div>
-              <button onClick={shareBattle} className="w-10 h-10 rounded-full glass flex items-center justify-center">
-                <Share2 className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShowReport(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                  <Flag className="w-5 h-5 text-muted-foreground" />
+                </button>
+                <button onClick={shareBattle} className="w-10 h-10 rounded-full glass flex items-center justify-center">
+                  <Share2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </header>
 
