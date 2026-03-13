@@ -75,6 +75,30 @@ export function useStellaVoiceActions() {
       navigate("/create-post");
       return { matched: true, response: "Apro la creazione di un nuovo post!" };
     }
+    if (text.includes("le mie prenotazioni") || text.includes("mostra prenotazioni")) {
+      navigate("/my-bookings");
+      return { matched: true, response: "Ecco le tue prenotazioni!" };
+    }
+    if (text.includes("classifica") || text.includes("leaderboard")) {
+      navigate("/leaderboard");
+      return { matched: true, response: "Apro la classifica!" };
+    }
+    if (text.includes("sfide") || text.includes("challenge")) {
+      navigate("/challenges");
+      return { matched: true, response: "Ecco le sfide attive!" };
+    }
+    if (text.includes("shorts") || text.includes("video brevi")) {
+      navigate("/shorts");
+      return { matched: true, response: "Apro i video shorts!" };
+    }
+    if (text.includes("eventi") || text.includes("apri eventi")) {
+      navigate("/events");
+      return { matched: true, response: "Ecco gli eventi!" };
+    }
+    if (text.includes("marketplace") || text.includes("apri marketplace")) {
+      navigate("/marketplace");
+      return { matched: true, response: "Apro il marketplace!" };
+    }
 
     // Message commands
     const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
@@ -99,6 +123,12 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Ti mostro le prenotazioni da confermare!" };
     }
 
+    // Read notifications
+    if (text.includes("leggi notifiche") || text.includes("dimmi le notifiche") || text.includes("tutte le notifiche")) {
+      navigate("/notifications");
+      return { matched: true, response: "Ecco le tue notifiche! Le leggo per te." };
+    }
+
     // Add friend
     const addMatch = text.match(/(?:aggiungi|segui)\s+(.+)/);
     if (addMatch) {
@@ -107,7 +137,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: `Cerco ${addMatch[1]} per seguirlo!` };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home' o 'invia messaggio a...'." };
+    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'invia messaggio a...', 'dimmi le notifiche' o 'conferma prenotazione'." };
   }, [navigate]);
 
   return { processVoiceCommand };
