@@ -190,7 +190,7 @@ export default function MapSearchPage() {
           lat: p.latitude!,
           lng: p.longitude!,
           label: p.business_name,
-          sublabel: `${p.specialty || "Beauty"} · ${p.distance}km`,
+          sublabel: `${p.specialty || "Beauty"} · ${p.distance}km · ${p.rating ? `★${p.rating}` : ""} · Disponibile`,
           type: p.is_verified ? "premium" : "salon",
           rating: p.rating || undefined,
           onClick: () => navigate(`/stylist/${p.id}`),
@@ -240,8 +240,8 @@ export default function MapSearchPage() {
     if (maxDistance > 100) return 7;
     if (maxDistance > 50) return 9;
     if (maxDistance > 20) return 11;
-    if (maxDistance > 10) return 12;
-    return 14;
+    if (maxDistance > 10) return 13;
+    return 15;
   }, [maxDistance]);
 
   const handleAiSearch = async () => {
@@ -415,9 +415,10 @@ export default function MapSearchPage() {
                 <Star className="w-3 h-3 text-accent fill-accent" />
                 <span className="text-[11px] font-medium">{p.rating || 0}</span>
                 <span className="text-[10px] text-muted-foreground">·</span>
-                <span className="text-[10px] text-muted-foreground">{p.distance} km</span>
+                <MapPin className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-semibold text-primary">{p.distance} km</span>
                 <span className="text-[10px] text-muted-foreground">·</span>
-                <span className="text-[10px] text-muted-foreground">{p.city}</span>
+                <span className="text-[10px] text-emerald-500 font-medium">Disponibile</span>
               </div>
             </div>
             <div className="text-right flex flex-col items-end gap-1">
