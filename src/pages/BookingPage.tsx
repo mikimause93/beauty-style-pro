@@ -218,6 +218,7 @@ export default function BookingPage() {
                   <span className="text-xs text-muted-foreground">({professional.review_count || 0} reviews)</span>
                 </div>
               </div>
+              <WhatsAppButton userId={professional.user_id} name={professional.business_name} context="booking" compact />
             </div>
           )}
 

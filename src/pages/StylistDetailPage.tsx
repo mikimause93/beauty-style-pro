@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useFollow";
 import { supabase } from "@/integrations/supabase/client";
 import ShareMenu from "@/components/ShareMenu";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
