@@ -131,7 +131,7 @@ export default function StylistDetailPage() {
           <p className="text-xs text-muted-foreground text-center mt-3 max-w-[280px]">{stylist.bio}</p>
 
           {/* Actions */}
-          <div className="flex gap-3 mt-4 w-full">
+          <div className="flex gap-2 mt-4 w-full">
             <button
               onClick={handleFollow}
               disabled={followLoading}
@@ -150,6 +150,7 @@ export default function StylistDetailPage() {
               className="w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center">
               <MessageCircle className="w-4 h-4 text-muted-foreground" />
             </button>
+            <WhatsAppButton userId={stylist.user_id} name={stylist.name} context="stylist" />
           </div>
         </div>
 
