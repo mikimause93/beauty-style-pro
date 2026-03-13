@@ -307,11 +307,11 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
 
         {/* Likers list modal */}
         {showLikersList && (
-          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end justify-center" onClick={() => setShowLikersList(false)}>
-            <div className="w-full max-w-md bg-card rounded-t-2xl border border-border p-4 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowLikersList(false)}>
+            <div className="w-full max-w-sm bg-card rounded-2xl border border-border p-4 max-h-[70vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold">Piace a {likeCount} {likeCount === 1 ? "persona" : "persone"}</h3>
-                <button onClick={() => setShowLikersList(false)} className="text-xs text-muted-foreground">✕</button>
+                <button onClick={() => setShowLikersList(false)} className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs">✕</button>
               </div>
               {allLikers.map(liker => (
                 <button key={liker.user_id} onClick={() => { setShowLikersList(false); navigate(`/profile/${liker.user_id}`); }}

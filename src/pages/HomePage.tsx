@@ -47,9 +47,9 @@ const fallbackStylists = [
 ];
 
 const fallbackPosts: Post[] = [
-  { id: "f1", user_id: "", caption: "New summer looks available!", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
-  { id: "f2", user_id: "", caption: "Balayage transformation", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
-  { id: "f3", user_id: "", caption: "Keratin treatment results", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
+  { id: "00000000-0000-0000-0000-000000000001", user_id: "00000000-0000-0000-0000-000000000010", caption: "New summer looks available!", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
+  { id: "00000000-0000-0000-0000-000000000002", user_id: "00000000-0000-0000-0000-000000000020", caption: "Balayage transformation", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
+  { id: "00000000-0000-0000-0000-000000000003", user_id: "00000000-0000-0000-0000-000000000030", caption: "Keratin treatment results", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
 ];
 
 export default function HomePage() {
@@ -147,7 +147,7 @@ export default function HomePage() {
       {/* Header — minimal & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <h1 className="text-xl font-display font-bold tracking-tight text-primary-foreground">STYLE</h1>
+          <img src={logo} alt="Style" className="h-7 object-contain" />
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
