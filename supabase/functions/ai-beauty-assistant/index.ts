@@ -52,21 +52,17 @@ Rispondi in massimo 3-4 paragrafi brevi.`;
       }),
     });
 
+    const FALLBACK_CONTENT = "Ciao! 👋 Al momento il servizio AI è temporaneamente offline. Puoi consultare i nostri professionisti su /stylists per consigli personalizzati. Tornerò presto! ✨";
+
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Troppe richieste, riprova tra poco" }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (response.status === 429 || response.status === 402) {
+        return new Response(JSON.stringify({ content: FALLBACK_CONTENT }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Crediti AI esauriti" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
-      return new Response(JSON.stringify({ error: "Errore AI gateway" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      console.error("AI gateway error:", response.status);
+      return new Response(JSON.stringify({ content: FALLBACK_CONTENT }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
