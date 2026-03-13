@@ -64,8 +64,8 @@ export default function PostCardActions({ postType, postId, userId, userType }: 
             <ChatIcon className="w-3 h-3" /> Chat
           </button>
           <button onClick={openWhatsApp}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500 text-[10px] font-semibold">
-            WhatsApp {phone && <span className="text-green-400/70">{phone}</span>}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-semibold">
+            WhatsApp {phone && <span className="opacity-70">{phone}</span>}
           </button>
         </>
       )}
