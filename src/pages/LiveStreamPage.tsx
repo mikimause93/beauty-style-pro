@@ -17,6 +17,7 @@ import BattleChallengeButton from "@/components/live/BattleChallengeButton";
 import LiveGuestPanel from "@/components/live/LiveGuestPanel";
 import ApplauseAnimation, { useApplause } from "@/components/live/ApplauseAnimation";
 import VoiceNoteButton from "@/components/live/VoiceNoteButton";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 
 interface LiveStream {
