@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 interface Service {
   id: string;
@@ -218,6 +219,7 @@ export default function BookingPage() {
                   <span className="text-xs text-muted-foreground">({professional.review_count || 0} reviews)</span>
                 </div>
               </div>
+              <WhatsAppButton userId={professional.user_id} name={professional.business_name} context="booking" compact />
             </div>
           )}
 
