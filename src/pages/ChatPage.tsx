@@ -68,6 +68,10 @@ export default function ChatPage() {
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioPlayRef = useRef<HTMLAudioElement | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [inCall, setInCall] = useState<"voice" | "video" | null>(null);
+  const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
+  const { translate, translating, targetLang, setTargetLang, LANGUAGES } = useTranslation();
+  const [showLangPicker, setShowLangPicker] = useState(false);
 
   useEffect(() => {
     if (user) loadConversations();
