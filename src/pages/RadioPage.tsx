@@ -2,6 +2,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { SpotifyIcon, YouTubeIcon, RadioTowerIcon } from "@/components/icons/BrandIcons";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import { toast } from "sonner";
