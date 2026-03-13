@@ -1,5 +1,5 @@
-import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,17 +23,37 @@ interface PostCardProps {
   fallbackImage: string;
 }
 
+interface CommentData {
+  id: string;
+  message: string;
+  user_id: string;
+  created_at: string;
+  display_name: string;
+  avatar_url: string | null;
+  like_count: number;
+  liked_by_me: boolean;
+}
+
 export default function PostCard({ post, onShare, onComment, fallbackImage }: PostCardProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [saved, setSaved] = useState(false);
-  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
   const [commentCount, setCommentCount] = useState(post.comment_count);
-  const [comments, setComments] = useState<{ id: string; message: string; name: string; time: string }[]>([]);
+  const [comments, setComments] = useState<CommentData[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
   const [sliderPos, setSliderPos] = useState(50);
+
+  // Check if user already liked this post
+  useEffect(() => {
+    if (user) {
+      supabase.from("post_likes").select("id").eq("user_id", user.id).eq("post_id", post.id).maybeSingle()
+        .then(({ data }) => { if (data) setLiked(true); });
+    }
+  }, [user, post.id]);
 
   const formatTimeAgo = (date: string) => {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -55,6 +75,47 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     }
   };
 
+  const loadComments = async () => {
+    setLoadingComments(true);
+    const { data } = await supabase
+      .from("comments")
+      .select("id, message, user_id, created_at")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true })
+      .limit(50);
+
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map(c => c.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .in("user_id", userIds);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+      setComments(data.map(c => {
+        const p = profileMap.get(c.user_id);
+        return {
+          id: c.id,
+          message: c.message,
+          user_id: c.user_id,
+          created_at: c.created_at,
+          display_name: p?.display_name || "Utente",
+          avatar_url: p?.avatar_url || null,
+          like_count: 0,
+          liked_by_me: false,
+        };
+      }));
+    }
+    setLoadingComments(false);
+  };
+
+  const toggleComments = () => {
+    if (!user) { navigate("/auth"); return; }
+    const next = !showComments;
+    setShowComments(next);
+    if (next && comments.length === 0) loadComments();
+  };
+
   const submitComment = async () => {
     if (!comment.trim() || !user) return;
     const { data, error } = await supabase.from("comments").insert({
@@ -63,11 +124,34 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
       message: comment.trim(),
     }).select().single();
     if (!error && data) {
-      setComments(prev => [...prev, { id: data.id, message: data.message, name: "Tu", time: "ora" }]);
+      const { data: prof } = await supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).maybeSingle();
+      setComments(prev => [...prev, {
+        id: data.id,
+        message: data.message,
+        user_id: user.id,
+        created_at: data.created_at,
+        display_name: prof?.display_name || "Tu",
+        avatar_url: prof?.avatar_url || null,
+        like_count: 0,
+        liked_by_me: false,
+      }]);
       setCommentCount(prev => prev + 1);
       setComment("");
     }
   };
+
+  const toggleCommentLike = (commentId: string) => {
+    setComments(prev => prev.map(c => c.id === commentId ? {
+      ...c,
+      liked_by_me: !c.liked_by_me,
+      like_count: c.like_count + (c.liked_by_me ? -1 : 1),
+    } : c));
+  };
+
+  // Names of people who liked (visible to all)
+  const likeLabel = likeCount > 0
+    ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
+    : "";
 
   return (
     <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
@@ -82,7 +166,9 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           />
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{post.profileData?.display_name || "Beauty Pro"}</p>
+          <button onClick={() => navigate(`/profile/${post.user_id}`)} className="text-sm font-semibold truncate block hover:text-primary transition-colors">
+            {post.profileData?.display_name || "Beauty Pro"}
+          </button>
           <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
         {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
@@ -126,11 +212,9 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         <div className="flex items-center gap-4">
           <button onClick={toggleLike} className="flex items-center gap-1.5 group">
             <Heart className={`w-[22px] h-[22px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
-            <span className="text-xs font-medium text-muted-foreground">{likeCount}</span>
           </button>
-          <button onClick={() => { if (!user) { navigate("/auth"); return; } setShowCommentInput(!showCommentInput); }} className="flex items-center gap-1.5 group">
+          <button onClick={toggleComments} className="flex items-center gap-1.5 group">
             <MessageCircle className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
-            <span className="text-xs font-medium text-muted-foreground">{commentCount}</span>
           </button>
           <button onClick={onShare} className="group">
             <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -151,38 +235,87 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           </button>
         </div>
 
-        {post.caption && <p className="text-sm leading-relaxed">{post.caption}</p>}
+        {/* Like count - visible to all, Facebook/Instagram style */}
+        {likeCount > 0 && (
+          <p className="text-xs font-semibold">
+            {liked && likeCount === 1 ? "Piace a te" :
+             liked ? `Piace a te e altre ${likeCount - 1} persone` :
+             `${likeCount} ${likeCount === 1 ? "like" : "likes"}`}
+          </p>
+        )}
+
+        {/* Caption with username */}
+        {post.caption && (
+          <p className="text-sm leading-relaxed">
+            <button onClick={() => navigate(`/profile/${post.user_id}`)} className="font-semibold mr-1 hover:text-primary transition-colors">
+              {post.profileData?.display_name || "Beauty Pro"}
+            </button>
+            {post.caption}
+          </p>
+        )}
+
+        {/* View all comments link */}
+        {commentCount > 0 && !showComments && (
+          <button onClick={toggleComments} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Visualizza {commentCount > 1 ? `tutti i ${commentCount} commenti` : "1 commento"}
+          </button>
+        )}
 
         {/* Contextual Action Buttons */}
         <PostCardActions postType={post.post_type} postId={post.id} userId={post.user_id} userType={post.profileData?.user_type} />
 
-        {comments.length > 0 && (
-          <div className="space-y-1.5">
+        {/* Comments section */}
+        {showComments && (
+          <div className="space-y-2 fade-in">
+            {loadingComments && (
+              <div className="flex justify-center py-2">
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
             {comments.map(c => (
-              <p key={c.id} className="text-xs">
-                <span className="font-semibold">{c.name}</span>{" "}
-                <span className="text-muted-foreground">{c.message}</span>
-              </p>
+              <div key={c.id} className="flex items-start gap-2">
+                <button onClick={() => navigate(`/profile/${c.user_id}`)}>
+                  <img
+                    src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`}
+                    alt=""
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
+                  />
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs">
+                    <button onClick={() => navigate(`/profile/${c.user_id}`)} className="font-semibold mr-1 hover:text-primary transition-colors">
+                      {c.display_name}
+                    </button>
+                    <span className="text-muted-foreground">{c.message}</span>
+                  </p>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="text-[10px] text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
+                    <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
+                      <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
+                      {c.like_count > 0 && <span className="text-[10px] text-muted-foreground">{c.like_count}</span>}
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
-          </div>
-        )}
 
-        {showCommentInput && (
-          <div className="flex items-center gap-2 fade-in">
-            <input
-              value={comment}
-              onChange={e => setComment(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && submitComment()}
-              placeholder="Scrivi un commento..."
-              className="flex-1 bg-muted rounded-full px-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
-            />
-            <button
-              onClick={submitComment}
-              disabled={!comment.trim()}
-              className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-40 transition-opacity"
-            >
-              Invia
-            </button>
+            {/* Comment input */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && submitComment()}
+                placeholder="Scrivi un commento..."
+                className="flex-1 bg-muted rounded-full px-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
+              />
+              <button
+                onClick={submitComment}
+                disabled={!comment.trim()}
+                className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-40 transition-opacity"
+              >
+                Invia
+              </button>
+            </div>
           </div>
         )}
       </div>

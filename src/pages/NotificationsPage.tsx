@@ -42,6 +42,29 @@ export default function NotificationsPage() {
   const { user } = useAuth();
   const { notifications, unreadCount, loading, markAllRead, markRead, deleteNotification } = useNotifications();
 
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.read) markRead(notification.id);
+    const type = notification.type || "info";
+    const data = notification.data || {};
+
+    // Navigate to relevant content based on notification type
+    if (type === "like" && data.post_id) {
+      navigate(`/`); // Go to home feed where the post is
+    } else if (type === "comment" && data.post_id) {
+      navigate(`/`); // Go to home feed where the post is
+    } else if (type === "message" && data.conversation_id) {
+      navigate(`/chat/${data.conversation_id}`);
+    } else if (type === "follow" && data.follower_id) {
+      navigate(`/profile/${data.follower_id}`);
+    } else if (type === "booking") {
+      navigate("/my-bookings");
+    } else if (type === "tip") {
+      navigate("/wallet");
+    } else if (type === "challenge") {
+      navigate("/challenges");
+    }
+  };
+
   if (!user) {
     return (
       <MobileLayout>
@@ -97,13 +120,7 @@ export default function NotificationsPage() {
             return (
               <button
                 key={notification.id}
-                onClick={() => {
-                  if (!notification.read) markRead(notification.id);
-                  // Navigate based on type
-                  if (type === "message" && notification.data?.conversation_id) navigate(`/chat/${notification.data.conversation_id}`);
-                  else if (type === "follow" && notification.data?.follower_id) navigate(`/stylist/${notification.data.follower_id}`);
-                  else if (type === "booking") navigate("/booking");
-                }}
+                onClick={() => handleNotificationClick(notification)}
                 className={`w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left ${
                   notification.read ? "bg-card" : "bg-primary/5 border border-primary/10"
                 } shadow-card`}
