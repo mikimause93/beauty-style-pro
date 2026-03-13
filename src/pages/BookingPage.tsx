@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 interface Service {
   id: string;
