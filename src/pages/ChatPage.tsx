@@ -107,6 +107,17 @@ export default function ChatPage() {
     }, 300);
   }, [searchQuery, user]);
 
+  // Auto-translate helper
+  const autoTranslateMsg = async (msgId: string, content: string) => {
+    if (!autoTranslate || !content.trim() || content.startsWith("[")) return;
+    try {
+      const translated = await translate(content);
+      if (translated && translated !== content) {
+        setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
+      }
+    } catch { /* silent */ }
+  };
+
   // Realtime subscription for messages
   useEffect(() => {
     if (!selectedChat) return;
@@ -120,20 +131,30 @@ export default function ChatPage() {
       }, (payload) => {
         const msg = payload.new as any;
         if (msg.sender_id !== user?.id) {
-          setMessages(prev => [...prev, {
+          const newMsg = {
             id: msg.id,
-            sender: "other",
+            sender: "other" as const,
             content: msg.content,
             time: new Date(msg.created_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }),
-            type: msg.message_type || "text",
+            type: (msg.message_type || "text") as MessageType,
             mediaUrl: msg.image_url,
-          }]);
+          };
+          setMessages(prev => [...prev, newMsg]);
+          // Auto-translate incoming message in real-time
+          autoTranslateMsg(msg.id, msg.content);
         }
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [selectedChat, user]);
+  }, [selectedChat, user, autoTranslate, targetLang]);
+
+  // Auto-translate all existing "other" messages when language changes or autoTranslate turns on
+  useEffect(() => {
+    if (!autoTranslate || messages.length === 0) return;
+    const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
+    otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
+  }, [autoTranslate, targetLang, messages.length]);
 
   const loadConversations = async () => {
     if (!user) return;
