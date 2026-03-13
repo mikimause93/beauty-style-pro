@@ -94,6 +94,7 @@ export default function LiveStreamPage() {
   const { awardCoins } = useQRCoinRewards();
   const { pause: pauseRadio } = useRadio();
   const { claps, triggerApplause } = useApplause();
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
