@@ -81,13 +81,50 @@ export default function MapSearchPage() {
   };
 
   const loadProfessionals = async () => {
+    // Load both professionals AND registered profiles with GPS
     const { data } = await supabase.from("professionals")
       .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id");
+    
+    // Also load profiles that have coordinates (registered users nearby)
+    const { data: profilesWithGps } = await supabase.from("profiles")
+      .select("user_id, display_name, avatar_url, city, latitude, longitude, user_type")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .limit(50);
+
+    const allPros: Professional[] = [];
+    
     if (data && data.length > 0) {
-      setProfessionals(data.map((p: any) => ({
-        ...p,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
-      })));
+      data.forEach((p: any) => {
+        allPros.push({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` });
+      });
+    }
+    
+    // Add registered users with GPS as markers (if they're professionals/businesses)
+    if (profilesWithGps) {
+      profilesWithGps.forEach(p => {
+        if ((p.user_type === "professional" || p.user_type === "business") && !allPros.find(pro => pro.id === p.user_id)) {
+          allPros.push({
+            id: p.user_id,
+            business_name: p.display_name || "Utente",
+            specialty: p.user_type === "business" ? "Business" : "Professionista",
+            city: p.city,
+            rating: null,
+            review_count: null,
+            hourly_rate: null,
+            latitude: p.latitude,
+            longitude: p.longitude,
+            address: null,
+            description: null,
+            is_verified: null,
+            avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.user_id}`,
+          });
+        }
+      });
+    }
+
+    if (allPros.length > 0) {
+      setProfessionals(allPros);
     } else {
       setProfessionals([
         { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, latitude: 45.47, longitude: 9.19, address: "Via Montenapoleone 12", description: "Balayage specialist", is_verified: true, avatar: stylist2 },
