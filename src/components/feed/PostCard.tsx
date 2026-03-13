@@ -49,6 +49,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
   const [loadingComments, setLoadingComments] = useState(false);
   const [sliderPos, setSliderPos] = useState(50);
   const [likerNames, setLikerNames] = useState<string[]>([]);
+  const [applauded, setApplauded] = useState(false);
+  const [applauseCount, setApplauseCount] = useState(0);
 
   // Check if user already liked this post
   useEffect(() => {
