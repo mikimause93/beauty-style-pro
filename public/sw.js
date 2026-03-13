@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stayle-beauty-v1';
+const CACHE_NAME = 'stayle-beauty-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -34,82 +34,75 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-  
-  // Skip API requests (Supabase)
   if (event.request.url.includes('supabase.co')) return;
-  
+  // Never cache OAuth redirects
+  if (event.request.url.includes('/~oauth')) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone the response
         const responseClone = response.clone();
-        
-        // Cache successful responses
         if (response.status === 200) {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });
         }
-        
         return response;
       })
       .catch(() => {
-        // Fallback to cache
         return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          
-          // Return offline page for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-          
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') return caches.match('/');
           return new Response('Offline', { status: 503 });
         });
       })
   );
 });
 
-// Push notifications
+// Push notifications - social style with preview
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {};
-  
+
   const options = {
-    body: data.body || 'Nuova notifica da Stayle',
+    body: data.body || data.message || 'Nuova notifica da Style',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
-    vibrate: [100, 50, 100],
+    badge: '/icons/icon-192x192.png',
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'style-notification',
+    renotify: true,
+    requireInteraction: false,
+    silent: false,
     data: {
-      url: data.url || '/'
+      url: data.url || '/notifications'
     },
     actions: [
-      { action: 'open', title: 'Apri' },
-      { action: 'close', title: 'Chiudi' }
+      { action: 'open', title: '📲 Apri' },
+      { action: 'close', title: '✕ Chiudi' }
     ]
   };
-  
+
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Stayle Beauty', options)
+    self.registration.showNotification(data.title || '💜 Style', options)
   );
 });
 
-// Notification click
+// Notification click - navigate to relevant content
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
+
   if (event.action === 'close') return;
-  
-  const url = event.notification.data?.url || '/';
-  
+
+  const url = event.notification.data?.url || '/notifications';
+
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      // Focus existing window if open
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Focus existing window
       for (const client of clientList) {
-        if (client.url === url && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          client.navigate(url);
+          return;
         }
       }
       // Open new window
@@ -128,10 +121,8 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncBookings() {
-  // Sync offline bookings when back online
   const cache = await caches.open('stayle-offline-actions');
   const requests = await cache.keys();
-  
   for (const request of requests) {
     try {
       await fetch(request);

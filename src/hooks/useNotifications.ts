@@ -12,11 +12,81 @@ export interface AppNotification {
   created_at: string;
 }
 
+// Request push notification permission and register SW
+async function registerPushNotifications() {
+  if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
+  
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") return;
+    
+    // SW is already registered via index.html
+    const registration = await navigator.serviceWorker.ready;
+    console.log("Push notifications ready via SW:", registration.scope);
+  } catch (err) {
+    console.warn("Push notification setup failed:", err);
+  }
+}
+
+// Show a local notification when app is in background
+function showLocalNotification(notif: AppNotification) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (document.visibilityState === "visible") return; // Don't show if app is focused
+
+  const typeEmoji: Record<string, string> = {
+    like: "❤️", comment: "💬", booking: "📅", tip: "💰",
+    follow: "👤", challenge: "🏆", message: "✉️", system: "🔔", info: "ℹ️",
+  };
+
+  const icon = "/icons/icon-192x192.png";
+  const badge = "/icons/icon-192x192.png";
+  const emoji = typeEmoji[notif.type] || "🔔";
+
+  try {
+    const options: NotificationOptions = {
+      body: notif.message,
+      icon,
+      badge,
+      tag: notif.id,
+      silent: false,
+      data: { url: getNotificationUrl(notif) },
+    };
+    new Notification(`${emoji} ${notif.title}`, options);
+  } catch {
+    // Fallback: use SW notification
+    navigator.serviceWorker?.ready.then(reg => {
+      reg.showNotification(`${emoji} ${notif.title}`, {
+        body: notif.message,
+        icon,
+        badge,
+        tag: notif.id,
+        data: { url: getNotificationUrl(notif) },
+      } as NotificationOptions);
+    });
+  }
+}
+
+function getNotificationUrl(notif: AppNotification): string {
+  const type = notif.type || "info";
+  const data = notif.data || {};
+  if (type === "message" && data.conversation_id) return `/chat/${data.conversation_id}`;
+  if (type === "follow" && data.follower_id) return `/profile/${data.follower_id}`;
+  if (type === "booking") return "/my-bookings";
+  if (type === "tip") return "/wallet";
+  if (type === "challenge") return "/challenges";
+  return "/notifications";
+}
+
 export function useNotifications() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Request push permission on mount
+  useEffect(() => {
+    if (user) registerPushNotifications();
+  }, [user]);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) { setNotifications([]); setUnreadCount(0); setLoading(false); return; }
@@ -37,7 +107,7 @@ export function useNotifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // Real-time subscription
+  // Real-time subscription + local push notification
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -51,6 +121,9 @@ export function useNotifications() {
         const newNotif = payload.new as AppNotification;
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
+        
+        // Show push notification when app is in background/closed
+        showLocalNotification(newNotif);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
