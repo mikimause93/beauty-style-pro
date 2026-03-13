@@ -419,11 +419,14 @@ export default function ChatPage() {
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
             <MessageCircle className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Phone className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+            <Phone className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <Video className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+            <Video className="w-4 h-4 text-primary-foreground" />
+          </button>
+          <button onClick={() => setShowLangPicker(!showLangPicker)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
+            <Languages className="w-4 h-4 text-muted-foreground" />
           </button>
         </header>
 
