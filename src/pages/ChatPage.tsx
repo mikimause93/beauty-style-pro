@@ -490,6 +490,14 @@ export default function ChatPage() {
                   </a>
                 )}
                 {msg.content && <p className="text-sm">{msg.content}</p>}
+                {msg.content && translatedMessages[msg.id] && (
+                  <p className="text-xs italic text-muted-foreground mt-1 border-t border-border/30 pt-1">🌐 {translatedMessages[msg.id]}</p>
+                )}
+                {msg.content && msg.sender === "other" && (
+                  <button onClick={() => translateMessage(msg.id, msg.content)} className="text-[9px] text-primary hover:underline mt-0.5">
+                    {translating ? "⏳" : translatedMessages[msg.id] ? "Originale" : "🌐 Traduci"}
+                  </button>
+                )}
                 {msg.type !== "image" && msg.type !== "video" && (
                   <p className={`text-[10px] mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</p>
                 )}
