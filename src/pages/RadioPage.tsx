@@ -70,19 +70,17 @@ export default function RadioPage() {
         </div>
 
         {/* Source Tabs */}
-         <div className="flex gap-1 mt-3">
+        <div className="flex gap-1 mt-3">
           {sourceTabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setSource(tab.key)}
               className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                 source === tab.key
-                  ? `bg-foreground text-background`
-                  : `text-muted-foreground hover:text-foreground`
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground"
               }`}>
               <span className={source === tab.key ? "" : tab.color}>{tab.icon}</span>
-              }`}
-            >
               {tab.label}
             </button>
           ))}
