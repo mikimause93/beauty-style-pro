@@ -57,6 +57,7 @@ export default function LiveBattlePage() {
   const [tipSide, setTipSide] = useState<"a" | "b">("a");
   const [tipAmount, setTipAmount] = useState(5);
   const [loading, setLoading] = useState(true);
+  const [showReport, setShowReport] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchBattles(); }, []);
