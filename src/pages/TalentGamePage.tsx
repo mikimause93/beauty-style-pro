@@ -51,6 +51,8 @@ export default function TalentGamePage() {
   const [selectedContestant, setSelectedContestant] = useState<Contestant | null>(null);
   const [hasVoted, setHasVoted] = useState<string[]>([]);
   const [voteAnimation, setVoteAnimation] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [reportTarget, setReportTarget] = useState<string>("");
 
   const filtered = activeCategory === "Tutti" ? contestants : contestants.filter(c => c.category === activeCategory);
 
