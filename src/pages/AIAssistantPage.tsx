@@ -45,6 +45,7 @@ export default function AIAssistantPage() {
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
   
   const { speak, cancel: cancelTTS } = useVoiceSynthesis();
+  const { processVoiceCommand } = useStellaVoiceActions();
   
   const {
     isListening, transcript, startListening, stopListening, resetTranscript,
