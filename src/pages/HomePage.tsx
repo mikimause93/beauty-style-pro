@@ -147,7 +147,7 @@ export default function HomePage() {
       {/* Header — minimal & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <img src={logo} alt="Style" className="h-7 object-contain" />
+          <span className="text-xl font-display font-bold italic text-primary tracking-tight">Style</span>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
