@@ -602,7 +602,12 @@ export default function ChatPage() {
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-display font-bold">Chat</h1>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-display font-bold">Chat</h1>
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
