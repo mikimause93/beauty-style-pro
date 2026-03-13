@@ -190,7 +190,7 @@ export default function MapSearchPage() {
           lat: p.latitude!,
           lng: p.longitude!,
           label: p.business_name,
-          sublabel: `${p.specialty || "Beauty"} · ${p.distance}km`,
+          sublabel: `${p.specialty || "Beauty"} · ${p.distance}km · ${p.rating ? `★${p.rating}` : ""} · Disponibile`,
           type: p.is_verified ? "premium" : "salon",
           rating: p.rating || undefined,
           onClick: () => navigate(`/stylist/${p.id}`),
