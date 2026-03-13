@@ -179,7 +179,20 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     } : c));
   };
 
-  // Like label with real names visible to all
+  // Like label with real names visible to all — clickable
+  const [showLikersList, setShowLikersList] = useState(false);
+  const [allLikers, setAllLikers] = useState<{ user_id: string; display_name: string; avatar_url: string | null }[]>([]);
+
+  const loadAllLikers = async () => {
+    const { data } = await supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(50);
+    if (data && data.length > 0) {
+      const ids = data.map(d => d.user_id);
+      const { data: profiles } = await supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", ids);
+      if (profiles) setAllLikers(profiles.map(p => ({ user_id: p.user_id, display_name: p.display_name || "Utente", avatar_url: p.avatar_url })));
+    }
+    setShowLikersList(true);
+  };
+
   const getLikeLabel = () => {
     if (likeCount === 0) return "";
     if (liked && likeCount === 1) return "Piace a te";
