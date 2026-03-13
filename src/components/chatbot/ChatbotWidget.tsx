@@ -120,14 +120,16 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (!command) return;
     setVoicePhase("processing");
     
-    // Try voice action first
+    // Try voice action first (navigation, messages, etc.)
     const result = executeVoiceCommand(command);
     
     if (result.matched) {
       setVoicePhase("speaking");
+      toast.success(result.response);
+      // Auto-close after short delay so user sees the navigated page
       setTimeout(() => {
         endVoiceCall();
-      }, 1500);
+      }, 800);
       return;
     }
 
