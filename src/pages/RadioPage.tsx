@@ -21,6 +21,7 @@ type MusicSource = "radio" | "spotify" | "youtube";
 type RadioFilter = "all" | "italia" | "beauty";
 
 export default function RadioPage() {
+  const navigate = useNavigate();
   const { isPlaying, loading, error, currentStation, volume, toggle, nextStation, prevStation, play, changeVolume, stations } = useRadio();
   const [liked, setLiked] = useState(false);
   const [source, setSource] = useState<MusicSource>("radio");
