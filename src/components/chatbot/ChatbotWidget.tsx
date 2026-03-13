@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import {
   MessageCircle, X, Send, Sparkles, Minimize2, Maximize2,
   Calendar, MapPin, ShoppingBag, Video, Wallet, Briefcase,
-  Star, Radio, Bot, User, Loader2
+  Star, Radio, Bot, User, Loader2, Mic, MicOff, Phone, PhoneOff
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
+import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
+import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { toast } from "sonner";
 
 interface ChatMsg {
@@ -56,6 +58,133 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [chatInput, setChatInput] = useState("");
   const [isAILoading, setIsAILoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Voice call state
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
+  const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
+  
+  const { executeVoiceCommand } = useStellaVoiceActions();
+
+  // Wake word detection
+  const {
+    isListening: isVoiceListening,
+    transcript: voiceTranscript,
+    interimTranscript,
+    isSupported: voiceSupported,
+    isWakeWordListening,
+    startListening,
+    stopListening,
+    resetTranscript,
+    startWakeWordListening,
+    stopWakeWordListening,
+  } = useVoiceRecognition({
+    continuous: true,
+    wakeWordEnabled: true,
+    wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
+    onWakeWordDetected: () => {
+      // Wake word detected — activate voice call UI
+      setIsVoiceCallActive(true);
+      setVoicePhase("listening");
+      toast("🎙️ Stella ti ascolta...", { duration: 2000 });
+    },
+  });
+
+  // Auto-start wake word listening when component mounts
+  useEffect(() => {
+    if (voiceSupported && user) {
+      const timer = setTimeout(() => {
+        startWakeWordListening();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [voiceSupported, user]);
+
+  // Re-start wake word listening after voice call ends
+  useEffect(() => {
+    if (!isVoiceCallActive && !isWakeWordListening && voiceSupported && user) {
+      const timer = setTimeout(() => {
+        startWakeWordListening();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVoiceCallActive, isWakeWordListening, voiceSupported, user]);
+
+  // Process voice command when transcript changes during call
+  useEffect(() => {
+    if (isVoiceCallActive && voiceTranscript && !isVoiceListening) {
+      processVoiceCommand(voiceTranscript.trim());
+    }
+  }, [isVoiceCallActive, voiceTranscript, isVoiceListening]);
+
+  const processVoiceCommand = async (command: string) => {
+    if (!command) return;
+    setVoicePhase("processing");
+    
+    // Try voice action first
+    const handled = executeVoiceCommand(command);
+    
+    if (handled) {
+      setVoicePhase("speaking");
+      setTimeout(() => {
+        endVoiceCall();
+      }, 1500);
+      return;
+    }
+
+    // If not a navigation command, send to AI
+    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
+    setChatMessages(prev => [...prev, userMsg]);
+    setIsMinimized(false);
+    setIsAILoading(true);
+    setVoicePhase("speaking");
+
+    const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    let assistantSoFar = "";
+
+    try {
+      await streamChat({
+        userId: user!.id,
+        messages: history as any,
+        onDelta: (chunk) => {
+          assistantSoFar += chunk;
+          const currentContent = assistantSoFar;
+          setChatMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "assistant" && last.id === "streaming") {
+              return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+            }
+            return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
+          });
+        },
+        onDone: () => {
+          setChatMessages(prev => prev.map(m =>
+            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
+          ));
+          setIsAILoading(false);
+          endVoiceCall();
+        },
+        onError: (error) => {
+          toast.error(error);
+          setIsAILoading(false);
+          endVoiceCall();
+        },
+      });
+    } catch {
+      setIsAILoading(false);
+      endVoiceCall();
+    }
+  };
+
+  const endVoiceCall = () => {
+    stopListening();
+    resetTranscript();
+    setIsVoiceCallActive(false);
+    setVoicePhase("listening");
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -147,6 +276,82 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
   return (
     <div className={`fixed bottom-20 right-4 z-50 ${className}`}>
+      {/* Voice Call Overlay — Alexa-style */}
+      <AnimatePresence>
+        {isVoiceCallActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center"
+          >
+            {/* Animated ring */}
+            <div className="relative mb-8">
+              <motion.div
+                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.1, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute inset-0 w-40 h-40 rounded-full bg-primary/20 -m-6"
+              />
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.2, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                className="absolute inset-0 w-32 h-32 rounded-full bg-primary/30 -m-2"
+              />
+              <div className="w-28 h-28 rounded-full gradient-primary flex items-center justify-center shadow-glow relative z-10">
+                <Sparkles className="w-12 h-12 text-primary-foreground" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-display font-bold mb-2">Stella</h2>
+            <p className="text-sm text-muted-foreground mb-1">
+              {voicePhase === "listening" && "Ti ascolto..."}
+              {voicePhase === "processing" && "Sto elaborando..."}
+              {voicePhase === "speaking" && "Rispondo..."}
+            </p>
+
+            {/* Show what user is saying */}
+            {(voiceTranscript || interimTranscript) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 px-6 py-3 rounded-2xl bg-card border border-border/50 max-w-[80%]"
+              >
+                <p className="text-sm text-center">
+                  {voiceTranscript || interimTranscript}
+                </p>
+              </motion.div>
+            )}
+
+            {/* Listening indicator */}
+            {voicePhase === "listening" && (
+              <div className="flex items-center gap-1 mt-6">
+                {[0, 1, 2, 3, 4].map(i => (
+                  <motion.div
+                    key={i}
+                    animate={{ height: [8, 24, 8] }}
+                    transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+                    className="w-1 rounded-full bg-primary"
+                  />
+                ))}
+              </div>
+            )}
+
+            {voicePhase === "processing" && (
+              <Loader2 className="w-6 h-6 animate-spin text-primary mt-6" />
+            )}
+
+            {/* End call button */}
+            <button
+              onClick={endVoiceCall}
+              className="mt-10 w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
+            >
+              <PhoneOff className="w-7 h-7 text-destructive-foreground" />
+            </button>
+            <p className="text-[10px] text-muted-foreground mt-2">Tocca per chiudere</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {!isMinimized && (
           <motion.div
@@ -165,10 +370,19 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Stella AI</h4>
-                  <p className="text-[10px] text-muted-foreground">Assistente STYLE con streaming</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {isWakeWordListening ? '🎙️ Dì "Stella" per attivare' : "Assistente STYLE"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {/* Voice call button */}
+                <button 
+                  onClick={() => { setIsVoiceCallActive(true); setVoicePhase("listening"); startListening(); }}
+                  className="w-7 h-7 rounded-lg bg-primary/20 hover:bg-primary/30 flex items-center justify-center transition-colors"
+                >
+                  <Mic className="w-3.5 h-3.5 text-primary" />
+                </button>
                 <button onClick={() => setIsFullscreen(!isFullscreen)}
                   className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors">
                   {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -338,7 +552,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
         )}
       </AnimatePresence>
 
-      {/* FAB Button */}
+      {/* FAB Button — with wake word indicator */}
       {isMinimized && (
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
@@ -349,6 +563,9 @@ export default function ChatbotWidget({ className = "" }: Props) {
           style={{ width: 52, height: 52 }}
         >
           <Sparkles className="w-6 h-6 text-primary-foreground" />
+          {isWakeWordListening && (
+            <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+          )}
           {suggestions.length > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
               {suggestions.length}
