@@ -223,14 +223,17 @@ serve(async (req) => {
       return jsonResponse({ error: "Nessun messaggio fornito" }, 400);
     }
 
+    // Fallback message when AI is unavailable
+    const FALLBACK_REPLY = "Ciao! 👋 Al momento Stella AI è temporaneamente offline per manutenzione. Puoi comunque usare tutte le funzionalità dell'app: prenota su /stylists, esplora lo shop su /shop, gestisci il wallet su /wallet. Tornerò presto! ✨";
+
     // ── STREAMING ──
     if (stream) {
       const response = await callAI(LOVABLE_API_KEY, enrichedPrompt, chatMessages, { stream: true });
 
       if (!response.ok) {
-        if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
-        if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
-        return jsonResponse({ error: "Errore AI" }, 500);
+        if (response.status === 429) return jsonResponse({ reply: "⏳ Troppe richieste, riprova tra qualche secondo.", role: role || "auto" });
+        if (response.status === 402) return jsonResponse({ reply: FALLBACK_REPLY, role: role || "auto" });
+        return jsonResponse({ reply: FALLBACK_REPLY, role: role || "auto" });
       }
 
       return new Response(response.body, {
@@ -242,9 +245,9 @@ serve(async (req) => {
     const response = await callAI(LOVABLE_API_KEY, enrichedPrompt, chatMessages);
 
     if (!response.ok) {
-      if (response.status === 429) return jsonResponse({ error: "Troppe richieste" }, 429);
-      if (response.status === 402) return jsonResponse({ error: "Crediti AI esauriti" }, 402);
-      return jsonResponse({ error: "Errore AI" }, 500);
+      if (response.status === 429) return jsonResponse({ reply: "⏳ Troppe richieste, riprova tra qualche secondo.", role: role || "auto" });
+      if (response.status === 402) return jsonResponse({ reply: FALLBACK_REPLY, role: role || "auto" });
+      return jsonResponse({ reply: FALLBACK_REPLY, role: role || "auto" });
     }
 
     const result = await response.json();
