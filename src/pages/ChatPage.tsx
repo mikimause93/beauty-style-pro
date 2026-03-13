@@ -445,8 +445,8 @@ export default function ChatPage() {
           <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
             <Video className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => setShowLangPicker(!showLangPicker)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
-            <Languages className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => setShowLangPicker(!showLangPicker)} className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
+            <Languages className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </button>
         </header>
         {/* In-call overlay */}
@@ -464,13 +464,24 @@ export default function ChatPage() {
 
         {/* Language picker */}
         {showLangPicker && (
-          <div className="px-4 py-2 bg-card border-b border-border flex gap-2 flex-wrap fade-in">
+          <div className="px-4 py-2 bg-card border-b border-border space-y-2 fade-in">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground">Traduzione automatica in tempo reale</span>
+              <button
+                onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione automatica attivata"); else { toast.info("Traduzione automatica disattivata"); setTranslatedMessages({}); } }}
+                className={`w-10 h-5 rounded-full transition-colors relative ${autoTranslate ? "bg-primary" : "bg-muted"}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-primary-foreground absolute top-0.5 transition-all ${autoTranslate ? "left-5.5" : "left-0.5"}`} />
+              </button>
+            </div>
+            <div className="flex gap-2 flex-wrap">
             {LANGUAGES.map(lang => (
-              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setShowLangPicker(false); toast.success(`Traduzione: ${lang.label}`); }}
+              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setTranslatedMessages({}); setShowLangPicker(false); toast.success(`Lingua: ${lang.label}`); }}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${targetLang === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                 {lang.label}
               </button>
             ))}
+            </div>
           </div>
         )}
 
