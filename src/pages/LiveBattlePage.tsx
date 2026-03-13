@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
 import MobileLayout from "@/components/layout/MobileLayout";
 import LiveShopPanel from "@/components/live/LiveShopPanel";
+import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
 
 interface Battle {
