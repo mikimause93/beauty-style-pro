@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, Trophy, Star, Users, Crown, Heart, Flame, Sparkles, Play, Eye, Music, Video, Mic, Share2, ChevronRight, Award, Zap } from "lucide-react";
+import { ArrowLeft, Coins, Trophy, Star, Users, Crown, Heart, Flame, Sparkles, Play, Eye, Music, Video, Mic, Share2, ChevronRight, Award, Zap, Flag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
