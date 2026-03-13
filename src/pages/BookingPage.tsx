@@ -122,11 +122,12 @@ export default function BookingPage() {
     if (error) {
       console.error("Booking error:", error);
       toast.error("Errore nella prenotazione");
+      setLoading(false);
     } else {
-      setConfirmed(true);
-      toast.success("Prenotazione confermata!");
+      toast.success("Prenotazione confermata! Procedi al pagamento.");
+      // Redirect to checkout with booking details
+      navigate(`/checkout?service=${encodeURIComponent(selectedServiceData?.name || '')}&amount=${selectedServiceData?.price || 0}&booking=true`);
     }
-    setLoading(false);
   };
 
   if (confirmed) {
