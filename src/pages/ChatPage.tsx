@@ -69,7 +69,7 @@ export default function ChatPage() {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [inCall, setInCall] = useState<"voice" | "video" | null>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
-  const { translate, translating, targetLang, setTargetLang, LANGUAGES } = useTranslation();
+  const { translate, translating, targetLang, setTargetLang, autoTranslate, setAutoTranslate, LANGUAGES } = useTranslation();
   const [showLangPicker, setShowLangPicker] = useState(false);
 
   useEffect(() => {
@@ -107,6 +107,17 @@ export default function ChatPage() {
     }, 300);
   }, [searchQuery, user]);
 
+  // Auto-translate helper
+  const autoTranslateMsg = async (msgId: string, content: string) => {
+    if (!autoTranslate || !content.trim() || content.startsWith("[")) return;
+    try {
+      const translated = await translate(content);
+      if (translated && translated !== content) {
+        setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
+      }
+    } catch { /* silent */ }
+  };
+
   // Realtime subscription for messages
   useEffect(() => {
     if (!selectedChat) return;
@@ -120,20 +131,30 @@ export default function ChatPage() {
       }, (payload) => {
         const msg = payload.new as any;
         if (msg.sender_id !== user?.id) {
-          setMessages(prev => [...prev, {
+          const newMsg = {
             id: msg.id,
-            sender: "other",
+            sender: "other" as const,
             content: msg.content,
             time: new Date(msg.created_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }),
-            type: msg.message_type || "text",
+            type: (msg.message_type || "text") as MessageType,
             mediaUrl: msg.image_url,
-          }]);
+          };
+          setMessages(prev => [...prev, newMsg]);
+          // Auto-translate incoming message in real-time
+          autoTranslateMsg(msg.id, msg.content);
         }
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [selectedChat, user]);
+  }, [selectedChat, user, autoTranslate, targetLang]);
+
+  // Auto-translate all existing "other" messages when language changes or autoTranslate turns on
+  useEffect(() => {
+    if (!autoTranslate || messages.length === 0) return;
+    const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
+    otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
+  }, [autoTranslate, targetLang, messages.length]);
 
   const loadConversations = async () => {
     if (!user) return;
@@ -351,14 +372,8 @@ export default function ChatPage() {
     toast.success("Chiamata terminata");
   };
 
-  const translateMessage = async (msgId: string, text: string) => {
-    if (translatedMessages[msgId]) {
-      setTranslatedMessages(prev => { const n = { ...prev }; delete n[msgId]; return n; });
-      return;
-    }
-    const translated = await translate(text);
-    setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
-  };
+  // Clear translations cache when target language changes
+  const clearTranslations = () => setTranslatedMessages({});
 
   const filteredConversations = conversations.filter(c =>
     !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -424,8 +439,8 @@ export default function ChatPage() {
           <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
             <Video className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => setShowLangPicker(!showLangPicker)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center relative">
-            <Languages className="w-4 h-4 text-muted-foreground" />
+          <button onClick={() => setShowLangPicker(!showLangPicker)} className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
+            <Languages className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </button>
         </header>
         {/* In-call overlay */}
@@ -443,13 +458,24 @@ export default function ChatPage() {
 
         {/* Language picker */}
         {showLangPicker && (
-          <div className="px-4 py-2 bg-card border-b border-border flex gap-2 flex-wrap fade-in">
+          <div className="px-4 py-2 bg-card border-b border-border space-y-2 fade-in">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground">Traduzione automatica in tempo reale</span>
+              <button
+                onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione automatica attivata"); else { toast.info("Traduzione automatica disattivata"); setTranslatedMessages({}); } }}
+                className={`w-10 h-5 rounded-full transition-colors relative ${autoTranslate ? "bg-primary" : "bg-muted"}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-primary-foreground absolute top-0.5 transition-all ${autoTranslate ? "left-5.5" : "left-0.5"}`} />
+              </button>
+            </div>
+            <div className="flex gap-2 flex-wrap">
             {LANGUAGES.map(lang => (
-              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setShowLangPicker(false); toast.success(`Traduzione: ${lang.label}`); }}
+              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setTranslatedMessages({}); setShowLangPicker(false); toast.success(`Lingua: ${lang.label}`); }}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${targetLang === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                 {lang.label}
               </button>
             ))}
+            </div>
           </div>
         )}
 
@@ -490,12 +516,9 @@ export default function ChatPage() {
                 )}
                 {msg.content && <p className="text-sm">{msg.content}</p>}
                 {msg.content && translatedMessages[msg.id] && (
-                  <p className="text-xs italic text-muted-foreground mt-1 border-t border-border/30 pt-1">🌐 {translatedMessages[msg.id]}</p>
-                )}
-                {msg.content && msg.sender === "other" && (
-                  <button onClick={() => translateMessage(msg.id, msg.content)} className="text-[9px] text-primary hover:underline mt-0.5">
-                    {translating ? "⏳" : translatedMessages[msg.id] ? "Originale" : "🌐 Traduci"}
-                  </button>
+                  <p className={`text-xs italic mt-1 border-t pt-1 ${msg.sender === "me" ? "border-primary-foreground/20 text-primary-foreground/70" : "border-border/30 text-muted-foreground"}`}>
+                    🌐 {translatedMessages[msg.id]}
+                  </p>
                 )}
                 {msg.type !== "image" && msg.type !== "video" && (
                   <p className={`text-[10px] mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</p>
