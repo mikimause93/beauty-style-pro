@@ -61,12 +61,17 @@ export async function streamAI(options: AIRouterOptions & {
     options.onError?.("Troppe richieste, riprova tra poco");
     return;
   }
-  if (resp.status === 402) {
-    options.onError?.("Crediti AI esauriti");
-    return;
-  }
-  if (!resp.ok || !resp.body) {
-    options.onError?.("Errore nella risposta AI");
+  if (!resp.ok) {
+    // Try to extract fallback reply from JSON response
+    try {
+      const fallback = await resp.json();
+      if (fallback?.reply) {
+        options.onDelta(fallback.reply);
+        options.onDone();
+        return;
+      }
+    } catch {}
+    options.onError?.("Servizio AI temporaneamente non disponibile");
     return;
   }
 
