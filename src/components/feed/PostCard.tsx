@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Calendar, Phone, ChevronLeft, ChevronRight, ThumbsUp, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +32,8 @@ interface CommentData {
   avatar_url: string | null;
   like_count: number;
   liked_by_me: boolean;
+  applause_count: number;
+  applauded_by_me: boolean;
 }
 
 export default function PostCard({ post, onShare, onComment, fallbackImage }: PostCardProps) {
@@ -46,6 +48,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [sliderPos, setSliderPos] = useState(50);
+  const [likerNames, setLikerNames] = useState<string[]>([]);
 
   // Check if user already liked this post
   useEffect(() => {
@@ -54,6 +57,20 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         .then(({ data }) => { if (data) setLiked(true); });
     }
   }, [user, post.id]);
+
+  // Fetch names of people who liked (visible to all)
+  useEffect(() => {
+    if (likeCount > 0) {
+      supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(3)
+        .then(async ({ data }) => {
+          if (data && data.length > 0) {
+            const ids = data.map(d => d.user_id);
+            const { data: profiles } = await supabase.from("profiles").select("display_name").in("user_id", ids);
+            if (profiles) setLikerNames(profiles.map(p => p.display_name || "Utente").filter(Boolean));
+          }
+        });
+    }
+  }, [post.id, likeCount]);
 
   const formatTimeAgo = (date: string) => {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -103,6 +120,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           avatar_url: p?.avatar_url || null,
           like_count: 0,
           liked_by_me: false,
+          applause_count: 0,
+          applauded_by_me: false,
         };
       }));
     }
@@ -134,6 +153,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         avatar_url: prof?.avatar_url || null,
         like_count: 0,
         liked_by_me: false,
+        applause_count: 0,
+        applauded_by_me: false,
       }]);
       setCommentCount(prev => prev + 1);
       setComment("");
@@ -148,10 +169,31 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     } : c));
   };
 
-  // Names of people who liked (visible to all)
-  const likeLabel = likeCount > 0
-    ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
-    : "";
+  const toggleCommentApplause = (commentId: string) => {
+    setComments(prev => prev.map(c => c.id === commentId ? {
+      ...c,
+      applauded_by_me: !c.applauded_by_me,
+      applause_count: c.applause_count + (c.applauded_by_me ? -1 : 1),
+    } : c));
+  };
+
+  // Like label with real names visible to all
+  const getLikeLabel = () => {
+    if (likeCount === 0) return "";
+    if (liked && likeCount === 1) return "Piace a te";
+    if (liked && likerNames.length > 0) {
+      const others = likerNames.filter(n => n !== "Tu").slice(0, 2);
+      return others.length > 0
+        ? `Piace a te, ${others.join(", ")} ${likeCount > others.length + 1 ? `e altri ${likeCount - others.length - 1}` : ""}`
+        : `Piace a te e altre ${likeCount - 1} persone`;
+    }
+    if (likerNames.length > 0) {
+      return likeCount <= 3
+        ? `Piace a ${likerNames.join(", ")}`
+        : `Piace a ${likerNames.slice(0, 2).join(", ")} e altri ${likeCount - 2}`;
+    }
+    return `${likeCount} ${likeCount === 1 ? "like" : "likes"}`;
+  };
 
   return (
     <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
@@ -235,13 +277,9 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           </button>
         </div>
 
-        {/* Like count - visible to all, Facebook/Instagram style */}
+        {/* Like count with names - visible to all */}
         {likeCount > 0 && (
-          <p className="text-xs font-semibold">
-            {liked && likeCount === 1 ? "Piace a te" :
-             liked ? `Piace a te e altre ${likeCount - 1} persone` :
-             `${likeCount} ${likeCount === 1 ? "like" : "likes"}`}
-          </p>
+          <p className="text-xs font-semibold">{getLikeLabel()}</p>
         )}
 
         {/* Caption with username */}
@@ -290,9 +328,15 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                   </p>
                   <div className="flex items-center gap-3 mt-0.5">
                     <span className="text-[10px] text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
+                    {/* Like */}
                     <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
                       <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
                       {c.like_count > 0 && <span className="text-[10px] text-muted-foreground">{c.like_count}</span>}
+                    </button>
+                    {/* Applause */}
+                    <button onClick={() => toggleCommentApplause(c.id)} className="flex items-center gap-0.5">
+                      <Sparkles className={`w-3 h-3 ${c.applauded_by_me ? "text-accent fill-accent" : "text-muted-foreground"}`} />
+                      {c.applause_count > 0 && <span className="text-[10px] text-muted-foreground">{c.applause_count}</span>}
                     </button>
                   </div>
                 </div>

@@ -1,12 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import stylist1 from "@/assets/stylist-1.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 
-type Tab = "tutti" | "stilisti" | "servizi" | "prodotti" | "lavoro";
+type Tab = "tutti" | "persone" | "stilisti" | "servizi" | "prodotti" | "lavoro";
+
+interface UserResult {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  user_type: string;
+  city: string | null;
+}
 
 export default function SearchPage() {
   const navigate = useNavigate();
@@ -17,6 +25,7 @@ export default function SearchPage() {
   const [services, setServices] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -29,6 +38,16 @@ export default function SearchPage() {
   const search = async () => {
     setLoading(true);
     const q = `%${query}%`;
+
+    // Search registered users (profiles)
+    if (tab === "tutti" || tab === "persone") {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url, user_type, city")
+        .ilike("display_name", q)
+        .limit(15);
+      if (data) setUsers(data);
+    }
 
     if (tab === "tutti" || tab === "stilisti") {
       const { data } = await supabase.from("professionals").select("*").or(`business_name.ilike.${q},specialty.ilike.${q},city.ilike.${q}`).limit(10);
@@ -55,13 +74,20 @@ export default function SearchPage() {
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "tutti", label: "Tutti", icon: <Search className="w-3.5 h-3.5" /> },
+    { key: "persone", label: "Persone", icon: <User className="w-3.5 h-3.5" /> },
     { key: "stilisti", label: "Stilisti", icon: <Users className="w-3.5 h-3.5" /> },
     { key: "servizi", label: "Servizi", icon: <Sparkles className="w-3.5 h-3.5" /> },
     { key: "prodotti", label: "Prodotti", icon: <ShoppingBag className="w-3.5 h-3.5" /> },
     { key: "lavoro", label: "Lavoro", icon: <Briefcase className="w-3.5 h-3.5" /> },
   ];
 
-  const hasResults = stylists.length > 0 || services.length > 0 || products.length > 0 || jobs.length > 0;
+  const hasResults = users.length > 0 || stylists.length > 0 || services.length > 0 || products.length > 0 || jobs.length > 0;
+
+  const userTypeLabel = (t: string) => {
+    if (t === "professional") return "Professionista";
+    if (t === "business") return "Business";
+    return "Utente";
+  };
 
   return (
     <MobileLayout>
@@ -76,7 +102,7 @@ export default function SearchPage() {
               ref={inputRef}
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Cerca stilisti, servizi, prodotti..."
+              placeholder="Cerca persone, stilisti, servizi..."
               className="w-full h-11 rounded-xl bg-card border border-border pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </div>
@@ -85,7 +111,7 @@ export default function SearchPage() {
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                tab === t.key ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
               }`}>
               {t.icon}{t.label}
             </button>
@@ -97,7 +123,7 @@ export default function SearchPage() {
         {!query.trim() && (
           <div className="text-center py-16">
             <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">Cerca parrucchieri, servizi, prodotti o offerte di lavoro</p>
+            <p className="text-muted-foreground text-sm">Cerca persone, parrucchieri, servizi o prodotti</p>
           </div>
         )}
 
@@ -110,6 +136,38 @@ export default function SearchPage() {
         {query.trim().length >= 2 && !loading && !hasResults && (
           <div className="text-center py-12">
             <p className="text-muted-foreground text-sm">Nessun risultato per "{query}"</p>
+          </div>
+        )}
+
+        {/* Registered Users / People */}
+        {users.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Persone</h3>
+            <div className="space-y-2">
+              {users.map(u => (
+                <button key={u.user_id} onClick={() => navigate(`/profile/${u.user_id}`)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left">
+                  <img
+                    src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.user_id}`}
+                    alt=""
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{u.display_name || "Utente"}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                        {userTypeLabel(u.user_type)}
+                      </span>
+                      {u.city && (
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                          <MapPin className="w-2.5 h-2.5" />{u.city}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
