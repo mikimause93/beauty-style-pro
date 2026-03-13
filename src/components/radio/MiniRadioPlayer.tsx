@@ -27,12 +27,12 @@ const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
     const cover = coverImages[idx % coverImages.length];
 
     return (
-      <div ref={ref} className="fixed bottom-[68px] left-0 right-0 z-30 px-3 pb-1 safe-area-bottom">
-        <div className="max-w-lg mx-auto bg-card/60 backdrop-blur-md rounded-2xl border border-border/30 overflow-hidden shadow-sm">
-          <div className="flex items-center gap-3 p-3">
+      <div ref={ref} className="fixed bottom-[68px] left-0 right-0 z-20 px-3 pb-1 safe-area-bottom">
+        <div className="max-w-lg mx-auto bg-card/60 backdrop-blur-md rounded-xl border border-border/30 overflow-hidden shadow-sm">
+          <div className="flex items-center gap-2 px-2.5 py-1.5">
             <button onClick={() => navigate("/radio")} className="relative shrink-0">
               <img src={cover} alt=""
-                className={`w-11 h-11 rounded-xl object-cover ${isPlaying ? "animate-[spin_8s_linear_infinite]" : ""}`} />
+                className={`w-8 h-8 rounded-lg object-cover ${isPlaying ? "animate-[spin_8s_linear_infinite]" : ""}`} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-3 h-3 rounded-full bg-background/80 border border-muted" />
               </div>
