@@ -327,6 +327,9 @@ export default function LiveStreamPage() {
                   <Shield className="w-3 h-3" /> MOD
                 </span>
               )}
+              <button onClick={() => setShowReport(true)} className="w-9 h-9 rounded-full glass flex items-center justify-center">
+                <Flag className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
           </div>
 
