@@ -43,15 +43,15 @@ function showLocalNotification(notif: AppNotification) {
   const emoji = typeEmoji[notif.type] || "🔔";
 
   try {
-    new Notification(`${emoji} ${notif.title}`, {
+    const options: NotificationOptions = {
       body: notif.message,
       icon,
       badge,
       tag: notif.id,
-      renotify: true,
       silent: false,
       data: { url: getNotificationUrl(notif) },
-    });
+    };
+    new Notification(`${emoji} ${notif.title}`, options);
   } catch {
     // Fallback: use SW notification
     navigator.serviceWorker?.ready.then(reg => {
@@ -61,11 +61,7 @@ function showLocalNotification(notif: AppNotification) {
         badge,
         tag: notif.id,
         data: { url: getNotificationUrl(notif) },
-        actions: [
-          { action: "open", title: "Apri" },
-          { action: "close", title: "Chiudi" },
-        ],
-      });
+      } as NotificationOptions);
     });
   }
 }
