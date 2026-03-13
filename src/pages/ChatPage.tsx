@@ -372,14 +372,8 @@ export default function ChatPage() {
     toast.success("Chiamata terminata");
   };
 
-  const translateMessage = async (msgId: string, text: string) => {
-    if (translatedMessages[msgId]) {
-      setTranslatedMessages(prev => { const n = { ...prev }; delete n[msgId]; return n; });
-      return;
-    }
-    const translated = await translate(text);
-    setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
-  };
+  // Clear translations cache when target language changes
+  const clearTranslations = () => setTranslatedMessages({});
 
   const filteredConversations = conversations.filter(c =>
     !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase())
