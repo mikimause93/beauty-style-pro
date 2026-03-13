@@ -43,10 +43,10 @@ export default function RadioPage() {
     awardCoins("share");
   };
 
-  const sourceTabs: { key: MusicSource; label: string; color: string }[] = [
-    { key: "radio", label: "Radio", color: "text-primary" },
-    { key: "spotify", label: "Spotify", color: "text-[#1DB954]" },
-    { key: "youtube", label: "YouTube", color: "text-[#FF0000]" },
+  const sourceTabs: { key: MusicSource; label: string; color: string; icon: React.ReactNode }[] = [
+    { key: "radio", label: "Radio", color: "text-primary", icon: <RadioTowerIcon className="w-4 h-4" /> },
+    { key: "spotify", label: "Spotify", color: "text-[#1DB954]", icon: <SpotifyIcon className="w-4 h-4" /> },
+    { key: "youtube", label: "YouTube", color: "text-[#FF0000]", icon: <YouTubeIcon className="w-4 h-4" /> },
   ];
 
   return (
