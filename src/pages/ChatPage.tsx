@@ -338,8 +338,27 @@ export default function ChatPage() {
   const formatDuration = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   const openWhatsApp = (name: string, otherUserId: string) => {
-    // Use wa.me with a direct link - works even if not in contacts
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
+  };
+
+  const startCall = (type: "voice" | "video") => {
+    setInCall(type);
+    toast.info(type === "voice" ? "Chiamata vocale avviata..." : "Videochiamata avviata...");
+    // WebRTC placeholder - in production use Agora/Twilio
+  };
+
+  const endCall = () => {
+    setInCall(null);
+    toast.success("Chiamata terminata");
+  };
+
+  const translateMessage = async (msgId: string, text: string) => {
+    if (translatedMessages[msgId]) {
+      setTranslatedMessages(prev => { const n = { ...prev }; delete n[msgId]; return n; });
+      return;
+    }
+    const translated = await translate(text);
+    setTranslatedMessages(prev => ({ ...prev, [msgId]: translated }));
   };
 
   const filteredConversations = conversations.filter(c =>
