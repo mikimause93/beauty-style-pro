@@ -120,14 +120,16 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (!command) return;
     setVoicePhase("processing");
     
-    // Try voice action first
+    // Try voice action first (navigation, messages, etc.)
     const result = executeVoiceCommand(command);
     
     if (result.matched) {
       setVoicePhase("speaking");
+      toast.success(result.response);
+      // Auto-close after short delay so user sees the navigated page
       setTimeout(() => {
         endVoiceCall();
-      }, 1500);
+      }, 800);
       return;
     }
 
@@ -276,78 +278,50 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
   return (
     <div className={`fixed bottom-20 right-4 z-50 ${className}`}>
-      {/* Voice Call Overlay — Alexa-style */}
+      {/* Voice Call — minimal floating indicator (no full screen) */}
       <AnimatePresence>
         {isVoiceCallActive && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-36 left-1/2 -translate-x-1/2 z-[200] bg-card/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-2xl px-5 py-4 flex flex-col items-center gap-2 w-[260px]"
           >
-            {/* Animated ring */}
-            <div className="relative mb-8">
-              <motion.div
-                animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.1, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 w-40 h-40 rounded-full bg-primary/20 -m-6"
-              />
-              <motion.div
-                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.2, 0.5] }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                className="absolute inset-0 w-32 h-32 rounded-full bg-primary/30 -m-2"
-              />
-              <div className="w-28 h-28 rounded-full gradient-primary flex items-center justify-center shadow-glow relative z-10">
-                <Sparkles className="w-12 h-12 text-primary-foreground" />
+            <div className="flex items-center gap-3 w-full">
+              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+                <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-primary">Stella</p>
+                <p className="text-[10px] text-muted-foreground truncate">
+                  {voicePhase === "listening" && "Ti ascolto..."}
+                  {voicePhase === "processing" && "Eseguo..."}
+                  {voicePhase === "speaking" && "Fatto!"}
+                </p>
+              </div>
+              <button onClick={endVoiceCall} className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
+                <PhoneOff className="w-4 h-4 text-destructive-foreground" />
+              </button>
             </div>
 
-            <h2 className="text-2xl font-display font-bold mb-2">Stella</h2>
-            <p className="text-sm text-muted-foreground mb-1">
-              {voicePhase === "listening" && "Ti ascolto..."}
-              {voicePhase === "processing" && "Sto elaborando..."}
-              {voicePhase === "speaking" && "Rispondo..."}
-            </p>
-
-            {/* Show what user is saying */}
             {(voiceTranscript || interimTranscript) && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 px-6 py-3 rounded-2xl bg-card border border-border/50 max-w-[80%]"
-              >
-                <p className="text-sm text-center">
-                  {voiceTranscript || interimTranscript}
-                </p>
-              </motion.div>
+              <p className="text-xs text-center text-muted-foreground italic px-2">
+                "{voiceTranscript || interimTranscript}"
+              </p>
             )}
 
-            {/* Listening indicator */}
             {voicePhase === "listening" && (
-              <div className="flex items-center gap-1 mt-6">
+              <div className="flex items-center gap-0.5">
                 {[0, 1, 2, 3, 4].map(i => (
                   <motion.div
                     key={i}
-                    animate={{ height: [8, 24, 8] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+                    animate={{ height: [4, 16, 4] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
                     className="w-1 rounded-full bg-primary"
                   />
                 ))}
               </div>
             )}
-
-            {voicePhase === "processing" && (
-              <Loader2 className="w-6 h-6 animate-spin text-primary mt-6" />
-            )}
-
-            {/* End call button */}
-            <button
-              onClick={endVoiceCall}
-              className="mt-10 w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg"
-            >
-              <PhoneOff className="w-7 h-7 text-destructive-foreground" />
-            </button>
-            <p className="text-[10px] text-muted-foreground mt-2">Tocca per chiudere</p>
           </motion.div>
         )}
       </AnimatePresence>

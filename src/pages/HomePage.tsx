@@ -147,7 +147,7 @@ export default function HomePage() {
       {/* Header — minimal & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <img src={logo} alt="Style" className="h-7 object-contain" />
+          <span className="text-xl font-display font-bold italic text-primary tracking-tight">Style</span>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
@@ -174,8 +174,8 @@ export default function HomePage() {
             <button key={tab} onClick={() => handleTabClick(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab 
-                  ? "bg-foreground text-background" 
-                  : "text-muted-foreground hover:text-foreground"
+                   ? "bg-primary text-primary-foreground" 
+                   : "text-muted-foreground hover:text-primary"
               }`}>
               {tab}
             </button>
@@ -392,10 +392,10 @@ export default function HomePage() {
                 { Icon: Trophy, label: "Sfide", path: "/challenges" },
               ].map(item => (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                  className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 shrink-0">
-                  <item.Icon className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
-                </button>
+                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-primary/10 border border-primary/20 hover:border-primary/40 transition-all duration-200 shrink-0">
+                   <item.Icon className="w-5 h-5 text-primary" />
+                   <span className="text-[10px] text-primary/70 font-medium">{item.label}</span>
+                 </button>
               ))}
             </div>
 
@@ -403,9 +403,9 @@ export default function HomePage() {
               <div className="text-center py-12">
                 <Video className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">Nessun live stream attivo</p>
-                <button onClick={() => navigate("/live")} className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                  Vai alla sezione Live
-                </button>
+                 <button onClick={() => navigate("/live")} className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-glow">
+                   Vai alla sezione Live
+                 </button>
               </div>
             ) : (
               displayLiveStreams.map(stream => (
