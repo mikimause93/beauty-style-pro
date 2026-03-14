@@ -40,17 +40,7 @@ interface Post {
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
 
-const fallbackStylists = [
-  { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, avatar: stylist2, hourly_rate: 45 },
-  { id: "2", business_name: "Sylvie Beauty", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, avatar: stylist1, hourly_rate: 55 },
-  { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, avatar: beauty1, hourly_rate: 35 },
-];
-
-const fallbackPosts: Post[] = [
-  { id: "00000000-0000-0000-0000-000000000001", user_id: "00000000-0000-0000-0000-000000000010", caption: "New summer looks available!", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
-  { id: "00000000-0000-0000-0000-000000000002", user_id: "00000000-0000-0000-0000-000000000020", caption: "Balayage transformation", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
-  { id: "00000000-0000-0000-0000-000000000003", user_id: "00000000-0000-0000-0000-000000000030", caption: "Keratin treatment results", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
-];
+// No mock data — only real DB content in production
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -59,12 +49,12 @@ export default function HomePage() {
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
   const [activeTab, setActiveTab] = useState("Nuovi");
-  const [posts, setPosts] = useState<Post[]>(fallbackPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [jobPosts, setJobPosts] = useState<any[]>([]);
-  const [stylists, setStylists] = useState(fallbackStylists);
+  const [stylists, setStylists] = useState<any[]>([]);
   const [sharePost, setSharePost] = useState<Post | null>(null);
   const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
 
@@ -95,7 +85,7 @@ export default function HomePage() {
       const { data: streamsData } = await supabase.from('live_streams').select(`*, professional:professionals(business_name, user_id)`).in('status', ['live', 'scheduled']).order('viewer_count', { ascending: false }).limit(5);
       const { data: profilesData } = await supabase.from('profiles').select('user_id, display_name, avatar_url').limit(10);
 
-      if (postsData && postsData.length > 0) {
+      if (postsData) {
         const userIds = [...new Set(postsData.map(p => p.user_id))];
         const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type').in('user_id', userIds);
         const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
@@ -115,23 +105,13 @@ export default function HomePage() {
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
-      if (profsData && profsData.length > 0) setStylists(profsData.map((p, i) => ({ ...p, avatar: fallbackStylists[i % fallbackStylists.length].avatar })));
+      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
     } catch (error) { console.error('Error:', error); }
   };
 
-  const displayStories = stories.length > 0 ? stories : [
-    { id: "s1", name: "Martina", avatar: stylist2, isLive: true, hasStory: true },
-    { id: "s2", name: "Sylvie", avatar: stylist1, isLive: true, hasStory: true },
-    { id: "s3", name: "Marco", avatar: beauty1, isLive: false, hasStory: true },
-    { id: "s4", name: "Luca", avatar: beauty2, isLive: false, hasStory: true },
-  ];
-
-  const displayLiveStreams = liveStreams.length > 0 ? liveStreams : [
-    { id: "l1", title: "Makeover completo", professional: { business_name: "Martina Rossi" }, viewer_count: 234, thumbnail_url: beauty1, category: "Makeup" },
-    { id: "l2", title: "Taglio tendenza 2024", professional: { business_name: "Sylvie Beauty" }, viewer_count: 189, thumbnail_url: beauty2, category: "Hair" },
-  ];
-
-  const displayPosts = posts.length > 0 ? posts : fallbackPosts;
+  const displayStories = stories;
+  const displayLiveStreams = liveStreams;
+  const displayPosts = posts;
 
   const handleLike = async (postId: string) => {
     const isLiked = likedPosts.includes(postId);

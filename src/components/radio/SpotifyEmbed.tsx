@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, ExternalLink } from "lucide-react";
+import { Search, Music2 } from "lucide-react";
 
 const playlists = [
   { name: "Peaceful Piano", id: "37i9dQZF1DX4sWSpwq3LiO" },
@@ -10,17 +10,35 @@ const playlists = [
   { name: "Deep Focus", id: "37i9dQZF1DWZeKCadgRdKQ" },
   { name: "Acoustic Chill", id: "37i9dQZF1DX4E3UdUs7fUx" },
   { name: "R&B Mix", id: "37i9dQZF1EQoqCH7BwIYb7" },
+  { name: "Top 50 Italia", id: "37i9dQZF1DXcRMFwBFVEzV" },
+  { name: "Hot Hits Italia", id: "37i9dQZF1DWVMlt6M4HCR0" },
+  { name: "Hits del Momento", id: "37i9dQZF1DX0FOF1IUWK1W" },
+  { name: "Workout", id: "37i9dQZF1DX76Wlfdnj7AP" },
 ];
 
 export default function SpotifyEmbed() {
   const [query, setQuery] = useState("");
   const [currentPlaylistId, setCurrentPlaylistId] = useState(playlists[0].id);
+  const [embedType, setEmbedType] = useState<"playlist" | "track" | "artist">("playlist");
+  const [customUri, setCustomUri] = useState("");
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    // Spotify doesn't support /embed/search/ URLs - open in Spotify instead
-    window.open(`https://open.spotify.com/search/${encodeURIComponent(query.trim())}`, "_blank");
+    // Search by filtering playlists locally
+    const match = playlists.find(p => 
+      p.name.toLowerCase().includes(query.toLowerCase())
+    );
+    if (match) {
+      setCurrentPlaylistId(match.id);
+      setEmbedType("playlist");
+      setCustomUri("");
+    }
+    // No external links — everything stays in-app
   };
+
+  const embedUrl = customUri
+    ? customUri
+    : `https://open.spotify.com/embed/${embedType}/${currentPlaylistId}?utm_source=generator&theme=0`;
 
   return (
     <div className="space-y-3">
@@ -31,7 +49,7 @@ export default function SpotifyEmbed() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSearch()}
-            placeholder="Cerca artisti, brani, album..."
+            placeholder="Cerca playlist..."
             className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB954]/50"
           />
         </div>
@@ -40,23 +58,18 @@ export default function SpotifyEmbed() {
         </button>
       </div>
 
-      {/* Open in Spotify link when query exists */}
-      {query && (
-        <a
-          href={`https://open.spotify.com/search/${encodeURIComponent(query)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#1DB954]/10 text-xs font-semibold text-[#1DB954]"
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-          Apri "{query}" su Spotify
-        </a>
+      {/* Info banner */}
+      {query && !playlists.find(p => p.name.toLowerCase().includes(query.toLowerCase())) && (
+        <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-[#1DB954]/10 text-xs text-[#1DB954]">
+          <Music2 className="w-3.5 h-3.5" />
+          Seleziona una playlist dal catalogo qui sotto
+        </div>
       )}
 
-      {/* Spotify embed - only works with valid playlist/track/album URIs */}
+      {/* Spotify embed — full playback in-app */}
       <iframe
-        key={currentPlaylistId}
-        src={`https://open.spotify.com/embed/playlist/${currentPlaylistId}?utm_source=generator&theme=0`}
+        key={embedUrl}
+        src={embedUrl}
         width="100%"
         height="380"
         frameBorder="0"
@@ -71,10 +84,12 @@ export default function SpotifyEmbed() {
             key={pl.id}
             onClick={() => {
               setCurrentPlaylistId(pl.id);
+              setEmbedType("playlist");
+              setCustomUri("");
               setQuery("");
             }}
             className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
-              currentPlaylistId === pl.id
+              currentPlaylistId === pl.id && !customUri
                 ? "bg-[#1DB954] text-white"
                 : "bg-[#1DB954]/10 text-[#1DB954]"
             }`}
