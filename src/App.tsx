@@ -83,6 +83,7 @@ const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
 const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
+const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 
 const queryClient = new QueryClient();
 
