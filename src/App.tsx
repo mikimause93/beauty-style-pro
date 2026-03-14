@@ -87,6 +87,7 @@ const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
+const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
 
 const queryClient = new QueryClient();
 
@@ -199,6 +200,7 @@ const App = () => {
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
+            <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
