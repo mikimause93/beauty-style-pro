@@ -247,7 +247,7 @@ export default function MarketplacePage() {
                     <button className="flex-1 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold">
                       🤝 Collabora
                     </button>
-                    <button onClick={() => navigate(`/chat`)} className="py-2 px-4 rounded-xl bg-muted text-foreground text-xs font-semibold">
+                    <button onClick={() => navigate(`/chat`)} className="py-2 px-4 rounded-xl bg-primary/10 text-primary text-xs font-semibold">
                       💬 Contatta
                     </button>
                   </div>

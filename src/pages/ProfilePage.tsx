@@ -290,12 +290,12 @@ export default function ProfilePage() {
               <button onClick={() => { if (!user) { navigate("/auth"); return; } toggleFollow(); }}
                 disabled={followLoading}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  isFollowing ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"
+                  isFollowing ? "bg-primary/10 text-primary" : "bg-primary text-primary-foreground"
                 }`}>
                 {isFollowing ? "Segui già" : "Segui"}
               </button>
               <button onClick={() => navigate("/chat")}
-                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold">
+                className="flex-1 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold">
                 Messaggio
               </button>
               <button

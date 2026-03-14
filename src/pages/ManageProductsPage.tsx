@@ -104,7 +104,7 @@ export default function ManageProductsPage() {
               {["Hair Care", "Skincare", "Makeup", "Nails", "Tools", "Altro"].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <div className="flex gap-2">
-              <button onClick={() => setShowAdd(false)} className="flex-1 py-2 rounded-xl bg-muted text-sm font-semibold">Annulla</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 py-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold">Annulla</button>
               <button onClick={handleAdd} className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">Pubblica</button>
             </div>
           </div>

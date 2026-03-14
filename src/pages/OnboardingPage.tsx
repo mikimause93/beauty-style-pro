@@ -506,7 +506,7 @@ export default function OnboardingPage() {
       <div className="p-6 space-y-3">
         <div className="flex gap-3">
           {step > 1 && (
-            <button onClick={() => setStep(step - 1)} className="flex-1 h-12 rounded-xl bg-muted text-foreground font-semibold text-sm">
+            <button onClick={() => setStep(step - 1)} className="flex-1 h-12 rounded-xl bg-primary/10 text-primary font-semibold text-sm">
               Indietro
             </button>
           )}

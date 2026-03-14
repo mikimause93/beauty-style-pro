@@ -440,7 +440,7 @@ export default function ShopPage() {
               />
 
               <div className="flex gap-2 mt-4">
-                <button onClick={() => setSelectedProduct(null)} className="flex-1 py-3 rounded-xl bg-muted text-sm font-semibold">
+                <button onClick={() => setSelectedProduct(null)} className="flex-1 py-3 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
                   Annulla
                 </button>
                 <button onClick={() => { toast.success("Recensione inviata!"); setSelectedProduct(null); setReviewText(""); }}
