@@ -143,7 +143,7 @@ export default function HomePage() {
       {/* Header — minimal & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-display font-bold italic tracking-tight" style={{ background: "linear-gradient(135deg, #9b59b6, #8b5cf6, #a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Style</span>
+          <span className="text-2xl font-display font-bold italic tracking-tight text-gradient-primary">Style</span>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
@@ -211,7 +211,7 @@ export default function HomePage() {
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
               <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shadow-sm">
-                <item.Icon className="w-4.5 h-4.5 text-primary" />
+                <item.Icon className="w-5 h-5 text-primary" />
               </div>
               <span className="text-[9px] text-primary font-semibold leading-tight">{item.label}</span>
             </button>
