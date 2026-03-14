@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -211,6 +211,7 @@ export default function SettingsPage() {
           <div className="space-y-1.5">
             <SettingRow icon={Shield} label="Verifica Account" onClick={() => navigate("/verify-account")} />
             <SettingRow icon={HelpCircle} label="Centro Assistenza" />
+            <SettingRow icon={Activity} label="Stato dell'App" onClick={() => navigate("/app-status")} />
             <SettingRow icon={FileText} label="Termini e Condizioni" onClick={() => navigate("/terms")} />
             <SettingRow icon={Shield} label="Privacy Policy" onClick={() => navigate("/privacy")} />
           </div>

@@ -75,6 +75,8 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  // Traccia aggiornamenti conversation generati dall'utente corrente (per non incrementare unread)
+  const ownConvUpdatesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) loadConversations();
@@ -159,6 +161,47 @@ export default function ChatPage() {
     const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
     otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
   }, [autoTranslate, messages.length]);
+
+  // Realtime subscription — aggiorna lista conversazioni quando arrivano nuovi messaggi
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`conv-list-${user.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+      }, (payload) => {
+        const updated = payload.new as any;
+        // Ignora aggiornamenti generati dall'utente corrente (evita falso unread)
+        const isOwnUpdate = ownConvUpdatesRef.current.has(updated.id);
+        if (isOwnUpdate) {
+          ownConvUpdatesRef.current.delete(updated.id);
+          return;
+        }
+        setConversations(prev => {
+          const idx = prev.findIndex(c => c.id === updated.id);
+          if (idx === -1) {
+            // Conversazione non ancora in lista: ricarica
+            loadConversations();
+            return prev;
+          }
+          const updatedConv = {
+            ...prev[idx],
+            lastMessage: updated.last_message || prev[idx].lastMessage,
+            time: updated.last_message_at
+              ? new Date(updated.last_message_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })
+              : prev[idx].time,
+            unread: selectedChat?.id === updated.id ? 0 : (prev[idx].unread || 0) + 1,
+          };
+          // Riporta la conversazione aggiornata in cima
+          const rest = prev.filter(c => c.id !== updated.id);
+          return [updatedConv, ...rest];
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, selectedChat]);
 
   const loadConversations = async () => {
     if (!user) return;
@@ -259,6 +302,28 @@ export default function ChatPage() {
 
   const now = () => new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
 
+  // Helper — aggiorna last_message nella conversazione (DB + stato locale)
+  const updateConversationLastMessage = async (convId: string, preview: string) => {
+    const timestamp = new Date().toISOString();
+    // Segna questa conversazione come aggiornata dall'utente corrente
+    // così la subscription Realtime non incrementa erroneamente il badge unread
+    ownConvUpdatesRef.current.add(convId);
+    await supabase.from("conversations").update({
+      last_message: preview,
+      last_message_at: timestamp,
+    }).eq("id", convId);
+    setConversations(prev => {
+      const idx = prev.findIndex(c => c.id === convId);
+      if (idx === -1) return prev;
+      const updated = {
+        ...prev[idx],
+        lastMessage: preview,
+        time: new Date(timestamp).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }),
+      };
+      return [updated, ...prev.filter(c => c.id !== convId)];
+    });
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || !user) return;
     const content = newMessage;
@@ -270,6 +335,7 @@ export default function ChatPage() {
       content,
       message_type: "text",
     });
+    await updateConversationLastMessage(selectedChat.id, content);
   };
 
   const uploadFile = async (file: File, type: MessageType) => {
@@ -284,6 +350,7 @@ export default function ChatPage() {
     } else {
       mediaUrl = URL.createObjectURL(file);
     }
+    const preview = type === "image" ? "📷 Immagine" : type === "video" ? "📹 Video" : `📎 ${file.name}`;
     setMessages(prev => [...prev, { id: Date.now().toString(), sender: "me", content: "", time: now(), type, mediaUrl, fileName: file.name }]);
     await supabase.from("messages").insert({
       conversation_id: selectedChat.id,
@@ -292,6 +359,7 @@ export default function ChatPage() {
       message_type: type,
       image_url: mediaUrl,
     });
+    await updateConversationLastMessage(selectedChat.id, preview);
     setShowAttachMenu(false);
     toast.success(`${type === "image" ? "Immagine" : type === "video" ? "Video" : "File"} inviato!`);
   };
@@ -331,6 +399,7 @@ export default function ChatPage() {
             message_type: "voice",
             image_url: mediaUrl,
           });
+          await updateConversationLastMessage(selectedChat.id, `🎤 Messaggio vocale ${formatDuration(duration)}`);
         }
       };
       mediaRecorder.start();

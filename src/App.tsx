@@ -203,6 +203,7 @@ const App = () => {
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
+            <Route path="/app-status" element={<AppStatusPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

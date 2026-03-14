@@ -85,12 +85,22 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
   const toggleLike = async () => {
     if (!user) { navigate("/auth"); return; }
     const newLiked = !liked;
+    const newCount = likeCount + (newLiked ? 1 : -1);
     setLiked(newLiked);
-    setLikeCount(prev => prev + (newLiked ? 1 : -1));
+    setLikeCount(newCount);
     if (newLiked) {
       await supabase.from("post_likes").insert({ user_id: user.id, post_id: post.id });
     } else {
       await supabase.from("post_likes").delete().eq("user_id", user.id).eq("post_id", post.id);
+    }
+    // Sincronizza il conteggio reale nel DB
+    const { count } = await supabase
+      .from("post_likes")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+    if (count !== null) {
+      await supabase.from("posts").update({ like_count: count }).eq("id", post.id);
+      setLikeCount(count);
     }
   };
 

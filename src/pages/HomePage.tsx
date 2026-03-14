@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon, Loader2 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
@@ -11,7 +11,7 @@ import AutoOffersBanner from "@/components/feed/AutoOffersBanner";
 import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import FeedJobCard from "@/components/feed/FeedJobCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +41,8 @@ interface Post {
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
 
+const PAGE_SIZE = 20;
+
 // No mock data — only real DB content in production
 
 export default function HomePage() {
@@ -59,6 +61,14 @@ export default function HomePage() {
   const [stylists, setStylists] = useState<any[]>([]);
   const [sharePost, setSharePost] = useState<Post | null>(null);
   const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
+
+  // Infinite scroll state
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  // Track seen post IDs to avoid duplicates efficiently
+  const seenPostIds = useRef<Set<string>>(new Set());
 
   // Handle post redirect from notifications
   useEffect(() => {
@@ -81,17 +91,45 @@ export default function HomePage() {
 
   useEffect(() => { fetchData(); }, []);
 
+  // Helper to enrich posts with profile data
+  const enrichPosts = useCallback(async (rawPosts: Post[]) => {
+    if (!rawPosts.length) return [];
+    const userIds = [...new Set(rawPosts.map(p => p.user_id))];
+    const { data: postProfiles } = await supabase
+      .from('profiles')
+      .select('user_id, display_name, avatar_url, user_type')
+      .in('user_id', userIds);
+    const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
+    return rawPosts.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined }));
+  }, []);
+
   const fetchData = async () => {
     try {
-      const { data: postsData } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(20);
-      const { data: streamsData } = await supabase.from('live_streams').select(`*, professional:professionals(business_name, user_id)`).in('status', ['live', 'scheduled']).order('viewer_count', { ascending: false }).limit(5);
-      const { data: profilesData } = await supabase.from('profiles').select('user_id, display_name, avatar_url').limit(10);
+      const { data: postsData } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(0, PAGE_SIZE - 1);
+
+      const { data: streamsData } = await supabase
+        .from('live_streams')
+        .select(`*, professional:professionals(business_name, user_id)`)
+        .in('status', ['live', 'scheduled'])
+        .order('viewer_count', { ascending: false })
+        .limit(5);
+
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .limit(10);
 
       if (postsData) {
-        const userIds = [...new Set(postsData.map(p => p.user_id))];
-        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type').in('user_id', userIds);
-        const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
-        setPosts(postsData.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined })));
+        const enriched = await enrichPosts(postsData as Post[]);
+        seenPostIds.current.clear();
+        enriched.forEach(p => seenPostIds.current.add(p.id));
+        setPosts(enriched);
+        setPage(1);
+        setHasMore(postsData.length === PAGE_SIZE);
       }
 
       if (streamsData) setLiveStreams(streamsData.map(s => ({ ...s, professional: Array.isArray(s.professional) ? s.professional[0] : s.professional })));
@@ -103,13 +141,82 @@ export default function HomePage() {
         })));
       }
 
-      const { data: jobsData } = await supabase.from('job_posts').select('*, professionals(business_name, city), businesses(business_name, logo_url)').eq('status', 'active').order('created_at', { ascending: false }).limit(10);
+      const { data: jobsData } = await supabase
+        .from('job_posts')
+        .select('*, professionals(business_name, city), businesses(business_name, logo_url)')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(10);
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
       if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
     } catch (error) { console.error('Error:', error); }
   };
+
+  // Load more posts for infinite scroll
+  const loadMorePosts = useCallback(async () => {
+    if (loadingMore || !hasMore || activeTab !== "Nuovi") return;
+    setLoadingMore(true);
+    try {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, to);
+      if (data && data.length > 0) {
+        const enriched = await enrichPosts(data as Post[]);
+        const newPosts = enriched.filter(p => !seenPostIds.current.has(p.id));
+        newPosts.forEach(p => seenPostIds.current.add(p.id));
+        setPosts(prev => [...prev, ...newPosts]);
+        setPage(prev => prev + 1);
+        if (data.length < PAGE_SIZE) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error('loadMore error:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [page, hasMore, loadingMore, activeTab, enrichPosts]);
+
+  // IntersectionObserver sentinel for infinite scroll
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries.length > 0 && entries[0].isIntersecting) loadMorePosts(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMorePosts]);
+
+  // Supabase Realtime — nuovi post in tempo reale
+  useEffect(() => {
+    const channel = supabase
+      .channel('home-feed-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'posts',
+      }, async (payload) => {
+        const newPost = payload.new as Post;
+        if (seenPostIds.current.has(newPost.id)) return;
+        seenPostIds.current.add(newPost.id);
+        const { data: profData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url, user_type')
+          .eq('user_id', newPost.user_id)
+          .maybeSingle();
+        setPosts(prev => [{ ...newPost, profileData: profData || undefined }, ...prev]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const displayStories = stories;
   const displayLiveStreams = liveStreams;
@@ -297,6 +404,13 @@ export default function HomePage() {
             {jobPosts.length > 0 && displayPosts.length < 3 && jobPosts.map(job => (
               <FeedJobCard key={job.id} job={job} />
             ))}
+            {/* Infinite scroll sentinel */}
+            <div ref={loadMoreRef} className="flex justify-center py-4">
+              {loadingMore && <Loader2 className="w-6 h-6 text-primary animate-spin" />}
+              {!hasMore && displayPosts.length > 0 && (
+                <p className="text-xs text-muted-foreground">Hai visto tutti i post ✓</p>
+              )}
+            </div>
           </div>
         )}
 
