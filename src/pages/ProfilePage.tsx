@@ -266,11 +266,11 @@ export default function ProfilePage() {
           {isOwnProfile ? (
             <>
               <button onClick={() => navigate("/profile/edit")}
-                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold">
+                className="flex-1 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold">
                 Modifica profilo
               </button>
               <button onClick={() => navigate("/referral")}
-                className="flex-1 py-2 rounded-lg bg-muted text-sm font-semibold flex items-center justify-center gap-1.5">
+                className="flex-1 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-1.5">
                 <Share2 className="w-3.5 h-3.5" /> Condividi
               </button>
               {(isProfessional || isBusiness) ? (
