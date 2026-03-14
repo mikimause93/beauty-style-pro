@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, CalendarDays, Briefcase, MapPin, Wand2 } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, CalendarDays, Briefcase, MapPin, Wand2, Tag, Gavel, Link2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
