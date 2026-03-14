@@ -206,6 +206,7 @@ export default function HomePage() {
       {activeTab === "Nuovi" && (
         <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
+            { Icon: Wand2, label: "AI Look", path: "/ai-look" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
