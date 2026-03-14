@@ -171,11 +171,11 @@ export default function TransformationChallengePage() {
 
         {/* View Toggle */}
         <div className="flex gap-2 mb-3">
-          <button onClick={() => setView("feed")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "feed" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            Feed
-          </button>
-          <button onClick={() => setView("leaderboard")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "leaderboard" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            Classifica
+           <button onClick={() => setView("feed")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "feed" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+             Feed
+           </button>
+           <button onClick={() => setView("leaderboard")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "leaderboard" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+             Classifica
           </button>
         </div>
 
