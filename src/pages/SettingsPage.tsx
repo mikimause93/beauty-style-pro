@@ -1,17 +1,18 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, User, Lock, Bell, Mail, Moon, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, profile, signOut, refreshProfile } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
   const [shareLocation, setShareLocation] = useState(false);
   const [searchDistance, setSearchDistance] = useState(25);
   const [locating, setLocating] = useState(false);
@@ -35,7 +36,6 @@ export default function SettingsPage() {
   const handleShareLocation = async () => {
     if (!user) return;
     if (!shareLocation) {
-      // Enable location sharing
       setLocating(true);
       try {
         const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -95,23 +95,23 @@ export default function SettingsPage() {
       disabled={l}
       className={`w-11 h-6 rounded-full transition-all duration-200 relative ${value ? "bg-primary" : "bg-muted"} ${l ? "opacity-50" : ""}`}
     >
-      <div className={`w-5 h-5 rounded-full bg-foreground absolute top-0.5 transition-all duration-200 ${value ? "left-[22px]" : "left-0.5"}`} />
+      <div className={`w-5 h-5 rounded-full bg-primary-foreground absolute top-0.5 transition-all duration-200 ${value ? "left-[22px]" : "left-0.5"}`} />
     </button>
   );
 
   const SettingRow = ({ icon: Icon, label, children, onClick }: { icon: any; label: string; children?: React.ReactNode; onClick?: () => void }) => (
     <button onClick={onClick} className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 text-left">
-      <Icon className="w-4 h-4 text-muted-foreground" />
+      <Icon className="w-4 h-4 text-primary" />
       <span className="flex-1 text-sm">{label}</span>
-      {children || <ChevronRight className="w-4 h-4 text-muted-foreground/50" />}
+      {children || <ChevronRight className="w-4 h-4 text-primary/50" />}
     </button>
   );
 
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-5 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
+          <ArrowLeft className="w-5 h-5 text-primary" />
         </button>
         <h1 className="text-lg font-display font-bold">Impostazioni</h1>
       </header>
@@ -119,7 +119,7 @@ export default function SettingsPage() {
       <div className="px-5 py-6 space-y-6">
         {/* Account */}
         <section>
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Account</p>
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Account</p>
           <div className="space-y-1.5">
             <SettingRow icon={User} label="Modifica Profilo" onClick={() => navigate("/profile/edit")} />
             <SettingRow icon={Lock} label="Cambia Password" />
@@ -128,10 +128,10 @@ export default function SettingsPage() {
 
         {/* Location & Search */}
         <section>
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              <Navigation className="w-4 h-4 text-muted-foreground" />
+              <Navigation className="w-4 h-4 text-primary" />
               <div className="flex-1">
                 <span className="text-sm">Condividi posizione</span>
                 {currentCoords && (
@@ -145,7 +145,7 @@ export default function SettingsPage() {
 
             <div className="p-4 rounded-2xl bg-card border border-border/50">
               <div className="flex items-center gap-3 mb-3">
-                <Ruler className="w-4 h-4 text-muted-foreground" />
+                <Ruler className="w-4 h-4 text-primary" />
                 <span className="flex-1 text-sm">Distanza di ricerca</span>
                 <span className="text-xs font-bold text-primary">{searchDistance} km</span>
               </div>
@@ -170,15 +170,15 @@ export default function SettingsPage() {
 
         {/* Notifications */}
         <section>
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Notifiche</p>
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Notifiche</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              <Bell className="w-4 h-4 text-muted-foreground" />
+              <Bell className="w-4 h-4 text-primary" />
               <span className="flex-1 text-sm">Push Notifications</span>
               <Toggle value={pushNotif} onChange={() => setPushNotif(!pushNotif)} />
             </div>
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              <Mail className="w-4 h-4 text-muted-foreground" />
+              <Mail className="w-4 h-4 text-primary" />
               <span className="flex-1 text-sm">Email Notifications</span>
               <Toggle value={emailNotif} onChange={() => setEmailNotif(!emailNotif)} />
             </div>
@@ -187,24 +187,27 @@ export default function SettingsPage() {
 
         {/* Preferences */}
         <section>
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Preferenze</p>
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Preferenze</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              <Moon className="w-4 h-4 text-muted-foreground" />
-              <span className="flex-1 text-sm">Dark Mode</span>
-              <Toggle value={darkMode} onChange={() => setDarkMode(!darkMode)} />
+              {theme === "dark" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
+              <div className="flex-1">
+                <span className="text-sm">Tema</span>
+                <p className="text-[10px] text-muted-foreground">{theme === "dark" ? "Scuro" : "Chiaro"}</p>
+              </div>
+              <Toggle value={theme === "dark"} onChange={toggleTheme} />
             </div>
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              <Globe className="w-4 h-4 text-muted-foreground" />
+              <Globe className="w-4 h-4 text-primary" />
               <span className="flex-1 text-sm">Lingua</span>
-              <span className="text-xs text-muted-foreground mr-1">Italiano</span>
+              <span className="text-xs text-primary mr-1">Italiano</span>
             </div>
           </div>
         </section>
 
         {/* Support */}
         <section>
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Supporto</p>
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Supporto</p>
           <div className="space-y-1.5">
             <SettingRow icon={Shield} label="Verifica Account" onClick={() => navigate("/verify-account")} />
             <SettingRow icon={HelpCircle} label="Centro Assistenza" />

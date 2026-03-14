@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Languages } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Languages, Volume2 } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useNavigate, useParams } from "react-router-dom";
@@ -361,14 +361,42 @@ export default function ChatPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
   };
 
-  const startCall = (type: "voice" | "video") => {
-    setInCall(type);
-    toast.info(type === "voice" ? "Chiamata vocale avviata..." : "Videochiamata avviata...");
-    // WebRTC placeholder - in production use Agora/Twilio
+  const [callTimer, setCallTimer] = useState(0);
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  const startCall = async (type: "voice" | "video") => {
+    try {
+      const constraints: MediaStreamConstraints = type === "video" 
+        ? { audio: true, video: { facingMode: "user", width: 640, height: 480 } }
+        : { audio: true };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      localStreamRef.current = stream;
+      
+      if (type === "video" && localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+      
+      setInCall(type);
+      setCallTimer(0);
+      callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+      toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
+    } catch (err) {
+      toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
+    }
   };
 
   const endCall = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(t => t.stop());
+      localStreamRef.current = null;
+    }
+    if (callTimerRef.current) clearInterval(callTimerRef.current);
     setInCall(null);
+    setCallTimer(0);
     toast.success("Chiamata terminata");
   };
 
@@ -445,14 +473,55 @@ export default function ChatPage() {
         </header>
         {/* In-call overlay */}
         {inCall && (
-          <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-sm font-semibold">{inCall === "voice" ? "Chiamata vocale" : "Videochiamata"} in corso...</span>
+          <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center">
+            {inCall === "video" && (
+              <>
+                {/* Remote video (full screen placeholder) */}
+                <div className="absolute inset-0 bg-card flex items-center justify-center">
+                  <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover opacity-30" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <img src={selectedChat.avatar} alt="" className="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-primary" />
+                      <p className="text-lg font-bold">{selectedChat.name}</p>
+                      <p className="text-sm text-muted-foreground">In attesa di risposta...</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Local video (small PIP) */}
+                <video ref={localVideoRef} autoPlay playsInline muted className="absolute top-16 right-4 w-28 h-36 rounded-2xl object-cover border-2 border-primary shadow-lg z-10" />
+              </>
+            )}
+            
+            {inCall === "voice" && (
+              <div className="flex flex-col items-center gap-4">
+                <img src={selectedChat.avatar} alt="" className="w-24 h-24 rounded-full border-4 border-primary shadow-glow" />
+                <p className="text-xl font-bold">{selectedChat.name}</p>
+                <p className="text-sm text-primary">Chiamata vocale</p>
+                {/* Audio waveform animation */}
+                <div className="flex items-center gap-1 h-8">
+                  {[0,1,2,3,4,5,6].map(i => (
+                    <div key={i} className="w-1 bg-primary rounded-full animate-pulse" 
+                      style={{ height: `${12 + Math.random() * 20}px`, animationDelay: `${i * 0.1}s` }} />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Timer */}
+            <p className="text-lg font-mono text-primary mt-6">{formatDuration(callTimer)}</p>
+            
+            {/* Call controls */}
+            <div className="absolute bottom-16 flex items-center gap-8">
+              <button className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+                {inCall === "voice" ? <Mic className="w-6 h-6" /> : <Video className="w-6 h-6" />}
+              </button>
+              <button onClick={endCall} className="w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg">
+                <Phone className="w-7 h-7 text-destructive-foreground rotate-[135deg]" />
+              </button>
+              <button className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+                <Volume2 className="w-6 h-6" />
+              </button>
             </div>
-            <button onClick={endCall} className="px-4 py-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
-              Termina
-            </button>
           </div>
         )}
 
