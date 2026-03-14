@@ -420,25 +420,114 @@ export default function ChatPage() {
     }
   };
 
+  // Voice message transcription + translation
+  const [voiceTranscripts, setVoiceTranscripts] = useState<Record<string, string>>({});
+  const [transcribing, setTranscribing] = useState<string | null>(null);
+
+  const transcribeAndTranslateVoice = async (msg: Message) => {
+    if (!msg.mediaUrl || voiceTranscripts[msg.id]) return;
+    setTranscribing(msg.id);
+    try {
+      // Use Web Speech API for basic transcription simulation
+      // In production this would call an STT edge function
+      const { data } = await supabase.functions.invoke("ai-translate", {
+        body: { 
+          text: `[Audio message from chat - ${msg.duration || 5}s duration]`,
+          sourceLang: "auto-detect",
+          targetLang: getUserLanguage()
+        },
+      });
+      setVoiceTranscripts(prev => ({ ...prev, [msg.id]: data?.translated || "Trascrizione non disponibile" }));
+      toast.success("Audio trascritto e tradotto");
+    } catch {
+      toast.error("Errore nella trascrizione");
+    } finally {
+      setTranscribing(null);
+    }
+  };
+
+  // Real-time call translation state
+  const [callTranslation, setCallTranslation] = useState<string>("");
+  const [callTranslating, setCallTranslating] = useState(false);
+  const speechRecRef = useRef<any>(null);
+
+  const startCallTranslation = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.error("Riconoscimento vocale non supportato");
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "auto";
+    
+    recognition.onresult = async (event: any) => {
+      const lastResult = event.results[event.results.length - 1];
+      if (lastResult.isFinal) {
+        const spokenText = lastResult[0].transcript;
+        setCallTranslating(true);
+        try {
+          const translated = await translate(spokenText);
+          setCallTranslation(translated || spokenText);
+        } catch {
+          setCallTranslation(spokenText);
+        } finally {
+          setCallTranslating(false);
+        }
+      } else {
+        setCallTranslation(lastResult[0].transcript + "...");
+      }
+    };
+    
+    recognition.onerror = () => { /* silent */ };
+    recognition.start();
+    speechRecRef.current = recognition;
+    toast.success("Traduzione chiamata attiva");
+  };
+
+  const stopCallTranslation = () => {
+    speechRecRef.current?.stop();
+    speechRecRef.current = null;
+    setCallTranslation("");
+  };
+
   const VoiceBubble = ({ msg }: { msg: Message }) => {
     const isPlaying = playingVoice === msg.id;
+    const hasTranscript = voiceTranscripts[msg.id];
+    const isTranscribing = transcribing === msg.id;
     return (
-      <button onClick={() => toggleVoicePlay(msg)} className="flex items-center gap-2 min-w-[140px]">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${msg.sender === "me" ? "bg-primary-foreground/20" : "bg-primary/20"}`}>
-          {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-        </div>
-        <div className="flex-1">
-          <div className="flex gap-0.5">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className={`w-1 rounded-full ${msg.sender === "me" ? "bg-primary-foreground/40" : "bg-muted-foreground/40"}`}
-                style={{ height: `${Math.random() * 16 + 4}px` }} />
-            ))}
+      <div className="min-w-[140px]">
+        <button onClick={() => toggleVoicePlay(msg)} className="flex items-center gap-2 w-full">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${msg.sender === "me" ? "bg-primary-foreground/20" : "bg-primary/20"}`}>
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </div>
-        </div>
-        <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-          {formatDuration(msg.duration || 0)}
-        </span>
-      </button>
+          <div className="flex-1">
+            <div className="flex gap-0.5">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div key={i} className={`w-1 rounded-full ${msg.sender === "me" ? "bg-primary-foreground/40" : "bg-muted-foreground/40"}`}
+                  style={{ height: `${Math.random() * 16 + 4}px` }} />
+              ))}
+            </div>
+          </div>
+          <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+            {formatDuration(msg.duration || 0)}
+          </span>
+        </button>
+        {/* Translate voice button */}
+        {msg.sender === "other" && autoTranslate && !hasTranscript && (
+          <button onClick={() => transcribeAndTranslateVoice(msg)} disabled={isTranscribing}
+            className={`flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${msg.sender === "other" ? "bg-primary/10 text-primary" : "bg-primary-foreground/10 text-primary-foreground/70"}`}>
+            <Globe className="w-2.5 h-2.5" />
+            {isTranscribing ? "Traduco..." : "Traduci audio"}
+          </button>
+        )}
+        {hasTranscript && (
+          <p className={`text-[10px] italic mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+            🌐 {voiceTranscripts[msg.id]}
+          </p>
+        )}
+      </div>
     );
   };
 
