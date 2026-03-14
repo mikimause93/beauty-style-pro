@@ -56,7 +56,7 @@ export default function RadioPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
