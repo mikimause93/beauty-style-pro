@@ -3912,6 +3912,7 @@ export type Database = {
           suggestion_id: string
         }[]
       }
+      get_own_stream_key: { Args: { _stream_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
