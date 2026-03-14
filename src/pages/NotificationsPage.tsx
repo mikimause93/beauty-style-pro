@@ -168,9 +168,9 @@ export default function NotificationsPage() {
           </button>
           <button
             onClick={() => setFilter("unread")}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              filter === "unread" ? "bg-foreground text-background" : "bg-foreground/10 text-foreground/60"
-            }`}
+             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+               filter === "unread" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
+             }`}
           >
             Non lette {unreadCount > 0 && `(${unreadCount})`}
           </button>
