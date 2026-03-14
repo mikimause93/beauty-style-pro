@@ -242,7 +242,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats — horizontal pill style, centered */}
-          <div className="flex items-center gap-1 rounded-2xl bg-muted/50 border border-border/30 px-2 py-1.5 mb-4">
+          <div className="flex items-center gap-1 rounded-2xl bg-primary/5 border border-primary/10 px-2 py-1.5 mb-4">
             <button onClick={() => setActiveTab("grid")} className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-background/50 transition-colors">
               <span className="text-sm font-bold">{postCount}</span>
               <span className="text-[10px] text-muted-foreground">post</span>
