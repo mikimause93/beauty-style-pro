@@ -41,6 +41,33 @@
     <!-- Favicon & Icons -->
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
     
+    <!-- GitHub Pages SPA routing: restore path from 404.html redirect -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Handle ?p= query param from 404.html
+        var search = location.search;
+        if (search) {
+          var params = {};
+          search.slice(1).split('&').forEach(function(p) {
+            var kv = p.split('=');
+            params[kv[0]] = kv.slice(1).join('=');
+          });
+          if (params.p !== undefined) {
+            var decoded = '/' + params.p.replace(/~and~/g, '&');
+            var query = params.q ? '?' + params.q.replace(/~and~/g, '&') : '';
+            history.replaceState(null, null,
+              location.pathname.split('?')[0] + decoded + query + location.hash
+            );
+          }
+        }
+      })();
+    </script>
+
     <!-- Playfair Display for splash/branding -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
