@@ -210,10 +210,10 @@ export default function HomePage() {
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <item.Icon className="w-4 h-4 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shadow-sm">
+                <item.Icon className="w-4.5 h-4.5 text-primary" />
               </div>
-              <span className="text-[9px] text-primary/70 font-medium leading-tight">{item.label}</span>
+              <span className="text-[9px] text-primary font-semibold leading-tight">{item.label}</span>
             </button>
           ))}
         </div>

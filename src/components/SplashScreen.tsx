@@ -95,17 +95,19 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         />
 
         <h1
-          className={`text-3xl font-light tracking-[0.3em] transition-all duration-500 ${
+          className={`text-4xl font-bold italic tracking-[0.08em] transition-all duration-500 ${
             phase !== "founder" && phase !== "logo"
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-4"
           }`}
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
-            color: "#fff",
+            background: "linear-gradient(135deg, #9b59b6, #8b5cf6, #a855f7)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
-          STYLE
+          Style
         </h1>
 
         <p
