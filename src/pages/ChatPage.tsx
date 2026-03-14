@@ -146,7 +146,7 @@ export default function ChatPage() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [selectedChat, user, autoTranslate, targetLang]);
+  }, [selectedChat, user, autoTranslate]);
 
   // Auto-translate all existing "other" messages when language changes or autoTranslate turns on
   useEffect(() => {
