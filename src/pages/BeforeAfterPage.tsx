@@ -67,7 +67,7 @@ export default function BeforeAfterPage() {
   }, [items]);
 
   const toggleLike = (id: string) => {
-    setLikedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setLikedIds(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
   };
 
   return (
@@ -142,7 +142,7 @@ export default function BeforeAfterPage() {
                   <Heart className={`w-4 h-4 ${likedIds.has(item.id) ? "fill-primary text-primary" : ""}`} />
                   <span className="text-xs font-bold">{item.likes + (likedIds.has(item.id) ? 1 : 0)}</span>
                 </button>
-                <button onClick={() => setSavedIds(prev => { const n = new Set(prev); n.has(item.id) ? n.delete(item.id) : n.add(item.id); return n; })}
+                <button onClick={() => setSavedIds(prev => { const n = new Set(prev); if (n.has(item.id)) { n.delete(item.id); } else { n.add(item.id); } return n; })}
                   className={`p-2 rounded-xl ${savedIds.has(item.id) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   <Bookmark className={`w-4 h-4 ${savedIds.has(item.id) ? "fill-primary" : ""}`} />
                 </button>
