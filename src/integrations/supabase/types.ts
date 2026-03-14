@@ -1595,6 +1595,51 @@ export type Database = {
           },
         ]
       }
+      look_generations: {
+        Row: {
+          categories: string[]
+          created_at: string
+          generated_photo_url: string | null
+          id: string
+          is_favorite: boolean
+          is_premium: boolean
+          metadata: Json | null
+          original_photo_url: string
+          prompt_used: string | null
+          status: string
+          styles_applied: Json
+          user_id: string
+        }
+        Insert: {
+          categories?: string[]
+          created_at?: string
+          generated_photo_url?: string | null
+          id?: string
+          is_favorite?: boolean
+          is_premium?: boolean
+          metadata?: Json | null
+          original_photo_url: string
+          prompt_used?: string | null
+          status?: string
+          styles_applied?: Json
+          user_id: string
+        }
+        Update: {
+          categories?: string[]
+          created_at?: string
+          generated_photo_url?: string | null
+          id?: string
+          is_favorite?: boolean
+          is_premium?: boolean
+          metadata?: Json | null
+          original_photo_url?: string
+          prompt_used?: string | null
+          status?: string
+          styles_applied?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string

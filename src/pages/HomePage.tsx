@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2 } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2 } from "lucide-react";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
 import StoriesBar from "@/components/feed/StoriesBar";
@@ -206,6 +206,7 @@ export default function HomePage() {
       {activeTab === "Nuovi" && (
         <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
+            { Icon: Wand2, label: "AI Look", path: "/ai-look" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
