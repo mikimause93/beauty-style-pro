@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, CalendarDays, Briefcase, MapPin, Wand2 } from "lucide-react";
+import { ShoppingBag, Coins, ChevronRight, Gift, Star, Heart, Search, ShoppingCart, MessageCircle, Share2, CalendarDays, Briefcase, MapPin, Wand2, Tag, Gavel, Link2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -197,6 +197,21 @@ export default function ShopPage() {
       </header>
 
       <div className="p-4">
+        {/* Quick links to Offers, Auctions, Affiliate */}
+        <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+          <button onClick={() => navigate("/offers")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 text-xs font-semibold shrink-0">
+            <Tag className="w-3.5 h-3.5" /> Offerte
+          </button>
+          <button onClick={() => navigate("/auctions")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-500 text-xs font-semibold shrink-0">
+            <Gavel className="w-3.5 h-3.5" /> Aste
+          </button>
+          <button onClick={() => navigate("/affiliate")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-semibold shrink-0">
+            <Link2 className="w-3.5 h-3.5" /> Affiliazione
+          </button>
+        </div>
         {/* Promo Code */}
         <div className="flex gap-2 mb-4">
           <input

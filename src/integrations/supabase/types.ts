@@ -68,6 +68,86 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_sales: {
+        Row: {
+          affiliate_id: string
+          buyer_id: string
+          commission_amount: number
+          created_at: string | null
+          id: string
+          order_amount: number
+          product_id: string | null
+          service_id: string | null
+          status: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          buyer_id: string
+          commission_amount: number
+          created_at?: string | null
+          id?: string
+          order_amount: number
+          product_id?: string | null
+          service_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          buyer_id?: string
+          commission_amount?: number
+          created_at?: string | null
+          id?: string
+          order_amount?: number
+          product_id?: string | null
+          service_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_sales_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          affiliate_code: string
+          commission_rate: number | null
+          created_at: string | null
+          id: string
+          status: string | null
+          total_earnings: number | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          affiliate_code: string
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          total_earnings?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          total_earnings?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_module_configs: {
         Row: {
           active: boolean
@@ -169,6 +249,109 @@ export type Database = {
           usage_count?: number
         }
         Relationships: []
+      }
+      auction_bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          bidder_id?: string
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          bid_count: number | null
+          buy_now_price: number | null
+          category: string | null
+          created_at: string | null
+          current_price: number
+          description: string | null
+          end_date: string
+          highest_bidder_id: string | null
+          id: string
+          image_url: string | null
+          product_id: string | null
+          reserve_price: number | null
+          seller_id: string
+          start_date: string | null
+          starting_price: number
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          bid_count?: number | null
+          buy_now_price?: number | null
+          category?: string | null
+          created_at?: string | null
+          current_price?: number
+          description?: string | null
+          end_date: string
+          highest_bidder_id?: string | null
+          id?: string
+          image_url?: string | null
+          product_id?: string | null
+          reserve_price?: number | null
+          seller_id: string
+          start_date?: string | null
+          starting_price?: number
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          bid_count?: number | null
+          buy_now_price?: number | null
+          category?: string | null
+          created_at?: string | null
+          current_price?: number
+          description?: string | null
+          end_date?: string
+          highest_bidder_id?: string | null
+          id?: string
+          image_url?: string | null
+          product_id?: string | null
+          reserve_price?: number | null
+          seller_id?: string
+          start_date?: string | null
+          starting_price?: number
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       badges: {
         Row: {
@@ -1792,6 +1975,45 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_commissions: {
+        Row: {
+          buyer_id: string | null
+          commission_amount: number
+          commission_rate: number | null
+          commission_type: string | null
+          created_at: string | null
+          id: string
+          order_amount: number
+          seller_id: string
+          status: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          buyer_id?: string | null
+          commission_amount: number
+          commission_rate?: number | null
+          commission_type?: string | null
+          created_at?: string | null
+          id?: string
+          order_amount: number
+          seller_id: string
+          status?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          buyer_id?: string | null
+          commission_amount?: number
+          commission_rate?: number | null
+          commission_type?: string | null
+          created_at?: string | null
+          id?: string
+          order_amount?: number
+          seller_id?: string
+          status?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           id: string
@@ -2911,6 +3133,87 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      special_offers: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          current_claims: number | null
+          description: string | null
+          discount_percentage: number | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          max_claims: number | null
+          offer_price: number
+          offer_type: string | null
+          original_price: number
+          product_id: string | null
+          seller_id: string
+          service_id: string | null
+          start_date: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          current_claims?: number | null
+          description?: string | null
+          discount_percentage?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          max_claims?: number | null
+          offer_price: number
+          offer_type?: string | null
+          original_price: number
+          product_id?: string | null
+          seller_id: string
+          service_id?: string | null
+          start_date?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          current_claims?: number | null
+          description?: string | null
+          discount_percentage?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          max_claims?: number | null
+          offer_price?: number
+          offer_type?: string | null
+          original_price?: number
+          product_id?: string | null
+          seller_id?: string
+          service_id?: string | null
+          start_date?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "special_offers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spin_results: {
         Row: {

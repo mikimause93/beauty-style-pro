@@ -3,6 +3,7 @@ import { ArrowLeft, Plus, Package, Edit3, Trash2, Eye, EyeOff } from "lucide-rea
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useVerificationGuard } from "@/hooks/useVerificationGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import beauty1 from "@/assets/beauty-1.jpg";
@@ -25,6 +26,7 @@ interface Product {
 export default function ManageProductsPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { guardAction } = useVerificationGuard();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -45,6 +47,7 @@ export default function ManageProductsPage() {
   };
 
   const handleAdd = async () => {
+    if (guardAction("pubblicare prodotti")) return;
     if (!user || !newProduct.name.trim() || !newProduct.price) { toast.error("Compila nome e prezzo"); return; }
     const price = parseFloat(newProduct.price);
     if (isNaN(price) || price <= 0) { toast.error("Prezzo non valido"); return; }

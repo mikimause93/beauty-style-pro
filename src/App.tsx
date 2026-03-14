@@ -84,6 +84,9 @@ const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
+const OffersPage = lazy(() => import("./pages/OffersPage"));
+const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
+const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 
 const queryClient = new QueryClient();
 
@@ -193,6 +196,9 @@ const App = () => {
             <Route path="/hr/job/:id/manage" element={<P><JobDetailPage /></P>} />
             <Route path="/hr/application/:id" element={<P><HRPage /></P>} />
             <Route path="/ai-look" element={<P><AILookGeneratorPage /></P>} />
+            <Route path="/offers" element={<OffersPage />} />
+            <Route path="/auctions" element={<AuctionsPage />} />
+            <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

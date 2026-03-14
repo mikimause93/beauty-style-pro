@@ -92,6 +92,47 @@ export default function CheckoutPage() {
         status: "paid",
       });
 
+      // Track platform commission (5%)
+      const commissionAmount = amount * 0.05;
+      if (refId) {
+        // Get seller id from product or booking
+        let sellerId = null;
+        if (type === "product") {
+          const { data: prod } = await supabase.from("products").select("seller_id").eq("id", refId).maybeSingle();
+          sellerId = prod?.seller_id;
+        }
+        if (sellerId) {
+          await supabase.from("platform_commissions").insert({
+            seller_id: sellerId,
+            buyer_id: user.id,
+            order_amount: amount,
+            commission_rate: 5,
+            commission_amount: commissionAmount,
+            commission_type: type === "product" ? "product" : "service",
+          });
+        }
+
+        // Check for affiliate referral
+        const refCode = new URLSearchParams(window.location.search).get("aff");
+        if (refCode && sellerId) {
+          const { data: aff } = await supabase.from("affiliates").select("*").eq("affiliate_code", refCode).maybeSingle();
+          if (aff) {
+            const affCommission = amount * (aff.commission_rate / 100);
+            await supabase.from("affiliate_sales").insert({
+              affiliate_id: aff.id,
+              buyer_id: user.id,
+              order_amount: amount,
+              commission_amount: affCommission,
+              product_id: type === "product" ? refId : null,
+            });
+            await supabase.from("affiliates").update({
+              total_earnings: Number(aff.total_earnings) + affCommission,
+              total_sales: (aff.total_sales || 0) + 1,
+            }).eq("id", aff.id);
+          }
+        }
+      }
+
       toast.success("Pagamento completato!");
       navigate(`/wallet`);
     } catch (e) {
