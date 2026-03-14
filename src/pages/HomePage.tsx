@@ -296,8 +296,8 @@ export default function HomePage() {
           <div className="space-y-4 fade-in">
             {/* Sponsor Banner */}
             <SponsorBanner />
-            {displayPosts.map((post, index) => (
-              <div key={post.id}>
+             {displayPosts.map((post, index) => (
+               <div key={post.id} id={`post-${post.id}`} className={highlightPostId === post.id ? "ring-2 ring-primary rounded-2xl transition-all" : ""}>
                 <PostCard post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
                 {/* Insert a job post card after every 2nd post */}
                 {index > 0 && index % 2 === 1 && jobPosts[Math.floor(index / 2)] && (
