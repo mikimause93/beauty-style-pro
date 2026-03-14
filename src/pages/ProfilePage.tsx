@@ -352,7 +352,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
+                  <span className="text-[9px] text-primary font-medium">{item.label}</span>
                 </button>
               );
             })}
