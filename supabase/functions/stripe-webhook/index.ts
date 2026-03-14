@@ -31,7 +31,20 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const event = JSON.parse(body) as Stripe.Event;
+
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    let event: Stripe.Event;
+
+    if (webhookSecret) {
+      const signature = req.headers.get("stripe-signature");
+      if (!signature) {
+        return new Response("Missing stripe-signature header", { status: 400 });
+      }
+      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+    } else {
+      event = JSON.parse(body) as Stripe.Event;
+    }
+
     logStep("Event received", { type: event.type });
 
     switch (event.type) {
