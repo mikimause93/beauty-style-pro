@@ -87,6 +87,7 @@ const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
+const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
 
 const queryClient = new QueryClient();
 
