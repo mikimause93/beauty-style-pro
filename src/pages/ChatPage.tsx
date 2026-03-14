@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Languages, Volume2 } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2 } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useNavigate, useParams } from "react-router-dom";
@@ -69,8 +69,7 @@ export default function ChatPage() {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [inCall, setInCall] = useState<"voice" | "video" | null>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
-  const { translate, translating, targetLang, setTargetLang, autoTranslate, setAutoTranslate, LANGUAGES } = useTranslation();
-  const [showLangPicker, setShowLangPicker] = useState(false);
+  const { translate, translating, autoTranslate, setAutoTranslate } = useTranslation();
 
   useEffect(() => {
     if (user) loadConversations();
@@ -147,14 +146,14 @@ export default function ChatPage() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [selectedChat, user, autoTranslate, targetLang]);
+  }, [selectedChat, user, autoTranslate]);
 
-  // Auto-translate all existing "other" messages when language changes or autoTranslate turns on
+  // Auto-translate all existing "other" messages when autoTranslate turns on
   useEffect(() => {
     if (!autoTranslate || messages.length === 0) return;
     const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
     otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
-  }, [autoTranslate, targetLang, messages.length]);
+  }, [autoTranslate, messages.length]);
 
   const loadConversations = async () => {
     if (!user) return;
@@ -448,7 +447,7 @@ export default function ChatPage() {
     return (
       <MobileLayout>
         <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
@@ -467,8 +466,9 @@ export default function ChatPage() {
           <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
             <Video className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => setShowLangPicker(!showLangPicker)} className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
-            <Languages className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
+          <button onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione AI attivata"); else { toast.info("Traduzione AI disattivata"); setTranslatedMessages({}); } }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
+            <Globe className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </button>
         </header>
         {/* In-call overlay */}
@@ -525,26 +525,11 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Language picker */}
-        {showLangPicker && (
-          <div className="px-4 py-2 bg-card border-b border-border space-y-2 fade-in">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">Traduzione automatica in tempo reale</span>
-              <button
-                onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione automatica attivata"); else { toast.info("Traduzione automatica disattivata"); setTranslatedMessages({}); } }}
-                className={`w-10 h-5 rounded-full transition-colors relative ${autoTranslate ? "bg-primary" : "bg-muted"}`}
-              >
-                <div className={`w-4 h-4 rounded-full bg-primary-foreground absolute top-0.5 transition-all ${autoTranslate ? "left-5.5" : "left-0.5"}`} />
-              </button>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-            {LANGUAGES.map(lang => (
-              <button key={lang.code} onClick={() => { setTargetLang(lang.code); setTranslatedMessages({}); setShowLangPicker(false); toast.success(`Lingua: ${lang.label}`); }}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${targetLang === lang.code ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                {lang.label}
-              </button>
-            ))}
-            </div>
+        {/* Auto-translate indicator */}
+        {autoTranslate && (
+          <div className="px-4 py-1.5 bg-primary/5 border-b border-border flex items-center justify-center gap-2">
+            <Globe className="w-3 h-3 text-primary" />
+            <span className="text-[10px] text-primary font-medium">Traduzione AI automatica attiva</span>
           </div>
         )}
 
