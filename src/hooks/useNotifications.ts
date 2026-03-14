@@ -12,7 +12,7 @@ export interface AppNotification {
   created_at: string;
 }
 
-// Request push notification permission and register SW
+// Register Service Worker for push notifications
 async function registerPushNotifications() {
   if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
   
@@ -20,7 +20,6 @@ async function registerPushNotifications() {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;
     
-    // SW is already registered via index.html
     const registration = await navigator.serviceWorker.ready;
     console.log("Push notifications ready via SW:", registration.scope);
   } catch (err) {
@@ -28,41 +27,47 @@ async function registerPushNotifications() {
   }
 }
 
-// Show a local notification when app is in background
-function showLocalNotification(notif: AppNotification) {
+// Show notification via Service Worker (works even when app is closed/background)
+async function showPushNotification(notif: AppNotification) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
-  if (document.visibilityState === "visible") return; // Don't show if app is focused
 
   const typeEmoji: Record<string, string> = {
     like: "❤️", comment: "💬", booking: "📅", tip: "💰",
     follow: "👤", challenge: "🏆", message: "✉️", system: "🔔", info: "ℹ️",
   };
 
-  const icon = "/icons/icon-192x192.png";
-  const badge = "/icons/icon-192x192.png";
   const emoji = typeEmoji[notif.type] || "🔔";
+  const url = getNotificationUrl(notif);
 
   try {
-    const options: NotificationOptions = {
-      body: notif.message,
-      icon,
-      badge,
-      tag: notif.id,
-      silent: false,
-      data: { url: getNotificationUrl(notif) },
-    };
-    new Notification(`${emoji} ${notif.title}`, options);
-  } catch {
-    // Fallback: use SW notification
-    navigator.serviceWorker?.ready.then(reg => {
-      reg.showNotification(`${emoji} ${notif.title}`, {
+    // Always use Service Worker notification - works in background AND when app is closed
+    const registration = await navigator.serviceWorker?.ready;
+    if (registration) {
+      await registration.showNotification(`${emoji} ${notif.title}`, {
         body: notif.message,
-        icon,
-        badge,
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-192x192.png",
         tag: notif.id,
-        data: { url: getNotificationUrl(notif) },
+        renotify: true,
+        requireInteraction: false,
+        silent: false,
+        vibrate: [200, 100, 200],
+        data: { url },
+        actions: [
+          { action: "open", title: "📲 Apri" },
+          { action: "close", title: "✕ Chiudi" },
+        ],
       } as NotificationOptions);
-    });
+    }
+  } catch {
+    // Last resort fallback
+    try {
+      new Notification(`${emoji} ${notif.title}`, {
+        body: notif.message,
+        icon: "/icons/icon-192x192.png",
+        tag: notif.id,
+      });
+    } catch { /* silent */ }
   }
 }
 
@@ -71,6 +76,7 @@ function getNotificationUrl(notif: AppNotification): string {
   const data = notif.data || {};
   if (type === "message" && data.conversation_id) return `/chat/${data.conversation_id}`;
   if (type === "follow" && data.follower_id) return `/profile/${data.follower_id}`;
+  if ((type === "like" || type === "comment") && data.post_id) return `/?post=${data.post_id}`;
   if (type === "booking") return "/my-bookings";
   if (type === "tip") return "/wallet";
   if (type === "challenge") return "/challenges";
@@ -107,7 +113,7 @@ export function useNotifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // Real-time subscription + local push notification
+  // Real-time subscription + push notification (works in background)
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -122,8 +128,8 @@ export function useNotifications() {
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
         
-        // Show push notification when app is in background/closed
-        showLocalNotification(newNotif);
+        // Show push notification (works even in background via SW)
+        showPushNotification(newNotif);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
