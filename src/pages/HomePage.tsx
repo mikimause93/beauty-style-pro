@@ -40,17 +40,7 @@ interface Post {
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
 
-const fallbackStylists = [
-  { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, avatar: stylist2, hourly_rate: 45 },
-  { id: "2", business_name: "Sylvie Beauty", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, avatar: stylist1, hourly_rate: 55 },
-  { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, avatar: beauty1, hourly_rate: 35 },
-];
-
-const fallbackPosts: Post[] = [
-  { id: "00000000-0000-0000-0000-000000000001", user_id: "00000000-0000-0000-0000-000000000010", caption: "New summer looks available!", image_url: beauty1, video_url: null, like_count: 234, comment_count: 45, post_type: "image", created_at: new Date(Date.now() - 3600000).toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
-  { id: "00000000-0000-0000-0000-000000000002", user_id: "00000000-0000-0000-0000-000000000020", caption: "Balayage transformation", image_url: beauty2, video_url: null, like_count: 189, comment_count: 23, post_type: "image", created_at: new Date(Date.now() - 7200000).toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
-  { id: "00000000-0000-0000-0000-000000000003", user_id: "00000000-0000-0000-0000-000000000030", caption: "Keratin treatment results", image_url: beauty3, video_url: null, like_count: 312, comment_count: 67, post_type: "image", created_at: new Date(Date.now() - 14400000).toISOString(), profileData: { display_name: "Beauty Rossi", avatar_url: beauty3, user_type: "professional" } },
-];
+// No mock data — only real DB content in production
 
 export default function HomePage() {
   const navigate = useNavigate();
