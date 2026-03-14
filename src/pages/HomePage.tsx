@@ -166,8 +166,8 @@ export default function HomePage() {
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
             </button>
-            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-xs font-semibold">
-              <Coins className="w-3.5 h-3.5 text-accent" />
+            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold">
+              <Coins className="w-3.5 h-3.5 text-primary" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
             <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
