@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 export default function ProfessionalDashboardPage() {
   const navigate = useNavigate();
