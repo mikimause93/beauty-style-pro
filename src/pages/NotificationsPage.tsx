@@ -148,9 +148,9 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-foreground text-background text-[10px] font-bold flex items-center gap-1">
-                <CheckCheck className="w-3 h-3" /> Letto
-              </button>
+               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+                 <CheckCheck className="w-3 h-3" /> Letto
+               </button>
             )}
             <img src={logo} alt="Style" className="h-6 object-contain opacity-60" />
           </div>
