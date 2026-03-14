@@ -109,19 +109,9 @@ export default function HomePage() {
     } catch (error) { console.error('Error:', error); }
   };
 
-  const displayStories = stories.length > 0 ? stories : [
-    { id: "s1", name: "Martina", avatar: stylist2, isLive: true, hasStory: true },
-    { id: "s2", name: "Sylvie", avatar: stylist1, isLive: true, hasStory: true },
-    { id: "s3", name: "Marco", avatar: beauty1, isLive: false, hasStory: true },
-    { id: "s4", name: "Luca", avatar: beauty2, isLive: false, hasStory: true },
-  ];
-
-  const displayLiveStreams = liveStreams.length > 0 ? liveStreams : [
-    { id: "l1", title: "Makeover completo", professional: { business_name: "Martina Rossi" }, viewer_count: 234, thumbnail_url: beauty1, category: "Makeup" },
-    { id: "l2", title: "Taglio tendenza 2024", professional: { business_name: "Sylvie Beauty" }, viewer_count: 189, thumbnail_url: beauty2, category: "Hair" },
-  ];
-
-  const displayPosts = posts.length > 0 ? posts : fallbackPosts;
+  const displayStories = stories;
+  const displayLiveStreams = liveStreams;
+  const displayPosts = posts;
 
   const handleLike = async (postId: string) => {
     const isLiked = likedPosts.includes(postId);

@@ -123,15 +123,7 @@ export default function MapSearchPage() {
       });
     }
 
-    if (allPros.length > 0) {
-      setProfessionals(allPros);
-    } else {
-      setProfessionals([
-        { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, latitude: 45.47, longitude: 9.19, address: "Via Montenapoleone 12", description: "Balayage specialist", is_verified: true, avatar: stylist2 },
-        { id: "2", business_name: "Sylvie Leaciu", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, hourly_rate: 55, latitude: 41.91, longitude: 12.49, address: "Via del Corso 45", description: "Colorazioni", is_verified: true, avatar: stylist1 },
-        { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, latitude: 40.85, longitude: 14.27, address: "Via Toledo 78", description: "Barber tradizionale", is_verified: false, avatar: beauty1 },
-      ]);
-    }
+    setProfessionals(allPros);
   };
 
   const loadJobs = async () => {
