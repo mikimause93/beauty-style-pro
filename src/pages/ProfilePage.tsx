@@ -261,8 +261,8 @@ export default function ProfilePage() {
 
           {/* QR Coins badge — centered */}
           {isOwnProfile && (
-            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-muted/60 border border-border/30 text-xs font-semibold mb-1">
-              <Coins className="w-3 h-3 text-accent" />
+            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold mb-1">
+              <Coins className="w-3 h-3 text-primary" />
               {displayProfile?.qr_coins?.toLocaleString() || '0'} QR Coins
             </button>
           )}
