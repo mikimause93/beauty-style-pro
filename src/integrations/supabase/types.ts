@@ -2198,6 +2198,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           availability: Json | null
           avatar_url: string | null
           bank_holder_name: string | null
@@ -2234,11 +2235,13 @@ export type Database = {
           user_id: string
           user_type: string
           username: string | null
+          verification_level: string
           verification_notes: string | null
           verification_status: string
           whatsapp: string | null
         }
         Insert: {
+          account_type?: string
           availability?: Json | null
           avatar_url?: string | null
           bank_holder_name?: string | null
@@ -2275,11 +2278,13 @@ export type Database = {
           user_id: string
           user_type?: string
           username?: string | null
+          verification_level?: string
           verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
         }
         Update: {
+          account_type?: string
           availability?: Json | null
           avatar_url?: string | null
           bank_holder_name?: string | null
@@ -2316,6 +2321,7 @@ export type Database = {
           user_id?: string
           user_type?: string
           username?: string | null
+          verification_level?: string
           verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
@@ -3715,42 +3721,72 @@ export type Database = {
       }
       verification_requests: {
         Row: {
+          account_type: string
           address: string | null
           admin_notes: string | null
+          business_name: string | null
+          city: string | null
           created_at: string
           document_type: string | null
           document_urls: string[] | null
+          email: string | null
           full_name: string | null
           id: string
+          license_urls: string[] | null
+          phone: string | null
+          rejection_reason: string | null
           reviewed_at: string | null
+          reviewer_id: string | null
           status: string
+          tax_code: string | null
           user_id: string
+          vat_number: string | null
           verification_type: string
         }
         Insert: {
+          account_type?: string
           address?: string | null
           admin_notes?: string | null
+          business_name?: string | null
+          city?: string | null
           created_at?: string
           document_type?: string | null
           document_urls?: string[] | null
+          email?: string | null
           full_name?: string | null
           id?: string
+          license_urls?: string[] | null
+          phone?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
+          reviewer_id?: string | null
           status?: string
+          tax_code?: string | null
           user_id: string
+          vat_number?: string | null
           verification_type?: string
         }
         Update: {
+          account_type?: string
           address?: string | null
           admin_notes?: string | null
+          business_name?: string | null
+          city?: string | null
           created_at?: string
           document_type?: string | null
           document_urls?: string[] | null
+          email?: string | null
           full_name?: string | null
           id?: string
+          license_urls?: string[] | null
+          phone?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
+          reviewer_id?: string | null
           status?: string
+          tax_code?: string | null
           user_id?: string
+          vat_number?: string | null
           verification_type?: string
         }
         Relationships: []
