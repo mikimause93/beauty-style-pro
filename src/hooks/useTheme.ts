@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { safeStorage } from "@/lib/safeStorage";
 
 type Theme = "dark" | "light";
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem("style-theme");
+    const saved = safeStorage.getItem("style-theme");
     return (saved === "light" ? "light" : "dark") as Theme;
   });
 
@@ -53,7 +54,7 @@ export function useTheme() {
       root.style.setProperty("--shadow-card", "0 4px 24px hsl(0 0% 0% / 0.3)");
       root.style.setProperty("--gold-foreground", "0 0% 8%");
     }
-    localStorage.setItem("style-theme", theme);
+    safeStorage.setItem("style-theme", theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(prev => prev === "dark" ? "light" : "dark");

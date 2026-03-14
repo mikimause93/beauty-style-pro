@@ -46,6 +46,11 @@ export default function EditProfilePage() {
   const handleDetectLocation = async () => {
     setLocating(true);
     try {
+      if (!('geolocation' in navigator)) {
+        toast.error("Geolocalizzazione non supportata su questo dispositivo");
+        setLocating(false);
+        return;
+      }
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
       });
