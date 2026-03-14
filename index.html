@@ -41,6 +41,27 @@
     <!-- Favicon & Icons -->
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
     
+    <!-- Single Page Apps for GitHub Pages: restore route after 404 redirect -->
+    <script>
+      (function(l) {
+        // Handle ?p= style redirect from 404.html
+        if (l.search.startsWith('?p=')) {
+          var params = {};
+          l.search.slice(1).split('&').forEach(function(part) {
+            var eq = part.indexOf('=');
+            if (eq > -1) params[part.slice(0, eq)] = part.slice(eq + 1).replace(/~and~/g, '&');
+          });
+          var path = params.p ? '/' + params.p.replace(/^\//, '') : '';
+          var query = params.q ? '?' + params.q : '';
+          // Strip trailing slash from pathname to avoid double-slash (e.g. /beauty-style-pro//shop)
+          window.history.replaceState(
+            null, null,
+            l.pathname.replace(/\/$/, '') + path + query + l.hash
+          );
+        }
+      }(window.location));
+    </script>
+
     <!-- Playfair Display for splash/branding -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
