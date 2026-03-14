@@ -70,7 +70,7 @@ export async function streamAI(options: AIRouterOptions & {
         options.onDone();
         return;
       }
-    } catch {}
+    } catch { /* ignore fallback fetch errors */ }
     options.onError?.("Servizio AI temporaneamente non disponibile");
     return;
   }

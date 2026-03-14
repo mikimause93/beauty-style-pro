@@ -138,7 +138,7 @@ export default function QuizLivePage() {
     } catch (e) { console.error(e); }
   };
 
-  const useLifeline = (id: string) => {
+  const handleLifeline = (id: string) => {
     if (usedLifelines.includes(id)) return;
     setUsedLifelines(prev => [...prev, id]);
 
@@ -398,7 +398,7 @@ export default function QuizLivePage() {
             {lifelines.map(l => {
               const used = usedLifelines.includes(l.id);
               return (
-                <button key={l.id} onClick={() => useLifeline(l.id)} disabled={used || selectedAnswer !== null}
+                <button key={l.id} onClick={() => handleLifeline(l.id)} disabled={used || selectedAnswer !== null}
                   className={`flex flex-col items-center gap-1 px-4 py-3 rounded-2xl transition-all ${
                     used ? "bg-muted/30 opacity-40" : "glass hover:bg-primary/10"
                   }`}>
