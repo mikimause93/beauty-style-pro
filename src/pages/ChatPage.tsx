@@ -466,8 +466,9 @@ export default function ChatPage() {
           <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
             <Video className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => setShowLangPicker(!showLangPicker)} className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
-            <Languages className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
+          <button onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione AI attivata"); else { toast.info("Traduzione AI disattivata"); setTranslatedMessages({}); } }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
+            <Globe className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </button>
         </header>
         {/* In-call overlay */}
