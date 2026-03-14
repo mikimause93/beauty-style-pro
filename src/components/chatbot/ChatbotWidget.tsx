@@ -93,7 +93,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   useEffect(() => {
     if (voiceSupported && user) {
       const timer = setTimeout(() => {
-        startWakeWordListening();
+        try { startWakeWordListening(); } catch(e) { console.log('Wake word not available'); }
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -101,13 +101,13 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
   // Re-start wake word listening after voice call ends
   useEffect(() => {
-    if (!isVoiceCallActive && !isWakeWordListening && voiceSupported && user) {
+    if (!isVoiceCallActive && voiceSupported && user) {
       const timer = setTimeout(() => {
-        startWakeWordListening();
-      }, 2000);
+        try { startWakeWordListening(); } catch(e) { /* ignore */ }
+      }, 2500);
       return () => clearTimeout(timer);
     }
-  }, [isVoiceCallActive, isWakeWordListening, voiceSupported, user]);
+  }, [isVoiceCallActive, voiceSupported, user]);
 
   // Process voice command when transcript changes during call
   useEffect(() => {
