@@ -217,7 +217,7 @@ export default function MarketplacePage() {
                   </button>
                   <button
                     onClick={() => navigate(`/chat`)}
-                    className="py-2 px-4 rounded-xl bg-muted text-foreground text-xs font-semibold"
+                    className="py-2 px-4 rounded-xl bg-primary/10 text-primary text-xs font-semibold"
                   >
                     💬 Chat
                   </button>
