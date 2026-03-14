@@ -49,6 +49,31 @@ export default function DebugPanelPage() {
     });
   }, [user]);
 
+  const fetchErrors = async () => {
+    const { data } = await (supabase as any)
+      .from("error_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (data) setErrors(data);
+  };
+
+  const fetchPastResults = async () => {
+    const { data } = await (supabase as any)
+      .from("stress_test_results")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (data) setResults(data);
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchErrors();
+      fetchPastResults();
+    }
+  }, [isAdmin]);
+
   if (isAdmin === null) {
     return (
       <MobileLayout>
@@ -71,29 +96,6 @@ export default function DebugPanelPage() {
       </MobileLayout>
     );
   }
-
-  const fetchErrors = async () => {
-    const { data } = await (supabase as any)
-      .from("error_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-    if (data) setErrors(data);
-  };
-
-  const fetchPastResults = async () => {
-    const { data } = await (supabase as any)
-      .from("stress_test_results")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (data) setResults(data);
-  };
-
-  useEffect(() => {
-    fetchErrors();
-    fetchPastResults();
-  }, []);
 
   const handleRunAll = async () => {
     setRunning(true);
