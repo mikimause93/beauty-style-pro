@@ -54,6 +54,7 @@ const fallbackPosts: Post[] = [
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
@@ -65,6 +66,19 @@ export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [stylists, setStylists] = useState(fallbackStylists);
   const [sharePost, setSharePost] = useState<Post | null>(null);
+  const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
+
+  // Handle post redirect from notifications
+  useEffect(() => {
+    const postId = searchParams.get("post");
+    if (postId) {
+      setHighlightPostId(postId);
+      setTimeout(() => {
+        const el = document.getElementById(`post-${postId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 500);
+    }
+  }, [searchParams]);
 
   // Track page visit
   useEffect(() => {
