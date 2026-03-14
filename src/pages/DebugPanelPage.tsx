@@ -34,10 +34,43 @@ interface ErrorLog {
 
 export default function DebugPanelPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [results, setResults] = useState<TestResult[]>([]);
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [running, setRunning] = useState(false);
   const [tab, setTab] = useState("tests");
+
+  // Check admin role
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
+      setIsAdmin(data && data.length > 0);
+    });
+  }, [user]);
+
+  if (isAdmin === null) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+          <ShieldCheck className="w-16 h-16 text-destructive" />
+          <h1 className="text-xl font-bold">Accesso Negato</h1>
+          <p className="text-sm text-muted-foreground">Solo gli amministratori possono accedere al Debug Panel.</p>
+          <Button onClick={() => navigate("/")} variant="outline">Torna alla Home</Button>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   const fetchErrors = async () => {
     const { data } = await (supabase as any)
