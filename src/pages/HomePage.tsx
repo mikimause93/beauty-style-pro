@@ -309,11 +309,11 @@ export default function HomePage() {
             </div>
             {stylists.map(stylist => (
               <button key={stylist.id} onClick={() => navigate(`/stylist/${stylist.id}`)}
-                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 text-left">
-                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover" />
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-primary/20 hover:border-primary/40 transition-all duration-200 text-left shadow-sm">
+                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/10" />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm truncate">{stylist.business_name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{stylist.specialty || 'Beauty Pro'}</p>
+                  <p className="text-xs text-primary/70 mt-0.5">{stylist.specialty || 'Beauty Pro'}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <Star className="w-3 h-3 text-accent fill-accent" />
                     <span className="text-xs font-medium">{stylist.rating || '4.5'}</span>
@@ -322,7 +322,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold">€{stylist.hourly_rate || 40}</p>
+                  <p className="text-sm font-bold text-primary">€{stylist.hourly_rate || 40}</p>
                   <p className="text-[10px] text-muted-foreground">/ora</p>
                 </div>
               </button>
