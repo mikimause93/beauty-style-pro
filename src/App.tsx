@@ -84,6 +84,9 @@ const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
+const OffersPage = lazy(() => import("./pages/OffersPage"));
+const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
+const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 
 const queryClient = new QueryClient();
 
