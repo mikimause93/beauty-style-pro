@@ -120,7 +120,7 @@ export default function NotificationsPage() {
           </div>
           <h2 className="text-xl font-display font-bold mb-2">Accedi per le notifiche</h2>
           <p className="text-sm text-muted-foreground mb-6">Ricevi aggiornamenti su like, commenti, prenotazioni e altro</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-foreground text-background font-semibold text-sm">
+          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm">
             Accedi
           </button>
         </div>
