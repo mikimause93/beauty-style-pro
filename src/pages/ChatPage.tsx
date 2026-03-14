@@ -365,11 +365,6 @@ export default function ChatPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
   };
 
-  const [callTimer, setCallTimer] = useState(0);
-  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const startCall = async (type: "voice" | "video") => {
     try {
