@@ -11,6 +11,7 @@ import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
+import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
 
 interface ChatMsg {
@@ -37,6 +38,7 @@ interface Props {
 export default function ChatbotWidget({ className = "" }: Props) {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { setTheme } = useTheme();
   const {
     suggestions,
     showChatbot,
@@ -124,6 +126,9 @@ export default function ChatbotWidget({ className = "" }: Props) {
     const result = executeVoiceCommand(command);
     
     if (result.matched) {
+      // Handle optional action field (e.g., theme change)
+      if (result.action === "theme:light") setTheme("light");
+      else if (result.action === "theme:dark") setTheme("dark");
       setVoicePhase("speaking");
       toast.success(result.response);
       // Auto-close after short delay so user sees the navigated page

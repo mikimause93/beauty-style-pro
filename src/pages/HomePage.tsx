@@ -1,4 +1,5 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2 } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
 import StoriesBar from "@/components/feed/StoriesBar";
@@ -48,6 +49,7 @@ export default function HomePage() {
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("Nuovi");
   const [posts, setPosts] = useState<Post[]>([]);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
@@ -145,6 +147,9 @@ export default function HomePage() {
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
+            </button>
+            <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+              {theme === "dark" ? <Sun className="w-[20px] h-[20px] text-muted-foreground" /> : <Moon className="w-[20px] h-[20px] text-muted-foreground" />}
             </button>
             <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold">
               <Coins className="w-3.5 h-3.5 text-primary" />

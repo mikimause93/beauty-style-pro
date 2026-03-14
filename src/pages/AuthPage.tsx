@@ -28,6 +28,12 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { signIn, signUp, user } = useAuth();
 
+  // Phone OTP login state
+  const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+
   // Shared fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,6 +118,29 @@ export default function AuthPage() {
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
     else { toast.success("Benvenuto!"); navigate("/"); }
+    setLoading(false);
+  };
+
+  // ─── Phone OTP Login ──────────────────────────────────
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber.trim()) { toast.error("Inserisci il numero di telefono"); return; }
+    setLoading(true);
+    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+    if (error) { toast.error(error.message); }
+    else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    setLoading(false);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim()) { toast.error("Inserisci il codice OTP"); return; }
+    setLoading(true);
+    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+    const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
+    if (error) { toast.error(error.message); }
+    else { toast.success("Accesso effettuato!"); navigate("/"); }
     setLoading(false);
   };
 
@@ -241,26 +270,63 @@ export default function AuthPage() {
             <button onClick={() => { setIsLogin(false); setStep(0); }} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-muted-foreground">Registrati</button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-3">
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
-                onChange={e => setPassword(e.target.value)} required minLength={6}
-                className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
-              </button>
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
-              {loading ? "Caricamento..." : "Accedi"}
+          {/* Email / Phone login tabs */}
+          <div className="flex gap-1 mb-4 bg-muted rounded-xl p-1">
+            <button onClick={() => { setLoginMode("email"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>Email</button>
+            <button onClick={() => { setLoginMode("phone"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+              <Phone className="w-3 h-3 inline mr-1" />Telefono
             </button>
-          </form>
+          </div>
+
+          {loginMode === "email" ? (
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
+                  onChange={e => setPassword(e.target.value)} required minLength={6}
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                  {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                </button>
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Caricamento..." : "Accedi"}
+              </button>
+            </form>
+          ) : !otpSent ? (
+            <form onSubmit={handleSendOtp} className="space-y-3">
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder="+39 333 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Invio OTP..." : "Invia codice SMS"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center">Codice OTP inviato a <strong>{phoneNumber}</strong></p>
+              <div className="relative">
+                <input type="text" inputMode="numeric" maxLength={6} placeholder="Codice OTP (6 cifre)" value={otpCode} onChange={e => setOtpCode(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 px-4 text-sm text-center tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Verifica..." : "Verifica e accedi"}
+              </button>
+              <button type="button" onClick={() => setOtpSent(false)} className="w-full text-center text-xs text-primary font-medium">
+                Modifica numero
+              </button>
+            </form>
+          )}
           <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
