@@ -154,13 +154,17 @@ export default function ProfilePage() {
             { icon: Edit3, label: "Modifica Profilo", action: () => navigate("/profile/edit") },
             { icon: Bookmark, label: "Salvati", action: () => setActiveTab("saved") },
             { icon: Bell, label: `Notifiche${unreadCount > 0 ? ` (${unreadCount})` : ''}`, action: () => navigate("/notifications") },
-            ...(isProfessional || isBusiness ? [
-              { icon: BarChart3, label: "Analytics", action: () => navigate("/analytics") },
+            ...(isProfessional ? [
+              { icon: BarChart3, label: "Pannello Pro", action: () => navigate("/professional-dashboard") },
               { icon: ShoppingBag, label: "Gestisci Prodotti", action: () => navigate("/manage-products") },
               { icon: Briefcase, label: "Annunci Lavoro", action: () => navigate("/hr") },
               { icon: Video, label: "Vai Live", action: () => navigate("/go-live") },
             ] : []),
             ...(isBusiness ? [
+              { icon: BarChart3, label: "Analytics", action: () => navigate("/analytics") },
+              { icon: ShoppingBag, label: "Gestisci Prodotti", action: () => navigate("/manage-products") },
+              { icon: Briefcase, label: "Annunci Lavoro", action: () => navigate("/hr") },
+              { icon: Video, label: "Vai Live", action: () => navigate("/go-live") },
               { icon: Building2, label: "Dashboard Business", action: () => navigate("/business") },
             ] : []),
             { icon: ShoppingBag, label: "Marketplace", action: () => navigate("/marketplace") },
