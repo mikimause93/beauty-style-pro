@@ -4,6 +4,17 @@
 
 ---
 
+## 🌐 Anteprima Live
+
+> **🔗 [https://mikimause93.github.io/beauty-style-pro/](https://mikimause93.github.io/beauty-style-pro/)**
+
+L'app è pubblicata automaticamente su GitHub Pages ad ogni push su `main`.
+Per attivare la prima pubblicazione, il proprietario del repository deve abilitare GitHub Pages una sola volta:
+**Settings → Pages → Source → GitHub Actions** → salvare.
+
+---
+
+
 ## ✨ Funzionalità
 
 ### Core
@@ -114,7 +125,7 @@ Il workflow **Deploy – GitHub Pages** (`.github/workflows/deploy.yml`) si atti
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
    - `VITE_SUPABASE_PROJECT_ID`
-4. Il sito sarà disponibile all'URL mostrato nel tab *Pages* (es. `https://<utente>.github.io/beauty-style-pro/`)
+4. Il sito sarà disponibile all'URL: **[https://mikimause93.github.io/beauty-style-pro/](https://mikimause93.github.io/beauty-style-pro/)**
 
 Per testare il build web in locale:
 

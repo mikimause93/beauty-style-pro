@@ -10,6 +10,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
 
@@ -101,14 +102,16 @@ const PageLoader = () => (
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(() => {
-    const shown = sessionStorage.getItem("style_splash_shown");
+    let shown = false;
+    try { shown = !!sessionStorage.getItem("style_splash_shown"); } catch { /* ignore */ }
     return !shown;
   });
   const handleSplashComplete = useCallback(() => {
-    sessionStorage.setItem("style_splash_shown", "1");
+    try { sessionStorage.setItem("style_splash_shown", "1"); } catch { /* ignore */ }
     setShowSplash(false);
   }, []);
   return (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -210,6 +213,7 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
   );
 };
 

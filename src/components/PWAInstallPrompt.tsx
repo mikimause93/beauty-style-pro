@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePWA } from '@/hooks/usePWA';
+import { safeStorage } from '@/lib/safeStorage';
 import { X, Download, Smartphone, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 export default function PWAInstallPrompt() {
@@ -29,7 +30,7 @@ export default function PWAInstallPrompt() {
   const handleDismiss = () => {
     setShowPrompt(false);
     setDismissed(true);
-    localStorage.setItem('pwa-dismissed', 'true');
+    safeStorage.setItem('pwa-dismissed', 'true');
   };
 
   // Offline banner
