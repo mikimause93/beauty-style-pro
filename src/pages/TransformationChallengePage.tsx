@@ -302,7 +302,7 @@ export default function TransformationChallengePage() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => setShowDonate(null)} className="flex-1 py-2.5 rounded-xl bg-muted text-sm font-semibold">Annulla</button>
+                        <button onClick={() => setShowDonate(null)} className="flex-1 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-semibold">Annulla</button>
                         <button onClick={() => donateQRC(ch.id)} className="flex-1 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-bold">
                           Dona {donateAmount} QRC
                         </button>
