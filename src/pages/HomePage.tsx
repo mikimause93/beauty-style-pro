@@ -49,12 +49,12 @@ export default function HomePage() {
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
   const [activeTab, setActiveTab] = useState("Nuovi");
-  const [posts, setPosts] = useState<Post[]>(fallbackPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const [jobPosts, setJobPosts] = useState<any[]>([]);
-  const [stylists, setStylists] = useState(fallbackStylists);
+  const [stylists, setStylists] = useState<any[]>([]);
   const [sharePost, setSharePost] = useState<Post | null>(null);
   const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
 
