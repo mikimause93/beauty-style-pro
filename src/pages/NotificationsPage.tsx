@@ -247,7 +247,7 @@ export default function NotificationsPage() {
                           <div className="flex items-center gap-2 mt-2.5">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleNotificationClick(notification); }}
-                              className="px-3.5 py-1.5 rounded-full bg-foreground text-background text-[10px] font-bold"
+                              className="px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold"
                             >
                               {getActionLabel(type)}
                             </button>
