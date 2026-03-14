@@ -220,11 +220,16 @@ export default function ProfilePage() {
             <p className="text-xs text-muted-foreground text-center max-w-[280px] leading-relaxed mb-2">{displayProfile.bio}</p>
           )}
 
-          {/* Location & skills — centered */}
+          {/* Location, sector & skills — centered */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-3">
             {displayProfile?.city && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> {displayProfile.city}
+              </span>
+            )}
+            {displayProfile?.sector && (
+              <span className="text-[11px] text-primary font-medium flex items-center gap-1">
+                <Briefcase className="w-3 h-3" /> {displayProfile.sector}
               </span>
             )}
             {displayProfile?.skills && displayProfile.skills.length > 0 && (
