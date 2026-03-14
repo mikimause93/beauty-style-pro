@@ -26,6 +26,7 @@ interface Product {
 export default function ManageProductsPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { guardAction } = useVerificationGuard();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
