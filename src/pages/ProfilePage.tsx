@@ -1,4 +1,4 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket, Store } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket, Store, Wand2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -220,11 +220,16 @@ export default function ProfilePage() {
             <p className="text-xs text-muted-foreground text-center max-w-[280px] leading-relaxed mb-2">{displayProfile.bio}</p>
           )}
 
-          {/* Location & skills — centered */}
+          {/* Location, sector & skills — centered */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-3">
             {displayProfile?.city && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-3 h-3" /> {displayProfile.city}
+              </span>
+            )}
+            {displayProfile?.sector && (
+              <span className="text-[11px] text-primary font-medium flex items-center gap-1">
+                <Briefcase className="w-3 h-3" /> {displayProfile.sector}
               </span>
             )}
             {displayProfile?.skills && displayProfile.skills.length > 0 && (
@@ -349,6 +354,34 @@ export default function ProfilePage() {
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {/* Horizontal Product Catalog — visible on other profiles */}
+        {!isOwnProfile && (isProfessional || isBusiness) && myProducts.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between px-1 mb-2">
+              <h3 className="text-xs font-bold">Catalogo Prodotti</h3>
+              <button onClick={() => setActiveTab("products")} className="text-[10px] text-primary font-semibold">Vedi tutti</button>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+              {myProducts.slice(0, 8).map(product => (
+                <div key={product.id} className="min-w-[120px] max-w-[120px] rounded-xl bg-card border border-border/50 overflow-hidden flex-shrink-0">
+                  {product.image_url && (
+                    <img src={product.image_url} alt="" className="w-full aspect-square object-cover" />
+                  )}
+                  <div className="p-2">
+                    <p className="text-[11px] font-semibold truncate">{product.name}</p>
+                    <p className="text-[10px] text-primary font-bold">€{product.price}</p>
+                    {product.ai_preview_enabled && (
+                      <button onClick={() => navigate("/ai-look")} className="mt-1 w-full flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[9px] font-semibold">
+                        <Wand2 className="w-2.5 h-2.5" /> Prova AI
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

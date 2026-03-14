@@ -1923,6 +1923,7 @@ export type Database = {
           image_url: string | null
           like_count: number
           post_type: string | null
+          sector: string | null
           user_id: string
           video_url: string | null
         }
@@ -1936,6 +1937,7 @@ export type Database = {
           image_url?: string | null
           like_count?: number
           post_type?: string | null
+          sector?: string | null
           user_id: string
           video_url?: string | null
         }
@@ -1949,6 +1951,7 @@ export type Database = {
           image_url?: string | null
           like_count?: number
           post_type?: string | null
+          sector?: string | null
           user_id?: string
           video_url?: string | null
         }
@@ -2004,6 +2007,7 @@ export type Database = {
       products: {
         Row: {
           active: boolean | null
+          ai_preview_enabled: boolean
           category: string | null
           created_at: string
           description: string | null
@@ -2013,12 +2017,14 @@ export type Database = {
           price: number
           rating: number | null
           review_count: number | null
+          sector: string | null
           seller_id: string
           stock: number | null
           updated_at: string
         }
         Insert: {
           active?: boolean | null
+          ai_preview_enabled?: boolean
           category?: string | null
           created_at?: string
           description?: string | null
@@ -2028,12 +2034,14 @@ export type Database = {
           price: number
           rating?: number | null
           review_count?: number | null
+          sector?: string | null
           seller_id: string
           stock?: number | null
           updated_at?: string
         }
         Update: {
           active?: boolean | null
+          ai_preview_enabled?: boolean
           category?: string | null
           created_at?: string
           description?: string | null
@@ -2043,9 +2051,46 @@ export type Database = {
           price?: number
           rating?: number | null
           review_count?: number | null
+          sector?: string | null
           seller_id?: string
           stock?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      professional_sectors: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          parent_sector: string | null
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          parent_sector?: string | null
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          parent_sector?: string | null
+          slug?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -2181,6 +2226,7 @@ export type Database = {
           phone_verified: boolean
           portfolio_urls: string[] | null
           qr_coins: number
+          sector: string | null
           skills: string[] | null
           surname: string | null
           tiktok: string | null
@@ -2221,6 +2267,7 @@ export type Database = {
           phone_verified?: boolean
           portfolio_urls?: string[] | null
           qr_coins?: number
+          sector?: string | null
           skills?: string[] | null
           surname?: string | null
           tiktok?: string | null
@@ -2261,6 +2308,7 @@ export type Database = {
           phone_verified?: boolean
           portfolio_urls?: string[] | null
           qr_coins?: number
+          sector?: string | null
           skills?: string[] | null
           surname?: string | null
           tiktok?: string | null
@@ -2676,6 +2724,7 @@ export type Database = {
       services: {
         Row: {
           active: boolean | null
+          ai_preview_enabled: boolean
           category: string | null
           created_at: string
           description: string | null
@@ -2687,6 +2736,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          ai_preview_enabled?: boolean
           category?: string | null
           created_at?: string
           description?: string | null
@@ -2698,6 +2748,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          ai_preview_enabled?: boolean
           category?: string | null
           created_at?: string
           description?: string | null

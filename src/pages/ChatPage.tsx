@@ -69,6 +69,11 @@ export default function ChatPage() {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [inCall, setInCall] = useState<"voice" | "video" | null>(null);
   const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
+  const [callTimer, setCallTimer] = useState(0);
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate } = useTranslation();
 
   useEffect(() => {
@@ -360,11 +365,6 @@ export default function ChatPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
   };
 
-  const [callTimer, setCallTimer] = useState(0);
-  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   const startCall = async (type: "voice" | "video") => {
     try {
