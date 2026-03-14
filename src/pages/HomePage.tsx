@@ -174,8 +174,8 @@ export default function HomePage() {
             <button key={tab} onClick={() => handleTabClick(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab 
-                   ? "bg-primary text-primary-foreground" 
-                   : "text-muted-foreground hover:text-primary"
+                   ? "bg-primary text-primary-foreground shadow-md" 
+                   : "bg-primary/10 text-primary hover:bg-primary/20"
               }`}>
               {tab}
             </button>
