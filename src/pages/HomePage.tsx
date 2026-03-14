@@ -392,9 +392,9 @@ export default function HomePage() {
                 { Icon: Trophy, label: "Sfide", path: "/challenges" },
               ].map(item => (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-primary/10 border border-primary/20 hover:border-primary/40 transition-all duration-200 shrink-0">
+                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-primary/15 border border-primary/30 hover:border-primary/50 transition-all duration-200 shrink-0 shadow-sm">
                    <item.Icon className="w-5 h-5 text-primary" />
-                   <span className="text-[10px] text-primary/70 font-medium">{item.label}</span>
+                   <span className="text-[10px] text-primary font-semibold">{item.label}</span>
                  </button>
               ))}
             </div>
