@@ -51,11 +51,12 @@
             var eq = part.indexOf('=');
             if (eq > -1) params[part.slice(0, eq)] = part.slice(eq + 1).replace(/~and~/g, '&');
           });
-          var path = params.p ? '/' + params.p : '';
+          var path = params.p ? '/' + params.p.replace(/^\//, '') : '';
           var query = params.q ? '?' + params.q : '';
+          // Strip trailing slash from pathname to avoid double-slash (e.g. /beauty-style-pro//shop)
           window.history.replaceState(
             null, null,
-            l.pathname + path + query + l.hash
+            l.pathname.replace(/\/$/, '') + path + query + l.hash
           );
         }
       }(window.location));
