@@ -148,12 +148,12 @@ export default function ChatPage() {
     return () => { supabase.removeChannel(channel); };
   }, [selectedChat, user, autoTranslate]);
 
-  // Auto-translate all existing "other" messages when language changes or autoTranslate turns on
+  // Auto-translate all existing "other" messages when autoTranslate turns on
   useEffect(() => {
     if (!autoTranslate || messages.length === 0) return;
     const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
     otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
-  }, [autoTranslate, targetLang, messages.length]);
+  }, [autoTranslate, messages.length]);
 
   const loadConversations = async () => {
     if (!user) return;
