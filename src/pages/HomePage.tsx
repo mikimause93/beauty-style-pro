@@ -403,7 +403,7 @@ export default function HomePage() {
               <div className="text-center py-12">
                 <Video className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">Nessun live stream attivo</p>
-                 <button onClick={() => navigate("/live")} className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-glow">
+                 <button onClick={() => navigate("/live")} className="mt-4 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg shadow-primary/30">
                    Vai alla sezione Live
                  </button>
               </div>
