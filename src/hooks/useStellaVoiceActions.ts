@@ -99,6 +99,26 @@ export function useStellaVoiceActions() {
       navigate("/marketplace");
       return { matched: true, response: "Apro il marketplace!" };
     }
+    if (text.includes("apri tema") || text.includes("cambia tema") || text.includes("tema chiaro") || text.includes("tema scuro")) {
+      navigate("/settings");
+      return { matched: true, response: "Apro le impostazioni per cambiare tema!" };
+    }
+    if (text.includes("spa") || text.includes("terme") || text.includes("benessere")) {
+      navigate("/spa-terme");
+      return { matched: true, response: "Ecco le Spa e Terme!" };
+    }
+    if (text.includes("quiz") || text.includes("gioca al quiz")) {
+      navigate("/quiz-live");
+      return { matched: true, response: "Apro il Quiz Live!" };
+    }
+    if (text.includes("talent") || text.includes("gioco talent")) {
+      navigate("/talent-game");
+      return { matched: true, response: "Apro il Talent Game!" };
+    }
+    if (text.includes("referral") || text.includes("invita amici")) {
+      navigate("/referral");
+      return { matched: true, response: "Apro il programma referral!" };
+    }
 
     // Message commands
     const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
