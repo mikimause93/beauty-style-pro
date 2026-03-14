@@ -447,7 +447,7 @@ export default function ChatPage() {
     return (
       <MobileLayout>
         <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
