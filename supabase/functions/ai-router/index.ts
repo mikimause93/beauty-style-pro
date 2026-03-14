@@ -193,9 +193,22 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
-    const { role, message, messages, user_id, context, stream } = await req.json();
+    // ── Verifica JWT ───────────────────────────────────────────────
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return jsonResponse({ error: "Token di autenticazione mancante" }, 401);
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authUser) {
+      return jsonResponse({ error: "Autenticazione fallita" }, 401);
+    }
+    // Usa sempre l'ID dal JWT — mai dal body
+    const user_id = authUser.id;
+
+    const { role, message, messages, context, stream } = await req.json();
 
     // Build prompt from role
     let userType: string | undefined;
