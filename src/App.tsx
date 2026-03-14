@@ -115,7 +115,7 @@ const App = () => {
       <Sonner />
       <PWAInstallPrompt />
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
         <RadioProvider>
           <PageTracker />
