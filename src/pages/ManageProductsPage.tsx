@@ -47,6 +47,7 @@ export default function ManageProductsPage() {
   };
 
   const handleAdd = async () => {
+    if (guardAction("pubblicare prodotti")) return;
     if (!user || !newProduct.name.trim() || !newProduct.price) { toast.error("Compila nome e prezzo"); return; }
     const price = parseFloat(newProduct.price);
     if (isNaN(price) || price <= 0) { toast.error("Prezzo non valido"); return; }
