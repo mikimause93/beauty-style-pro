@@ -361,14 +361,42 @@ export default function ChatPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(`Ciao ${name}! Ti contatto tramite STYLE App.`)}`, "_blank");
   };
 
-  const startCall = (type: "voice" | "video") => {
-    setInCall(type);
-    toast.info(type === "voice" ? "Chiamata vocale avviata..." : "Videochiamata avviata...");
-    // WebRTC placeholder - in production use Agora/Twilio
+  const [callTimer, setCallTimer] = useState(0);
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  const startCall = async (type: "voice" | "video") => {
+    try {
+      const constraints: MediaStreamConstraints = type === "video" 
+        ? { audio: true, video: { facingMode: "user", width: 640, height: 480 } }
+        : { audio: true };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      localStreamRef.current = stream;
+      
+      if (type === "video" && localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+      
+      setInCall(type);
+      setCallTimer(0);
+      callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+      toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
+    } catch (err) {
+      toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
+    }
   };
 
   const endCall = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(t => t.stop());
+      localStreamRef.current = null;
+    }
+    if (callTimerRef.current) clearInterval(callTimerRef.current);
     setInCall(null);
+    setCallTimer(0);
     toast.success("Chiamata terminata");
   };
 
