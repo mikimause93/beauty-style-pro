@@ -171,11 +171,11 @@ export default function TransformationChallengePage() {
 
         {/* View Toggle */}
         <div className="flex gap-2 mb-3">
-          <button onClick={() => setView("feed")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "feed" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            Feed
-          </button>
-          <button onClick={() => setView("leaderboard")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "leaderboard" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
-            Classifica
+           <button onClick={() => setView("feed")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "feed" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+             Feed
+           </button>
+           <button onClick={() => setView("leaderboard")} className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${view === "leaderboard" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+             Classifica
           </button>
         </div>
 
@@ -184,9 +184,9 @@ export default function TransformationChallengePage() {
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
             {CATEGORIES.map(cat => (
               <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat.value ? "bg-foreground text-background" : "bg-card border border-border text-muted-foreground"
-                }`}>
+                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                   selectedCategory === cat.value ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"
+                 }`}>
                 {cat.label}
               </button>
             ))}
@@ -320,9 +320,9 @@ export default function TransformationChallengePage() {
           <div className="space-y-4">
             <div className="flex gap-2">
               {LEADERBOARD_TABS.map(tab => (
-                <button key={tab} onClick={() => setLeaderboardTab(tab)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    leaderboardTab === tab ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                 <button key={tab} onClick={() => setLeaderboardTab(tab)}
+                   className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
+                     leaderboardTab === tab ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   }`}>{tab}</button>
               ))}
             </div>

@@ -11,7 +11,7 @@ import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import FeedJobCard from "@/components/feed/FeedJobCard";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -54,6 +54,7 @@ const fallbackPosts: Post[] = [
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
@@ -65,6 +66,19 @@ export default function HomePage() {
   const [jobPosts, setJobPosts] = useState<any[]>([]);
   const [stylists, setStylists] = useState(fallbackStylists);
   const [sharePost, setSharePost] = useState<Post | null>(null);
+  const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
+
+  // Handle post redirect from notifications
+  useEffect(() => {
+    const postId = searchParams.get("post");
+    if (postId) {
+      setHighlightPostId(postId);
+      setTimeout(() => {
+        const el = document.getElementById(`post-${postId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 500);
+    }
+  }, [searchParams]);
 
   // Track page visit
   useEffect(() => {
@@ -282,8 +296,8 @@ export default function HomePage() {
           <div className="space-y-4 fade-in">
             {/* Sponsor Banner */}
             <SponsorBanner />
-            {displayPosts.map((post, index) => (
-              <div key={post.id}>
+             {displayPosts.map((post, index) => (
+               <div key={post.id} id={`post-${post.id}`} className={highlightPostId === post.id ? "ring-2 ring-primary rounded-2xl transition-all" : ""}>
                 <PostCard post={post} onShare={() => setSharePost(post)} fallbackImage={beauty1} />
                 {/* Insert a job post card after every 2nd post */}
                 {index > 0 && index % 2 === 1 && jobPosts[Math.floor(index / 2)] && (

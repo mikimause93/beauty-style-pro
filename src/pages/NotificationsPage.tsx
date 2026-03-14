@@ -120,7 +120,7 @@ export default function NotificationsPage() {
           </div>
           <h2 className="text-xl font-display font-bold mb-2">Accedi per le notifiche</h2>
           <p className="text-sm text-muted-foreground mb-6">Ricevi aggiornamenti su like, commenti, prenotazioni e altro</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-foreground text-background font-semibold text-sm">
+          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm">
             Accedi
           </button>
         </div>
@@ -134,7 +134,7 @@ export default function NotificationsPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
@@ -148,9 +148,9 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-foreground text-background text-[10px] font-bold flex items-center gap-1">
-                <CheckCheck className="w-3 h-3" /> Letto
-              </button>
+               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+                 <CheckCheck className="w-3 h-3" /> Letto
+               </button>
             )}
             <img src={logo} alt="Style" className="h-6 object-contain opacity-60" />
           </div>
@@ -160,17 +160,17 @@ export default function NotificationsPage() {
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => setFilter("all")}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              filter === "all" ? "bg-foreground text-background" : "bg-foreground/10 text-foreground/60"
-            }`}
+             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+               filter === "all" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
+             }`}
           >
             Tutte
           </button>
           <button
             onClick={() => setFilter("unread")}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              filter === "unread" ? "bg-foreground text-background" : "bg-foreground/10 text-foreground/60"
-            }`}
+             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+               filter === "unread" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
+             }`}
           >
             Non lette {unreadCount > 0 && `(${unreadCount})`}
           </button>
@@ -247,14 +247,14 @@ export default function NotificationsPage() {
                           <div className="flex items-center gap-2 mt-2.5">
                             <button
                               onClick={(e) => { e.stopPropagation(); handleNotificationClick(notification); }}
-                              className="px-3.5 py-1.5 rounded-full bg-foreground text-background text-[10px] font-bold"
+                              className="px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold"
                             >
                               {getActionLabel(type)}
                             </button>
                             {!notification.read && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); markRead(notification.id); }}
-                                className="px-3 py-1.5 rounded-full bg-foreground/10 text-foreground/70 text-[10px] font-semibold flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary/70 text-[10px] font-semibold flex items-center gap-1"
                               >
                                 <Check className="w-3 h-3" /> Letto
                               </button>

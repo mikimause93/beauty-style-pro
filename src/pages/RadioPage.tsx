@@ -56,7 +56,7 @@ export default function RadioPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-foreground/10 flex items-center justify-center">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
@@ -77,11 +77,11 @@ export default function RadioPage() {
             <button
               key={tab.key}
               onClick={() => setSource(tab.key)}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                source === tab.key
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}>
+               className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                 source === tab.key
+                   ? "bg-primary text-primary-foreground"
+                   : "bg-primary/10 text-muted-foreground hover:text-foreground"
+               }`}>
               <span className={source === tab.key ? "" : tab.color}>{tab.icon}</span>
               {tab.label}
             </button>
@@ -178,10 +178,10 @@ export default function RadioPage() {
                   <button
                     key={f.key}
                     onClick={() => setRadioFilter(f.key)}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
-                      radioFilter === f.key
-                        ? "bg-foreground text-background"
-                        : "bg-muted text-muted-foreground"
+                     className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                       radioFilter === f.key
+                         ? "bg-primary text-primary-foreground"
+                         : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {f.label}
