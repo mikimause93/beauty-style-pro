@@ -1,4 +1,5 @@
-import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket, Store, Wand2 } from "lucide-react";
+import { Settings, Edit3, Heart, Calendar, Star, Users, Coins, Share2, Copy, LogOut, LogIn, ChevronRight, Trophy, Gift, BarChart3, Briefcase, Building2, ShoppingBag, Video, MessageCircle, Bell, Cog, Grid3X3, Bookmark, Tag, MapPin, Link, ExternalLink, Plus, Camera, Scissors, RotateCw, Phone, Wallet, Crown, Rocket, Store, Wand2, ShieldCheck } from "lucide-react";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -125,9 +126,7 @@ export default function ProfilePage() {
           <h1 className="text-base font-display font-bold truncate max-w-[180px]">
             {displayProfile?.display_name || 'Profilo'}
           </h1>
-          {(isProfessional || isBusiness) && (
-            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-primary/15 text-primary">✓</span>
-          )}
+          <VerifiedBadge status={displayProfile?.verification_status} userType={displayProfile?.user_type} size="sm" />
         </div>
         <div className="flex gap-1">
           {isOwnProfile && (
@@ -208,11 +207,14 @@ export default function ProfilePage() {
           {/* Name & Badge — centered */}
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-base font-bold tracking-tight">{displayProfile?.display_name || 'Utente STYLE'}</h2>
-            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-              isBusiness ? 'bg-accent/20 text-accent' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-            }`}>
-              {isBusiness ? 'Business' : isProfessional ? 'Pro' : 'Cliente'}
-            </span>
+            <VerifiedBadge status={displayProfile?.verification_status} userType={displayProfile?.user_type} size="sm" showLabel />
+            {displayProfile?.verification_status !== "verified" && (
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                isBusiness ? 'bg-primary/20 text-primary' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-primary/10 text-primary'
+              }`}>
+                {isBusiness ? 'Business' : isProfessional ? 'Pro' : 'Cliente'}
+              </span>
+            )}
           </div>
 
           {/* Bio — centered */}
@@ -240,7 +242,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats — horizontal pill style, centered */}
-          <div className="flex items-center gap-1 rounded-2xl bg-muted/50 border border-border/30 px-2 py-1.5 mb-4">
+          <div className="flex items-center gap-1 rounded-2xl bg-primary/5 border border-primary/10 px-2 py-1.5 mb-4">
             <button onClick={() => setActiveTab("grid")} className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-background/50 transition-colors">
               <span className="text-sm font-bold">{postCount}</span>
               <span className="text-[10px] text-muted-foreground">post</span>
@@ -259,8 +261,8 @@ export default function ProfilePage() {
 
           {/* QR Coins badge — centered */}
           {isOwnProfile && (
-            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-muted/60 border border-border/30 text-xs font-semibold mb-1">
-              <Coins className="w-3 h-3 text-accent" />
+            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold mb-1">
+              <Coins className="w-3 h-3 text-primary" />
               {displayProfile?.qr_coins?.toLocaleString() || '0'} QR Coins
             </button>
           )}
@@ -340,8 +342,8 @@ export default function ProfilePage() {
               return (
                 <button key={item.label} onClick={() => navigate(item.path)}
                   className="flex flex-col items-center gap-1 min-w-[56px] relative">
-                  <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center">
-                    <ItemIcon className="w-5 h-5 text-muted-foreground" />
+                  <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <ItemIcon className="w-5 h-5 text-primary" />
                     {item.badge && item.badge > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
                         <span className="text-[9px] text-destructive-foreground font-bold">
@@ -350,7 +352,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  <span className="text-[9px] text-muted-foreground font-medium">{item.label}</span>
+                  <span className="text-[9px] text-primary font-medium">{item.label}</span>
                 </button>
               );
             })}
