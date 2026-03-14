@@ -126,9 +126,7 @@ export default function ProfilePage() {
           <h1 className="text-base font-display font-bold truncate max-w-[180px]">
             {displayProfile?.display_name || 'Profilo'}
           </h1>
-          {(isProfessional || isBusiness) && (
-            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-primary/15 text-primary">✓</span>
-          )}
+          <VerifiedBadge status={displayProfile?.verification_status} userType={displayProfile?.user_type} size="sm" />
         </div>
         <div className="flex gap-1">
           {isOwnProfile && (
