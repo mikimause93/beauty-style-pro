@@ -345,7 +345,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-gradient-to-r from-primary/10 to-accent/10">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-                  <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Stella AI</h4>

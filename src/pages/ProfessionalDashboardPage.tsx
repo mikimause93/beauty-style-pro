@@ -160,7 +160,7 @@ export default function ProfessionalDashboardPage() {
           {statCards.map(card => (
             <div key={card.label} className="p-4 rounded-2xl bg-card border border-border/50">
               <div className={`w-9 h-9 rounded-xl ${card.color} flex items-center justify-center mb-2`}>
-                <card.icon className="w-4.5 h-4.5" />
+                <card.icon className="w-5 h-5" />
               </div>
               <p className="text-xl font-display font-bold">{card.value}</p>
               <p className="text-[11px] text-muted-foreground">{card.label}</p>
