@@ -285,11 +285,11 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <div className="flex-1" />
           {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
             <>
+              <button onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center gap-1">
+                <Wand2 className="w-3 h-3" /> Prova AI
+              </button>
               <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                 Prenota
-              </button>
-              <button onClick={() => navigate(`/chat`)} className="w-[22px] h-[22px]">
-                <Phone className="w-[18px] h-[18px] text-muted-foreground" />
               </button>
             </>
           )}

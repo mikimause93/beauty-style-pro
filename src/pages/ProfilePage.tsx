@@ -357,6 +357,34 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Horizontal Product Catalog — visible on other profiles */}
+        {!isOwnProfile && (isProfessional || isBusiness) && myProducts.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between px-1 mb-2">
+              <h3 className="text-xs font-bold">Catalogo Prodotti</h3>
+              <button onClick={() => setActiveTab("products")} className="text-[10px] text-primary font-semibold">Vedi tutti</button>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+              {myProducts.slice(0, 8).map(product => (
+                <div key={product.id} className="min-w-[120px] max-w-[120px] rounded-xl bg-card border border-border/50 overflow-hidden flex-shrink-0">
+                  {product.image_url && (
+                    <img src={product.image_url} alt="" className="w-full aspect-square object-cover" />
+                  )}
+                  <div className="p-2">
+                    <p className="text-[11px] font-semibold truncate">{product.name}</p>
+                    <p className="text-[10px] text-primary font-bold">€{product.price}</p>
+                    {product.ai_preview_enabled && (
+                      <button onClick={() => navigate("/ai-look")} className="mt-1 w-full flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[9px] font-semibold">
+                        <Wand2 className="w-2.5 h-2.5" /> Prova AI
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tabs — Instagram style icons */}
         <div className="flex border-t border-border">
           {[
