@@ -3,6 +3,7 @@ import { ArrowLeft, Plus, Package, Edit3, Trash2, Eye, EyeOff } from "lucide-rea
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useVerificationGuard } from "@/hooks/useVerificationGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import beauty1 from "@/assets/beauty-1.jpg";
