@@ -1,4 +1,4 @@
-name: Build Android AAB
+name: Build & Publish Android to Play Store
 
 on:
   push:
@@ -69,3 +69,26 @@ jobs:
           name: app-release-aab
           path: android/app/build/outputs/bundle/release/*.aab
           retention-days: 30
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: {}
+    env:
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+    steps:
+      - name: Download AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-aab
+          path: release/
+
+      - name: Publish to Google Play Store
+        if: env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.stylebeauty.pro
+          releaseFiles: release/*.aab
+          track: internal

@@ -82,7 +82,7 @@ npm run preview    # anteprima locale del build su http://localhost:4173
 
 ### 🤖 Android – Google Play (AAB)
 
-Il workflow **Build Android AAB** (`.github/workflows/android.yml`) genera un bundle `.aab` pronto per il Google Play Store.
+Il workflow **Build & Publish Android to Play Store** (`.github/workflows/android.yml`) genera un bundle `.aab` firmato e lo pubblica automaticamente sul Google Play Store nel canale **Internal testing**.
 
 **Setup una tantum:**
 1. Genera un keystore di firma:
@@ -94,13 +94,21 @@ Il workflow **Build Android AAB** (`.github/workflows/android.yml`) genera un bu
    ```bash
    base64 stayle.keystore | tr -d '\n'
    ```
-3. Aggiungi i segreti in **Settings → Secrets and variables → Actions**:
-   - `ANDROID_KEYSTORE_BASE64` – output del comando sopra
+3. Crea un **Service Account** per la Google Play API:
+   - Vai su [Google Play Console](https://play.google.com/console) → *Setup → API access*
+   - Collega (o crea) un progetto Google Cloud e crea un Service Account con il ruolo **Release manager**
+   - Scarica il file JSON delle credenziali del Service Account
+4. Aggiungi i segreti in **Settings → Secrets and variables → Actions**:
+   - `ANDROID_KEYSTORE_BASE64` – output del punto 2
    - `ANDROID_KEY_ALIAS` – alias usato nella creazione (es. `style-beauty`)
    - `ANDROID_STORE_PASSWORD` – password del keystore
    - `ANDROID_KEY_PASSWORD` – password della chiave
-4. Fai un push su `main`: il file `.aab` verrà caricato come artefatto del workflow, scaricabile dalla pagina **Actions → Build Android AAB → Artifacts**
-5. Carica il file `.aab` sulla [Google Play Console](https://play.google.com/console) per la distribuzione
+   - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` – contenuto del file JSON del Service Account (punto 3)
+5. Fai un push su `main`: il workflow costruirà l'AAB, lo caricherà come artefatto e lo pubblicherà automaticamente nel canale **Internal testing** della Play Console
+
+> **Nota:** se il segreto `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` non è configurato, il passo di pubblicazione viene saltato e l'AAB resta disponibile come artefatto scaricabile dalla pagina **Actions → Build & Publish Android to Play Store → Artifacts**.
+>
+> Per promuovere la release ad altri canali (alpha, beta, production) modifica il campo `track:` nel file `.github/workflows/android.yml`.
 
 ---
 
