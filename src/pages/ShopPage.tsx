@@ -186,9 +186,9 @@ export default function ShopPage() {
             const Icon = s.icon;
             return (
               <button key={s.key} onClick={() => setActiveSection(s.key)}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                  activeSection === s.key ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                }`}>
+                 className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                   activeSection === s.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                 }`}>
                 <Icon className="w-3.5 h-3.5" />{s.label}
               </button>
             );

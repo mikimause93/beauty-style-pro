@@ -178,10 +178,10 @@ export default function RadioPage() {
                   <button
                     key={f.key}
                     onClick={() => setRadioFilter(f.key)}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
-                      radioFilter === f.key
-                        ? "bg-foreground text-background"
-                        : "bg-muted text-muted-foreground"
+                     className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
+                       radioFilter === f.key
+                         ? "bg-primary text-primary-foreground"
+                         : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {f.label}

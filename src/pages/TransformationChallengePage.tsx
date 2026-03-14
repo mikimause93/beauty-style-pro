@@ -320,9 +320,9 @@ export default function TransformationChallengePage() {
           <div className="space-y-4">
             <div className="flex gap-2">
               {LEADERBOARD_TABS.map(tab => (
-                <button key={tab} onClick={() => setLeaderboardTab(tab)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    leaderboardTab === tab ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                 <button key={tab} onClick={() => setLeaderboardTab(tab)}
+                   className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
+                     leaderboardTab === tab ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   }`}>{tab}</button>
               ))}
             </div>

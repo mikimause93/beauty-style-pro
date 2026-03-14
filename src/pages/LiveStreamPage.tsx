@@ -582,11 +582,11 @@ export default function LiveStreamPage() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
           {CATEGORIES.map(cat => (
             <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-                selectedCategory === cat.value
-                  ? "bg-foreground text-background"
-                  : "bg-card border border-border text-muted-foreground"
-              }`}>
+               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
+                 selectedCategory === cat.value
+                   ? "bg-primary text-primary-foreground"
+                   : "bg-card border border-border text-muted-foreground"
+               }`}>
               <cat.Icon className="w-3.5 h-3.5" />
               {cat.label}
             </button>
