@@ -59,6 +59,7 @@ export default function HomePage() {
   const [stylists, setStylists] = useState<any[]>([]);
   const [sharePost, setSharePost] = useState<Post | null>(null);
   const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
+  const [loadingFeed, setLoadingFeed] = useState(true);
 
   // Handle post redirect from notifications
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function HomePage() {
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    setLoadingFeed(true);
     try {
       const { data: postsData } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(20);
       const { data: streamsData } = await supabase.from('live_streams').select(`*, professional:professionals(business_name, user_id)`).in('status', ['live', 'scheduled']).order('viewer_count', { ascending: false }).limit(5);
@@ -108,12 +110,17 @@ export default function HomePage() {
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
       if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
-    } catch (error) { console.error('Error:', error); }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoadingFeed(false);
+    }
   };
 
   const displayStories = stories;
   const displayLiveStreams = liveStreams;
   const displayPosts = posts;
+  const hasNoPosts = !loadingFeed && displayPosts.length === 0 && jobPosts.length === 0;
 
   const handleLike = async (postId: string) => {
     const isLiked = likedPosts.includes(postId);
@@ -297,6 +304,22 @@ export default function HomePage() {
             {jobPosts.length > 0 && displayPosts.length < 3 && jobPosts.map(job => (
               <FeedJobCard key={job.id} job={job} />
             ))}
+            {/* Empty state when no posts */}
+            {hasNoPosts && (
+              <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Plus className="w-7 h-7 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-base">Nessun contenuto ancora</p>
+                  <p className="text-sm text-muted-foreground mt-1">Sii il primo a pubblicare qualcosa!</p>
+                </div>
+                <button onClick={() => navigate("/create-post")}
+                  className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                  Crea post
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -327,6 +350,21 @@ export default function HomePage() {
                 </div>
               </button>
             ))}
+            {!loadingFeed && stylists.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Scissors className="w-7 h-7 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-base">Nessun professionista ancora</p>
+                  <p className="text-sm text-muted-foreground mt-1">Esplora tutti i professionisti beauty</p>
+                </div>
+                <button onClick={() => navigate("/stylists")}
+                  className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                  Scopri stilisti
+                </button>
+              </div>
+            )}
           </div>
         )}
 
