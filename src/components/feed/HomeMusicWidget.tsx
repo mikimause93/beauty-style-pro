@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Music, Play, Pause, SkipForward, Loader2, X, Search, Radio as RadioIcon } from "lucide-react";
+import { Music, Play, Pause, SkipForward, Loader2, X, Search } from "lucide-react";
+import { SpotifyIcon, YouTubeIcon, RadioTowerIcon } from "@/components/icons/BrandIcons";
 import { useRadio } from "@/contexts/RadioContext";
 import { useNavigate } from "react-router-dom";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -19,24 +20,25 @@ export default function HomeMusicWidget() {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   // Spotify state
-  const [spotifyQuery, setSpotifyQuery] = useState("");
   const [spotifyPlaylistId, setSpotifyPlaylistId] = useState("37i9dQZF1DX4sWSpwq3LiO");
 
-  // YouTube state - always in-app embed
+  // YouTube state - in-app embed with search
   const [youtubeQuery, setYoutubeQuery] = useState("");
   const [youtubeVideoId, setYoutubeVideoId] = useState("lFcSrYw-ARY");
+  const [youtubeSearchMode, setYoutubeSearchMode] = useState(false);
+  const [youtubeSearchUrl, setYoutubeSearchUrl] = useState("");
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
   const cover = coverImages[currentIdx % coverImages.length];
 
   if (hidden) return null;
 
-  // Search YouTube in-app by changing the embed to a search results embed
   const searchYouTubeInApp = () => {
     if (!youtubeQuery.trim()) return;
-    // Use YouTube embed search - plays first result in-app
+    // Use YouTube embed search - shows results list in-app player
     const query = encodeURIComponent(youtubeQuery.trim());
-    setYoutubeVideoId(`videoseries?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf&search_query=${query}`);
+    setYoutubeSearchUrl(`https://www.youtube.com/embed?listType=search&list=${query}`);
+    setYoutubeSearchMode(true);
   };
 
   const spotifyPlaylists = [
@@ -60,29 +62,52 @@ export default function HomeMusicWidget() {
     setActivePanel(prev => prev === panel ? null : panel);
   };
 
+  const iconConfig: Record<string, { icon: React.ReactNode; color: string; activeColor: string }> = {
+    radio: {
+      icon: <RadioTowerIcon className="w-4 h-4" />,
+      color: "text-primary",
+      activeColor: "bg-primary text-primary-foreground",
+    },
+    spotify: {
+      icon: <SpotifyIcon className="w-4 h-4" />,
+      color: "text-[hsl(141,73%,42%)]",
+      activeColor: "bg-[hsl(141,73%,42%)] text-white",
+    },
+    youtube: {
+      icon: <YouTubeIcon className="w-4 h-4" />,
+      color: "text-[hsl(0,100%,50%)]",
+      activeColor: "bg-[hsl(0,100%,50%)] text-white",
+    },
+  };
+
   return (
     <div className="px-5 mb-3">
       <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
-        {/* Compact header */}
+        {/* Header with real brand icons */}
         <div className="flex items-center justify-between px-3 py-2">
           <div className="flex items-center gap-1.5">
             <Music className="w-3 h-3 text-primary" />
             <h3 className="text-[10px] font-display font-bold">Music</h3>
           </div>
           <div className="flex items-center gap-1">
-            {(["radio", "spotify", "youtube"] as ActivePanel[]).map(p => (
-              <button key={p} onClick={() => togglePanel(p)}
-                className={`px-2 py-0.5 rounded-full text-[9px] font-semibold transition-all ${activePanel === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                {p === "radio" ? "📻" : p === "spotify" ? "🟢" : "▶️"}
-              </button>
-            ))}
+            {(["radio", "spotify", "youtube"] as ActivePanel[]).map(p => {
+              if (!p) return null;
+              const cfg = iconConfig[p];
+              const isActive = activePanel === p;
+              return (
+                <button key={p} onClick={() => togglePanel(p)}
+                  className={`px-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold transition-all ${
+                    isActive ? cfg.activeColor : `${cfg.color} hover:opacity-80`
+                  }`}>
+                  {cfg.icon}
+                </button>
+              );
+            })}
             <button onClick={() => setHidden(true)} className="w-5 h-5 rounded-full flex items-center justify-center">
               <X className="w-2.5 h-2.5 text-muted-foreground" />
             </button>
           </div>
         </div>
-
-        {/* No big platform buttons - just panels */}
 
         {/* ===== RADIO PANEL ===== */}
         {activePanel === "radio" && (
@@ -145,39 +170,68 @@ export default function HomeMusicWidget() {
               width="100%" height="280" frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy" className="rounded-xl" />
-
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {spotifyPlaylists.map(pl => (
                 <button key={pl.id}
                   onClick={() => setSpotifyPlaylistId(pl.id)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all flex items-center gap-1 ${
                     spotifyPlaylistId === pl.id ? "bg-[hsl(141,73%,42%)] text-white" : "bg-[hsl(141,73%,42%)]/10 text-[hsl(141,73%,42%)]"
-                  }`}>{pl.name}</button>
+                  }`}>
+                  <SpotifyIcon className="w-3 h-3" />
+                  {pl.name}
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* ===== YOUTUBE PANEL — always in-app ===== */}
+        {/* ===== YOUTUBE PANEL — with search bar ===== */}
         {activePanel === "youtube" && (
           <div className="border-t border-border/30 px-4 py-3 space-y-2.5 animate-in slide-in-from-top-2 duration-200">
-            {/* YouTube embed player - stays in-app */}
+            {/* Search bar */}
+            <div className="flex gap-2">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
+                <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="text"
+                  value={youtubeQuery}
+                  onChange={(e) => setYoutubeQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && searchYouTubeInApp()}
+                  placeholder="Cerca artista o canzone..."
+                  className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <button onClick={searchYouTubeInApp}
+                className="px-3 py-2 rounded-xl bg-[hsl(0,100%,50%)] text-white text-xs font-semibold flex items-center gap-1">
+                <YouTubeIcon className="w-3.5 h-3.5" />
+                Cerca
+              </button>
+            </div>
+
+            {/* YouTube embed player */}
             <div className="rounded-xl overflow-hidden aspect-video">
-              <iframe key={youtubeVideoId}
-                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=0&rel=0`}
+              <iframe
+                key={youtubeSearchMode ? youtubeSearchUrl : youtubeVideoId}
+                src={youtubeSearchMode
+                  ? youtubeSearchUrl
+                  : `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=0&rel=0`
+                }
                 width="100%" height="100%" frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen loading="lazy" className="w-full h-full" />
             </div>
 
-            {/* Quick select videos - all play in-app via embed */}
+            {/* Quick select videos */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {youtubeVideos.map(v => (
                 <button key={v.videoId}
-                  onClick={() => { setYoutubeVideoId(v.videoId); setYoutubeQuery(""); }}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all ${
-                    youtubeVideoId === v.videoId ? "bg-[hsl(0,100%,50%)] text-white" : "bg-[hsl(0,100%,50%)]/10 text-[hsl(0,100%,50%)]"
-                  }`}>{v.name}</button>
+                  onClick={() => { setYoutubeVideoId(v.videoId); setYoutubeSearchMode(false); setYoutubeQuery(""); }}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap shrink-0 transition-all flex items-center gap-1 ${
+                    !youtubeSearchMode && youtubeVideoId === v.videoId ? "bg-[hsl(0,100%,50%)] text-white" : "bg-[hsl(0,100%,50%)]/10 text-[hsl(0,100%,50%)]"
+                  }`}>
+                  <YouTubeIcon className="w-3 h-3" />
+                  {v.name}
+                </button>
               ))}
             </div>
           </div>
