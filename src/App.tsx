@@ -88,6 +88,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const AppStatusPage = lazy(() => import("./pages/AppStatusPage"));
 
 const queryClient = new QueryClient();
 
