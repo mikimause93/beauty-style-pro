@@ -1,4 +1,4 @@
-import { Users, Calendar, CreditCard, ShieldCheck, BarChart3, Clock, Crown, Rocket, DollarSign, Flag, FileCheck, ArrowLeft, Ban, CheckCircle, XCircle, TrendingUp, Wallet } from "lucide-react";
+import { Users, Calendar, CreditCard, ShieldCheck, BarChart3, Clock, Crown, Rocket, DollarSign, Flag, FileCheck, ArrowLeft, Ban, CheckCircle, XCircle, TrendingUp, Wallet, AlertTriangle, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,8 +20,9 @@ export default function AdminPage() {
   const [commission, setCommission] = useState(5);
   const [subBreakdown, setSubBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
+  const [expandedVerify, setExpandedVerify] = useState<string | null>(null);
 
-  // Check admin role from user_roles table
   useEffect(() => {
     if (!user) return;
     supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").then(({ data }) => {
@@ -86,7 +87,6 @@ export default function AdminPage() {
     if (cv?.value) setCommission(cv.value);
     if (subDetail.data) setSubBreakdown(subDetail.data);
 
-    // Load tab-specific data
     if (tab === "overview" || tab === "users") {
       const { data: usersData } = await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(tab === "users" ? 100 : 10);
       if (tab === "users") setAllUsers(usersData || []);
@@ -118,11 +118,45 @@ export default function AdminPage() {
   };
 
   const updateVerification = async (id: string, status: string, userId?: string) => {
-    await supabase.from("verification_requests").update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
-    if (userId && status === "approved") {
-      await supabase.from("profiles").update({ verification_status: "verified" }).eq("user_id", userId);
+    const notes = adminNotes[id] || null;
+    await supabase.from("verification_requests").update({
+      status,
+      reviewed_at: new Date().toISOString(),
+      admin_notes: notes,
+      reviewer_id: user?.id,
+      rejection_reason: status === "rejected" ? (notes || "Non conforme") : null,
+    }).eq("id", id);
+
+    if (userId) {
+      if (status === "approved") {
+        await supabase.from("profiles").update({
+          verification_status: "verified",
+          verification_level: "verified",
+        }).eq("user_id", userId);
+      } else if (status === "suspended") {
+        await supabase.from("profiles").update({
+          verification_status: "suspended",
+          verification_level: "none",
+        }).eq("user_id", userId);
+      } else if (status === "rejected") {
+        await supabase.from("profiles").update({
+          verification_status: "rejected",
+          verification_level: "none",
+        }).eq("user_id", userId);
+      }
     }
-    toast.success(`Verifica ${status === "approved" ? "approvata" : "rifiutata"}`);
+
+    const label = status === "approved" ? "approvata" : status === "rejected" ? "rifiutata" : "sospesa";
+    toast.success(`Verifica ${label}`);
+    loadStats();
+  };
+
+  const suspendUser = async (userId: string) => {
+    await supabase.from("profiles").update({
+      verification_status: "suspended",
+      verification_level: "none",
+    }).eq("user_id", userId);
+    toast.success("Utente sospeso");
     loadStats();
   };
 
@@ -141,18 +175,20 @@ export default function AdminPage() {
     { label: "Transazioni", value: stats.transactions, Icon: TrendingUp, color: "text-primary" },
   ];
 
+  const pendingVerifications = verifications.filter(v => v.status === "pending").length;
+
   const tabs = [
     { key: "overview" as const, label: "Stats", Icon: BarChart3 },
     { key: "users" as const, label: "Utenti", Icon: Users },
     { key: "payments" as const, label: "Pagamenti", Icon: Wallet },
     { key: "reports" as const, label: "Report", Icon: Flag },
-    { key: "verify" as const, label: "Verifiche", Icon: FileCheck },
+    { key: "verify" as const, label: `Verifiche${pendingVerifications > 0 ? ` (${pendingVerifications})` : ''}`, Icon: FileCheck },
   ];
 
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-5 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-display font-bold flex-1">Admin Panel</h1>
@@ -163,7 +199,7 @@ export default function AdminPage() {
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`flex items-center gap-1 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap transition-all ${
-              tab === t.key ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground"
+              tab === t.key ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
             }`}>
             <t.Icon className="w-3.5 h-3.5" />
             {t.label}
@@ -224,7 +260,7 @@ export default function AdminPage() {
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                       u.verification_status === "verified" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                    }`}>{u.verification_status === "verified" ? "✓" : u.user_type}</span>
+                    }`}>{u.verification_status === "verified" ? "Verificato" : u.user_type}</span>
                   </div>
                 ))}
               </div>
@@ -246,9 +282,16 @@ export default function AdminPage() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                    u.verification_status === "verified" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                    u.verification_status === "verified" ? "bg-primary/15 text-primary" 
+                    : u.verification_status === "suspended" ? "bg-destructive/15 text-destructive"
+                    : "bg-muted text-muted-foreground"
                   }`}>{u.verification_status || "pending"}</span>
-                  {u.iban && <span className="text-[8px] text-primary">IBAN ✓</span>}
+                  {u.iban && <span className="text-[8px] text-primary">IBAN</span>}
+                  {u.verification_status !== "suspended" && (u.user_type === "professional" || u.user_type === "business") && (
+                    <button onClick={() => suspendUser(u.user_id)} className="text-[8px] text-destructive font-semibold">
+                      Sospendi
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -322,33 +365,97 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* VERIFY */}
+        {/* VERIFY — Enhanced */}
         {tab === "verify" && (
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold flex items-center gap-2"><FileCheck className="w-4 h-4 text-primary" /> Richieste Verifica ({verifications.length})</h3>
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <FileCheck className="w-4 h-4 text-primary" /> Richieste Verifica ({verifications.length})
+            </h3>
             {verifications.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Nessuna richiesta</p>
             ) : verifications.map(v => (
               <div key={v.id} className="p-4 rounded-2xl bg-card border border-border/50 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    v.status === "pending" ? "bg-yellow-500/15 text-yellow-600" : v.status === "approved" ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"
-                  }`}>{v.status}</span>
-                  <span className="text-[10px] text-muted-foreground">{new Date(v.created_at).toLocaleDateString("it-IT")}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      v.status === "pending" ? "bg-yellow-500/15 text-yellow-600" 
+                      : v.status === "approved" ? "bg-primary/15 text-primary" 
+                      : v.status === "suspended" ? "bg-orange-500/15 text-orange-600"
+                      : "bg-destructive/15 text-destructive"
+                    }`}>{v.status}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold">
+                      {v.account_type || v.verification_type}
+                    </span>
+                  </div>
+                  <button onClick={() => setExpandedVerify(expandedVerify === v.id ? null : v.id)} className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-muted">
+                    <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
                 </div>
+
                 <p className="text-sm font-semibold">{v.full_name || "—"}</p>
-                <p className="text-xs text-muted-foreground">Tipo: {v.verification_type} · Doc: {v.document_type}</p>
-                <p className="text-[10px] text-muted-foreground">{(v.document_urls || []).length} documenti</p>
+                <p className="text-xs text-muted-foreground">
+                  Tipo: {v.verification_type} · Doc: {v.document_type} · {(v.document_urls || []).length} doc
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {new Date(v.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </p>
+
+                {/* Expanded details */}
+                {expandedVerify === v.id && (
+                  <div className="space-y-2 pt-2 border-t border-border/30 fade-in">
+                    {v.business_name && (
+                      <p className="text-xs"><span className="font-semibold">Attività:</span> {v.business_name}</p>
+                    )}
+                    {v.vat_number && (
+                      <p className="text-xs"><span className="font-semibold">P.IVA:</span> {v.vat_number}</p>
+                    )}
+                    {v.tax_code && (
+                      <p className="text-xs"><span className="font-semibold">C.F.:</span> {v.tax_code}</p>
+                    )}
+                    {v.city && (
+                      <p className="text-xs"><span className="font-semibold">Città:</span> {v.city}</p>
+                    )}
+                    {v.address && (
+                      <p className="text-xs"><span className="font-semibold">Indirizzo:</span> {v.address}</p>
+                    )}
+                    {v.phone && (
+                      <p className="text-xs"><span className="font-semibold">Tel:</span> {v.phone}</p>
+                    )}
+                    {v.email && (
+                      <p className="text-xs"><span className="font-semibold">Email:</span> {v.email}</p>
+                    )}
+                    {v.license_urls && v.license_urls.length > 0 && (
+                      <p className="text-xs text-primary font-semibold">{v.license_urls.length} licenze/certificati</p>
+                    )}
+                    {v.admin_notes && (
+                      <p className="text-xs text-muted-foreground italic">Note: {v.admin_notes}</p>
+                    )}
+                  </div>
+                )}
+
                 {v.status === "pending" && (
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={() => updateVerification(v.id, "approved", v.user_id)}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-semibold">
-                      <CheckCircle className="w-3.5 h-3.5" /> Approva
-                    </button>
-                    <button onClick={() => updateVerification(v.id, "rejected", v.user_id)}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-destructive/10 text-destructive text-[11px] font-semibold">
-                      <XCircle className="w-3.5 h-3.5" /> Rifiuta
-                    </button>
+                  <div className="space-y-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Note admin (opzionale)"
+                      value={adminNotes[v.id] || ""}
+                      onChange={e => setAdminNotes(prev => ({ ...prev, [v.id]: e.target.value }))}
+                      className="w-full h-9 rounded-lg bg-muted/50 border border-border/50 px-3 text-[11px] focus:outline-none focus:ring-1 focus:ring-primary/30"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={() => updateVerification(v.id, "approved", v.user_id)}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-semibold">
+                        <CheckCircle className="w-3.5 h-3.5" /> Approva
+                      </button>
+                      <button onClick={() => updateVerification(v.id, "rejected", v.user_id)}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-destructive/10 text-destructive text-[11px] font-semibold">
+                        <XCircle className="w-3.5 h-3.5" /> Rifiuta
+                      </button>
+                      <button onClick={() => updateVerification(v.id, "suspended", v.user_id)}
+                        className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-600 text-[11px] font-semibold">
+                        <Ban className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
