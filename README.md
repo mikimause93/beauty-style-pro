@@ -153,4 +153,82 @@ Il workflow **Build & Publish Android to Play Store** (`.github/workflows/androi
 
 ---
 
+## 🔄 Come trasferire il repository su un altro account
+
+Hai due opzioni principali per spostare questo progetto su un altro account o organizzazione GitHub.
+
+---
+
+### Opzione A – Trasferimento diretto (consigliata per cambiare proprietario)
+
+Questa opzione trasferisce l'intero repository (storia, branch, issue, PR) al nuovo proprietario.
+
+1. Vai su **Settings** del repository attuale
+2. Scorri fino in fondo → **Danger Zone** → clicca **Transfer**
+3. Inserisci il nome del repository e il nuovo account/organizzazione di destinazione
+4. Conferma il trasferimento
+
+> ⚠️ Dopo il trasferimento il vecchio URL reindirizzerà automaticamente per un certo periodo, ma dovrai aggiornare eventuali remote locali:
+> ```bash
+> git remote set-url origin https://github.com/NUOVO-ACCOUNT/beauty-style-pro.git
+> ```
+
+---
+
+### Opzione B – Fork / Clone su un nuovo repository (consigliata per copiare il codice)
+
+Usa questa opzione se vuoi una copia indipendente su un altro account.
+
+#### 1. Clona il repository in locale
+
+```bash
+git clone https://github.com/mikimause93/beauty-style-pro.git
+cd beauty-style-pro
+```
+
+#### 2. Crea un nuovo repository vuoto su GitHub
+
+Vai su [github.com/new](https://github.com/new) e crea un repository vuoto (senza README, .gitignore o licenza).
+
+#### 3. Cambia l'origine remota e fai il push
+
+```bash
+git remote set-url origin https://github.com/NUOVO-ACCOUNT/NUOVO-REPO.git
+git push -u origin main
+```
+
+---
+
+### Configurazione post-trasferimento
+
+Dopo aver trasferito o copiato il repository su GitHub, ricorda di ricreare tutti i segreti e le impostazioni:
+
+#### Segreti GitHub Actions (Settings → Secrets and variables → Actions)
+
+| Secret | Dove trovarlo |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase → Project Settings → API |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API (anon/public key) |
+| `VITE_SUPABASE_PROJECT_ID` | Supabase → Project Settings → General |
+| `ANDROID_KEYSTORE_BASE64` | Il tuo keystore convertito in Base64 |
+| `ANDROID_KEY_ALIAS` | Alias della chiave (es. `style-beauty`) |
+| `ANDROID_STORE_PASSWORD` | Password del keystore |
+| `ANDROID_KEY_PASSWORD` | Password della chiave |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Google Play Console → Setup → API access |
+
+#### File .env locale
+
+```bash
+cp .env.example .env
+# Modifica .env con i tuoi valori Supabase
+```
+
+#### GitHub Pages (se vuoi usare il deploy automatico)
+
+1. Vai su **Settings → Pages** del nuovo repository
+2. In *Source* seleziona **GitHub Actions**
+3. Aggiungi i segreti Supabase elencati sopra
+
+---
+
 Creato con [Lovable](https://lovable.dev)
