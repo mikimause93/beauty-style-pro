@@ -11,7 +11,7 @@ import LiveNowFeed from "@/components/feed/LiveNowFeed";
 import PostCard from "@/components/feed/PostCard";
 import FeedJobCard from "@/components/feed/FeedJobCard";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
