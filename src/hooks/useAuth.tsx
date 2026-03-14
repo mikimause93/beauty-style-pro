@@ -77,6 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id);
       }
       setLoading(false);
+    }).catch((err) => {
+      console.warn("Auth init failed:", err?.message ?? err);
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
