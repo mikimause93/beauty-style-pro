@@ -8,9 +8,10 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { runFullStressTest, testRapidFire } from "@/lib/stressTest";
+import { useNavigate } from "react-router-dom";
 import {
   Activity, AlertTriangle, CheckCircle, XCircle, Zap, Database,
-  Radio, HardDrive, MessageSquare, Shield, Clock, RefreshCw, Loader2
+  Radio, HardDrive, MessageSquare, Shield, ShieldCheck, Clock, RefreshCw, Loader2
 } from "lucide-react";
 
 interface TestResult {
