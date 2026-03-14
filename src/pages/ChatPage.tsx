@@ -74,7 +74,7 @@ export default function ChatPage() {
   const localStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const { translate, translating, autoTranslate, setAutoTranslate } = useTranslation();
+  const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
 
   useEffect(() => {
     if (user) loadConversations();
