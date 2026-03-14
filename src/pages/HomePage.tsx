@@ -105,7 +105,7 @@ export default function HomePage() {
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
-      if (profsData && profsData.length > 0) setStylists(profsData.map((p, i) => ({ ...p, avatar: fallbackStylists[i % fallbackStylists.length].avatar })));
+      if (profsData) setStylists(profsData.map((p, i) => ({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
     } catch (error) { console.error('Error:', error); }
   };
 
