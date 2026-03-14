@@ -280,8 +280,12 @@ export default function ShopPage() {
                                 Acquista
                               </button>
                             </div>
+                            <button onClick={() => navigate("/ai-look")}
+                              className="w-full mt-1.5 py-1.5 rounded-lg bg-primary/10 text-[10px] font-semibold text-primary flex items-center justify-center gap-1 hover:bg-primary/20 transition-all">
+                              <Wand2 className="w-3 h-3" /> Prova Look AI
+                            </button>
                             <button onClick={() => setSelectedProduct(product)}
-                              className="w-full mt-1.5 py-1.5 rounded-lg border border-border/50 text-[10px] font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
+                              className="w-full mt-1 py-1.5 rounded-lg border border-border/50 text-[10px] font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
                               <MessageCircle className="w-3 h-3" /> Recensione
                             </button>
                           </div>
