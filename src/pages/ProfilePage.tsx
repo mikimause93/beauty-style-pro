@@ -342,8 +342,8 @@ export default function ProfilePage() {
               return (
                 <button key={item.label} onClick={() => navigate(item.path)}
                   className="flex flex-col items-center gap-1 min-w-[56px] relative">
-                  <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center">
-                    <ItemIcon className="w-5 h-5 text-muted-foreground" />
+                  <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <ItemIcon className="w-5 h-5 text-primary" />
                     {item.badge && item.badge > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
                         <span className="text-[9px] text-destructive-foreground font-bold">
