@@ -77,11 +77,11 @@ export default function RadioPage() {
             <button
               key={tab.key}
               onClick={() => setSource(tab.key)}
-              className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                source === tab.key
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}>
+               className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                 source === tab.key
+                   ? "bg-primary text-primary-foreground"
+                   : "bg-primary/10 text-muted-foreground hover:text-foreground"
+               }`}>
               <span className={source === tab.key ? "" : tab.color}>{tab.icon}</span>
               {tab.label}
             </button>
