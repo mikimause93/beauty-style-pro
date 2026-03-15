@@ -132,7 +132,7 @@ export default function ProfessionalDashboardPage() {
         <div className="flex-1">
           <h1 className="text-lg font-display font-bold flex items-center gap-2">
             Pannello Pro
-            {profile?.verification_status === "approved" && <VerifiedBadge size="sm" />}
+            {profile?.verification_status === "verified" && <VerifiedBadge status="verified" userType={profile?.user_type} size="sm" />}
           </h1>
           <p className="text-[11px] text-muted-foreground">{professional.business_name}</p>
         </div>
@@ -144,7 +144,7 @@ export default function ProfessionalDashboardPage() {
 
       <div className="p-4 space-y-5">
         {/* Verification Warning */}
-        {profile?.verification_status !== "approved" && (
+        {profile?.verification_status !== "verified" && (
           <button onClick={() => navigate("/verify-account")}
             className="w-full p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-3">
             <XCircle className="w-5 h-5 text-yellow-500 shrink-0" />

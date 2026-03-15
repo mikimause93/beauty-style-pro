@@ -28,7 +28,7 @@ export default function ExplorePage() {
 
   const loadData = async () => {
     const [postsRes, creatorsRes, prosRes] = await Promise.all([
-      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type)").order("like_count", { ascending: false }).limit(20),
+      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type, verification_status)").order("like_count", { ascending: false }).limit(20),
       supabase.from("profiles").select("*").in("user_type", ["professional", "business"]).order("follower_count", { ascending: false }).limit(10),
       supabase.from("professionals").select("*, profiles:user_id(display_name, avatar_url, city)").order("rating", { ascending: false }).limit(10),
     ]);

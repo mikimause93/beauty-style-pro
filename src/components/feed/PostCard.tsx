@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import PostCardActions from "./PostCardActions";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface PostCardProps {
   post: {
@@ -16,7 +17,7 @@ interface PostCardProps {
     comment_count: number;
     post_type: string | null;
     created_at: string;
-    profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+    profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
   };
   onShare?: () => void;
   onComment?: () => void;
@@ -223,9 +224,12 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           />
         </button>
         <div className="flex-1 min-w-0">
-          <button onClick={() => navigate(`/profile/${post.user_id}`)} className="text-sm font-semibold truncate block hover:text-primary transition-colors">
-            {post.profileData?.display_name || "Beauty Pro"}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => navigate(`/profile/${post.user_id}`)} className="text-sm font-semibold truncate hover:text-primary transition-colors">
+              {post.profileData?.display_name || "Beauty Pro"}
+            </button>
+            <VerifiedBadge status={post.profileData?.verification_status ?? undefined} userType={post.profileData?.user_type} size="xs" />
+          </div>
           <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
         {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (

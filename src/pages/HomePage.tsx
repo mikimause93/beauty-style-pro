@@ -36,7 +36,7 @@ interface Post {
   comment_count: number;
   post_type: string | null;
   created_at: string;
-  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
 }
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
@@ -89,7 +89,7 @@ export default function HomePage() {
 
       if (postsData) {
         const userIds = [...new Set(postsData.map(p => p.user_id))];
-        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type').in('user_id', userIds);
+        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type, verification_status').in('user_id', userIds);
         const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
         setPosts(postsData.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined })));
       }
