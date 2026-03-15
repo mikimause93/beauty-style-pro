@@ -236,7 +236,7 @@ export default function BookingPage() {
                   onClick={() => setSelectedService(service.id)}
                   className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
                     selectedService === service.id
-                      ? "gradient-primary text-white border-transparent shadow-glow"
+                      ? "gradient-primary text-white shadow-glow"
                       : "bg-card hover:bg-muted"
                   }`}
                 >
