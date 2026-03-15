@@ -46,7 +46,7 @@ export default function StylistDetailPage() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).single();
+      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).maybeSingle();
       if (pro) {
         // Fetch verification status from profile (authoritative source)
         const { data: profProfile } = await supabase.from("profiles").select("verification_status, user_type").eq("user_id", pro.user_id).maybeSingle();

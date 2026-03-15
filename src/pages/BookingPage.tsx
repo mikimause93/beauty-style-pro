@@ -72,7 +72,7 @@ export default function BookingPage() {
     }
 
     const [{ data: pro }, { data: svc }] = await Promise.all([
-      supabase.from("professionals").select("*").eq("id", professionalId).single(),
+      supabase.from("professionals").select("*").eq("id", professionalId).maybeSingle(),
       supabase.from("services").select("*").eq("professional_id", professionalId).eq("active", true),
     ]);
 
@@ -114,7 +114,7 @@ export default function BookingPage() {
     const { error } = await supabase.from("bookings").insert({
       client_id: user.id,
       professional_id: professional.id,
-      service_id: selectedServiceData?.id.startsWith("default-") ? undefined : selectedService,
+      service_id: selectedServiceData?.id?.startsWith("default-") ? undefined : selectedService,
       booking_date: selectedDate,
       start_time: selectedTime,
       total_price: selectedServiceData?.price,

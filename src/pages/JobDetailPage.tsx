@@ -34,7 +34,7 @@ export default function JobDetailPage() {
       .from("job_posts")
       .select("*, professionals(business_name, city, rating, user_id), businesses(business_name, city, logo_url, rating, user_id)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     setJob(data);
     if (user) {
       const { data: existing } = await supabase
@@ -124,7 +124,13 @@ export default function JobDetailPage() {
   };
 
   const handleChatApply = () => {
-    navigate("/chat/1"); // Opens chat with employer
+    const employer = job?.businesses || job?.professionals;
+    const employerId = employer?.user_id;
+    if (!employerId) {
+      toast.error("Impossibile trovare il datore di lavoro");
+      return;
+    }
+    navigate(`/chat/${employerId}`);
     toast.success("Aperta chat diretta con il datore di lavoro");
   };
 
