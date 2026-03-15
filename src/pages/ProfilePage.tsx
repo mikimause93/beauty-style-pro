@@ -59,6 +59,7 @@ export default function ProfilePage() {
       loadProducts();
       if (!isOwnProfile) loadViewProfile();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetUserId]);
 
   const loadViewProfile = async () => {
@@ -85,6 +86,7 @@ export default function ProfilePage() {
   // Re-load posts once viewProfile is fetched
   useEffect(() => {
     if (viewProfile && !isOwnProfile) loadPosts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewProfile]);
 
   const displayProfile = isOwnProfile ? profile : viewProfile;

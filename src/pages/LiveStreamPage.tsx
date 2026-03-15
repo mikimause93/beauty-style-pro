@@ -96,6 +96,7 @@ export default function LiveStreamPage() {
   const { claps, triggerApplause } = useApplause();
   const [showReport, setShowReport] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
   // Auto-select stream from URL param
@@ -105,6 +106,7 @@ export default function LiveStreamPage() {
       const found = streams.find(s => s.id === streamId);
       if (found) setSelectedStream(found);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streams, searchParams]);
 
   useEffect(() => {
@@ -143,6 +145,7 @@ export default function LiveStreamPage() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStream?.id]);
 
   // Auto-earn + badge checks
@@ -178,6 +181,7 @@ export default function LiveStreamPage() {
       }
     }
     return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStream]);
 
   // Moderator promotion at high interaction
@@ -195,6 +199,7 @@ export default function LiveStreamPage() {
       awardCoins("complete_mission");
       toast.success("Sei stato promosso Moderatore!", { duration: 4000 });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactionScore]);
 
   const checkBadges = () => {

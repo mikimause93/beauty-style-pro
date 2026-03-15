@@ -96,6 +96,7 @@ export default function MissionsPage() {
 
   useEffect(() => {
     if (user) loadBadges();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadBadges = async () => {

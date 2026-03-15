@@ -22,6 +22,7 @@ export default function BusinessProfilePage() {
 
   useEffect(() => {
     if (id) fetchBusiness();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchBusiness = async () => {

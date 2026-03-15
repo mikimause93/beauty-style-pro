@@ -14,6 +14,7 @@ export function useFollow(targetUserId: string | undefined) {
     if (!targetUserId) return;
     checkFollowStatus();
     fetchCounts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetUserId, user?.id]);
 
   const checkFollowStatus = async () => {

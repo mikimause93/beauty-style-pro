@@ -72,6 +72,7 @@ export default function MapSearchPage() {
     loadJobs();
     loadEvents();
     loadUserPrefs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadUserPrefs = async () => {

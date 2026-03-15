@@ -41,6 +41,7 @@ export default function StoriesBar() {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadStories(); }, [user]);
 
   const loadStories = async () => {

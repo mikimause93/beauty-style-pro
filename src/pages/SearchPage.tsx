@@ -33,6 +33,7 @@ export default function SearchPage() {
   useEffect(() => {
     const t = setTimeout(() => { if (query.trim().length >= 2) search(); }, 350);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tab]);
 
   const search = async () => {

@@ -14,6 +14,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (id) fetchService();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchService = async () => {

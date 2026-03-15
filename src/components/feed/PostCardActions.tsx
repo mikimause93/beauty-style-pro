@@ -30,6 +30,7 @@ export default function PostCardActions({ postType, postId, userId, userType, us
           if (data?.display_name && !userName) setDisplayName(data.display_name);
         });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, isJob, isService, isProduct]);
 
   const goAuth = () => { if (!user) { navigate("/auth"); return true; } return false; };

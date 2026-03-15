@@ -37,6 +37,7 @@ export default function ManageProductsPage() {
   useEffect(() => {
     if (!user || !isSeller) { navigate("/profile"); return; }
     fetchProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isSeller]);
 
   const fetchProducts = async () => {

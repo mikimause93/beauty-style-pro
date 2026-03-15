@@ -99,6 +99,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
       }, 3000);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voiceSupported, user]);
 
   // Re-start wake word listening after voice call ends
@@ -109,6 +110,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
       }, 2500);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVoiceCallActive, voiceSupported, user]);
 
   // Process voice command when transcript changes during call
@@ -116,6 +118,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (isVoiceCallActive && voiceTranscript && !isVoiceListening) {
       processVoiceCommand(voiceTranscript.trim());
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVoiceCallActive, voiceTranscript, isVoiceListening]);
 
   const processVoiceCommand = async (command: string) => {

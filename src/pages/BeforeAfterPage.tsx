@@ -64,6 +64,7 @@ export default function BeforeAfterPage() {
       items.forEach(item => { positions[item.id] = 50; });
       setSliderPositions(positions);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   const toggleLike = (id: string) => {

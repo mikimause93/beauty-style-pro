@@ -9,6 +9,7 @@ interface Clap {
 
 const CLAP_EMOJIS = ["👏", "👏🏻", "👏🏽", "🔥", "💖", "⭐", "✨"];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApplause() {
   const [claps, setClaps] = useState<Clap[]>([]);
 

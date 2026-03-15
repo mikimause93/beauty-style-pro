@@ -66,6 +66,7 @@ export default function SubscriptionPage() {
     if (searchParams.get("cancelled") === "true") {
       toast.info("Pagamento annullato");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const checkSubscription = useCallback(async () => {

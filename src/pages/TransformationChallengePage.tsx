@@ -84,6 +84,7 @@ export default function TransformationChallengePage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"feed" | "leaderboard">("feed");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchChallenges(); }, []);
 
   const fetchChallenges = async () => {

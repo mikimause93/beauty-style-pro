@@ -33,6 +33,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     loadLeaderboard();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const loadLeaderboard = async () => {

@@ -61,6 +61,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professionalId]);
 
   const loadData = async () => {

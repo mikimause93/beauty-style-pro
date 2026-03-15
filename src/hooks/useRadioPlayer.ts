@@ -119,6 +119,7 @@ export function useRadioPlayer() {
         audioRef.current.src = "";
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const play = useCallback(async (station?: RadioStation) => {

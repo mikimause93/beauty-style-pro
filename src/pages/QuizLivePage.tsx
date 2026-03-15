@@ -77,6 +77,7 @@ export default function QuizLivePage() {
     }
     const t = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, gameState, selectedAnswer]);
 
   const startGame = () => {

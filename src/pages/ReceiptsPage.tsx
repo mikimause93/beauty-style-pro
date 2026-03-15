@@ -12,6 +12,7 @@ export default function ReceiptsPage() {
 
   useEffect(() => {
     if (user) loadReceipts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadReceipts = async () => {

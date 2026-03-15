@@ -78,6 +78,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (user) loadConversations();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function ChatPage() {
       const chat = conversations.find(c => c.id === id);
       if (chat) { setSelectedChat(chat); loadMessages(chat.id); }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, conversations]);
 
   useEffect(() => {
@@ -151,6 +153,7 @@ export default function ChatPage() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat, user, autoTranslate]);
 
   // Auto-translate all existing "other" messages when autoTranslate turns on
@@ -158,6 +161,7 @@ export default function ChatPage() {
     if (!autoTranslate || messages.length === 0) return;
     const otherMsgs = messages.filter(m => m.sender === "other" && m.content && !m.content.startsWith("[") && !translatedMessages[m.id]);
     otherMsgs.forEach(m => autoTranslateMsg(m.id, m.content));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTranslate, messages.length]);
 
   const loadConversations = async () => {

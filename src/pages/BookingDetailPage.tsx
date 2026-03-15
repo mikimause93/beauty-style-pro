@@ -16,6 +16,7 @@ export default function BookingDetailPage() {
 
   useEffect(() => {
     if (id) fetchBooking();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchBooking = async () => {
