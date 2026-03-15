@@ -47,7 +47,7 @@ async function registerPushNotifications(userId?: string) {
             p256dh: subData.keys?.p256dh,
             auth: subData.keys?.auth,
             updated_at: new Date().toISOString(),
-          }, { onConflict: "user_id" }).catch(() => {});
+          }, { onConflict: "user_id" }).then(() => {}).catch?.(() => {});
         }
       } catch { /* graceful — realtime fallback is still active */ }
     }
