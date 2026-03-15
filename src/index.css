@@ -225,6 +225,35 @@
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
   }
+
+  /* Notification toast progress drain */
+  @keyframes notif-drain {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+
+  /* Bell shake animation for new notifications */
+  @keyframes bell-shake {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(12deg); }
+    30% { transform: rotate(-10deg); }
+    45% { transform: rotate(8deg); }
+    60% { transform: rotate(-6deg); }
+    75% { transform: rotate(4deg); }
+    90% { transform: rotate(-2deg); }
+  }
+  .animate-bell-shake {
+    animation: bell-shake 0.7s ease-in-out;
+  }
+
+  /* Notification badge pulse */
+  @keyframes badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+  .animate-badge-pulse {
+    animation: badge-pulse 1.5s ease-in-out infinite;
+  }
 }
 
 /* Mobile viewport fix */

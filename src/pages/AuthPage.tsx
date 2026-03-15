@@ -123,9 +123,20 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        const msg = (error.message === "Failed to fetch" || error.message?.includes("fetch"))
+          ? "Connessione al server non riuscita. Controlla la connessione internet."
+          : error.message || "Accesso non riuscito";
+        toast.error(msg);
+      } else {
+        toast.success("Benvenuto!");
+        navigate("/");
+      }
+    } catch {
+      toast.error("Connessione al server non riuscita. Controlla la connessione internet.");
+    }
     setLoading(false);
   };
 
@@ -134,10 +145,14 @@ export default function AuthPage() {
     e.preventDefault();
     if (!phoneNumber.trim()) { toast.error("Inserisci il numero di telefono"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
-    else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+      if (error) { toast.error(error.message); }
+      else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    } catch {
+      toast.error("Connessione non riuscita. Riprova tra poco.");
+    }
     setLoading(false);
   };
 
@@ -145,10 +160,14 @@ export default function AuthPage() {
     e.preventDefault();
     if (!otpCode.trim()) { toast.error("Inserisci il codice OTP"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
-    else { toast.success("Accesso effettuato!"); navigate("/"); }
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
+      if (error) { toast.error(error.message); }
+      else { toast.success("Accesso effettuato!"); navigate("/"); }
+    } catch {
+      toast.error("Verifica non riuscita. Riprova tra poco.");
+    }
     setLoading(false);
   };
 

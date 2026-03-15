@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { NEW_NOTIFICATION_EVENT } from "@/lib/notificationConstants";
 
 export interface AppNotification {
   id: string;
@@ -119,6 +120,7 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [latestNotification, setLatestNotification] = useState<AppNotification | null>(null);
 
   // Request push permission on mount — pass userId for subscription storage
   useEffect(() => {
@@ -158,7 +160,11 @@ export function useNotifications() {
         const newNotif = payload.new as AppNotification;
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
-        
+        setLatestNotification(newNotif);
+
+        // Dispatch in-app toast event
+        window.dispatchEvent(new CustomEvent(NEW_NOTIFICATION_EVENT, { detail: newNotif }));
+
         // Show push notification (works even in background via SW)
         showPushNotification(newNotif);
       })
@@ -188,5 +194,5 @@ export function useNotifications() {
     });
   };
 
-  return { notifications, unreadCount, loading, markAllRead, markRead, deleteNotification, refetch: fetchNotifications };
+  return { notifications, unreadCount, loading, latestNotification, markAllRead, markRead, deleteNotification, refetch: fetchNotifications };
 }

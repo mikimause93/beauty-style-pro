@@ -82,65 +82,77 @@ export default function MapSearchPage() {
   };
 
   const loadProfessionals = async () => {
-    // Load both professionals AND registered profiles with GPS
-    const { data } = await supabase.from("professionals")
-      .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id");
-    
-    // Also load profiles that have coordinates (registered users nearby)
-    const { data: profilesWithGps } = await supabase.from("profiles")
-      .select("user_id, display_name, avatar_url, city, latitude, longitude, user_type")
-      .not("latitude", "is", null)
-      .not("longitude", "is", null)
-      .limit(50);
+    try {
+      // Load both professionals AND registered profiles with GPS
+      const { data } = await supabase.from("professionals")
+        .select("id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, address, description, is_verified, user_id");
+      
+      // Also load profiles that have coordinates (registered users nearby)
+      const { data: profilesWithGps } = await supabase.from("profiles")
+        .select("user_id, display_name, avatar_url, city, latitude, longitude, user_type")
+        .not("latitude", "is", null)
+        .not("longitude", "is", null)
+        .limit(50);
 
-    const allPros: Professional[] = [];
-    
-    if (data && data.length > 0) {
-      data.forEach((p: any) => {
-        allPros.push({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` });
-      });
-    }
-    
-    // Add registered users with GPS as markers (if they're professionals/businesses)
-    if (profilesWithGps) {
-      profilesWithGps.forEach(p => {
-        if ((p.user_type === "professional" || p.user_type === "business") && !allPros.find(pro => pro.id === p.user_id)) {
-          allPros.push({
-            id: p.user_id,
-            business_name: p.display_name || "Utente",
-            specialty: p.user_type === "business" ? "Business" : "Professionista",
-            city: p.city,
-            rating: null,
-            review_count: null,
-            hourly_rate: null,
-            latitude: p.latitude,
-            longitude: p.longitude,
-            address: null,
-            description: null,
-            is_verified: null,
-            avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.user_id}`,
-          });
-        }
-      });
-    }
+      const allPros: Professional[] = [];
+      
+      if (data && data.length > 0) {
+        data.forEach((p: any) => {
+          allPros.push({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` });
+        });
+      }
+      
+      // Add registered users with GPS as markers (if they're professionals/businesses)
+      if (profilesWithGps) {
+        profilesWithGps.forEach(p => {
+          if ((p.user_type === "professional" || p.user_type === "business") && !allPros.find(pro => pro.id === p.user_id)) {
+            allPros.push({
+              id: p.user_id,
+              business_name: p.display_name || "Utente",
+              specialty: p.user_type === "business" ? "Business" : "Professionista",
+              city: p.city,
+              rating: null,
+              review_count: null,
+              hourly_rate: null,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              address: null,
+              description: null,
+              is_verified: null,
+              avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.user_id}`,
+            });
+          }
+        });
+      }
 
-    setProfessionals(allPros);
+      setProfessionals(allPros);
+    } catch (e) {
+      console.warn("loadProfessionals error:", e);
+    }
   };
 
   const loadJobs = async () => {
-    const { data } = await supabase.from("job_posts")
-      .select("id, title, location, latitude, longitude, category")
-      .eq("status", "active")
-      .limit(50);
-    if (data) setJobs(data);
+    try {
+      const { data } = await supabase.from("job_posts")
+        .select("id, title, location, latitude, longitude, category")
+        .eq("status", "active")
+        .limit(50);
+      if (data) setJobs(data);
+    } catch (e) {
+      console.warn("loadJobs error:", e);
+    }
   };
 
   const loadEvents = async () => {
-    const { data } = await supabase.from("events")
-      .select("id, title, location, start_date")
-      .gte("end_date", new Date().toISOString())
-      .limit(50);
-    if (data) setEvents(data);
+    try {
+      const { data } = await supabase.from("events")
+        .select("id, title, location, start_date")
+        .gte("end_date", new Date().toISOString())
+        .limit(50);
+      if (data) setEvents(data);
+    } catch (e) {
+      console.warn("loadEvents error:", e);
+    }
   };
 
   const handleDetectGPS = () => {

@@ -1,18 +1,21 @@
-import { Home, User, Video, Compass, Sparkles } from "lucide-react";
+import { Home, User, Bell, Compass, ShoppingBag } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useNotificationsContext } from "@/contexts/NotificationsContext";
+import { NOTIFICATION_BADGE_COLOR } from "@/lib/notificationConstants";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/explore", icon: Compass, label: "Esplora" },
-  { path: "/live", icon: Video, label: "Live" },
+  { path: "/notifications", icon: Bell, label: "Notifiche" },
   { path: "/profile", icon: User, label: "Profilo" },
 ];
 
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isAIActive = location.pathname.startsWith("/ai-assistant");
+  const isShopActive = location.pathname.startsWith("/shop");
+  const { unreadCount } = useNotificationsContext();
 
   const half = Math.ceil(tabs.length / 2);
   const leftTabs = tabs.slice(0, half);
@@ -23,6 +26,7 @@ export default function BottomNav() {
       location.pathname === tab.path ||
       (tab.path !== "/" && location.pathname.startsWith(tab.path));
     const Icon = tab.icon;
+    const isNotif = tab.path === "/notifications";
     return (
       <button
         key={tab.path}
@@ -40,9 +44,24 @@ export default function BottomNav() {
           <Icon
             className={cn(
               "w-[22px] h-[22px] transition-all duration-300",
-              isActive ? "text-white drop-shadow-sm" : "text-foreground/60"
+              isActive ? "text-white drop-shadow-sm" : "text-foreground/60",
+              isNotif && unreadCount > 0 && !isActive && "animate-bell-shake"
             )}
           />
+          {/* Notification badge */}
+          {isNotif && unreadCount > 0 && (
+            <span
+              className={cn(
+                "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full",
+                "text-white text-[9px] font-black flex items-center justify-center",
+                "shadow-lg border border-background",
+                "animate-badge-pulse"
+              )}
+              style={{ backgroundColor: NOTIFICATION_BADGE_COLOR }}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
           {isActive && (
             <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/70" />
           )}
@@ -66,34 +85,36 @@ export default function BottomNav() {
           {/* Left tabs */}
           {leftTabs.map(renderTab)}
 
-          {/* Center AI button — raised FAB */}
+          {/* Center Shop button — raised FAB */}
           <div className="flex flex-col items-center justify-center flex-1 relative">
             <button
-              onClick={() => navigate("/ai-assistant")}
-              aria-label="Stella AI"
+              onClick={() => navigate("/shop")}
+              aria-label="Shop"
               className={cn(
                 "absolute -top-5 w-[58px] h-[58px] rounded-full flex items-center justify-center transition-all duration-300 shadow-luxury",
-                isAIActive
+                isShopActive
                   ? "gradient-luxury scale-110 shadow-glow"
-                  : "gradient-primary hover:scale-105 animate-pulse-glow"
+                  : "gradient-gold hover:scale-105 animate-pulse-glow"
               )}
             >
-              <Sparkles
+              <ShoppingBag
                 className={cn(
                   "w-[26px] h-[26px] text-white drop-shadow-sm transition-all duration-300",
-                  isAIActive && "animate-pulse"
+                  isShopActive && "animate-pulse"
                 )}
               />
+              {/* Gold star accent */}
+              <span className="absolute top-0.5 right-0.5 text-[11px]">⭐</span>
               {/* Glow ring */}
               <span className="absolute inset-0 rounded-full border-2 border-white/20" />
             </button>
             <span
               className={cn(
                 "text-[10px] font-bold tracking-wide mt-1 transition-all duration-300",
-                isAIActive ? "text-primary" : "text-foreground/50"
+                isShopActive ? "text-accent" : "text-foreground/50"
               )}
             >
-              Stella
+              Shop
             </span>
           </div>
 
