@@ -16,8 +16,8 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
-      <div className="glass border-t border-border/50">
-        <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+      <div className="glass-nav">
+        <div className="flex items-center justify-around h-[62px] max-w-lg mx-auto px-3">
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path ||
               (tab.path !== "/" && location.pathname.startsWith(tab.path));
@@ -27,19 +27,26 @@ export default function BottomNav() {
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-200",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-300",
                 )}
               >
                 <div className={cn(
-                  "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200",
-                  isActive ? "bg-primary/15" : "bg-primary/5"
+                  "relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
+                  isActive
+                    ? "gradient-primary shadow-glow scale-105"
+                    : "bg-primary/8 hover:bg-primary/15"
                 )}>
-                  <Icon className={cn("w-[22px] h-[22px] transition-all duration-200", isActive ? "text-primary" : "text-primary/60")} />
+                  <Icon className={cn(
+                    "w-[21px] h-[21px] transition-all duration-300",
+                    isActive ? "text-white drop-shadow-sm" : "text-primary/65"
+                  )} />
+                  {isActive && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/70" />
+                  )}
                 </div>
                 <span className={cn(
-                  "text-[10px] font-medium transition-all duration-200",
-                  isActive ? "text-primary" : "text-primary/50"
+                  "text-[10px] font-semibold tracking-wide transition-all duration-300",
+                  isActive ? "text-primary" : "text-primary/45"
                 )}>
                   {tab.label}
                 </span>

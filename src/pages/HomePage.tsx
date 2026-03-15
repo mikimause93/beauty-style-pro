@@ -140,40 +140,40 @@ export default function HomePage() {
 
   return (
     <MobileLayout>
-      {/* Header — minimal & clean */}
+      {/* Header — luxury & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-display font-bold italic tracking-tight" style={{ background: "linear-gradient(135deg, #9b59b6, #8b5cf6, #a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Style</span>
+          <span className="text-[26px] font-display font-bold italic tracking-tight text-gradient-luxury">Style</span>
           <div className="flex items-center gap-1.5">
-            <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
               <Search className="w-[20px] h-[20px] text-muted-foreground" />
             </button>
-            <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
               {theme === "dark" ? <Sun className="w-[20px] h-[20px] text-muted-foreground" /> : <Moon className="w-[20px] h-[20px] text-muted-foreground" />}
             </button>
-            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold">
-              <Coins className="w-3.5 h-3.5 text-primary" />
+            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
+              <Coins className="w-3.5 h-3.5" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
-            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
               <Bell className="w-[20px] h-[20px] text-muted-foreground" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-glow" />
               )}
             </button>
-            <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
               <MessageCircle className="w-[20px] h-[20px] text-muted-foreground" />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 px-5 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button key={tab} onClick={() => handleTabClick(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === tab 
-                   ? "bg-primary text-primary-foreground shadow-md" 
+                activeTab === tab
+                   ? "gradient-primary text-white shadow-glow"
                    : "bg-primary/10 text-primary hover:bg-primary/20"
               }`}>
               {tab}
@@ -209,11 +209,11 @@ export default function HomePage() {
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shadow-sm">
-                <item.Icon className="w-5 h-5 text-primary" />
+              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
+              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
+                <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
-              <span className="text-[9px] text-primary font-semibold leading-tight">{item.label}</span>
+              <span className="text-[9px] text-primary font-semibold leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>
@@ -248,26 +248,26 @@ export default function HomePage() {
       {/* Live Banner — subtle */}
       {activeTab !== "Stilisti" && (
         <div className="px-5 mb-5">
-          <button onClick={() => navigate("/live")} className="w-full rounded-2xl overflow-hidden relative h-28 bg-card border border-border/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+          <button onClick={() => navigate("/live")} className="w-full rounded-2xl overflow-hidden relative h-28 luxury-card">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/15 to-transparent" />
             <div className="absolute inset-0 flex items-center px-5">
               <div className="flex items-center gap-4 w-full">
                 <div className="flex -space-x-2">
                   {[stylist1, stylist2, beauty1].map((img, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-card overflow-hidden" style={{ zIndex: 3 - i }}>
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-card overflow-hidden shadow-md" style={{ zIndex: 3 - i }}>
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary live-pulse" />
-                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">In diretta</span>
+                    <span className="w-2 h-2 rounded-full bg-red-500 live-pulse shadow-sm" />
+                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">In diretta</span>
                   </div>
-                  <p className="text-sm font-semibold">Beauty streaming</p>
+                  <p className="text-sm font-semibold tracking-tight">Beauty streaming</p>
                   <p className="text-[11px] text-muted-foreground">Tutorial in diretta</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <ChevronRight className="w-5 h-5 text-primary" />
               </div>
             </div>
           </button>
@@ -304,25 +304,25 @@ export default function HomePage() {
         {activeTab === "Stilisti" && (
           <div className="space-y-3 fade-in">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Professionisti</h3>
+              <h3 className="text-sm font-semibold tracking-tight">Professionisti</h3>
               <button onClick={() => navigate("/stylists")} className="text-xs text-primary font-semibold">Vedi tutti</button>
             </div>
             {stylists.map(stylist => (
               <button key={stylist.id} onClick={() => navigate(`/stylist/${stylist.id}`)}
-                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-primary/20 hover:border-primary/40 transition-all duration-200 text-left shadow-sm">
-                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/10" />
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl luxury-card hover:border-primary/40 transition-all duration-200 text-left shadow-luxury">
+                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/20 shadow-sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{stylist.business_name}</p>
-                  <p className="text-xs text-primary/70 mt-0.5">{stylist.specialty || 'Beauty Pro'}</p>
+                  <p className="font-semibold text-sm truncate tracking-tight">{stylist.business_name}</p>
+                  <p className="text-xs text-primary mt-0.5 font-medium">{stylist.specialty || 'Beauty Pro'}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <Star className="w-3 h-3 text-accent fill-accent" />
-                    <span className="text-xs font-medium">{stylist.rating || '4.5'}</span>
+                    <span className="text-xs font-semibold">{stylist.rating || '4.5'}</span>
                     <span className="text-xs text-muted-foreground">({stylist.review_count || 0})</span>
                     {stylist.city && <span className="text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="w-3 h-3" /> {stylist.city}</span>}
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-primary">€{stylist.hourly_rate || 40}</p>
+                  <p className="text-sm font-bold text-gradient-primary">€{stylist.hourly_rate || 40}</p>
                   <p className="text-[10px] text-muted-foreground">/ora</p>
                 </div>
               </button>
@@ -385,16 +385,16 @@ export default function HomePage() {
               <button onClick={() => navigate("/live")} className="text-xs text-primary font-semibold">Apri Live</button>
             </div>
 
-            <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
               {[
                 { Icon: CalendarDays, label: "Eventi", path: "/events" },
                 { Icon: Podcast, label: "Radio", path: "/radio" },
                 { Icon: Trophy, label: "Sfide", path: "/challenges" },
               ].map(item => (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-primary/15 border border-primary/30 hover:border-primary/50 transition-all duration-200 shrink-0 shadow-sm">
-                   <item.Icon className="w-5 h-5 text-primary" />
-                   <span className="text-[10px] text-primary font-semibold">{item.label}</span>
+                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl gradient-primary shadow-glow transition-all duration-200 shrink-0">
+                   <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
+                   <span className="text-[10px] text-white font-semibold tracking-wide">{item.label}</span>
                  </button>
               ))}
             </div>

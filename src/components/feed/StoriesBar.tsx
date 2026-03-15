@@ -181,22 +181,22 @@ export default function StoriesBar() {
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {/* Add Story */}
         <button onClick={handleAddStory} disabled={uploading} className="flex flex-col items-center gap-1 flex-shrink-0">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-primary/40">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed border-primary/50 bg-primary/8">
             {uploading ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : (
               <Plus className="w-5 h-5 text-primary" />
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground">{uploading ? "..." : "La tua"}</span>
+          <span className="text-[10px] text-muted-foreground font-medium">{uploading ? "..." : "La tua"}</span>
         </button>
 
         {groups.map((group) => (
           <button key={group.user_id} onClick={() => openStory(group)} className="flex flex-col items-center gap-1 flex-shrink-0">
-            <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-yellow-500">
+            <div className="w-16 h-16 rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, hsl(262 88% 63%), hsl(302 78% 56%), hsl(42 98% 62%))" }}>
               <img src={group.avatar_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-background" />
             </div>
-            <span className="text-[10px] text-muted-foreground truncate max-w-[64px]">{group.display_name}</span>
+            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[64px]">{group.display_name}</span>
           </button>
         ))}
       </div>
