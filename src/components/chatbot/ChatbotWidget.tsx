@@ -562,21 +562,75 @@ export default function ChatbotWidget({ className = "" }: Props) {
         )}
       </AnimatePresence>
 
-      {/* FAB Button — with wake word indicator */}
+      {/* Draggable FAB Button — Messenger style */}
       {isMinimized && (
         <motion.button
+          ref={fabRef}
           initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsMinimized(false)}
-          className="w-13 h-13 rounded-full gradient-primary shadow-glow flex items-center justify-center relative"
-          style={{ width: 52, height: 52 }}
+          animate={{ opacity: 1, scale: isDragging ? 1.1 : 1 }}
+          className="w-13 h-13 rounded-full gradient-primary shadow-glow flex items-center justify-center relative touch-none select-none"
+          style={{
+            width: 52,
+            height: 52,
+            position: "fixed",
+            right: fabPos.x === 0 ? 16 : undefined,
+            bottom: fabPos.y === 0 ? 80 : undefined,
+            left: fabPos.x !== 0 ? fabPos.x : undefined,
+            top: fabPos.y !== 0 ? fabPos.y : undefined,
+            zIndex: 9999,
+            transition: isDragging ? "none" : "transform 0.2s ease",
+          }}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            const rect = fabRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            dragStartRef.current = {
+              x: touch.clientX,
+              y: touch.clientY,
+              posX: rect.left,
+              posY: rect.top,
+              moved: false,
+            };
+            setIsDragging(true);
+          }}
+          onTouchMove={(e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - dragStartRef.current.x;
+            const dy = touch.clientY - dragStartRef.current.y;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+              dragStartRef.current.moved = true;
+            }
+            const newX = Math.max(0, Math.min(window.innerWidth - 56, dragStartRef.current.posX + dx));
+            const newY = Math.max(0, Math.min(window.innerHeight - 56, dragStartRef.current.posY + dy));
+            setFabPos({ x: newX, y: newY });
+          }}
+          onTouchEnd={() => {
+            setIsDragging(false);
+            if (!dragStartRef.current.moved) {
+              setIsMinimized(false);
+            }
+            // Snap to nearest edge
+            if (fabPos.x !== 0 || fabPos.y !== 0) {
+              const snapX = fabPos.x < window.innerWidth / 2 ? 8 : window.innerWidth - 60;
+              setFabPos(prev => ({ ...prev, x: snapX }));
+            }
+          }}
+          onMouseDown={(e) => {
+            const rect = fabRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            dragStartRef.current = { x: e.clientX, y: e.clientY, posX: rect.left, posY: rect.top, moved: false };
+          }}
+          onClick={() => {
+            if (!dragStartRef.current.moved) {
+              setIsMinimized(false);
+            }
+          }}
         >
           <Sparkles className="w-6 h-6 text-primary-foreground" />
           {isWakeWordListening && (
             <>
               <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-accent border-2 border-background animate-pulse" />
-              {/* Ripple effect indicating always-on voice listening */}
               <span className="absolute inset-0 rounded-full border-2 border-accent/40 animate-ping" style={{ animationDuration: "2.5s" }} />
             </>
           )}
@@ -588,9 +642,9 @@ export default function ChatbotWidget({ className = "" }: Props) {
         </motion.button>
       )}
 
-      {/* Wake word hint — shown below FAB */}
-      {isMinimized && isWakeWordListening && (
-        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium">
+      {/* Wake word hint */}
+      {isMinimized && isWakeWordListening && fabPos.x === 0 && fabPos.y === 0 && (
+        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: 64, right: 8, zIndex: 9998 }}>
           🎙️ Dì "Stella"
         </p>
       )}
