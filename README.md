@@ -153,4 +153,22 @@ Il workflow **Build & Publish Android to Play Store** (`.github/workflows/androi
 
 ---
 
+## 🔗 Connessione GitHub
+
+Sì, **questo repository è connesso a GitHub** ed è possibile apportare modifiche tramite:
+
+- **[Lovable.dev](https://lovable.dev)** – modifiche visive e AI direttamente sincronizzate sul repository tramite commit automatici
+- **GitHub Copilot Agent** – modifiche automatizzate tramite agenti AI GitHub (pull request automatiche)
+- **Pull Request classica** – contributi diretti creando un branch e aprendo una PR su `main`
+
+Ogni modifica su `main` attiva automaticamente:
+
+| Workflow | File | Azione |
+|---|---|---|
+| CI – Lint & Test | `.github/workflows/ci.yml` | Esegue lint e test su ogni push e PR |
+| Deploy – GitHub Pages | `.github/workflows/deploy.yml` | Pubblica l'app su GitHub Pages |
+| Build & Publish Android | `.github/workflows/android.yml` | Genera e pubblica l'AAB sul Play Store |
+
+---
+
 Creato con [Lovable](https://lovable.dev)
