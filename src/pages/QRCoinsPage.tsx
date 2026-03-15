@@ -82,7 +82,7 @@ export default function QRCoinsPage() {
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-xl font-display font-bold text-gradient-primary">QR Coins</h1>
@@ -146,7 +146,7 @@ export default function QRCoinsPage() {
               {(["all", "earned", "spent"] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                    activeTab === tab ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                    activeTab === tab ? "gradient-primary text-white shadow-glow" : "bg-primary/10 text-primary"
                   }`}>
                   {tab === "all" ? "Tutte" : tab === "earned" ? "Guadagnate" : "Spese"}
                 </button>
@@ -169,7 +169,7 @@ export default function QRCoinsPage() {
           ) : (
             <div className="space-y-2">
               {filtered.map(tx => (
-                <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/30">
+                <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl luxury-card">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === "earn" ? "bg-success/20" : "bg-live/20"}`}>
                       {tx.type === "earn" ? <TrendingUp className="w-5 h-5 text-success" /> : <TrendingDown className="w-5 h-5 text-live" />}

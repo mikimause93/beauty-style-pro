@@ -392,10 +392,10 @@ export default function SpinWheelPage() {
 
         {/* Spin Button */}
         <button onClick={handleSpin} disabled={isSpinning}
-          className={`px-10 py-3.5 rounded-full text-base font-bold transition-all mb-4 ${
+          className={`px-10 py-3.5 rounded-full text-lg font-bold transition-all mb-4 ${
             isSpinning ? "bg-muted text-muted-foreground cursor-not-allowed"
               : spinsRemaining <= 0 ? "gradient-gold text-gold-foreground shadow-card hover:scale-105"
-              : "gradient-primary text-primary-foreground shadow-glow hover:scale-105 active:scale-95"
+              : "gradient-luxury text-white shadow-glow hover:scale-105 active:scale-95"
           }`}>
           {isSpinning ? (
             <span className="flex items-center gap-2">

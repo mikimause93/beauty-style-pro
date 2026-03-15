@@ -28,7 +28,7 @@ const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
 
     return (
       <div ref={ref} className="fixed bottom-[68px] left-0 right-0 z-20 px-3 pb-1 safe-area-bottom">
-        <div className="max-w-lg mx-auto bg-card/60 backdrop-blur-md rounded-xl border border-border/30 overflow-hidden shadow-sm">
+        <div className="max-w-lg mx-auto glass-nav rounded-xl border border-border/30 overflow-hidden shadow-sm">
           <div className="flex items-center gap-2 px-2.5 py-1.5">
             <button onClick={() => navigate("/radio")} className="relative shrink-0">
               <img src={cover} alt=""
@@ -39,7 +39,7 @@ const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
             </button>
 
             <button onClick={() => navigate("/radio")} className="flex-1 min-w-0 text-left">
-              <p className="text-xs font-semibold truncate">{currentStation.name}</p>
+              <p className="text-xs font-semibold truncate text-gradient-primary">{currentStation.name}</p>
               <p className="text-[9px] text-muted-foreground truncate">{currentStation.genre}</p>
             </button>
 

@@ -34,7 +34,7 @@ export default function BottomNav() {
                   "relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
                   isActive
                     ? "gradient-primary shadow-glow scale-105"
-                    : "bg-primary/8 hover:bg-primary/15"
+                    : "bg-primary/10 hover:bg-primary/15"
                 )}>
                   <Icon className={cn(
                     "w-[21px] h-[21px] transition-all duration-300",

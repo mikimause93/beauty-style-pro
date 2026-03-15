@@ -136,7 +136,7 @@ export default function BookingPage() {
     return (
       <MobileLayout>
         <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => navigate("/")} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-display font-bold">Ricevuta</h1>
@@ -173,7 +173,7 @@ export default function BookingPage() {
     return (
       <MobileLayout>
         <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-display font-bold">Prenota</h1>
@@ -193,7 +193,7 @@ export default function BookingPage() {
   return (
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-display font-bold">Prenota Appuntamento</h1>
@@ -287,8 +287,8 @@ export default function BookingPage() {
                   onClick={() => setSelectedTime(time)}
                   className={`py-2 rounded-lg text-xs font-medium transition-all ${
                     selectedTime === time
-                      ? "gradient-primary text-primary-foreground"
-                      : "bg-card hover:bg-muted"
+                      ? "gradient-primary text-white shadow-glow"
+                      : "bg-primary/10 text-primary border border-primary/20"
                   }`}
                 >
                   {time}
@@ -334,14 +334,14 @@ export default function BookingPage() {
             <div className="rounded-2xl gradient-card border border-border p-4 shadow-card slide-up">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-muted-foreground">Totale</span>
-                <span className="text-xl font-bold text-gradient-primary">
+                <span className="text-xl font-bold text-gradient-gold">
                   €{selectedServiceData?.price}
                 </span>
               </div>
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className="w-full py-3 rounded-xl gradient-primary text-primary-foreground font-bold shadow-glow disabled:opacity-50"
+                className="w-full py-3 rounded-2xl gradient-primary text-white font-bold shadow-glow disabled:opacity-50"
               >
                 {loading ? "Confermando..." : "Conferma Prenotazione"}
               </button>

@@ -271,7 +271,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Logout */}
-        <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border border-destructive/30 text-destructive text-sm font-semibold hover:bg-destructive/5 transition-colors">
+        <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl border border-destructive/30 text-destructive text-sm font-semibold hover:bg-destructive/5 transition-colors shadow-sm">
           <LogOut className="w-4 h-4" />
           Logout
         </button>

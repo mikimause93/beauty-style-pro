@@ -321,7 +321,7 @@ export default function LiveStreamPage() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold animate-pulse">
                 <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" /> LIVE
               </span>
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-sm">
@@ -589,8 +589,8 @@ export default function LiveStreamPage() {
             <button key={cat.value} onClick={() => setSelectedCategory(cat.value)}
                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                  selectedCategory === cat.value
-                   ? "bg-primary text-primary-foreground"
-                   : "bg-card border border-border text-muted-foreground"
+                   ? "gradient-primary text-white shadow-glow"
+                   : "bg-primary/10 text-primary border border-primary/20"
                }`}>
               <cat.Icon className="w-3.5 h-3.5" />
               {cat.label}
@@ -626,7 +626,7 @@ export default function LiveStreamPage() {
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background/90" />
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-live text-primary-foreground text-xs font-bold animate-pulse">
                     <span className="w-2 h-2 rounded-full bg-primary-foreground live-pulse" /> LIVE
                   </span>
                   {stream.category && (

@@ -120,8 +120,8 @@ export default function RadioPage() {
               onClick={() => setSource(tab.key)}
                className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                  source === tab.key
-                   ? "bg-primary text-primary-foreground"
-                   : "bg-primary/10 text-muted-foreground hover:text-foreground"
+                   ? "gradient-primary text-white shadow-glow"
+                   : "bg-primary/10 text-primary"
                }`}>
               <span className={source === tab.key ? "" : tab.color}>{tab.icon}</span>
               {tab.label}
@@ -221,8 +221,8 @@ export default function RadioPage() {
                     onClick={() => setRadioFilter(f.key)}
                      className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
                        radioFilter === f.key
-                         ? "bg-primary text-primary-foreground"
-                         : "bg-muted text-muted-foreground"
+                         ? "gradient-primary text-white shadow-glow"
+                         : "bg-primary/10 text-primary"
                     }`}
                   >
                     {f.label}

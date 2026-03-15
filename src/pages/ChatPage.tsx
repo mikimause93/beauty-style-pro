@@ -556,14 +556,14 @@ export default function ChatPage() {
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
             <MessageCircle className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
             <Phone className="w-4 h-4 text-primary-foreground" />
           </button>
-          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
             <Video className="w-4 h-4 text-primary-foreground" />
           </button>
           <button onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione AI attivata"); else { toast.info("Traduzione AI disattivata"); setTranslatedMessages({}); } }}
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
+            className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "gradient-primary" : "bg-muted"}`}>
             <Globe className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </button>
         </header>

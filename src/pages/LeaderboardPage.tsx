@@ -69,7 +69,7 @@ export default function LeaderboardPage() {
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-display font-bold">Classifica</h1>
@@ -81,7 +81,7 @@ export default function LeaderboardPage() {
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                activeTab === tab ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                activeTab === tab ? "gradient-primary text-white shadow-glow" : "bg-primary/10 text-primary"
               }`}>
               {tab}
             </button>
@@ -110,7 +110,7 @@ export default function LeaderboardPage() {
                     <Zap className="w-3 h-3 text-gold" />
                     <span className={`text-xs font-bold ${isFirst ? 'text-gold' : ''}`}>{entry.score.toLocaleString()}</span>
                   </div>
-                  <div className={`w-full rounded-t-xl mt-2 ${isFirst ? 'h-24 gradient-gold' : idx === 1 ? 'h-16 bg-muted' : 'h-12 bg-muted'}`} />
+                  <div className={`w-full rounded-t-xl mt-2 ${isFirst ? 'h-24 gradient-gold' : idx === 1 ? 'h-16 gradient-primary' : 'h-12 gradient-primary'}`} />
                 </div>
               );
             })}

@@ -209,8 +209,8 @@ export default function HomePage() {
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
-              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
+              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group transition-all duration-200 group-active:scale-95">
+              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200">
                 <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
               <span className="text-[9px] text-primary font-semibold leading-tight tracking-wide">{item.label}</span>
