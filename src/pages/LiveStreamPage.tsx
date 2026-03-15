@@ -284,7 +284,7 @@ export default function LiveStreamPage() {
     if (navigator.share) {
       navigator.share({ title: `Live: ${selectedStream.title}`, text: "Guarda questa live su Style e guadagna QRCoin! 🎁", url });
     } else {
-      navigator.clipboard.writeText(url);
+      try { navigator.clipboard.writeText(url); } catch { /* unavailable in restricted contexts */ }
       toast.success("Link copiato! Condividilo per guadagnare QRCoin bonus 🎁");
     }
     awardCoins("share");

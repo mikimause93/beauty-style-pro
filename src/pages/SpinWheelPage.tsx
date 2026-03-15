@@ -155,7 +155,7 @@ export default function SpinWheelPage() {
     if (navigator.share) {
       navigator.share({ title: "Style - Ruota della Fortuna", text, url: window.location.href });
     } else {
-      navigator.clipboard.writeText(text);
+      try { navigator.clipboard.writeText(text); } catch { /* unavailable in restricted contexts */ }
       toast.success("Copiato negli appunti!");
     }
     setMissionsProgress(prev => ({ ...prev, m3: 1 }));

@@ -57,7 +57,7 @@ export default function AffiliatePage() {
 
   const copyLink = () => {
     const link = `${window.location.origin}?ref=${affiliate.affiliate_code}`;
-    navigator.clipboard.writeText(link);
+    try { navigator.clipboard.writeText(link); } catch { /* unavailable in restricted contexts */ }
     setCopied(true);
     toast.success("Link copiato!");
     setTimeout(() => setCopied(false), 2000);

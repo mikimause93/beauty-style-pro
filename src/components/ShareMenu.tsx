@@ -26,7 +26,9 @@ export default function ShareMenu({ url, title, description, onClose, onChatShar
   const shareText = description ? `${title} - ${description}` : title;
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(shareUrl);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch { /* unavailable in restricted contexts */ }
     setCopied(true);
     toast.success("Link copiato!");
     setTimeout(() => setCopied(false), 2000);

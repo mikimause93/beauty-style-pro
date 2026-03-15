@@ -137,7 +137,7 @@ export default function LiveBattlePage() {
     if (navigator.share) {
       navigator.share({ title: `Live Battle: ${selectedBattle.host_a_name} vs ${selectedBattle.host_b_name}`, url });
     } else {
-      navigator.clipboard.writeText(url);
+      try { navigator.clipboard.writeText(url); } catch { /* unavailable in restricted contexts */ }
       toast.success("Link copiato!");
     }
     awardCoins("share");

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Flame, Check, Coins } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
+import safeStorage from "@/lib/safeStorage";
 
 const WEEKLY_GOAL = 5;
 const MILESTONE_REWARD = 10;
@@ -15,12 +16,9 @@ export default function WeeklyLiveTracker() {
 
   useEffect(() => {
     const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      const data = JSON.parse(stored);
-      setLiveCount(data.count || 0);
-      setClaimed(data.claimed || false);
-    }
+    const data = safeStorage.getJSON<{ count: number; claimed: boolean }>(key, { count: 0, claimed: false });
+    setLiveCount(data.count || 0);
+    setClaimed(data.claimed || false);
   }, []);
 
   const claimReward = () => {
@@ -28,7 +26,7 @@ export default function WeeklyLiveTracker() {
       awardCoins("complete_mission");
       setClaimed(true);
       const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
-      localStorage.setItem(key, JSON.stringify({ count: liveCount, claimed: true }));
+      safeStorage.setJSON(key, { count: liveCount, claimed: true });
     }
   };
 
