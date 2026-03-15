@@ -22,12 +22,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    setProfile(data);
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setProfile(data);
+    } catch {
+      // Ignore profile fetch errors – user can still be logged in
+    }
   };
 
   useEffect(() => {
@@ -77,30 +81,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchProfile(session.user.id);
       }
       setLoading(false);
+    }).catch(() => {
+      // Network unavailable during initial session recovery – continue unauthenticated
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, userType: string = "client") => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName, user_type: userType },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: displayName, user_type: userType },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      return { error };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Errore di rete. Controlla la connessione.";
+      return { error: { message: msg } };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Errore di rete. Controlla la connessione.";
+      return { error: { message: msg } };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch { /* ignore network errors on sign-out */ }
     setUser(null);
     setSession(null);
     setProfile(null);
