@@ -3,6 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ShoppingBag, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ── Layout constants ──────────────────────────────────────
+const BTN_SIZE = 52;
+const EDGE_PADDING = 4;
+const DRAG_THRESHOLD = 5;
+const BOTTOM_NAV_HEIGHT = 80;  // keeps the FAB above the bottom nav
+
 /**
  * Messenger-style draggable floating Shop button.
  * - Defaults to bottom-left corner (above BottomNav)
@@ -35,9 +41,9 @@ export default function DraggableShopFAB() {
     const touch = e.touches[0];
     const dx = touch.clientX - dragRef.current.x;
     const dy = touch.clientY - dragRef.current.y;
-    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragRef.current.moved = true;
-    const newX = Math.max(4, Math.min(window.innerWidth - 60, dragRef.current.posX + dx));
-    const newY = Math.max(4, Math.min(window.innerHeight - 80, dragRef.current.posY + dy));
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) dragRef.current.moved = true;
+    const newX = Math.max(EDGE_PADDING, Math.min(window.innerWidth - BTN_SIZE - EDGE_PADDING, dragRef.current.posX + dx));
+    const newY = Math.max(EDGE_PADDING, Math.min(window.innerHeight - BOTTOM_NAV_HEIGHT, dragRef.current.posY + dy));
     setPos({ x: newX, y: newY });
   };
 
@@ -49,7 +55,7 @@ export default function DraggableShopFAB() {
     }
     // Snap to nearest horizontal edge
     if (pos) {
-      const snapX = pos.x < window.innerWidth / 2 ? 8 : window.innerWidth - 60;
+      const snapX = pos.x < window.innerWidth / 2 ? EDGE_PADDING : window.innerWidth - BTN_SIZE - EDGE_PADDING;
       setPos(prev => prev ? { ...prev, x: snapX } : prev);
     }
   };
@@ -64,9 +70,9 @@ export default function DraggableShopFAB() {
     const onMove = (ev: MouseEvent) => {
       const dx = ev.clientX - dragRef.current.x;
       const dy = ev.clientY - dragRef.current.y;
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) dragRef.current.moved = true;
-      const newX = Math.max(4, Math.min(window.innerWidth - 60, dragRef.current.posX + dx));
-      const newY = Math.max(4, Math.min(window.innerHeight - 80, dragRef.current.posY + dy));
+      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) dragRef.current.moved = true;
+      const newX = Math.max(EDGE_PADDING, Math.min(window.innerWidth - BTN_SIZE - EDGE_PADDING, dragRef.current.posX + dx));
+      const newY = Math.max(EDGE_PADDING, Math.min(window.innerHeight - BOTTOM_NAV_HEIGHT, dragRef.current.posY + dy));
       setPos({ x: newX, y: newY });
     };
     const onUp = () => {
@@ -81,7 +87,7 @@ export default function DraggableShopFAB() {
 
   const posStyle: React.CSSProperties = pos
     ? { left: pos.x, top: pos.y, right: "auto", bottom: "auto" }
-    : { right: 16, bottom: 90 };
+    : { right: EDGE_PADDING + 12, bottom: BOTTOM_NAV_HEIGHT + 8 };
 
   return (
     <button
