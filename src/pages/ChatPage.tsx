@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2 } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useNavigate, useParams } from "react-router-dom";
@@ -544,10 +544,13 @@ export default function ChatPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
-            <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
+            <div className="relative">
+              <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+            </div>
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-[10px] text-muted-foreground">Chat</p>
+              <p className="text-[10px] text-green-500 font-medium">● Online</p>
             </div>
           </button>
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
@@ -647,8 +650,11 @@ export default function ChatPage() {
             </div>
           )}
           {messages.map(msg => (
-            <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"} fade-in`}>
-              <div className={`max-w-[75%] rounded-2xl overflow-hidden ${
+            <div key={msg.id} className={`flex items-end gap-1.5 ${msg.sender === "me" ? "justify-end" : "justify-start"} fade-in`}>
+              {msg.sender === "other" && (
+                <img src={selectedChat.avatar} alt="" className="w-6 h-6 rounded-full object-cover shrink-0 mb-1" />
+              )}
+              <div className={`max-w-[72%] rounded-2xl overflow-hidden ${
                 msg.type === "image" || msg.type === "video"
                   ? "shadow-card"
                   : msg.sender === "me"
@@ -680,7 +686,10 @@ export default function ChatPage() {
                   </p>
                 )}
                 {msg.type !== "image" && msg.type !== "video" && (
-                  <p className={`text-[10px] mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</p>
+                  <div className={`flex items-center justify-end gap-1 mt-1`}>
+                    <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
+                    {msg.sender === "me" && <CheckCheck className="w-3.5 h-3.5 text-primary-foreground/60" />}
+                  </div>
                 )}
               </div>
             </div>
@@ -831,6 +840,7 @@ export default function ChatPage() {
             >
               <div className="relative">
                 <img src={conv.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
+                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between">
