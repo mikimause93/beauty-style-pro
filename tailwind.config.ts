@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         display: ["Playfair Display", "Georgia", "serif"],
         body: ["Cormorant Garamond", "Georgia", "serif"],
+        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -55,6 +56,18 @@ export default {
         gold: {
           DEFAULT: "hsl(var(--gold))",
           foreground: "hsl(var(--gold-foreground))",
+        },
+        "rose-gold": {
+          DEFAULT: "hsl(var(--rose-gold))",
+          foreground: "hsl(var(--rose-gold-foreground))",
+        },
+        platinum: {
+          DEFAULT: "hsl(var(--platinum))",
+          foreground: "hsl(var(--platinum-foreground))",
+        },
+        champagne: {
+          DEFAULT: "hsl(var(--champagne))",
+          foreground: "hsl(var(--champagne-foreground))",
         },
         success: "hsl(var(--success))",
         live: "hsl(var(--live))",

@@ -142,11 +142,25 @@ export default function HomePage() {
     <MobileLayout>
       {/* Header — luxury & clean */}
       <header className="sticky top-0 z-50 glass">
-        <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-[26px] font-display font-bold italic tracking-tight text-gradient-luxury">Style</span>
+        {/* Ambient top line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 5%, hsl(263 85% 62% / 0.45) 30%, hsl(302 80% 55% / 0.5) 50%, hsl(38 88% 58% / 0.4) 70%, transparent 95%)" }} />
+        <div className="flex items-center justify-between px-5 py-3.5">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[27px] font-display font-bold italic tracking-tight text-gradient-luxury"
+              style={{ filter: "drop-shadow(0 0 12px hsl(263 85% 62% / 0.35))" }}
+            >
+              Style
+            </span>
+            <span
+              className="font-sans text-[9px] font-semibold tracking-[0.22em] uppercase mt-2 opacity-40"
+            >
+              PRO
+            </span>
+          </div>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              <Search className="w-[20px] h-[20px] text-foreground/70" />
+              <Search className="w-[20px] h-[20px] text-foreground/65" />
             </button>
             <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
               {theme === "dark" ? <Sun className="w-[20px] h-[20px] text-foreground/70" /> : <Moon className="w-[20px] h-[20px] text-foreground/70" />}
@@ -168,13 +182,13 @@ export default function HomePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1.5 px-5 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 px-5 pb-3.5 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button key={tab} onClick={() => handleTabClick(tab)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
+              className={`font-sans px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab
                    ? "gradient-primary text-white shadow-glow"
-                   : "bg-primary/10 text-primary hover:bg-primary/20"
+                   : "bg-primary/8 text-foreground/60 hover:bg-primary/15 hover:text-foreground/80"
               }`}>
               {tab}
             </button>
@@ -189,32 +203,32 @@ export default function HomePage() {
 
       {/* Quick Actions — single compact scrollable row under stories */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
-            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
-            { Icon: Wand2, label: "AI Look", path: "/ai-look" },
-            { Icon: Scissors, label: "Stilisti", path: "/stylists" },
-            { Icon: CalendarDays, label: "Prenota", path: "/booking" },
-            { Icon: ShoppingBag, label: "Shop", path: "/shop" },
-            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
-            { Icon: Droplets, label: "Spa", path: "/spa-terme" },
-            { Icon: Home, label: "Domicilio", path: "/map-search" },
-            { Icon: Target, label: "Missioni", path: "/missions" },
-            { Icon: Zap, label: "Quiz", path: "/quiz-live" },
-            { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
-            { Icon: Film, label: "Shorts", path: "/shorts" },
-            { Icon: Gift, label: "Vinci", path: "/spin" },
-            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
-            { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
-            { Icon: Radio, label: "Radio", path: "/radio" },
-            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant", grad: "gradient-primary" },
+            { Icon: Wand2, label: "AI Look", path: "/ai-look", grad: "gradient-luxury" },
+            { Icon: Scissors, label: "Stilisti", path: "/stylists", grad: "gradient-rose-gold" },
+            { Icon: CalendarDays, label: "Prenota", path: "/booking", grad: "gradient-primary" },
+            { Icon: ShoppingBag, label: "Shop", path: "/shop", grad: "gradient-gold" },
+            { Icon: MapIcon, label: "Mappa", path: "/map-search", grad: "gradient-primary" },
+            { Icon: Droplets, label: "Spa", path: "/spa-terme", grad: "gradient-rose-gold" },
+            { Icon: Home, label: "Domicilio", path: "/map-search", grad: "gradient-primary" },
+            { Icon: Target, label: "Missioni", path: "/missions", grad: "gradient-luxury" },
+            { Icon: Zap, label: "Quiz", path: "/quiz-live", grad: "gradient-gold" },
+            { Icon: Gamepad2, label: "Talent", path: "/talent-game", grad: "gradient-primary" },
+            { Icon: Film, label: "Shorts", path: "/shorts", grad: "gradient-luxury" },
+            { Icon: Gift, label: "Vinci", path: "/spin", grad: "gradient-rose-gold" },
+            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge", grad: "gradient-gold" },
+            { Icon: Camera, label: "Prima/Dopo", path: "/before-after", grad: "gradient-primary" },
+            { Icon: Radio, label: "Radio", path: "/radio", grad: "gradient-luxury" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard", grad: "gradient-rose-gold" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
-              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
+              className="flex flex-col items-center gap-1.5 min-w-[56px] shrink-0 group">
+              <div className={`w-12 h-12 rounded-2xl ${item.grad} shadow-luxury flex items-center justify-center transition-all duration-200 group-active:scale-95 luxury-shimmer`}>
                 <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
-              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
+              <span className="font-sans text-[10px] text-foreground/60 font-semibold leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>
