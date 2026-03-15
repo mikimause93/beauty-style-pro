@@ -41,13 +41,15 @@ async function registerPushNotifications(userId?: string) {
         // Store subscription endpoint in Supabase so server can push later
         if (subscription) {
           const subData = subscription.toJSON();
-          await supabase.from("push_subscriptions").upsert({
-            user_id: userId,
-            endpoint: subData.endpoint,
-            p256dh: subData.keys?.p256dh,
-            auth: subData.keys?.auth,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: "user_id" }).catch(() => {});
+          try {
+            await supabase.from("push_subscriptions").upsert({
+              user_id: userId,
+              endpoint: subData.endpoint,
+              p256dh: subData.keys?.p256dh,
+              auth: subData.keys?.auth,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: "user_id" });
+          } catch { /* ignore */ }
         }
       } catch { /* graceful — realtime fallback is still active */ }
     }
