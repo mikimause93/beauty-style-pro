@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Coins, Trophy, Zap, HelpCircle, Timer, Users, Star, Sparkles, ChevronRight, Crown, Gift, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
 
@@ -136,7 +137,7 @@ export default function QuizLivePage() {
       if (finalWon > 0) {
         await supabase.from("profiles").update({ qr_coins: (profile?.qr_coins || 0) + finalWon }).eq("user_id", user.id);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { logError({ error_type: "database", message: "Quiz coins update error", metadata: { error: String(e) } }); }
   };
 
   const handleLifeline = (id: string) => {

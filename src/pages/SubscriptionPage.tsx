@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { Check, Crown, Rocket, Star, Zap, ArrowLeft, Loader2, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -82,7 +83,7 @@ export default function SubscriptionPage() {
         setSubscriptionEnd(null);
       }
     } catch (e) {
-      console.error("Check subscription error:", e);
+      logError({ error_type: "api", message: "Check subscription error", metadata: { error: String(e) } });
     }
     setChecking(false);
   }, [user]);

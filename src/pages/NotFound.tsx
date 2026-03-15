@@ -1,11 +1,14 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { logError } from "@/lib/errorLogger";
 
 const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    // Truncate and encode pathname to avoid logging overly long or sensitive URLs
+    const safePath = encodeURIComponent(location.pathname).slice(0, 200);
+    logError({ error_type: "ui", message: `404 – route not found: ${safePath}`, severity: "warn" });
   }, [location.pathname]);
 
   return (
