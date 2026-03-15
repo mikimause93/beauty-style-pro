@@ -191,11 +191,11 @@ export default function HomePage() {
       {activeTab === "Nuovi" && (
         <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
-            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
+            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant", gold: true },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
-            { Icon: ShoppingBag, label: "Shop", path: "/shop" },
+            { Icon: ShoppingBag, label: "Shop", path: "/shop", gold: true },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
             { Icon: Droplets, label: "Spa", path: "/spa-terme" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
@@ -203,18 +203,18 @@ export default function HomePage() {
             { Icon: Zap, label: "Quiz", path: "/quiz-live" },
             { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
             { Icon: Film, label: "Shorts", path: "/shorts" },
-            { Icon: Gift, label: "Vinci", path: "/spin" },
+            { Icon: Gift, label: "Vinci", path: "/spin", gold: true },
             { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
             { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
             { Icon: Radio, label: "Radio", path: "/radio" },
-            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard", gold: true },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
-              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
-                <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
+              className="flex flex-col items-center gap-1.5 min-w-[58px] shrink-0 group">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 group-active:scale-90 group-hover:scale-105 ${item.gold ? "gradient-gold shadow-glow-gold" : "gradient-primary shadow-glow"}`}>
+                <item.Icon className={`w-6 h-6 drop-shadow-sm ${item.gold ? "text-black" : "text-white"}`} />
               </div>
-              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
+              <span className="text-[11px] text-foreground/75 font-semibold leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>

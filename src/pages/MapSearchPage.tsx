@@ -59,6 +59,7 @@ export default function MapSearchPage() {
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [maxDistance, setMaxDistance] = useState(50);
   const [homeService, setHomeService] = useState(false);
+  const [minRating, setMinRating] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [jobs, setJobs] = useState<JobPost[]>([]);
@@ -166,6 +167,7 @@ export default function MapSearchPage() {
         if (cityFilter && (p.city || "").toLowerCase() !== cityFilter.toLowerCase()) return false;
         if (specialtyFilter && (p.specialty || "").toLowerCase() !== specialtyFilter.toLowerCase()) return false;
         if (p.distance !== undefined && p.distance > maxDistance) return false;
+        if (minRating > 0 && (p.rating == null || p.rating < minRating)) return false;
         return true;
       })
       .sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
@@ -338,6 +340,20 @@ export default function MapSearchPage() {
                 <option value="">Tutte le specialità</option>
                 {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
+            </div>
+            {/* Rating filter */}
+            <div>
+              <span className="text-[10px] text-muted-foreground block mb-1.5">Valutazione minima</span>
+              <div className="flex gap-1.5">
+                {[0, 3, 4, 4.5].map(r => (
+                  <button key={r} onClick={() => setMinRating(r)}
+                    className={`flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-150 ${
+                      minRating === r ? "bg-accent text-accent-foreground shadow-glow-gold" : "bg-muted text-muted-foreground"
+                    }`}>
+                    {r === 0 ? "Tutti" : `★${r}+`}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <div className="flex justify-between mb-1">
