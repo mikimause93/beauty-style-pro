@@ -98,7 +98,7 @@ export default function ProfilePage() {
           <LogIn className="w-10 h-10 text-primary mb-4" />
           <h2 className="text-xl font-display font-bold mb-2">Accedi a STYLE</h2>
           <p className="text-sm text-muted-foreground mb-8">Registrati o accedi per gestire il tuo profilo</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold">
+          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full gradient-primary text-white font-semibold shadow-glow">
             Accedi / Registrati
           </button>
         </div>
@@ -151,7 +151,7 @@ export default function ProfilePage() {
 
       {/* Settings Menu Dropdown */}
       {showMenu && isOwnProfile && (
-        <div className="absolute top-14 right-4 z-50 w-56 rounded-2xl bg-card border border-border shadow-lg py-2 fade-in">
+        <div className="absolute top-14 right-4 z-50 w-56 rounded-2xl bg-card border border-border shadow-luxury py-2 fade-in">
           {[
             { icon: Edit3, label: "Modifica Profilo", action: () => navigate("/profile/edit") },
             { icon: Bookmark, label: "Salvati", action: () => setActiveTab("saved") },
@@ -195,7 +195,7 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center pt-6 pb-4">
           {/* Centered Avatar */}
           <div className="relative mb-4">
-            <div className={`w-24 h-24 rounded-full p-[2.5px] ${isProfessional || isBusiness ? "bg-gradient-to-br from-primary via-accent to-primary" : "bg-border"}`}>
+            <div className={`w-24 h-24 rounded-full p-[2.5px] ${isProfessional || isBusiness ? "" : "bg-border"}`} style={isProfessional || isBusiness ? { background: "linear-gradient(135deg, hsl(262 88% 63%), hsl(35 90% 60%), hsl(42 98% 62%))" } : undefined}>
               <img
                 src={displayProfile?.avatar_url || stylist2}
                 alt=""
@@ -248,7 +248,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats — horizontal pill style, centered */}
-          <div className="flex items-center gap-1 rounded-2xl bg-primary/5 border border-primary/10 px-2 py-1.5 mb-4">
+          <div className="flex items-center gap-1 rounded-2xl bg-primary/8 border border-primary/15 px-2 py-1.5 mb-4">
             <button onClick={() => setActiveTab("grid")} className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-background/50 transition-colors">
               <span className="text-sm font-bold">{postCount}</span>
               <span className="text-[10px] text-muted-foreground">post</span>
@@ -267,8 +267,8 @@ export default function ProfilePage() {
 
           {/* QR Coins badge — centered */}
           {isOwnProfile && (
-            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold mb-1">
-              <Coins className="w-3 h-3 text-primary" />
+            <button onClick={() => navigate("/qr-coins")} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full gradient-gold shadow-glow-gold text-black text-xs font-bold mb-1">
+              <Coins className="w-3 h-3 text-black" />
               {displayProfile?.qr_coins?.toLocaleString() || '0'} QR Coins
             </button>
           )}
@@ -288,12 +288,12 @@ export default function ProfilePage() {
               </button>
               {(isProfessional || isBusiness) ? (
                 <button onClick={() => navigate("/go-live")}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                  className="px-4 py-2 rounded-lg gradient-primary text-white text-sm font-semibold shadow-glow">
                   Live
                 </button>
               ) : (
                 <button onClick={() => navigate("/become-creator")}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                  className="px-4 py-2 rounded-lg gradient-primary text-white text-sm font-semibold shadow-glow">
                   Diventa Pro
                 </button>
               )}
@@ -303,7 +303,7 @@ export default function ProfilePage() {
               <button onClick={() => { if (!user) { navigate("/auth"); return; } toggleFollow(); }}
                 disabled={followLoading}
                 className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  isFollowing ? "bg-primary/10 text-primary" : "bg-primary text-primary-foreground"
+                  isFollowing ? "bg-primary/10 text-primary" : "gradient-primary text-white shadow-glow"
                 }`}>
                 {isFollowing ? "Segui già" : "Segui"}
               </button>
@@ -322,7 +322,7 @@ export default function ProfilePage() {
                 <Phone className="w-4 h-4 text-primary-foreground" />
               </button>
               <button onClick={() => navigate(`/booking/${viewUserId}`)}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+                className="px-4 py-2 rounded-lg gradient-primary text-white text-sm font-semibold shadow-glow">
                 Prenota
               </button>
             </>
@@ -348,8 +348,8 @@ export default function ProfilePage() {
               return (
                 <button key={item.label} onClick={() => navigate(item.path)}
                   className="flex flex-col items-center gap-1 min-w-[56px] relative">
-                  <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <ItemIcon className="w-5 h-5 text-primary" />
+                  <div className="w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+                    <ItemIcon className="w-5 h-5 text-white" />
                     {item.badge && item.badge > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
                         <span className="text-[9px] text-destructive-foreground font-bold">

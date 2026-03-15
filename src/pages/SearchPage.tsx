@@ -110,7 +110,7 @@ export default function SearchPage() {
     <MobileLayout>
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1 relative">
@@ -120,7 +120,7 @@ export default function SearchPage() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Cerca persone, stilisti, servizi..."
-              className="w-full h-11 rounded-xl bg-card border border-border pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
+              className="w-full h-11 rounded-xl bg-card border border-primary/20 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50"
             />
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function SearchPage() {
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                tab === t.key ? "gradient-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
               }`}>
               {t.icon}{t.label}
             </button>

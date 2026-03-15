@@ -177,7 +177,7 @@ export default function ShopPage() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Cerca prodotti, servizi, saloni..."
-            className="w-full h-10 rounded-xl bg-muted pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
+            className="w-full h-10 rounded-xl bg-card border border-primary/20 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/50"
           />
         </div>
 
@@ -187,7 +187,7 @@ export default function ShopPage() {
             return (
               <button key={s.key} onClick={() => setActiveSection(s.key)}
                  className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                   activeSection === s.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                   activeSection === s.key ? "gradient-primary text-white shadow-glow" : "bg-muted text-muted-foreground"
                  }`}>
                 <Icon className="w-3.5 h-3.5" />{s.label}
               </button>
@@ -221,7 +221,7 @@ export default function ShopPage() {
             placeholder="Codice promozionale..."
             className="flex-1 h-10 rounded-xl bg-muted px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
-          <button onClick={applyPromoCode} className="px-4 h-10 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+          <button onClick={applyPromoCode} className="px-4 h-10 rounded-xl gradient-primary text-white text-sm font-semibold shadow-glow">
             Applica
           </button>
         </div>
@@ -291,7 +291,7 @@ export default function ShopPage() {
                               <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
                                 <ShoppingCart className="w-3 h-3" /> Carrello
                               </button>
-                              <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                              <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg gradient-primary text-white text-[10px] font-semibold shadow-glow">
                                 Acquista
                               </button>
                             </div>
@@ -381,7 +381,7 @@ export default function ShopPage() {
                       </div>
                       <div className="flex flex-col gap-1.5 shrink-0">
                         <button onClick={e => { e.stopPropagation(); navigate(`/booking/${pro.id}`); }}
-                          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                          className="px-3 py-1.5 rounded-lg gradient-primary text-white text-[10px] font-semibold shadow-glow">
                           Prenota
                         </button>
                       </div>
@@ -419,7 +419,7 @@ export default function ShopPage() {
                         <p className="text-sm font-bold text-primary mt-1">€{product.price}</p>
                       </div>
                       <div className="flex flex-col gap-1.5 shrink-0">
-                        <button onClick={() => buyNow(product)} className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold">
+                        <button onClick={() => buyNow(product)} className="px-3 py-2 rounded-xl gradient-primary text-white text-xs font-semibold shadow-glow">
                           Acquista
                         </button>
                         <button onClick={() => toggleLike(product.id)} className="px-3 py-2 rounded-xl bg-muted text-xs font-semibold flex items-center justify-center gap-1">
@@ -463,7 +463,7 @@ export default function ShopPage() {
                   Annulla
                 </button>
                 <button onClick={() => { toast.success("Recensione inviata!"); setSelectedProduct(null); setReviewText(""); }}
-                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+                  className="flex-1 py-3 rounded-xl gradient-primary text-white text-sm font-semibold shadow-glow">
                   Pubblica
                 </button>
               </div>

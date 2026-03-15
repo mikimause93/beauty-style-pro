@@ -230,7 +230,7 @@ export default function OnboardingPage() {
         <div className="flex items-center gap-3 mb-6">
           <img src={logo} alt="STYLE" className="w-10 h-10" />
           <div>
-            <h1 className="text-xl font-display font-bold">Completa il profilo</h1>
+            <h1 className="text-xl font-display font-bold text-gradient-luxury">Completa il profilo</h1>
             <p className="text-xs text-muted-foreground">
               {userType === "professional" ? "Professionista" : "Business"} • Step {step}/{totalSteps}
             </p>

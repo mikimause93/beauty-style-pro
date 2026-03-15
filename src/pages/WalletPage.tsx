@@ -193,7 +193,7 @@ export default function WalletPage() {
           <Wallet className="w-10 h-10 text-primary mb-4" />
           <h2 className="text-xl font-display font-bold mb-2">Il tuo Wallet</h2>
           <p className="text-sm text-muted-foreground mb-6">Accedi per gestire il tuo portafoglio</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold">Accedi</button>
+          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full gradient-primary text-white font-semibold shadow-glow">Accedi</button>
         </div>
       </MobileLayout>
     );
@@ -207,7 +207,7 @@ export default function WalletPage() {
 
       <div className="px-5 py-6 space-y-6">
         {/* Balance Card */}
-        <div className="rounded-2xl gradient-primary p-6 text-primary-foreground">
+        <div className="rounded-2xl gradient-luxury p-6 text-white shadow-glow">
           <p className="text-xs opacity-80 mb-1">Saldo disponibile</p>
           <div className="flex items-baseline gap-2 mb-4">
             <span className="text-3xl font-display font-bold">{balance.toLocaleString()}</span>
@@ -215,11 +215,11 @@ export default function WalletPage() {
           </div>
           <div className="flex gap-3">
             <button onClick={() => navigate("/qr-coins")}
-              className="flex-1 py-2.5 rounded-xl bg-primary-foreground/20 text-sm font-semibold flex items-center justify-center gap-2">
+              className="flex-1 py-2.5 rounded-xl bg-white/20 text-sm font-semibold flex items-center justify-center gap-2 backdrop-blur-sm">
               <Plus className="w-4 h-4" /> Ricarica
             </button>
             <button onClick={() => setShowWithdraw(true)}
-              className="flex-1 py-2.5 rounded-xl bg-primary-foreground/20 text-sm font-semibold flex items-center justify-center gap-2">
+              className="flex-1 py-2.5 rounded-xl bg-white/20 text-sm font-semibold flex items-center justify-center gap-2 backdrop-blur-sm">
               <ArrowUpRight className="w-4 h-4" /> Preleva
             </button>
           </div>
@@ -254,7 +254,7 @@ export default function WalletPage() {
         <div className="flex gap-1 bg-muted rounded-xl p-1">
           {([["overview", "Panoramica"], ["methods", "Metodi"], ["history", "Storico"]] as const).map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
-              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${tab === key ? "bg-card shadow-sm" : "text-muted-foreground"}`}>
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${tab === key ? "gradient-primary text-white shadow-glow" : "text-muted-foreground"}`}>
               {label}
             </button>
           ))}
@@ -564,7 +564,7 @@ export default function WalletPage() {
               <input placeholder="CVV" value={cardForm.cvv} onChange={e => setCardForm({ ...cardForm, cvv: e.target.value })} maxLength={4} type="password"
                 className="flex-1 px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
             </div>
-            <button onClick={addCard} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Salva Carta</button>
+            <button onClick={addCard} className="w-full py-3 rounded-xl gradient-primary text-white font-semibold shadow-glow">Salva Carta</button>
           </div>
         </div>
       )}
@@ -596,7 +596,7 @@ export default function WalletPage() {
                 className="w-full px-4 py-3 rounded-xl bg-muted text-sm font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-primary/30" />
               <p className="text-[10px] text-muted-foreground">Inserisci il tuo IBAN completo (es. IT60X0542811101000000123456)</p>
             </div>
-            <button onClick={saveIBAN} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">
+            <button onClick={saveIBAN} className="w-full py-3 rounded-xl gradient-primary text-white font-semibold shadow-glow">
               {profile?.iban ? "Aggiorna IBAN" : "Collega Conto"}
             </button>
           </div>
@@ -622,13 +622,13 @@ export default function WalletPage() {
                 <input type="number" placeholder="Importo (€)" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
                 <p className="text-[11px] text-muted-foreground">Saldo disponibile: <strong>{balance.toLocaleString()} QR Coins</strong></p>
-                <button onClick={handleWithdraw} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">Conferma Prelievo</button>
+                <button onClick={handleWithdraw} className="w-full py-3 rounded-xl gradient-primary text-white font-semibold shadow-glow">Conferma Prelievo</button>
               </>
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">Devi collegare un conto bancario per poter prelevare.</p>
                 <button onClick={() => { setShowWithdraw(false); setShowAddIBAN(true); }}
-                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2">
+                  className="w-full py-3 rounded-xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 shadow-glow">
                   <Building2 className="w-4 h-4" /> Collega Conto Bancario
                 </button>
               </>

@@ -221,11 +221,12 @@ export default function AuthPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
         <div className="w-full">
           <div className="flex flex-col items-center mb-10">
-            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
-            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+            <div className="w-20 h-20 rounded-full gradient-luxury flex items-center justify-center mb-3 shadow-glow">
+              <img src={logo} alt="STYLE" className="w-14 h-14 object-contain" />
+            </div>
+            <h1 className="text-2xl font-display font-bold tracking-tight text-gradient-primary">STYLE</h1>
             <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
           </div>
-
           <div className="text-center space-y-6">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
               <Mail className="w-10 h-10 text-primary" />
@@ -251,7 +252,7 @@ export default function AuthPage() {
             <div className="space-y-3">
               <button 
                 onClick={() => setRegistrationResult(null)} 
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm"
+                className="w-full h-12 rounded-xl gradient-primary text-white font-semibold text-sm shadow-glow"
               >
                 Torna al Login
               </button>
@@ -285,8 +286,10 @@ export default function AuthPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
         <div className="w-full">
           <div className="flex flex-col items-center mb-10">
-            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
-            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+            <div className="w-20 h-20 rounded-full gradient-luxury flex items-center justify-center mb-3 shadow-glow">
+              <img src={logo} alt="STYLE" className="w-14 h-14 object-contain" />
+            </div>
+            <h1 className="text-2xl font-display font-bold tracking-tight text-gradient-primary">STYLE</h1>
             <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
           </div>
 
@@ -297,8 +300,8 @@ export default function AuthPage() {
 
           {/* Email / Phone login tabs */}
           <div className="flex gap-1 mb-4 bg-muted rounded-xl p-1">
-            <button onClick={() => { setLoginMode("email"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>Email</button>
-            <button onClick={() => { setLoginMode("phone"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+            <button onClick={() => { setLoginMode("email"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "email" ? "gradient-primary text-white shadow-glow" : "text-muted-foreground"}`}>Email</button>
+            <button onClick={() => { setLoginMode("phone"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "phone" ? "gradient-primary text-white shadow-glow" : "text-muted-foreground"}`}>
               <Phone className="w-3 h-3 inline mr-1" />Telefono
             </button>
           </div>
@@ -308,19 +311,19 @@ export default function AuthPage() {
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
-                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/60" />
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
                   onChange={e => setPassword(e.target.value)} required minLength={6}
-                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/60" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
                   {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
                 </button>
               </div>
               <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                className="w-full h-12 rounded-xl gradient-primary text-white font-semibold text-sm disabled:opacity-50 shadow-glow">
                 {loading ? "Caricamento..." : "Accedi"}
               </button>
             </form>
@@ -329,10 +332,10 @@ export default function AuthPage() {
               <div className="relative">
                 <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input type="tel" placeholder="+39 333 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required
-                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/60" />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                className="w-full h-12 rounded-xl gradient-primary text-white font-semibold text-sm disabled:opacity-50 shadow-glow">
                 {loading ? "Invio OTP..." : "Invia codice SMS"}
               </button>
             </form>
@@ -341,10 +344,10 @@ export default function AuthPage() {
               <p className="text-xs text-muted-foreground text-center">Codice OTP inviato a <strong>{phoneNumber}</strong></p>
               <div className="relative">
                 <input type="text" inputMode="numeric" maxLength={6} placeholder="Codice OTP (6 cifre)" value={otpCode} onChange={e => setOtpCode(e.target.value)} required
-                  className="w-full h-12 rounded-xl bg-card border border-border/50 px-4 text-sm text-center tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 px-4 text-sm text-center tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/60" />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                className="w-full h-12 rounded-xl gradient-primary text-white font-semibold text-sm disabled:opacity-50 shadow-glow">
                 {loading ? "Verifica..." : "Verifica e accedi"}
               </button>
               <button type="button" onClick={() => setOtpSent(false)} className="w-full text-center text-xs text-primary font-medium">
@@ -366,8 +369,10 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex flex-col px-6 max-w-lg mx-auto py-8">
       {/* Header */}
       <div className="flex flex-col items-center mb-6">
-        <img src={logo} alt="STYLE" className="w-12 h-12 mb-2" />
-        <h1 className="text-xl font-display font-bold tracking-tight">Crea il tuo account</h1>
+        <div className="w-16 h-16 rounded-full gradient-luxury flex items-center justify-center mb-2 shadow-glow">
+          <img src={logo} alt="STYLE" className="w-11 h-11 object-contain" />
+        </div>
+        <h1 className="text-xl font-display font-bold tracking-tight text-gradient-primary">Crea il tuo account</h1>
       </div>
 
       {/* Tab switch */}
@@ -380,7 +385,7 @@ export default function AuthPage() {
       {step > 0 && totalSteps > 0 && (
         <div className="flex gap-1.5 mb-6">
           {Array.from({ length: totalSteps }, (_, i) => (
-            <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${i < step ? "bg-primary" : i === step ? "bg-primary/50" : "bg-muted"}`} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${i < step ? "gradient-primary" : i === step ? "bg-primary/50" : "bg-muted"}`} />
           ))}
         </div>
       )}
@@ -448,7 +453,7 @@ export default function AuthPage() {
               {["Hair", "Makeup", "Nails", "Skin", "Tattoo", "Fashion", "Fitness", "Barber", "Wellness"].map(i => (
                 <button key={i} type="button" onClick={() => setInterests(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i])}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    interests.includes(i) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    interests.includes(i) ? "gradient-primary text-white shadow-glow" : "bg-muted text-muted-foreground"
                   }`}>{i}</button>
               ))}
             </div>
@@ -500,7 +505,7 @@ export default function AuthPage() {
               {CATEGORIES_PRO.map(c => (
                 <button key={c} type="button" onClick={() => setCategory(c)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    category === c ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    category === c ? "gradient-primary text-white shadow-glow" : "bg-muted text-muted-foreground"
                   }`}>{c}</button>
               ))}
             </div>
@@ -556,7 +561,7 @@ export default function AuthPage() {
               {CATEGORIES_BIZ.map(c => (
                 <button key={c} type="button" onClick={() => setBizCategory(c.toLowerCase())}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    bizCategory === c.toLowerCase() ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    bizCategory === c.toLowerCase() ? "gradient-primary text-white shadow-glow" : "bg-muted text-muted-foreground"
                   }`}>{c}</button>
               ))}
             </div>
@@ -619,7 +624,7 @@ export default function AuthPage() {
       {step > 0 && (
         <div className="mt-8 space-y-3">
           <button onClick={handleNext} disabled={loading || !canProceed()}
-            className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition-all">
+            className="w-full h-12 rounded-xl gradient-primary text-white font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition-all shadow-glow">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creazione...</> :
               step < totalSteps ? <>Continua <ChevronRight className="w-4 h-4" /></> :
               <>Crea Account <CheckCircle className="w-4 h-4" /></>}

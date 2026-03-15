@@ -67,14 +67,14 @@ export default function ExplorePage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Cerca creators, servizi, luoghi..."
-            className="w-full h-10 rounded-full bg-muted pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full h-10 rounded-full bg-card border border-primary/20 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                activeTab === tab ? "gradient-primary text-white shadow-glow" : "bg-primary/10 text-primary"
               }`}>
               {tab}
             </button>
@@ -107,14 +107,16 @@ export default function ExplorePage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Crown className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-bold">Top Creators</h2>
+                <h2 className="text-sm font-bold text-gradient-primary">Top Creators</h2>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {creators.map((c) => (
                   <button key={c.user_id} onClick={() => navigate(`/profile/${c.user_id}`)}
                     className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
-                    <img src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`}
-                      alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                    <div className="w-16 h-16 rounded-full p-[2px] shadow-sm" style={{ background: "linear-gradient(135deg, hsl(262 88% 63%), hsl(35 90% 60%), hsl(42 98% 62%))" }}>
+                      <img src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`}
+                        alt="" className="w-full h-full rounded-full object-cover border-2 border-background" />
+                    </div>
                     <p className="text-[11px] font-semibold truncate max-w-[80px]">{c.display_name}</p>
                     <span className="text-[9px] text-muted-foreground">{(c.follower_count / 1000).toFixed(1)}K</span>
                   </button>
@@ -168,7 +170,7 @@ export default function ExplorePage() {
                   <p className="text-sm font-semibold truncate">{c.display_name}</p>
                   <p className="text-[11px] text-muted-foreground">{c.user_type} · {(c.follower_count / 1000).toFixed(1)}K follower</p>
                 </div>
-                <span className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold">Segui</span>
+                <span className="px-3 py-1.5 rounded-full gradient-primary text-white text-xs font-semibold shadow-glow">Segui</span>
               </button>
             ))}
           </div>

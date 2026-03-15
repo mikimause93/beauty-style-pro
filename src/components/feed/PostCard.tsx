@@ -233,7 +233,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
         {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
-          <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors">
+          <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-4 py-1.5 rounded-full gradient-primary text-white text-xs font-semibold shadow-glow">
             Prenota
           </button>
         )}
@@ -292,7 +292,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
               <button onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center gap-1">
                 <Wand2 className="w-3 h-3" /> Prova AI
               </button>
-              <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full gradient-primary text-white text-[10px] font-bold shadow-glow">
                 Prenota
               </button>
             </>
@@ -407,7 +407,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
               <button
                 onClick={submitComment}
                 disabled={!comment.trim()}
-                className="px-4 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-40 transition-opacity"
+                className="px-4 py-2.5 rounded-full gradient-primary text-white text-xs font-semibold disabled:opacity-40 shadow-glow transition-opacity"
               >
                 Invia
               </button>

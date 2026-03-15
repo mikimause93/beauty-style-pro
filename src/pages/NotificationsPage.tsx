@@ -120,7 +120,7 @@ export default function NotificationsPage() {
           </div>
           <h2 className="text-xl font-display font-bold mb-2">Accedi per le notifiche</h2>
           <p className="text-sm text-muted-foreground mb-6">Ricevi aggiornamenti su like, commenti, prenotazioni e altro</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full gradient-primary text-white font-semibold text-sm shadow-glow">
             Accedi
           </button>
         </div>
@@ -134,13 +134,13 @@ export default function NotificationsPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-display font-bold">Notifiche</h1>
               {unreadCount > 0 && (
-                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full gradient-primary text-white text-[10px] font-bold flex items-center justify-center shadow-glow">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
@@ -148,7 +148,7 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full gradient-primary text-white text-[10px] font-bold flex items-center gap-1 shadow-glow">
                  <CheckCheck className="w-3 h-3" /> Letto
                </button>
             )}
@@ -161,7 +161,7 @@ export default function NotificationsPage() {
           <button
             onClick={() => setFilter("all")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-               filter === "all" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
+               filter === "all" ? "gradient-primary text-white shadow-glow" : "bg-primary/10 text-primary"
              }`}
           >
             Tutte
@@ -169,7 +169,7 @@ export default function NotificationsPage() {
           <button
             onClick={() => setFilter("unread")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-               filter === "unread" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
+               filter === "unread" ? "gradient-primary text-white shadow-glow" : "bg-primary/10 text-primary"
              }`}
           >
             Non lette {unreadCount > 0 && `(${unreadCount})`}
@@ -184,8 +184,8 @@ export default function NotificationsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-              <Bell className="w-8 h-8 text-muted-foreground" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-8 h-8 text-primary/60" />
             </div>
             <p className="font-semibold">Nessuna notifica</p>
             <p className="text-xs text-muted-foreground mt-1">
