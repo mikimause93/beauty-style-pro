@@ -304,7 +304,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const panelHeight = isFullscreen ? "h-[85vh]" : "h-[28rem]";
 
   return (
-    <div className={`fixed bottom-20 right-4 z-50 ${className}`}>
+    <div className={`fixed z-50 ${className}`} style={{ bottom: 80, right: 16 }}>
       {/* Voice Call — minimal floating indicator (no full screen) */}
       <AnimatePresence>
         {isVoiceCallActive && (
