@@ -5,7 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/beauty-style-pro/" : "/",
+  // Use VITE_BASE_PATH env var (set by GitHub Pages deploy workflow) or default to "/"
+  // This allows Lovable preview and local dev to work at "/" while GitHub Pages uses "/beauty-style-pro/"
+  base: process.env.VITE_BASE_PATH ?? "/",
   server: {
     host: "::",
     port: 8080,
