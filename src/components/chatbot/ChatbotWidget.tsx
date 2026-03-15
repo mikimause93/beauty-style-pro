@@ -63,6 +63,12 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [isAILoading, setIsAILoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Draggable FAB state
+  const [fabPos, setFabPos] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0, moved: false });
+  const fabRef = useRef<HTMLButtonElement>(null);
+
   // Voice call state
   const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
