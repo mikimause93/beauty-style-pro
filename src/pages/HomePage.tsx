@@ -15,7 +15,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { useAuth } from "@/hooks/useAuth";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotificationsContext } from "@/contexts/NotificationsContext";
+import { NOTIFICATION_BADGE_COLOR } from "@/lib/notificationConstants";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -47,7 +48,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { unreadCount } = useNotificationsContext();
   const { trackAction } = useChatbot();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("Nuovi");
@@ -156,9 +157,11 @@ export default function HomePage() {
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
             <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              <Bell className="w-[20px] h-[20px] text-foreground/70" />
+              <Bell className={`w-[20px] h-[20px] transition-colors ${unreadCount > 0 ? "text-foreground animate-bell-shake" : "text-foreground/70"}`} />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-glow" />
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow-lg border border-background animate-badge-pulse" style={{ backgroundColor: NOTIFICATION_BADGE_COLOR }}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
               )}
             </button>
             <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">

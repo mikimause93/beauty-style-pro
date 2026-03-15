@@ -3,6 +3,7 @@ import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
 import FloatingAIButton from "@/components/FloatingAIButton";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import NotificationToast from "@/components/notifications/NotificationToast";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface MobileLayoutProps {
@@ -19,6 +20,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      <NotificationToast />
       <main className={showRadio ? "pb-32" : "pb-20"}>
         {children}
       </main>
