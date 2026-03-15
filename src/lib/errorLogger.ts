@@ -39,7 +39,7 @@ export function logError(entry: LogEntry) {
   const enriched = {
     ...entry,
     severity: entry.severity || "error",
-    page_path: entry.page_path || window.location.pathname,
+    page_path: entry.page_path || (typeof window !== 'undefined' ? window.location.pathname : '/'),
     metadata: entry.metadata || {},
   };
   console.error(`[${enriched.error_type.toUpperCase()}]`, enriched.message, enriched.metadata);
@@ -57,6 +57,7 @@ export function logWarn(type: ErrorType, message: string, metadata?: Record<stri
 
 // Global error handler
 export function initGlobalErrorHandler() {
+  if (typeof window === 'undefined') return;
   window.addEventListener("error", (e) => {
     logError({
       error_type: "ui",

@@ -307,6 +307,10 @@ export default function ChatPage() {
   };
 
   const startRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Registrazione vocale non supportata dal browser");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
@@ -371,6 +375,10 @@ export default function ChatPage() {
 
 
   const startCall = async (type: "voice" | "video") => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Chiamate non supportate dal browser");
+      return;
+    }
     try {
       const constraints: MediaStreamConstraints = type === "video" 
         ? { audio: true, video: { facingMode: "user", width: 640, height: 480 } }
