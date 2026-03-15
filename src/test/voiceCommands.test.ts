@@ -5,6 +5,9 @@ import { describe, it, expect } from "vitest";
 type CommandResult =
   | { matched: false }
   | { matched: true; type: "navigate"; path: string }
+  | { matched: true; type: "back" }
+  | { matched: true; type: "scroll"; dir: "up" | "down" }
+  | { matched: true; type: "search"; query: string }
   | { matched: true; type: "message"; recipient: string; content?: string }
   | { matched: true; type: "like" }
   | { matched: true; type: "map-search"; radius: string }
@@ -13,6 +16,15 @@ type CommandResult =
 describe("voice command patterns", () => {
   const processText = (text: string): CommandResult => {
     const t = text.toLowerCase().trim();
+
+    // Back navigation (hands-free essential)
+    if (t.includes("torna indietro") || t.includes("vai indietro") || t.includes("pagina precedente") || t === "indietro") {
+      return { matched: true, type: "back" };
+    }
+
+    // Scroll
+    if (t.includes("scorri su") || t.includes("vai su") || t.includes("scroll su")) return { matched: true, type: "scroll", dir: "up" };
+    if (t.includes("scorri giù") || t.includes("vai giù") || t.includes("scorri in basso")) return { matched: true, type: "scroll", dir: "down" };
 
     // Message with content (must be checked before navigation)
     const msgWithContent = t.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo)\s+)(.+)/);
@@ -26,6 +38,12 @@ describe("voice command patterns", () => {
     if (t.includes("vai alla home") || t.includes("apri home")) return { matched: true, type: "navigate", path: "/" };
     if (t.includes("apri chat") || t.includes("messaggi")) return { matched: true, type: "navigate", path: "/chat" };
     if (t.includes("apri mappa") || t.includes("cerca sulla mappa")) return { matched: true, type: "navigate", path: "/map-search" };
+
+    // Generic search
+    const searchM = t.match(/^cerca\s+(.+)$/);
+    if (searchM && !t.includes("match") && !t.includes("amici") && !t.includes("stilisti") && !t.includes("persone")) {
+      return { matched: true, type: "search", query: searchM[1].trim() };
+    }
 
     // Like
     if (t.match(/metti\s+like|dai\s+like|mi\s+piace/)) return { matched: true, type: "like" };
@@ -123,5 +141,38 @@ describe("voice command patterns", () => {
   it("returns not matched for unknown command", () => {
     const r = processText("bla bla bla incomprensibile");
     expect(r.matched).toBe(false);
+  });
+
+  it("matches 'torna indietro'", () => {
+    const r = processText("torna indietro");
+    expect(r.matched).toBe(true);
+    if (r.matched) expect(r.type).toBe("back");
+  });
+
+  it("matches 'vai indietro'", () => {
+    const r = processText("vai indietro");
+    expect(r.matched).toBe(true);
+    if (r.matched) expect(r.type).toBe("back");
+  });
+
+  it("matches 'scorri su'", () => {
+    const r = processText("scorri su");
+    expect(r.matched).toBe(true);
+    if (r.matched) expect(r.type).toBe("scroll");
+    if (r.matched && r.type === "scroll") expect(r.dir).toBe("up");
+  });
+
+  it("matches 'scorri giù'", () => {
+    const r = processText("scorri giù");
+    expect(r.matched).toBe(true);
+    if (r.matched) expect(r.type).toBe("scroll");
+    if (r.matched && r.type === "scroll") expect(r.dir).toBe("down");
+  });
+
+  it("matches 'cerca parrucchiere'", () => {
+    const r = processText("cerca parrucchiere");
+    expect(r.matched).toBe(true);
+    if (r.matched) expect(r.type).toBe("search");
+    if (r.matched && r.type === "search") expect(r.query).toBe("parrucchiere");
   });
 });

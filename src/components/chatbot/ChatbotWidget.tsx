@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   MessageCircle, X, Send, Sparkles, Minimize2, Maximize2,
   Calendar, MapPin, ShoppingBag, Video, Wallet, Briefcase,
-  Star, Radio, Bot, User, Loader2, Mic, MicOff, Phone, PhoneOff
+  Star, Radio, Bot, User, Loader2, Mic, MicOff, Phone, PhoneOff, HelpCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +11,7 @@ import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
+import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
 import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
 
@@ -50,6 +51,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "actions" | "tips">("chat");
+  const [showVoiceHelp, setShowVoiceHelp] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([
     {
       id: "welcome",
@@ -66,6 +68,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
   
   const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
+  const { speak, speaking: isSpeaking } = useVoiceSynthesis({ rate: 1.05, pitch: 1.05 });
 
   // Wake word detection
   const {
@@ -133,11 +136,13 @@ export default function ChatbotWidget({ className = "" }: Props) {
       if (result.action === "theme:light") setTheme("light");
       else if (result.action === "theme:dark") setTheme("dark");
       setVoicePhase("speaking");
+      // Speak the response aloud — hands-free
+      speak(result.response);
       toast.success(result.response);
-      // Auto-close after short delay so user sees the navigated page
+      // Auto-close after TTS completes (roughly 1.5s per 100 chars)
       setTimeout(() => {
         endVoiceCall();
-      }, 800);
+      }, Math.max(800, result.response.length * 15));
       return;
     }
 
@@ -174,16 +179,24 @@ export default function ChatbotWidget({ className = "" }: Props) {
           setChatMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
+          // Speak the full AI response aloud
+          if (assistantSoFar) {
+            // Truncate for TTS if very long
+            const ttsText = assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar;
+            speak(ttsText);
+          }
           setIsAILoading(false);
           endVoiceCall();
         },
         onError: (error) => {
+          speak("Mi dispiace, riprova tra poco!");
           toast.error(error);
           setIsAILoading(false);
           endVoiceCall();
         },
       });
     } catch {
+      speak("Errore nella risposta. Riprova.");
       setIsAILoading(false);
       endVoiceCall();
     }
@@ -296,15 +309,16 @@ export default function ChatbotWidget({ className = "" }: Props) {
             className="fixed bottom-36 left-1/2 -translate-x-1/2 z-[200] bg-card/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-2xl px-5 py-4 flex flex-col items-center gap-2 w-[260px]"
           >
             <div className="flex items-center gap-3 w-full">
-              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+              <div className={`w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow ${isSpeaking ? "animate-pulse" : ""}`}>
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-primary">Stella</p>
                 <p className="text-[10px] text-muted-foreground truncate">
-                  {voicePhase === "listening" && "Ti ascolto..."}
-                  {voicePhase === "processing" && "Eseguo..."}
-                  {voicePhase === "speaking" && "Fatto!"}
+                  {isSpeaking && "🔊 Rispondo..."}
+                  {!isSpeaking && voicePhase === "listening" && "🎤 Ti ascolto..."}
+                  {!isSpeaking && voicePhase === "processing" && "⚡ Eseguo..."}
+                  {!isSpeaking && voicePhase === "speaking" && !isSpeaking && "✓ Fatto!"}
                 </p>
               </div>
               <button onClick={endVoiceCall} className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
@@ -358,6 +372,14 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {/* Voice commands help */}
+                <button
+                  onClick={() => setShowVoiceHelp(true)}
+                  title="Comandi vocali disponibili"
+                  className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
                 {/* Voice call button */}
                 <button 
                   onClick={() => { setIsVoiceCallActive(true); setVoicePhase("listening"); startListening(); }}
@@ -546,7 +568,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
         >
           <Sparkles className="w-6 h-6 text-primary-foreground" />
           {isWakeWordListening && (
-            <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-accent border-2 border-background animate-pulse" />
+            <>
+              <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-accent border-2 border-background animate-pulse" />
+              {/* Ripple effect indicating always-on voice listening */}
+              <span className="absolute inset-0 rounded-full border-2 border-accent/40 animate-ping" style={{ animationDuration: "2.5s" }} />
+            </>
           )}
           {suggestions.length > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
@@ -555,6 +581,78 @@ export default function ChatbotWidget({ className = "" }: Props) {
           )}
         </motion.button>
       )}
+
+      {/* Wake word hint — shown below FAB */}
+      {isMinimized && isWakeWordListening && (
+        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium">
+          🎙️ Dì "Stella"
+        </p>
+      )}
+
+      {/* Voice commands help sheet */}
+      <AnimatePresence>
+        {showVoiceHelp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] bg-background/80 backdrop-blur-sm flex items-end justify-center"
+            onClick={() => setShowVoiceHelp(false)}
+          >
+            <motion.div
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="w-full max-w-md bg-card border border-border rounded-t-3xl shadow-2xl p-5 pb-10"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-4" />
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Comandi Vocali Stella</h3>
+                  <p className="text-[10px] text-muted-foreground">Parla senza toccare lo schermo</p>
+                </div>
+                <button onClick={() => setShowVoiceHelp(false)} className="ml-auto w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                {[
+                  { title: "🚀 Attivazione", cmds: ['"Stella" oppure "Hey Stella"', '"Ciao Stella"', '"Ok Stella"'] },
+                  { title: "📱 Navigazione", cmds: ['"Vai alla home"', '"Apri chat"', '"Apri mappa"', '"Apri wallet"', '"Apri shop"', '"Torna indietro"', '"Apri profilo"', '"Apri impostazioni"', '"Vai allo shop"', '"Apri live"', '"Apri radio"'] },
+                  { title: "💬 Messaggi", cmds: ['"Invia messaggio a [nome]"', '"Scrivi a [nome]: [testo]"', '"Chiama [nome]"'] },
+                  { title: "🔍 Ricerca", cmds: ['"Cerca [termine]"', '"Cerca match a 10 km"', '"Trova stilisti vicini"'] },
+                  { title: "🎬 Azioni", cmds: ['"Prenota"', '"Crea post"', '"Vai in live"', '"Gira la ruota"', '"Apri notifiche"', '"Le mie prenotazioni"'] },
+                  { title: "🎨 Tema", cmds: ['"Tema scuro"', '"Tema chiaro"', '"Dark mode"'] },
+                  { title: "❓ AI libero", cmds: ['Dopo "Stella", fai qualsiasi domanda:', '"Quale taglio di capelli va di moda?"', '"Come funziona il wallet?"'] },
+                ].map(section => (
+                  <div key={section.title}>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{section.title}</p>
+                    <div className="space-y-1">
+                      {section.cmds.map(cmd => (
+                        <div key={cmd} className="px-3 py-1.5 rounded-lg bg-muted/40 border border-border/30">
+                          <p className="text-xs font-medium">{cmd}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => { setIsVoiceCallActive(true); setVoicePhase("listening"); startListening(); setShowVoiceHelp(false); }}
+                className="w-full mt-4 h-11 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
+              >
+                <Mic className="w-4 h-4" /> Inizia adesso
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

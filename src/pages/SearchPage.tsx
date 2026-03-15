@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User, Navigation } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -21,8 +21,10 @@ interface UserResult {
 
 export default function SearchPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
+  // Pre-fill from ?q= (set by voice command "cerca [query]")
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [tab, setTab] = useState<Tab>("tutti");
   const [stylists, setStylists] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
