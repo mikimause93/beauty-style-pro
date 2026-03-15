@@ -125,8 +125,21 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    if (error) {
+      // Supabase returns code "email_not_confirmed" when email is not yet verified
+      if (error.code === "email_not_confirmed" || error.code === "invalid_credentials") {
+        toast.error(
+          error.code === "email_not_confirmed"
+            ? "Email non ancora confermata. Controlla la tua casella di posta."
+            : error.message
+        );
+      } else {
+        toast.error(error.message);
+      }
+    } else {
+      toast.success("Benvenuto!");
+      navigate("/");
+    }
     setLoading(false);
   };
 
@@ -162,7 +175,24 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
+    const { error } = await signUp(email, password, displayName, accountType, {
+      phone: phone || undefined,
+      city: city || undefined,
+      country: country || undefined,
+      birth_date: birthDate || undefined,
+      bio: bio || undefined,
+      interests: interests.length > 0 ? interests : undefined,
+      username: username || undefined,
+      instagram: instagram || undefined,
+      tiktok: tiktok || undefined,
+      facebook: facebook || undefined,
+      iban: iban.trim() || undefined,
+      bank_holder_name: iban.trim() ? (bankHolder || displayName) : undefined,
+      surname: accountType !== "business" ? (surname || undefined) : undefined,
+      whatsapp: whatsapp || undefined,
+      latitude: latitude ?? undefined,
+      longitude: longitude ?? undefined,
+    });
     
     if (error) { 
       toast.error(error.message); 
@@ -170,23 +200,10 @@ export default function AuthPage() {
       return; 
     }
 
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
-    }
-
-    // Since email verification is now enabled, show verification screen
+    // Since email verification is enabled, show verification screen.
+    // All profile data (including optional IBAN) is stored in auth metadata
+    // and will be persisted to the profiles table by the handle_new_user
+    // database trigger when the email is confirmed.
     setRegistrationResult({
       success: true,
       email: email,
@@ -594,10 +611,12 @@ export default function AuthPage() {
       {/* ═══ STEP 4: Conto Bancario (Client + Professional) ═══ */}
       {step === 4 && (accountType === "client" || accountType === "professional") && (
         <div className="space-y-4 fade-in">
-          <h2 className="text-lg font-display font-bold">Conto Bancario</h2>
-          <p className="text-xs text-muted-foreground">
-            Collega il tuo conto bancario al Wallet interno per ricevere pagamenti e rimborsi
-          </p>
+          <div>
+            <h2 className="text-lg font-display font-bold">Conto Bancario <span className="text-xs font-normal text-muted-foreground ml-1">(facoltativo)</span></h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Collega il tuo conto bancario al Wallet interno per ricevere pagamenti e rimborsi. Puoi saltare questo passaggio e aggiungerlo in seguito.
+            </p>
+          </div>
           <InputField icon={<Banknote className="w-4 h-4" />} placeholder="IBAN (es. IT60 X054 2811 1010 0000 0123 456)" value={iban} onChange={setIban} />
           <InputField icon={<User className="w-4 h-4" />} placeholder="Intestatario conto" value={bankHolder} onChange={setBankHolder} />
           <div className="p-3.5 rounded-2xl bg-primary/5 border border-primary/20 space-y-1.5">

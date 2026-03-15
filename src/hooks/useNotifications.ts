@@ -26,36 +26,47 @@ async function registerPushNotifications(userId?: string) {
     // This enables push even when the app is completely closed (like Facebook/TikTok)
     if (registration.pushManager && userId) {
       try {
-        // Use the public VAPID key for push subscription
-        // A real VAPID key would be set in the env but we still attempt subscription
         let subscription = await registration.pushManager.getSubscription();
         if (!subscription) {
-          // Try to subscribe — will gracefully fail without a real VAPID key
-          try {
+          // VAPID public key from environment (set VITE_VAPID_PUBLIC_KEY in .env)
+          const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+          if (vapidPublicKey) {
+            // Convert base64url VAPID public key to Uint8Array
+            const keyData = base64UrlToUint8Array(vapidPublicKey);
             subscription = await registration.pushManager.subscribe({
               userVisibleOnly: true,
-              // applicationServerKey would normally be a real VAPID public key
-            } as PushSubscriptionOptionsInit);
-          } catch { /* No VAPID key configured — SW push still works via Supabase realtime */ }
+              applicationServerKey: keyData,
+            });
+          } else {
+            // No VAPID key — background push won't work but in-app realtime still does
+            console.info("VITE_VAPID_PUBLIC_KEY not set — background push notifications disabled");
+          }
         }
-        // Store subscription endpoint in Supabase so server can push later
+        // Store subscription endpoint in Supabase so the server can push later
         if (subscription) {
           const subData = subscription.toJSON();
-          try {
-            await supabase.from("push_subscriptions").upsert({
-              user_id: userId,
-              endpoint: subData.endpoint,
-              p256dh: subData.keys?.p256dh,
-              auth: subData.keys?.auth,
-              updated_at: new Date().toISOString(),
-            }, { onConflict: "user_id" });
-          } catch { /* ignore */ }
+          await supabase.from("push_subscriptions").upsert({
+            user_id: userId,
+            endpoint: subData.endpoint,
+            p256dh: subData.keys?.p256dh ?? "",
+            auth: subData.keys?.auth ?? "",
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "user_id,endpoint" });
         }
-      } catch { /* graceful — realtime fallback is still active */ }
+      } catch (err) {
+        console.warn("Push subscription failed (graceful):", err);
+      }
     }
   } catch (err) {
     console.warn("Push notification setup failed:", err);
   }
+}
+
+// Convert a base64url string to Uint8Array (needed for applicationServerKey)
+function base64UrlToUint8Array(base64url: string): Uint8Array {
+  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
 // Show notification via Service Worker (works even when app is closed/background)
