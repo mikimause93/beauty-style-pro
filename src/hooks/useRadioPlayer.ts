@@ -199,7 +199,7 @@ export function useRadioPlayer() {
           setIsPlaying(true);
           setLoading(false);
           return;
-        } catch {}
+        } catch { /* Intentionally ignored: try next URL on failure */ }
       }
       setError("Impossibile riprodurre");
       setIsPlaying(false);
@@ -208,7 +208,7 @@ export function useRadioPlayer() {
   }, [currentStation]);
 
   const pause = useCallback(() => {
-    try { audioRef.current?.pause(); } catch {}
+    try { audioRef.current?.pause(); } catch { /* Intentionally ignored: pause error is non-critical */ }
     setIsPlaying(false);
   }, []);
 

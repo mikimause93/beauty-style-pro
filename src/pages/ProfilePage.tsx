@@ -132,10 +132,10 @@ export default function ProfilePage() {
           {isOwnProfile && (
             <>
               <button onClick={() => navigate("/create-post")} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-                <Plus className="w-4.5 h-4.5 text-muted-foreground" />
+                <Plus className="w-5 h-5 text-muted-foreground" />
               </button>
               <button onClick={() => setShowMenu(!showMenu)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-                <Settings className="w-4.5 h-4.5 text-muted-foreground" />
+                <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
             </>
           )}

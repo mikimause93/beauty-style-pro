@@ -3,7 +3,10 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Apply saved theme on mount
-const savedTheme = localStorage.getItem("style-theme");
+let savedTheme: string | null = null;
+try {
+  savedTheme = localStorage.getItem("style-theme");
+} catch { /* intentionally empty */ }
 if (savedTheme === "light") {
   const root = document.documentElement;
   root.style.setProperty("--background", "0 0% 97%");

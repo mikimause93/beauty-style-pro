@@ -45,6 +45,10 @@ export default function EditProfilePage() {
 
   const handleDetectLocation = async () => {
     setLocating(true);
+    if (!('geolocation' in navigator)) {
+      setLocating(false);
+      return;
+    }
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });

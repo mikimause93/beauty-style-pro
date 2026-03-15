@@ -33,7 +33,7 @@ export function useApplause() {
       osc.connect(gain).connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
-    } catch {}
+    } catch { /* Intentionally ignored: AudioContext may not be supported in all environments */ }
 
     setTimeout(() => {
       setClaps(prev => prev.filter(c => !newClaps.find(n => n.id === c.id)));

@@ -114,19 +114,19 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
       <div className="px-4 pb-4">
         <div className="flex items-center gap-4 pt-3 border-t border-border/50">
           <button onClick={() => { setLiked(!liked); setLikeCount(prev => prev + (liked ? -1 : 1)); }} className="flex items-center gap-1.5 group">
-            <Heart className={`w-[20px] h-[20px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
+            <Heart className={`w-[22px] h-[22px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
             <span className="text-xs font-medium text-muted-foreground">{likeCount}</span>
           </button>
           <button onClick={() => navigate(`/hr/job/${job.id}`)} className="flex items-center gap-1.5 group">
-            <MessageCircle className="w-[20px] h-[20px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            <MessageCircle className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
             <span className="text-xs font-medium text-muted-foreground">Commenta</span>
           </button>
           <button className="group">
-            <Share2 className="w-[20px] h-[20px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
           <div className="flex-1" />
           <button onClick={() => setSaved(!saved)}>
-            <Bookmark className={`w-[20px] h-[20px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
+            <Bookmark className={`w-[22px] h-[22px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
           </button>
         </div>
       </div>

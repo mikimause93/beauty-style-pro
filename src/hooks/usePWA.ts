@@ -8,7 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
 export function usePWA() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
@@ -55,6 +55,8 @@ export function usePWA() {
             });
           }
         });
+      }).catch((err) => {
+        console.warn('Service worker registration failed:', err);
       });
     }
 
