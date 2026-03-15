@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName: string, userType?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, userType?: string, profileData?: Record<string, unknown>) => Promise<{ error: any; user: User | null }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -82,16 +82,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string, userType: string = "client") => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (
+    email: string,
+    password: string,
+    displayName: string,
+    userType: string = "client",
+    profileData?: {
+      phone?: string; surname?: string; username?: string; city?: string;
+      country?: string; birth_date?: string; bio?: string; interests?: string[];
+      instagram?: string; tiktok?: string; facebook?: string; whatsapp?: string;
+      latitude?: number | null; longitude?: number | null;
+    }
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, user_type: userType },
+        data: {
+          display_name: displayName,
+          user_type: userType,
+          account_type: userType,
+          ...profileData,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
-    return { error };
+    return { error, user: data?.user ?? null };
   };
 
   const signIn = async (email: string, password: string) => {
