@@ -318,7 +318,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   {isSpeaking && "🔊 Rispondo..."}
                   {!isSpeaking && voicePhase === "listening" && "🎤 Ti ascolto..."}
                   {!isSpeaking && voicePhase === "processing" && "⚡ Eseguo..."}
-                  {!isSpeaking && voicePhase === "speaking" && !isSpeaking && "✓ Fatto!"}
+                  {!isSpeaking && voicePhase === "speaking" && "✓ Fatto!"}
                 </p>
               </div>
               <button onClick={endVoiceCall} className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">

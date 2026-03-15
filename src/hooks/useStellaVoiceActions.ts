@@ -15,7 +15,7 @@ export function useStellaVoiceActions() {
     const text = transcript.toLowerCase().trim();
 
     // ─── Back navigation (hands-free essential) ────────────────────────────
-    if (text.includes("torna indietro") || text.includes("vai indietro") || text.includes("pagina precedente") || text.includes("indietro")) {
+    if (text.includes("torna indietro") || text.includes("vai indietro") || text.includes("pagina precedente") || text === "indietro") {
       window.history.back();
       return { matched: true, response: "Torno alla pagina precedente!" };
     }

@@ -21,7 +21,6 @@ describe("voice command patterns", () => {
     if (t.includes("torna indietro") || t.includes("vai indietro") || t.includes("pagina precedente") || t === "indietro") {
       return { matched: true, type: "back" };
     }
-
     // Scroll
     if (t.includes("scorri su") || t.includes("vai su") || t.includes("scroll su")) return { matched: true, type: "scroll", dir: "up" };
     if (t.includes("scorri giù") || t.includes("vai giù") || t.includes("scorri in basso")) return { matched: true, type: "scroll", dir: "down" };
