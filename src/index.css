@@ -139,7 +139,7 @@
     background: hsl(var(--background) / 0.92);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
-    border-top: 1px solid hsl(var(--primary) / 0.15);
+    border-top: 1px solid hsl(var(--gold) / 0.25);
     overflow: visible;
   }
   .luxury-border {
@@ -224,6 +224,15 @@
   }
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Shop center button gold glow */
+  @keyframes shop-glow {
+    0%, 100% { box-shadow: 0 0 24px hsl(42 98% 62% / 0.55), 0 6px 28px hsl(32 90% 52% / 0.35); }
+    50% { box-shadow: 0 0 40px hsl(42 98% 62% / 0.75), 0 6px 36px hsl(32 90% 52% / 0.5); }
+  }
+  .animate-shop-glow {
+    animation: shop-glow 3s ease-in-out infinite;
   }
 }
 

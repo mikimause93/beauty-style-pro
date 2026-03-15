@@ -1,4 +1,4 @@
-import { Home, User, Video, Compass, Sparkles } from "lucide-react";
+import { Home, User, Video, Compass, ShoppingBag } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ const tabs = [
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isAIActive = location.pathname.startsWith("/ai-assistant");
+  const isShopActive = location.pathname.startsWith("/shop");
 
   const half = Math.ceil(tabs.length / 2);
   const leftTabs = tabs.slice(0, half);
@@ -31,7 +31,7 @@ export default function BottomNav() {
       >
         <div
           className={cn(
-            "relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
+            "relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300",
             isActive
               ? "gradient-primary shadow-glow scale-105"
               : "bg-primary/8 hover:bg-primary/15"
@@ -39,7 +39,7 @@ export default function BottomNav() {
         >
           <Icon
             className={cn(
-              "w-[22px] h-[22px] transition-all duration-300",
+              "w-[24px] h-[24px] transition-all duration-300",
               isActive ? "text-white drop-shadow-sm" : "text-foreground/60"
             )}
           />
@@ -62,38 +62,38 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
       <div className="glass-nav">
-        <div className="flex items-center justify-around h-[62px] max-w-lg mx-auto px-2">
+        <div className="flex items-center justify-around h-[66px] max-w-lg mx-auto px-2">
           {/* Left tabs */}
           {leftTabs.map(renderTab)}
 
-          {/* Center AI button — raised FAB */}
+          {/* Center Shop button — raised golden FAB */}
           <div className="flex flex-col items-center justify-center flex-1 relative">
             <button
-              onClick={() => navigate("/ai-assistant")}
-              aria-label="Stella AI"
+              onClick={() => navigate("/shop")}
+              aria-label="Shop"
               className={cn(
-                "absolute -top-5 w-[58px] h-[58px] rounded-full flex items-center justify-center transition-all duration-300 shadow-luxury",
-                isAIActive
-                  ? "gradient-luxury scale-110 shadow-glow"
-                  : "gradient-primary hover:scale-105 animate-pulse-glow"
+                "absolute -top-6 w-[62px] h-[62px] rounded-full flex items-center justify-center transition-all duration-300",
+                isShopActive
+                  ? "gradient-gold shadow-glow-gold scale-110"
+                  : "gradient-gold hover:scale-105 animate-shop-glow"
               )}
             >
-              <Sparkles
+              <ShoppingBag
                 className={cn(
-                  "w-[26px] h-[26px] text-white drop-shadow-sm transition-all duration-300",
-                  isAIActive && "animate-pulse"
+                  "w-[28px] h-[28px] text-black drop-shadow-sm transition-all duration-300",
+                  isShopActive && "scale-110"
                 )}
               />
-              {/* Glow ring */}
-              <span className="absolute inset-0 rounded-full border-2 border-white/20" />
+              {/* Gold glow ring */}
+              <span className="absolute inset-0 rounded-full border-2 border-yellow-200/40" />
             </button>
             <span
               className={cn(
                 "text-[10px] font-bold tracking-wide mt-1 transition-all duration-300",
-                isAIActive ? "text-primary" : "text-foreground/50"
+                isShopActive ? "text-yellow-400" : "text-yellow-500/80"
               )}
             >
-              Stella
+              Shop
             </span>
           </div>
 
