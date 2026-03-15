@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck, PenLine } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useNavigate, useParams } from "react-router-dom";
@@ -539,95 +539,108 @@ export default function ChatPage() {
   if (selectedChat) {
     return (
       <MobileLayout>
-        <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => { setSelectedChat(null); navigate("/chat"); }} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-            <ArrowLeft className="w-5 h-5" />
+        {/* Messenger-style gradient header */}
+        <header className="sticky top-0 z-40 flex items-center gap-3 px-4 py-3"
+          style={{ background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(262 88% 45%) 100%)" }}>
+          <button
+            onClick={() => { setSelectedChat(null); navigate("/chat"); }}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
-            <div className="relative">
-              <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+          <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="relative shrink-0">
+              <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-white/80 ring-1 ring-white/40" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#25D366] border-2 border-white" />
             </div>
-            <div>
-              <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-[10px] text-green-500 font-medium">● Online</p>
+            <div className="min-w-0 text-left">
+              <p className="font-bold text-sm text-white truncate">{selectedChat.name}</p>
+              <p className="text-[10px] text-green-300 font-medium">Online</p>
             </div>
           </button>
-          <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
-            <MessageCircle className="w-4 h-4 text-primary-foreground" />
+          <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <MessageCircle className="w-4 h-4 text-white" />
           </button>
-          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-            <Phone className="w-4 h-4 text-primary-foreground" />
+          <button onClick={() => startCall("voice")} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <Phone className="w-4 h-4 text-white" />
           </button>
-          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-            <Video className="w-4 h-4 text-primary-foreground" />
+          <button onClick={() => startCall("video")} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <Video className="w-4 h-4 text-white" />
           </button>
-          <button onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione AI attivata"); else { toast.info("Traduzione AI disattivata"); setTranslatedMessages({}); } }}
-            className={`w-9 h-9 rounded-full flex items-center justify-center ${autoTranslate ? "bg-primary" : "bg-muted"}`}>
-            <Globe className={`w-4 h-4 ${autoTranslate ? "text-primary-foreground" : "text-muted-foreground"}`} />
+          <button
+            onClick={() => { setAutoTranslate(!autoTranslate); if (!autoTranslate) toast.success("Traduzione AI attivata"); else { toast.info("Traduzione AI disattivata"); setTranslatedMessages({}); } }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${autoTranslate ? "bg-white/40 shadow-inner" : "bg-white/20"}`}
+          >
+            <Globe className="w-4 h-4 text-white" />
           </button>
         </header>
+
         {/* In-call overlay */}
         {inCall && (
-          <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center">
+          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+            style={{ background: "linear-gradient(180deg, hsl(262 88% 20%) 0%, hsl(var(--background)) 100%)" }}>
             {inCall === "video" && (
               <>
-                <div className="absolute inset-0 bg-card flex items-center justify-center">
-                  <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover opacity-30" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover opacity-20" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <img src={selectedChat.avatar} alt="" className="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-primary" />
-                      <p className="text-lg font-bold">{selectedChat.name}</p>
-                      <p className="text-sm text-muted-foreground">In attesa di risposta...</p>
+                      <div className="w-24 h-24 rounded-full mx-auto mb-3 ring-4 ring-white/30 overflow-hidden">
+                        <img src={selectedChat.avatar} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="text-lg font-bold text-white">{selectedChat.name}</p>
+                      <p className="text-sm text-white/60 mt-1">In attesa di risposta...</p>
                     </div>
                   </div>
                 </div>
-                <video ref={localVideoRef} autoPlay playsInline muted className="absolute top-16 right-4 w-28 h-36 rounded-2xl object-cover border-2 border-primary shadow-lg z-10" />
+                <video ref={localVideoRef} autoPlay playsInline muted className="absolute top-16 right-4 w-28 h-36 rounded-2xl object-cover border-2 border-white/60 shadow-lg z-10" />
               </>
             )}
-            
+
             {inCall === "voice" && (
               <div className="flex flex-col items-center gap-4">
-                <img src={selectedChat.avatar} alt="" className="w-24 h-24 rounded-full border-4 border-primary shadow-glow" />
-                <p className="text-xl font-bold">{selectedChat.name}</p>
-                <p className="text-sm text-primary">Chiamata vocale</p>
-                <div className="flex items-center gap-1 h-8">
+                <div className="w-28 h-28 rounded-full ring-4 ring-white/30 ring-offset-4 ring-offset-transparent overflow-hidden shadow-2xl">
+                  <img src={selectedChat.avatar} alt="" className="w-full h-full object-cover" />
+                </div>
+                <p className="text-2xl font-bold text-white">{selectedChat.name}</p>
+                <p className="text-sm text-white/60">Chiamata vocale in corso</p>
+                <div className="flex items-end gap-1 h-10">
                   {[0,1,2,3,4,5,6].map(i => (
-                    <div key={i} className="w-1 bg-primary rounded-full animate-pulse" 
-                      style={{ height: `${12 + Math.random() * 20}px`, animationDelay: `${i * 0.1}s` }} />
+                    <div key={i} className="w-1.5 bg-white/70 rounded-full animate-pulse"
+                      style={{ height: `${14 + Math.sin(i) * 14 + 8}px`, animationDelay: `${i * 0.12}s` }} />
                   ))}
                 </div>
               </div>
             )}
-            
+
             {/* Live translation subtitles */}
             {callTranslation && (
-              <div className="absolute bottom-36 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
+              <div className="absolute bottom-36 left-4 right-4 bg-black/60 backdrop-blur rounded-2xl px-4 py-3 border border-white/20 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
-                  <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-bold text-primary">Traduzione Live</span>
-                  {callTranslating && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                  <Globe className="w-3.5 h-3.5 text-white/70" />
+                  <span className="text-[10px] font-bold text-white/70 uppercase tracking-wide">Traduzione Live</span>
+                  {callTranslating && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
                 </div>
-                <p className="text-sm">{callTranslation}</p>
+                <p className="text-sm text-white">{callTranslation}</p>
               </div>
             )}
-            
-            <p className="text-lg font-mono text-primary mt-6">{formatDuration(callTimer)}</p>
-            
+
+            <p className="text-xl font-mono font-semibold text-white/80 mt-8">{formatDuration(callTimer)}</p>
+
             {/* Call controls */}
             <div className="absolute bottom-16 flex items-center gap-6">
-              <button className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-                {inCall === "voice" ? <Mic className="w-6 h-6" /> : <Video className="w-6 h-6" />}
+              <button className="w-14 h-14 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                {inCall === "voice" ? <Mic className="w-6 h-6 text-white" /> : <Video className="w-6 h-6 text-white" />}
               </button>
               <button onClick={() => { if (speechRecRef.current) stopCallTranslation(); else startCallTranslation(); }}
-                className={`w-14 h-14 rounded-full flex items-center justify-center ${speechRecRef.current ? "bg-primary" : "bg-muted"}`}>
-                <Globe className={`w-6 h-6 ${speechRecRef.current ? "text-primary-foreground" : ""}`} />
+                className={`w-14 h-14 rounded-full flex items-center justify-center backdrop-blur ${speechRecRef.current ? "bg-white/40" : "bg-white/20"}`}>
+                <Globe className="w-6 h-6 text-white" />
               </button>
-              <button onClick={() => { stopCallTranslation(); endCall(); }} className="w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg">
-                <Phone className="w-7 h-7 text-destructive-foreground rotate-[135deg]" />
+              <button onClick={() => { stopCallTranslation(); endCall(); }} className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+                <Phone className="w-7 h-7 text-white rotate-[135deg]" />
               </button>
-              <button className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-                <Volume2 className="w-6 h-6" />
+              <button className="w-14 h-14 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                <Volume2 className="w-6 h-6 text-white" />
               </button>
             </div>
           </div>
@@ -635,14 +648,14 @@ export default function ChatPage() {
 
         {/* Auto-translate indicator */}
         {autoTranslate && (
-          <div className="px-4 py-1.5 bg-primary/5 border-b border-border flex items-center justify-center gap-2">
+          <div className="px-4 py-1.5 bg-primary/10 border-b border-primary/20 flex items-center justify-center gap-2">
             <Globe className="w-3 h-3 text-primary" />
             <span className="text-[10px] text-primary font-medium">Traduzione AI automatica attiva</span>
           </div>
         )}
 
         {/* Messages */}
-        <div className="flex-1 px-4 py-4 space-y-3 min-h-[60vh]">
+        <div className="flex-1 px-3 py-4 space-y-2 min-h-[60vh]">
           {messages.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
@@ -650,45 +663,48 @@ export default function ChatPage() {
             </div>
           )}
           {messages.map(msg => (
-            <div key={msg.id} className={`flex items-end gap-1.5 ${msg.sender === "me" ? "justify-end" : "justify-start"} fade-in`}>
+            <div key={msg.id} className={`flex items-end gap-2 ${msg.sender === "me" ? "justify-end" : "justify-start"} fade-in`}>
               {msg.sender === "other" && (
-                <img src={selectedChat.avatar} alt="" className="w-6 h-6 rounded-full object-cover shrink-0 mb-1" />
+                <img src={selectedChat.avatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0 mb-1 shadow-sm" />
               )}
-              <div className={`max-w-[72%] rounded-2xl overflow-hidden ${
+              <div className={`max-w-[74%] overflow-hidden shadow-sm ${
                 msg.type === "image" || msg.type === "video"
-                  ? "shadow-card"
+                  ? "rounded-2xl shadow-md"
                   : msg.sender === "me"
-                    ? "gradient-primary text-primary-foreground rounded-br-md px-4 py-2.5"
-                    : "bg-card border border-border rounded-bl-md px-4 py-2.5"
+                    ? "rounded-2xl rounded-br-sm px-4 py-2.5 text-white"
+                    : "rounded-2xl rounded-bl-sm px-4 py-2.5 bg-card border border-border/30 text-foreground"
+              } ${(msg.type === "text" || msg.type === "voice" || msg.type === "file") && msg.sender === "me"
+                  ? "bg-gradient-to-br from-[hsl(var(--primary))] to-purple-600"
+                  : ""
               }`}>
                 {msg.type === "image" && msg.mediaUrl && (
-                  <img src={msg.mediaUrl} alt="" className="w-full max-w-[240px] rounded-xl object-cover" />
+                  <img src={msg.mediaUrl} alt="" className="w-full max-w-[240px] rounded-2xl object-cover" />
                 )}
                 {msg.type === "video" && msg.mediaUrl && (
-                  <video src={msg.mediaUrl} controls className="w-full max-w-[240px] rounded-xl" />
+                  <video src={msg.mediaUrl} controls className="w-full max-w-[240px] rounded-2xl" />
                 )}
                 {msg.type === "voice" && <VoiceBubble msg={msg} />}
                 {msg.type === "file" && (
                   <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 min-w-[140px]">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${msg.sender === "me" ? "bg-primary-foreground/20" : "bg-primary/10"}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${msg.sender === "me" ? "bg-white/20" : "bg-primary/10"}`}>
                       <File className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{msg.fileName || "File"}</p>
-                      <p className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Tocca per aprire</p>
+                      <p className={`text-[10px] ${msg.sender === "me" ? "text-white/60" : "text-muted-foreground"}`}>Tocca per aprire</p>
                     </div>
                   </a>
                 )}
-                {msg.content && <p className="text-sm">{msg.content}</p>}
+                {msg.content && <p className="text-sm leading-snug">{msg.content}</p>}
                 {msg.content && translatedMessages[msg.id] && (
-                  <p className={`text-xs italic mt-1 border-t pt-1 ${msg.sender === "me" ? "border-primary-foreground/20 text-primary-foreground/70" : "border-border/30 text-muted-foreground"}`}>
+                  <p className={`text-xs italic mt-1 border-t pt-1 ${msg.sender === "me" ? "border-white/20 text-white/60" : "border-border/30 text-muted-foreground"}`}>
                     🌐 {translatedMessages[msg.id]}
                   </p>
                 )}
                 {msg.type !== "image" && msg.type !== "video" && (
-                  <div className={`flex items-center justify-end gap-1 mt-1`}>
-                    <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
-                    {msg.sender === "me" && <CheckCheck className="w-3.5 h-3.5 text-primary-foreground/60" />}
+                  <div className="flex items-center justify-end gap-1 mt-1">
+                    <span className={`text-[10px] ${msg.sender === "me" ? "text-white/60" : "text-muted-foreground"}`}>{msg.time}</span>
+                    {msg.sender === "me" && <CheckCheck className="w-3.5 h-3.5 text-white/60" />}
                   </div>
                 )}
               </div>
@@ -699,13 +715,13 @@ export default function ChatPage() {
 
         {/* Attach menu */}
         {showAttachMenu && (
-          <div className="px-4 pb-2 flex gap-3 fade-in">
+          <div className="px-4 pb-2 flex gap-4 fade-in bg-background/80 backdrop-blur-sm border-t border-border/20 pt-3">
             {[
-              { icon: <Camera className="w-5 h-5" />, label: "Foto", color: "bg-primary", action: () => imageInputRef.current?.click() },
-              { icon: <File className="w-5 h-5" />, label: "File", color: "bg-accent", action: () => fileInputRef.current?.click() },
+              { icon: <Camera className="w-5 h-5" />, label: "Foto", color: "from-primary to-purple-600", action: () => imageInputRef.current?.click() },
+              { icon: <File className="w-5 h-5" />, label: "File", color: "from-accent to-accent/80", action: () => fileInputRef.current?.click() },
             ].map(item => (
-              <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1">
-                <div className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center text-primary-foreground`}>{item.icon}</div>
+              <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1.5">
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-md`}>{item.icon}</div>
                 <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
               </button>
             ))}
@@ -717,20 +733,27 @@ export default function ChatPage() {
 
         {/* Recording UI */}
         {isRecording ? (
-          <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-3">
-            <button onClick={cancelRecording} className="w-9 h-9 rounded-full bg-destructive/20 flex items-center justify-center">
+          <div className="sticky bottom-16 backdrop-blur-md bg-background/85 border-t border-border/30 px-4 py-3 flex items-center gap-3">
+            <button onClick={cancelRecording} className="w-9 h-9 rounded-full bg-destructive/15 flex items-center justify-center">
               <X className="w-4 h-4 text-destructive" />
             </button>
             <div className="flex-1 flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
               <span className="text-sm font-mono font-semibold text-destructive">{formatDuration(recordingTime)}</span>
+              <div className="flex-1 flex items-end gap-0.5 h-6">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <div key={i} className="w-1 bg-primary/50 rounded-full animate-pulse"
+                    style={{ height: `${6 + Math.sin(i) * 8 + 6}px`, animationDelay: `${i * 0.08}s` }} />
+                ))}
+              </div>
             </div>
-            <button onClick={stopRecording} className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-              <Send className="w-5 h-5 text-primary-foreground" />
+            <button onClick={stopRecording} className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-white"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(262 88% 45%))" }}>
+              <Send className="w-5 h-5" />
             </button>
           </div>
         ) : (
-          <div className="sticky bottom-16 glass px-4 py-2 space-y-2">
+          <div className="sticky bottom-16 backdrop-blur-md bg-background/85 border-t border-border/30 px-4 py-2 space-y-2">
             {messages.length < 3 && (
               <AutoMessageSuggestions
                 recipientName={conversations.find(c => c.id === id)?.name}
@@ -739,7 +762,7 @@ export default function ChatPage() {
               />
             )}
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+              <button onClick={() => setShowAttachMenu(!showAttachMenu)} className="w-9 h-9 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
                 <Paperclip className="w-4 h-4 text-muted-foreground" />
               </button>
               <input
@@ -747,14 +770,16 @@ export default function ChatPage() {
                 onChange={e => setNewMessage(e.target.value)}
                 onKeyPress={e => e.key === "Enter" && sendMessage()}
                 placeholder="Scrivi un messaggio..."
-                className="flex-1 h-10 rounded-full bg-muted px-4 text-sm focus:outline-none"
+                className="flex-1 h-10 rounded-full bg-muted/60 px-4 text-sm focus:outline-none"
               />
               {newMessage.trim() ? (
-                <button onClick={sendMessage} className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-                  <Send className="w-4 h-4 text-primary-foreground" />
+                <button onClick={sendMessage}
+                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg shrink-0 text-white"
+                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(262 88% 45%))" }}>
+                  <Send className="w-4 h-4" />
                 </button>
               ) : (
-                <button onMouseDown={startRecording} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <button onMouseDown={startRecording} className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
                   <Mic className="w-4 h-4 text-muted-foreground" />
                 </button>
               )}
@@ -768,47 +793,97 @@ export default function ChatPage() {
   // ===== CONVERSATION LIST =====
   return (
     <MobileLayout>
-      <header className="sticky top-0 z-40 glass px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-xl font-display font-bold">Chat</h1>
+      {/* WhatsApp/Messenger-style gradient header */}
+      <header className="sticky top-0 z-40"
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(262 88% 45%) 100%)" }}>
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-bold text-white">Chat</h1>
+            <div className="flex items-center gap-2">
+              <button onClick={() => navigate("/create-post")} className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <Camera className="w-5 h-5 text-white" />
+              </button>
+              <button className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <PenLine className="w-5 h-5 text-white" />
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Cerca persone o conversazioni..."
-            className="w-full h-10 rounded-full bg-muted pl-10 pr-4 text-sm focus:outline-none"
-          />
+          {/* WhatsApp-style search bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Cerca persone o conversazioni..."
+              className="w-full h-10 rounded-full bg-white/20 pl-10 pr-4 text-sm text-white placeholder:text-white/60 focus:outline-none focus:bg-white/30 transition-colors"
+            />
+          </div>
         </div>
       </header>
 
-      <div className="p-4 space-y-2">
+      {/* Stories / Status row */}
+      {!searchQuery && conversations.length > 0 && (
+        <div className="border-b border-border/20 bg-card/20 px-4 py-3">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1">
+            {/* My status */}
+            <div className="flex flex-col items-center gap-1.5 shrink-0">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full p-0.5" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(262 88% 45%))" }}>
+                  <div className="w-full h-full rounded-full bg-card overflow-hidden">
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || "me"}`}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full flex items-center justify-center border-2 border-card text-white text-xs font-bold"
+                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(262 88% 45%))" }}>
+                  +
+                </div>
+              </div>
+              <span className="text-[10px] text-muted-foreground w-14 text-center truncate">Il mio stato</span>
+            </div>
+            {/* Others' stories */}
+            {conversations.slice(0, 6).map(conv => (
+              <button
+                key={conv.id}
+                onClick={() => { setSelectedChat(conv); loadMessages(conv.id); navigate(`/chat/${conv.id}`); }}
+                className="flex flex-col items-center gap-1.5 shrink-0"
+              >
+                <div className="w-14 h-14 rounded-full p-0.5" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(262 88% 45%))" }}>
+                  <div className="w-full h-full rounded-full overflow-hidden">
+                    <img src={conv.avatar} alt="" className="w-full h-full object-cover" />
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground w-14 text-center truncate">{conv.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col">
         {/* Search results - show registered users */}
         {searchQuery.length >= 2 && searchedUsers.length > 0 && (
-          <div className="mb-4">
+          <div className="px-4 pt-4 pb-2">
             <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2 px-1">Utenti registrati</p>
             {searchedUsers.map(u => (
               <button
                 key={u.user_id}
                 onClick={() => startNewChat(u)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all"
+                className="w-full flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-muted/60 transition-all"
               >
                 <img
                   src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.user_id}`}
                   alt=""
-                  className="w-11 h-11 rounded-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover shrink-0"
                 />
                 <div className="flex-1 text-left">
                   <p className="font-semibold text-sm">{u.display_name || "Utente"}</p>
                   <p className="text-[10px] text-muted-foreground">Tocca per iniziare una chat</p>
                 </div>
-                <UserPlus className="w-4 h-4 text-primary" />
+                <UserPlus className="w-4 h-4 text-primary shrink-0" />
               </button>
             ))}
             {filteredConversations.length > 0 && (
@@ -818,7 +893,14 @@ export default function ChatPage() {
         )}
 
         {searchQuery.length >= 2 && searchedUsers.length === 0 && !searchingUsers && (
-          <p className="text-xs text-muted-foreground text-center py-2">Nessun utente trovato per "{searchQuery}"</p>
+          <p className="text-xs text-muted-foreground text-center py-3 px-4">Nessun utente trovato per "{searchQuery}"</p>
+        )}
+
+        {/* Section label */}
+        {!searchQuery && filteredConversations.length > 0 && (
+          <div className="px-4 pt-4 pb-1">
+            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Messaggi recenti</p>
+          </div>
         )}
 
         {loading ? (
@@ -826,36 +908,38 @@ export default function ChatPage() {
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredConversations.length === 0 && searchedUsers.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 px-4">
             <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground text-sm">Nessuna conversazione</p>
             <p className="text-xs text-muted-foreground mt-1">Cerca un utente per iniziare una chat</p>
           </div>
         ) : (
-          filteredConversations.map(conv => (
-            <button
-              key={conv.id}
-              onClick={() => { setSelectedChat(conv); loadMessages(conv.id); navigate(`/chat/${conv.id}`); }}
-              className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all"
-            >
-              <div className="relative">
-                <img src={conv.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
-              </div>
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">{conv.name}</p>
-                  <span className="text-[10px] text-muted-foreground">{conv.time}</span>
+          <div className="divide-y divide-border/20">
+            {filteredConversations.map(conv => (
+              <button
+                key={conv.id}
+                onClick={() => { setSelectedChat(conv); loadMessages(conv.id); navigate(`/chat/${conv.id}`); }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-card/40 transition-all text-left"
+              >
+                <div className="relative shrink-0">
+                  <img src={conv.avatar} alt="" className="w-14 h-14 rounded-full object-cover" />
+                  <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#25D366] border-2 border-background" />
                 </div>
-                <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
-              </div>
-              {conv.unread > 0 && (
-                <span className="w-5 h-5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                  {conv.unread}
-                </span>
-              )}
-            </button>
-          ))
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-sm truncate">{conv.name}</p>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{conv.time}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
+                </div>
+                {conv.unread > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-[#25D366] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                    {conv.unread}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         )}
       </div>
     </MobileLayout>

@@ -3,6 +3,7 @@ import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
 import FloatingAIButton from "@/components/FloatingAIButton";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import DraggableShopFAB from "@/components/DraggableShopFAB";
 import NotificationToast from "@/components/notifications/NotificationToast";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -26,6 +27,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
       </main>
       <FloatingAIButton />
       <ChatbotWidget />
+      <DraggableShopFAB />
       <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
       <BottomNav />
     </div>

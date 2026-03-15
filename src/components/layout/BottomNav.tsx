@@ -1,4 +1,4 @@
-import { Home, User, Bell, Compass, Sparkles } from "lucide-react";
+import { Home, User, Bell, Compass, ShoppingBag } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useNotificationsContext } from "@/contexts/NotificationsContext";
@@ -14,7 +14,7 @@ const tabs = [
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isAIActive = location.pathname.startsWith("/ai-assistant");
+  const isShopActive = location.pathname.startsWith("/shop");
   const { unreadCount } = useNotificationsContext();
 
   const half = Math.ceil(tabs.length / 2);
@@ -85,34 +85,36 @@ export default function BottomNav() {
           {/* Left tabs */}
           {leftTabs.map(renderTab)}
 
-          {/* Center AI button — raised FAB */}
+          {/* Center Shop button — raised FAB */}
           <div className="flex flex-col items-center justify-center flex-1 relative">
             <button
-              onClick={() => navigate("/ai-assistant")}
-              aria-label="Stella AI"
+              onClick={() => navigate("/shop")}
+              aria-label="Shop"
               className={cn(
                 "absolute -top-5 w-[58px] h-[58px] rounded-full flex items-center justify-center transition-all duration-300 shadow-luxury",
-                isAIActive
+                isShopActive
                   ? "gradient-luxury scale-110 shadow-glow"
-                  : "gradient-primary hover:scale-105 animate-pulse-glow"
+                  : "gradient-gold hover:scale-105 animate-pulse-glow"
               )}
             >
-              <Sparkles
+              <ShoppingBag
                 className={cn(
                   "w-[26px] h-[26px] text-white drop-shadow-sm transition-all duration-300",
-                  isAIActive && "animate-pulse"
+                  isShopActive && "animate-pulse"
                 )}
               />
+              {/* Gold star accent */}
+              <span className="absolute top-0.5 right-0.5 text-[11px]">⭐</span>
               {/* Glow ring */}
               <span className="absolute inset-0 rounded-full border-2 border-white/20" />
             </button>
             <span
               className={cn(
                 "text-[10px] font-bold tracking-wide mt-1 transition-all duration-300",
-                isAIActive ? "text-primary" : "text-foreground/50"
+                isShopActive ? "text-accent" : "text-foreground/50"
               )}
             >
-              Stella
+              Shop
             </span>
           </div>
 
