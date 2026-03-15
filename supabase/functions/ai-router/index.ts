@@ -261,7 +261,7 @@ serve(async (req) => {
         message_type: role || "chat",
         content: `User: ${userMsg}\nBot: ${reply}`,
         status: "completed"
-      }).catch(() => {});
+      }).catch(() => { /* Intentionally ignored: chat log persistence is non-critical */ });
     }
 
     return jsonResponse({ reply, role: role || "auto" });

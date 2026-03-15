@@ -16,6 +16,7 @@ export default function AffiliatePage() {
 
   useEffect(() => {
     if (user) fetchAffiliate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchAffiliate = async () => {

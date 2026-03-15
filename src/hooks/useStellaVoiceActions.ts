@@ -14,6 +14,22 @@ export function useStellaVoiceActions() {
   const processVoiceCommand = useCallback((transcript: string): { matched: boolean; response: string; action?: string } => {
     const text = transcript.toLowerCase().trim();
 
+    // ─── Back navigation (hands-free essential) ────────────────────────────
+    if (text.includes("torna indietro") || text.includes("vai indietro") || text.includes("pagina precedente") || text === "indietro") {
+      window.history.back();
+      return { matched: true, response: "Torno alla pagina precedente!" };
+    }
+
+    // ─── Scroll commands ────────────────────────────────────────────────────
+    if (text.includes("scorri su") || text.includes("vai su") || text.includes("scroll su")) {
+      window.scrollBy({ top: -300, behavior: "smooth" });
+      return { matched: true, response: "Scorro verso l'alto!" };
+    }
+    if (text.includes("scorri giù") || text.includes("vai giù") || text.includes("scroll giù") || text.includes("scorri in basso")) {
+      window.scrollBy({ top: 300, behavior: "smooth" });
+      return { matched: true, response: "Scorro verso il basso!" };
+    }
+
     // Message commands must be checked first (before navigation) because "messaggio" contains "messaggi"
     const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo)\s+)(.+)/);
     if (messageMatch) {
@@ -84,7 +100,7 @@ export function useStellaVoiceActions() {
       navigate("/settings");
       return { matched: true, response: "Apro le impostazioni!" };
     }
-    if (text.includes("cerca") || text.includes("esplora")) {
+    if (text.includes("esplora")) {
       navigate("/explore");
       return { matched: true, response: "Apro la sezione esplora!" };
     }
@@ -157,12 +173,20 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Ecco le tue notifiche! Le leggo per te." };
     }
 
-    // Add friend
+    // Add friend / search
     const addMatch = text.match(/(?:aggiungi|segui)\s+(.+)/);
     if (addMatch) {
       navigate("/search");
       toast.info(`Cerco "${addMatch[1]}"...`);
       return { matched: true, response: `Cerco ${addMatch[1]} per seguirlo!` };
+    }
+
+    // Generic search — navigate to search page with query
+    const searchMatch = text.match(/^cerca\s+(.+)$/);
+    if (searchMatch) {
+      const query = searchMatch[1].trim();
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      return { matched: true, response: `Cerco "${query}"!` };
     }
 
     // Like commands
@@ -195,7 +219,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Attivo il tema scuro!", action: "theme:dark" };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'invia messaggio a...', 'metti like', 'cerca match a 10 km', o 'dimmi le notifiche'." };
+    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'torna indietro', 'invia messaggio a...', 'cerca [termine]', 'cerca match a 10 km', o 'dimmi le notifiche'." };
   }, [navigate]);
 
   return { processVoiceCommand };

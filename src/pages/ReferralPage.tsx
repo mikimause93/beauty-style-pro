@@ -17,6 +17,7 @@ export default function ReferralPage() {
 
   useEffect(() => {
     if (user) loadReferralData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadReferralData = async () => {

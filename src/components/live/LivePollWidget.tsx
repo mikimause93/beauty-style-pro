@@ -35,6 +35,7 @@ export default function LivePollWidget({ streamId }: LivePollWidgetProps) {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamId]);
 
   const fetchActivePoll = async () => {

@@ -27,9 +27,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        # continue-on-error: pre-existing lint errors in the codebase; tracked separately
         run: npm run lint
-        continue-on-error: true
 
       - name: Run tests
         run: npm test

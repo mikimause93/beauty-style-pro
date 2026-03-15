@@ -36,7 +36,7 @@ interface Post {
   comment_count: number;
   post_type: string | null;
   created_at: string;
-  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
 }
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
@@ -89,7 +89,7 @@ export default function HomePage() {
 
       if (postsData) {
         const userIds = [...new Set(postsData.map(p => p.user_id))];
-        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type').in('user_id', userIds);
+        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type, verification_status').in('user_id', userIds);
         const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
         setPosts(postsData.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined })));
       }
@@ -211,7 +211,7 @@ export default function HomePage() {
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
               <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shadow-sm">
-                <item.Icon className="w-4.5 h-4.5 text-primary" />
+                <item.Icon className="w-5 h-5 text-primary" />
               </div>
               <span className="text-[9px] text-primary font-semibold leading-tight">{item.label}</span>
             </button>

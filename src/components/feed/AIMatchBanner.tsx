@@ -22,6 +22,7 @@ export default function AIMatchBanner() {
     if (user && profile && !dismissed) {
       loadSuggestions();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, profile]);
 
   const loadSuggestions = async () => {

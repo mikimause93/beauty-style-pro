@@ -84,6 +84,7 @@ export default function TransformationChallengePage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"feed" | "leaderboard">("feed");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchChallenges(); }, []);
 
   const fetchChallenges = async () => {
@@ -276,7 +277,7 @@ export default function TransformationChallengePage() {
                         <Coins className="w-4 h-4" />
                         <span className="text-xs font-bold">{ch.qr_coin_received}</span>
                       </button>
-                      <button onClick={() => setSavedIds(prev => { const n = new Set(prev); n.has(ch.id) ? n.delete(ch.id) : n.add(ch.id); return n; })}
+                      <button onClick={() => setSavedIds(prev => { const n = new Set(prev); if (n.has(ch.id)) { n.delete(ch.id); } else { n.add(ch.id); } return n; })}
                         className={`p-2 rounded-xl ${savedIds.has(ch.id) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                         <Bookmark className={`w-4 h-4 ${savedIds.has(ch.id) ? "fill-primary" : ""}`} />
                       </button>

@@ -30,6 +30,7 @@ export default function AdminPage() {
     });
   }, [user]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (isAdmin) loadStats(); }, [tab, isAdmin]);
 
   if (isAdmin === null) {

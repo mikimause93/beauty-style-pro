@@ -1,23 +1,16 @@
 <!DOCTYPE html>
-<html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <title>STYLE - La Piattaforma Beauty</title>
-    <script>
-      // Single Page Application redirect for GitHub Pages.
-      // Stores the current path in sessionStorage and redirects to the root,
-      // where the React app will read it back and navigate to the correct route.
-      var basePathSegment = location.pathname.split("/")[1];
-      sessionStorage.setItem(
-        "spa-redirect",
-        JSON.stringify({
-          path: location.pathname.slice(basePathSegment.length + 1) || "/",
-          search: location.search,
-          hash: location.hash,
-        })
-      );
-      location.replace("/" + basePathSegment + "/");
-    </script>
-  </head>
-  <body></body>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Beauty Style Pro</title>
+  <script>
+    var l = window.location;
+    var base = '/beauty-style-pro';
+    var p = l.pathname.replace(base, '') || '/';
+    var q = l.search.slice(1);
+    var h = l.hash;
+    var url = base + '/?p=' + encodeURIComponent(p) + (q ? '&q=' + encodeURIComponent(q) : '') + h;
+    l.replace(url);
+  </script>
+</head>
 </html>

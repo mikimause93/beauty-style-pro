@@ -145,16 +145,26 @@ export default function AIAssistantPage() {
         <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
+        <div className={`w-9 h-9 rounded-full gradient-primary flex items-center justify-center ${isListening ? "animate-pulse" : ""}`}>
           <Sparkles className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
           <h1 className="text-sm font-bold">Stella AI</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Assistente STYLE con streaming AI"}
+            {isListening ? "🔴 Sto ascoltando..." : isWakeWordListening ? "🎤 Dì 'Stella' per attivare" : "Assistente STYLE · Voce + AI"}
           </p>
         </div>
       </header>
+
+      {/* Hands-free active banner */}
+      {(isWakeWordListening || isListening) && (
+        <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shrink-0" />
+          <p className="text-[11px] text-primary font-medium flex-1">
+            {isListening ? "🎤 Ti sto ascoltando — parla ora!" : "🤖 Modalità Mani Libere attiva · Dì \"Stella\" per iniziare"}
+          </p>
+        </div>
+      )}
 
       <AIQuickActions onCommand={(cmd) => {
         setInput(cmd);
@@ -199,7 +209,15 @@ export default function AIAssistantPage() {
           disabled={isLoading}
         />
         <button
-          onClick={() => { if (isListening) stopListening(); else startListening(); }}
+          onClick={() => {
+            if (isListening) {
+              stopListening();
+            } else {
+              // Enable TTS automatically when mic is pressed for hands-free experience
+              if (!isTTSEnabled) setIsTTSEnabled(true);
+              startListening();
+            }
+          }}
           className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
             isListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
           }`}

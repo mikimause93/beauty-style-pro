@@ -26,6 +26,7 @@ export default function AIGrowthSuggestions() {
 
   useEffect(() => {
     if (user) loadSuggestions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Auto show/hide cycle

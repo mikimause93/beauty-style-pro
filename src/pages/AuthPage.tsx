@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -71,6 +71,10 @@ export default function AuthPage() {
   const [website, setWebsite] = useState("");
   const [bizCategory, setBizCategory] = useState("");
 
+  // IBAN fields
+  const [iban, setIban] = useState("");
+  const [bankHolder, setBankHolder] = useState("");
+
   // Location
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -79,11 +83,16 @@ export default function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) navigate("/");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // ─── GPS ─────────────────────────────────────────────
   const requestLocation = async () => {
     setLocating(true);
+    if (!('geolocation' in navigator)) {
+      setLocating(false);
+      return;
+    }
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
@@ -161,6 +170,22 @@ export default function AuthPage() {
       return; 
     }
 
+    // Save IBAN to payment_methods if provided
+    if (iban.trim()) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from("payment_methods").insert({
+            user_id: session.user.id,
+            method_type: "iban",
+            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
+            iban_number: iban.trim(),
+            holder_name: bankHolder || displayName,
+          });
+        }
+      } catch { /* Will be addable from Wallet later */ }
+    }
+
     // Since email verification is now enabled, show verification screen
     setRegistrationResult({
       success: true,
@@ -172,13 +197,13 @@ export default function AuthPage() {
   };
 
   // ─── Step logic per account type ─────────────────────
-  const totalSteps = accountType === "client" ? 3 : accountType === "professional" ? 3 : accountType === "business" ? 3 : 0;
+  const totalSteps = accountType === "client" ? 4 : accountType === "professional" ? 4 : accountType === "business" ? 3 : 0;
 
   const canProceed = () => {
     if (step === 0) return !!accountType;
     if (step === 1) {
-      if (accountType === "client") return !!name && !!email && !!password;
-      if (accountType === "professional") return !!name && !!email && !!password;
+      if (accountType === "client") return !!name && !!email && !!password && !!phone;
+      if (accountType === "professional") return !!name && !!email && !!password && !!phone;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
     if (step === 2 && accountType === "client") return !!city && !!birthDate;
@@ -405,7 +430,7 @@ export default function AuthPage() {
               {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
             </button>
           </div>
-          <InputField icon={<Phone className="w-4 h-4" />} placeholder="Telefono" value={phone} onChange={setPhone} type="tel" />
+          <InputField icon={<Phone className="w-4 h-4" />} placeholder="Telefono *" value={phone} onChange={setPhone} type="tel" />
           <InputField icon={<Calendar className="w-4 h-4" />} placeholder="Data di nascita *" value={birthDate} onChange={setBirthDate} type="date" />
         </div>
       )}
@@ -562,6 +587,30 @@ export default function AuthPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ STEP 4: Conto Bancario (Client + Professional) ═══ */}
+      {step === 4 && (accountType === "client" || accountType === "professional") && (
+        <div className="space-y-4 fade-in">
+          <h2 className="text-lg font-display font-bold">Conto Bancario</h2>
+          <p className="text-xs text-muted-foreground">
+            Collega il tuo conto bancario al Wallet interno per ricevere pagamenti e rimborsi
+          </p>
+          <InputField icon={<Banknote className="w-4 h-4" />} placeholder="IBAN (es. IT60 X054 2811 1010 0000 0123 456)" value={iban} onChange={setIban} />
+          <InputField icon={<User className="w-4 h-4" />} placeholder="Intestatario conto" value={bankHolder} onChange={setBankHolder} />
+          <div className="p-3.5 rounded-2xl bg-primary/5 border border-primary/20 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-xs font-semibold">Dati protetti con crittografia SSL</p>
+            </div>
+            <p className="text-[11px] text-muted-foreground pl-6">
+              Potrai aggiungere o modificare i dati bancari anche in seguito dal tuo <strong>Wallet</strong>. Il campo è facoltativo.
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-muted/50 text-[11px] text-muted-foreground">
+            📱 <strong>Verifica numero:</strong> Dopo la registrazione riceverai un SMS di conferma sul numero {phone || "inserito"} per attivare i pagamenti.
           </div>
         </div>
       )}

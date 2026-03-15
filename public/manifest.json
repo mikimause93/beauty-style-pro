@@ -2,21 +2,21 @@
   "name": "STYLE Beauty",
   "short_name": "STYLE",
   "description": "La piattaforma beauty per professionisti e clienti",
-  "start_url": "/",
+  "start_url": "/beauty-style-pro/",
   "display": "standalone",
   "background_color": "#0a0a0b",
   "theme_color": "#d946ef",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "/beauty-style-pro/",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/beauty-style-pro/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/beauty-style-pro/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"

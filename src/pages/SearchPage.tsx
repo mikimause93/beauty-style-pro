@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User, Navigation } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import stylist1 from "@/assets/stylist-1.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
+import { haversineDistance, getCoordsFromCity } from "@/hooks/useGeolocation";
 
 type Tab = "tutti" | "persone" | "stilisti" | "servizi" | "prodotti" | "lavoro";
 
@@ -14,12 +15,16 @@ interface UserResult {
   avatar_url: string | null;
   user_type: string;
   city: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export default function SearchPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
+  // Pre-fill from ?q= (set by voice command "cerca [query]")
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [tab, setTab] = useState<Tab>("tutti");
   const [stylists, setStylists] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
@@ -27,26 +32,38 @@ export default function SearchPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [users, setUsers] = useState<UserResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Try to get user location for distance display
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        pos => setUserCoords([pos.coords.latitude, pos.coords.longitude]),
+        () => {} // silent fail — distance just won't be shown
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => { if (query.trim().length >= 2) search(); }, 350);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tab]);
 
   const search = async () => {
     setLoading(true);
     const q = `%${query}%`;
 
-    // Search registered users (profiles)
+    // Search registered users (profiles) - also fetch location for distance
     if (tab === "tutti" || tab === "persone") {
       const { data } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url, user_type, city")
+        .select("user_id, display_name, avatar_url, user_type, city, latitude, longitude")
         .ilike("display_name", q)
         .limit(15);
-      if (data) setUsers(data);
+      if (data) setUsers(data as UserResult[]);
     }
 
     if (tab === "tutti" || tab === "stilisti") {
@@ -144,7 +161,13 @@ export default function SearchPage() {
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Persone</h3>
             <div className="space-y-2">
-              {users.map(u => (
+              {users.map(u => {
+                const uLat = u.latitude || (u.city ? getCoordsFromCity(u.city)[0] : null);
+                const uLng = u.longitude || (u.city ? getCoordsFromCity(u.city)[1] : null);
+                const dist = userCoords && uLat && uLng
+                  ? Math.round(haversineDistance(userCoords[0], userCoords[1], uLat, uLng) * 10) / 10
+                  : null;
+                return (
                 <button key={u.user_id} onClick={() => navigate(`/profile/${u.user_id}`)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left">
                   <img
@@ -154,7 +177,7 @@ export default function SearchPage() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{u.display_name || "Utente"}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
                         {userTypeLabel(u.user_type)}
                       </span>
@@ -163,10 +186,16 @@ export default function SearchPage() {
                           <MapPin className="w-2.5 h-2.5" />{u.city}
                         </span>
                       )}
+                      {dist !== null && (
+                        <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5">
+                          <Navigation className="w-2.5 h-2.5" />{dist} km
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

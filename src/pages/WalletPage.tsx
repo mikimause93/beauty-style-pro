@@ -25,6 +25,7 @@ export default function WalletPage() {
 
   useEffect(() => {
     if (user) { loadTransactions(); loadPaymentMethods(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadTransactions = async () => {

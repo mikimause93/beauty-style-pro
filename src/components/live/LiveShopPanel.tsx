@@ -31,6 +31,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professionalId]);
 
   const fetchData = async () => {

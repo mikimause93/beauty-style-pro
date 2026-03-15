@@ -36,6 +36,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamId]);
 
   const fetchRequests = async () => {

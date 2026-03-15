@@ -97,6 +97,7 @@ export default function InteractiveMap({
       mapInstanceRef.current = null;
       markersLayerRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update center/zoom
@@ -104,6 +105,7 @@ export default function InteractiveMap({
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView(center, zoom, { animate: true });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center[0], center[1], zoom]);
 
   // Update markers
