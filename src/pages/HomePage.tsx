@@ -146,23 +146,23 @@ export default function HomePage() {
           <span className="text-[26px] font-display font-bold italic tracking-tight text-gradient-luxury">Style</span>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              <Search className="w-[20px] h-[20px] text-muted-foreground" />
+              <Search className="w-[20px] h-[20px] text-foreground/70" />
             </button>
             <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              {theme === "dark" ? <Sun className="w-[20px] h-[20px] text-muted-foreground" /> : <Moon className="w-[20px] h-[20px] text-muted-foreground" />}
+              {theme === "dark" ? <Sun className="w-[20px] h-[20px] text-foreground/70" /> : <Moon className="w-[20px] h-[20px] text-foreground/70" />}
             </button>
             <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
               <Coins className="w-3.5 h-3.5" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
             <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              <Bell className="w-[20px] h-[20px] text-muted-foreground" />
+              <Bell className="w-[20px] h-[20px] text-foreground/70" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-glow" />
               )}
             </button>
             <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-primary/10 transition-colors">
-              <MessageCircle className="w-[20px] h-[20px] text-muted-foreground" />
+              <MessageCircle className="w-[20px] h-[20px] text-foreground/70" />
             </button>
           </div>
         </div>
@@ -191,14 +191,15 @@ export default function HomePage() {
       {activeTab === "Nuovi" && (
         <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
+            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
+            { Icon: ShoppingBag, label: "Shop", path: "/shop" },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
             { Icon: Droplets, label: "Spa", path: "/spa-terme" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
             { Icon: Target, label: "Missioni", path: "/missions" },
-            { Icon: Sparkles, label: "AI", path: "/ai-assistant" },
             { Icon: Zap, label: "Quiz", path: "/quiz-live" },
             { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
             { Icon: Film, label: "Shorts", path: "/shorts" },
@@ -213,7 +214,7 @@ export default function HomePage() {
               <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
                 <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
-              <span className="text-[9px] text-primary font-semibold leading-tight tracking-wide">{item.label}</span>
+              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>

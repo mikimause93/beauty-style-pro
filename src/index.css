@@ -140,6 +140,7 @@
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
     border-top: 1px solid hsl(var(--primary) / 0.15);
+    overflow: visible;
   }
   .luxury-border {
     border: 1px solid hsl(var(--primary) / 0.25);
@@ -213,6 +214,16 @@
   /* Safe area for bottom nav */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: visible;
+  }
+
+  /* AI center button pulse glow */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px hsl(262 88% 63% / 0.4), 0 4px 24px hsl(262 88% 63% / 0.25); }
+    50% { box-shadow: 0 0 32px hsl(302 78% 56% / 0.5), 0 4px 32px hsl(262 88% 63% / 0.35); }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
   }
 }
 
