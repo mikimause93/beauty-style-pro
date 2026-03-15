@@ -26,7 +26,7 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
@@ -82,9 +82,8 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate("/");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    if (!authLoading && user) navigate("/");
+  }, [user, authLoading, navigate]);
 
   // ─── GPS ─────────────────────────────────────────────
   const requestLocation = async () => {
@@ -197,16 +196,16 @@ export default function AuthPage() {
   };
 
   // ─── Step logic per account type ─────────────────────
-  const totalSteps = accountType === "client" ? 4 : accountType === "professional" ? 4 : accountType === "business" ? 3 : 0;
+  const totalSteps = accountType === "client" ? 3 : accountType === "professional" ? 4 : accountType === "business" ? 3 : 0;
 
   const canProceed = () => {
     if (step === 0) return !!accountType;
     if (step === 1) {
-      if (accountType === "client") return !!name && !!email && !!password && !!phone;
+      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate;
       if (accountType === "professional") return !!name && !!email && !!password && !!phone;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
-    if (step === 2 && accountType === "client") return !!city && !!birthDate;
+    if (step === 2 && accountType === "client") return !!city;
     return true;
   };
 
@@ -591,8 +590,8 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* ═══ STEP 4: Conto Bancario (Client + Professional) ═══ */}
-      {step === 4 && (accountType === "client" || accountType === "professional") && (
+      {/* ═══ STEP 4: Conto Bancario (Professional only) ═══ */}
+      {step === 4 && accountType === "professional" && (
         <div className="space-y-4 fade-in">
           <h2 className="text-lg font-display font-bold">Conto Bancario</h2>
           <p className="text-xs text-muted-foreground">
