@@ -123,6 +123,7 @@ const App = () => {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
