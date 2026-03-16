@@ -122,7 +122,7 @@ export function useGeolocation(defaultCity = "Milano") {
         savePositionToDB(userId, latitude, longitude, city);
       }
     } catch (err: unknown) {
-      const errCode = (err as GeolocationPositionError).code;
+      const errCode = err instanceof GeolocationPositionError ? err.code : 0;
       const msg = errCode === 1 ? "Permesso GPS negato" :
                   errCode === 2 ? "Posizione non disponibile" :
                   errCode === 3 ? "Timeout GPS" : "Errore GPS";

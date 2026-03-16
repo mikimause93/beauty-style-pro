@@ -107,6 +107,7 @@ export const useVoiceRecognition = (
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        setError(`Speech recognition error: ${event.error}`);
         setIsListening(false);
       };
 
