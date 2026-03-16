@@ -145,7 +145,7 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
           .from("profiles")
           .select("user_id, display_name")
           .eq("user_id", targetId)
-          .single();
+          .maybeSingle();
         recipient = data;
       } else {
         const { data: recipients } = await supabase
@@ -163,7 +163,7 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
       await supabase.from("profiles").update({ qr_coins: balance - amt }).eq("user_id", user.id);
 
       // Add to recipient
-      const { data: recipientProfile } = await supabase.from("profiles").select("qr_coins").eq("user_id", recipient.user_id).single();
+      const { data: recipientProfile } = await supabase.from("profiles").select("qr_coins").eq("user_id", recipient.user_id).maybeSingle();
       await supabase.from("profiles").update({ qr_coins: (recipientProfile?.qr_coins || 0) + amt }).eq("user_id", recipient.user_id);
 
       // Log transactions

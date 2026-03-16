@@ -18,7 +18,7 @@ export default function BusinessDashboardPage() {
         .from("businesses")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -63,7 +63,7 @@ export default function BusinessDashboardPage() {
         .from("professionals")
         .select("id")
         .eq("user_id", business.user_id)
-        .single();
+        .maybeSingle();
       if (!prof) return 0;
       const { count } = await supabase
         .from("bookings")

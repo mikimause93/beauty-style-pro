@@ -72,7 +72,7 @@ export default function BookingPage() {
     }
 
     const [{ data: pro }, { data: svc }] = await Promise.all([
-      supabase.from("professionals").select("*").eq("id", professionalId).single(),
+      supabase.from("professionals").select("*").eq("id", professionalId).maybeSingle(),
       supabase.from("services").select("*").eq("professional_id", professionalId).eq("active", true),
     ]);
 
