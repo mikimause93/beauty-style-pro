@@ -22,7 +22,7 @@ export default function ServiceDetailPage() {
       .from("services")
       .select("*, professionals(business_name, city, rating)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     setService(data);
     setLoading(false);
   };

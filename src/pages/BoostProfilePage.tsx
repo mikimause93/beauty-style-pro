@@ -27,7 +27,7 @@ export default function BoostProfilePage() {
 
   const loadData = async () => {
     const { data: settings } = await supabase
-      .from("platform_settings").select("value").eq("key", "boost_prices").single();
+      .from("platform_settings").select("value").eq("key", "boost_prices").maybeSingle();
     if (settings?.value) setPrices((settings.value as any) || {});
 
     if (user) {

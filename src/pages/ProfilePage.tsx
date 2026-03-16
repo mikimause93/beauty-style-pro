@@ -63,7 +63,7 @@ export default function ProfilePage() {
   }, [targetUserId]);
 
   const loadViewProfile = async () => {
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", targetUserId!).single();
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", targetUserId!).maybeSingle();
     if (data) setViewProfile(data);
   };
 

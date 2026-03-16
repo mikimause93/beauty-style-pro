@@ -46,7 +46,7 @@ export default function AnalyticsDashboardPage() {
     queryKey: ["analytics-streams", user?.id, period],
     queryFn: async () => {
       if (!user) return null;
-      const { data: pro } = await supabase.from("professionals").select("id").eq("user_id", user.id).single();
+      const { data: pro } = await supabase.from("professionals").select("id").eq("user_id", user.id).maybeSingle();
       if (!pro) return null;
       const { data } = await supabase.from("live_streams").select("id, total_views, total_earnings, total_tips, peak_viewers").eq("professional_id", pro.id).gte("created_at", startDate);
       return {
@@ -75,7 +75,7 @@ export default function AnalyticsDashboardPage() {
     queryKey: ["analytics-leaderboard", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase.from("leaderboard").select("rank, score").eq("user_id", user.id).eq("leaderboard_type", "earnings").eq("period", "monthly").single();
+      const { data } = await supabase.from("leaderboard").select("rank, score").eq("user_id", user.id).eq("leaderboard_type", "earnings").eq("period", "monthly").maybeSingle();
       return data;
     },
     enabled: !!user,

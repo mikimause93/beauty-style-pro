@@ -92,7 +92,7 @@ export default function OnboardingPage() {
         .from("profiles")
         .select("otp_code, otp_expires_at")
         .eq("user_id", user!.id)
-        .single();
+        .maybeSingle();
 
       if (!data) throw new Error("Profile not found");
 
