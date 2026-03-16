@@ -224,7 +224,7 @@ serve(async (req) => {
           .from("profiles")
           .select("user_type, created_at, qr_coins, city, bio, avatar_url")
           .eq("user_id", user_id)
-          .single();
+          .maybeSingle();
 
         const [postsRes, bookingsRes, subsRes] = await Promise.all([
           supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id),
@@ -400,7 +400,7 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidat
     if (action === "recommend_services") {
       if (!LOVABLE_API_KEY) return jsonResponse({ recommendations: [] });
 
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).maybeSingle();
       const { data: pastBookings } = await supabase
         .from("bookings")
         .select("*, services(name, category)")
@@ -481,7 +481,7 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidat
         .from("profiles")
         .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
         .eq("user_id", user_id)
-        .single();
+        .maybeSingle();
 
       const userType = profile?.user_type || 'client';
 
@@ -636,7 +636,7 @@ CONTESTO UTENTE ATTUALE:
         .from("profiles")
         .select("user_type, display_name, qr_coins, city")
         .eq("user_id", user_id)
-        .single();
+        .maybeSingle();
 
       const userType = profile?.user_type || "client";
       const userName = profile?.display_name || "Utente";

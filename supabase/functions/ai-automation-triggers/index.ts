@@ -253,7 +253,7 @@ serve(async (req) => {
             .from("profiles")
             .select("display_name, follower_count")
             .eq("user_id", pro.user_id)
-            .single();
+            .maybeSingle();
 
           if (profile && (profile.follower_count || 0) < 50) {
             await supabase.from("notifications").insert({
