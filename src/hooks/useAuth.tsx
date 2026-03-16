@@ -11,6 +11,34 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+}
+
+/** Translates Supabase English error messages to Italian. */
+export function localizeAuthError(message: string): string {
+  if (!message) return "Si è verificato un errore. Riprova.";
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid credentials"))
+    return "Credenziali non valide. Controlla email e password.";
+  if (m.includes("email not confirmed"))
+    return "Email non verificata. Controlla la tua casella di posta.";
+  if (m.includes("user already registered") || m.includes("already been registered"))
+    return "Questa email è già registrata. Prova ad accedere.";
+  if (m.includes("password should be at least"))
+    return "La password deve contenere almeno 6 caratteri.";
+  if (m.includes("signup is disabled"))
+    return "La registrazione è temporaneamente disabilitata.";
+  if (m.includes("email rate limit exceeded") || m.includes("rate limit"))
+    return "Troppi tentativi. Aspetta qualche minuto e riprova.";
+  if (m.includes("invalid phone") || m.includes("phone number"))
+    return "Numero di telefono non valido.";
+  if (m.includes("otp expired") || m.includes("token has expired"))
+    return "Il codice OTP è scaduto. Richiedine uno nuovo.";
+  if (m.includes("invalid otp") || m.includes("token is invalid"))
+    return "Codice OTP non valido. Controlla il codice ricevuto.";
+  if (m.includes("network") || m.includes("fetch"))
+    return "Errore di rete. Controlla la connessione e riprova.";
+  return message;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,12 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    setProfile(data);
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setProfile(data ?? null);
+    } catch {
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
@@ -110,8 +142,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user.id);
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth?mode=reset`,
+    });
+    return { error };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, refreshProfile, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
