@@ -26,13 +26,14 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, loading: authLoading, resetPassword } = useAuth();
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Shared fields
   const [email, setEmail] = useState("");
@@ -126,6 +127,20 @@ export default function AuthPage() {
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
     else { toast.success("Benvenuto!"); navigate("/"); }
+    setLoading(false);
+  };
+
+  // ─── Forgot Password ──────────────────────────────────
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) { toast.error("Inserisci la tua email"); return; }
+    setLoading(true);
+    const { error } = await resetPassword(email);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Email di recupero inviata! Controlla la tua casella.");
+      setShowForgotPassword(false);
+    }
     setLoading(false);
   };
 
@@ -303,6 +318,23 @@ export default function AuthPage() {
           </div>
 
           {loginMode === "email" ? (
+            showForgotPassword ? (
+              <form onSubmit={handleResetPassword} className="space-y-3">
+                <p className="text-xs text-muted-foreground text-center mb-2">Inserisci la tua email per ricevere il link di recupero</p>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
+                    className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                </div>
+                <button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                  {loading ? "Invio..." : "Invia link di recupero"}
+                </button>
+                <button type="button" onClick={() => setShowForgotPassword(false)} className="w-full text-center text-xs text-primary font-medium">
+                  ← Torna al login
+                </button>
+              </form>
+            ) : (
             <form onSubmit={handleLogin} className="space-y-3">
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -323,6 +355,7 @@ export default function AuthPage() {
                 {loading ? "Caricamento..." : "Accedi"}
               </button>
             </form>
+            )
           ) : !otpSent ? (
             <form onSubmit={handleSendOtp} className="space-y-3">
               <div className="relative">
@@ -351,7 +384,9 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          {!showForgotPassword && loginMode === "email" && (
+            <button type="button" onClick={() => setShowForgotPassword(true)} className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          )}
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>

@@ -59,6 +59,7 @@ export default function CheckoutPage() {
           setProcessing(false);
           return;
         }
+        throw new Error("URL di pagamento non disponibile");
       }
 
       if (selected === "wallet") {
