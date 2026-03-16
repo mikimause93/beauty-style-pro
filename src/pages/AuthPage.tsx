@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote, Gift } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -21,7 +21,10 @@ const CATEGORIES_BIZ = [
 
 // ─── Component ───────────────────────────────────────────
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  // Referral code from URL (?ref=CODE) — read once at mount
+  const referralCodeParam = searchParams.get("ref") ?? "";
+  const [isLogin, setIsLogin] = useState(!referralCodeParam);
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
@@ -79,11 +82,6 @@ export default function AuthPage() {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locating, setLocating] = useState(false);
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!authLoading && user) navigate("/");
-  }, [user, authLoading, navigate]);
 
   // ─── GPS ─────────────────────────────────────────────
   const requestLocation = async () => {
@@ -183,6 +181,37 @@ export default function AuthPage() {
           });
         }
       } catch { /* Will be addable from Wallet later */ }
+    }
+
+    // Apply referral code from URL if present
+    if (referralCodeParam) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: codeRow } = await supabase
+            .from("referral_codes")
+            .select("id, user_id")
+            .eq("code", referralCodeParam.toUpperCase())
+            .eq("active", true)
+            .maybeSingle();
+          if (codeRow && codeRow.user_id !== session.user.id) {
+            // Avoid duplicate referral entries for the same referred user
+            const { data: existing } = await supabase
+              .from("referrals")
+              .select("id")
+              .eq("code_id", codeRow.id)
+              .eq("referred_id", session.user.id)
+              .maybeSingle();
+            if (!existing) {
+              await supabase.from("referrals").insert({
+                code_id: codeRow.id,
+                referrer_id: codeRow.user_id,
+                referred_id: session.user.id,
+              });
+            }
+          }
+        }
+      } catch { /* Referral linking is best-effort */ }
     }
 
     // Since email verification is now enabled, show verification screen
@@ -374,6 +403,16 @@ export default function AuthPage() {
         <button onClick={() => setIsLogin(true)} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-muted-foreground">Accedi</button>
         <button className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-card text-foreground shadow-sm">Registrati</button>
       </div>
+
+      {/* Referral code banner */}
+      {referralCodeParam && (
+        <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
+          <Gift className="w-4 h-4 text-primary shrink-0" />
+          <p className="text-xs text-primary font-semibold">
+            Codice referral attivo: <span className="font-mono tracking-widest">{referralCodeParam.toUpperCase()}</span> · +20 QRC al completamento
+          </p>
+        </div>
+      )}
 
       {/* Progress bar */}
       {step > 0 && totalSteps > 0 && (
