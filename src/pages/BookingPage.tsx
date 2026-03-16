@@ -57,6 +57,7 @@ export default function BookingPage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function BookingPage() {
     }
 
     setLoading(true);
-    const { error } = await supabase.from("bookings").insert({
+    const { data: inserted, error } = await supabase.from("bookings").insert({
       client_id: user.id,
       professional_id: professional.id,
       service_id: selectedServiceData?.id.startsWith("default-") ? undefined : selectedService,
@@ -119,16 +120,15 @@ export default function BookingPage() {
       start_time: selectedTime,
       total_price: selectedServiceData?.price,
       notes: notes || undefined,
-    });
+    }).select("id").single();
 
     if (error) {
-      console.error("Booking error:", error);
       toast.error("Errore nella prenotazione");
       setLoading(false);
     } else {
-      toast.success("Prenotazione confermata! Procedi al pagamento.");
-      // Redirect to checkout with booking details
-      navigate(`/checkout?service=${encodeURIComponent(selectedServiceData?.name || '')}&amount=${selectedServiceData?.price || 0}&booking=true`);
+      setConfirmedBookingId(inserted?.id || null);
+      setConfirmed(true);
+      setLoading(false);
     }
   };
 
@@ -144,7 +144,7 @@ export default function BookingPage() {
         <div className="px-4 py-6 fade-in">
           <BookingReceipt
             booking={{
-              id: Date.now().toString(),
+              id: confirmedBookingId || Date.now().toString(),
               booking_date: selectedDate,
               start_time: selectedTime || "",
               total_price: selectedServiceData?.price || null,
@@ -155,13 +155,25 @@ export default function BookingPage() {
             service={selectedServiceData ? { name: selectedServiceData.name, duration_minutes: selectedServiceData.duration_minutes } : null}
             clientName={user?.email?.split("@")[0] || "Cliente"}
           />
-          <div className="flex gap-3 mt-6">
-            <button onClick={() => navigate("/my-bookings")} className="flex-1 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm">
-              Le Mie Prenotazioni
+          <div className="space-y-3 mt-6">
+            <button
+              onClick={() =>
+                navigate(
+                  `/checkout?desc=${encodeURIComponent(selectedServiceData?.name || "Prenotazione")}&amount=${selectedServiceData?.price || 0}&type=booking&ref=${confirmedBookingId || ""}`
+                )
+              }
+              className="w-full py-3 rounded-xl gradient-primary text-primary-foreground font-bold text-sm"
+            >
+              Procedi al Pagamento
             </button>
-            <button onClick={() => navigate("/")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
-              Home
-            </button>
+            <div className="flex gap-3">
+              <button onClick={() => navigate("/my-bookings")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
+                Le Mie Prenotazioni
+              </button>
+              <button onClick={() => navigate("/")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
+                Home
+              </button>
+            </div>
           </div>
         </div>
       </MobileLayout>
