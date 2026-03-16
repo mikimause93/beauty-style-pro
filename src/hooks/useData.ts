@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { isNoRowsError } from "@/lib/errorCodes";
 
 // ======= POSTS =======
 export function usePosts() {
@@ -257,7 +258,7 @@ export function useMyReferralCode() {
         .select("*")
         .eq("user_id", user!.id)
         .single();
-      if (error && error.code !== "PGRST116") throw error;
+      if (error && !isNoRowsError(error)) throw error;
       return data;
     },
     enabled: !!user,

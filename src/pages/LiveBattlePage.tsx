@@ -8,6 +8,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 import LiveShopPanel from "@/components/live/LiveShopPanel";
 import ReportDialog from "@/components/ReportDialog";
 import { toast } from "sonner";
+import { isUniqueViolation } from "@/lib/errorCodes";
 
 interface Battle {
   id: string;
@@ -97,7 +98,7 @@ export default function LiveBattlePage() {
       qr_coin_amount: qrcAmount,
     });
 
-    if (error && error.code === "23505") {
+    if (error && isUniqueViolation(error)) {
       toast.error("Hai già votato! Usa QRCoin per aumentare il punteggio");
       return;
     }

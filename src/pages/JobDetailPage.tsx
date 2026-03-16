@@ -7,6 +7,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
 import { ArrowLeft, MapPin, Clock, Briefcase, DollarSign, Star, Send, CheckCircle2, MessageCircle, Share2, Sparkles, Eye as EyeIcon, FileText, Lightbulb, Phone, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { isUniqueViolation, localizeDbError } from "@/lib/errorCodes";
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -103,8 +104,8 @@ export default function JobDetailPage() {
     });
 
     if (error) {
-      if (error.code === "23505") toast.error("Hai già inviato la candidatura");
-      else toast.error(error.message);
+      if (isUniqueViolation(error)) toast.error("Hai già inviato la candidatura");
+      else toast.error(localizeDbError(error, "Errore nell'invio della candidatura"));
     } else {
       await supabase.from("job_posts").update({ application_count: (job.application_count || 0) + 1 }).eq("id", id!);
       setAlreadyApplied(true);

@@ -5,25 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
+import { localizeAuthError } from "@/lib/errorCodes";
 
 // ─── Types ───────────────────────────────────────────────
 type AccountType = "client" | "professional" | "business";
 type RegistrationResult = { success: boolean; email?: string; accountType?: AccountType } | null;
-
-// ─── Localize Supabase auth errors to Italian ─────────────
-function localizeAuthError(message: string): string {
-  if (!message) return "Errore sconosciuto";
-  const m = message.toLowerCase();
-  if (m.includes("invalid login credentials") || m.includes("invalid email or password")) return "Credenziali non valide. Controlla email e password.";
-  if (m.includes("email not confirmed")) return "Email non confermata. Controlla la tua casella di posta.";
-  if (m.includes("user already registered") || m.includes("already been registered")) return "Questo indirizzo email è già registrato.";
-  if (m.includes("password should be at least")) return "La password deve essere di almeno 6 caratteri.";
-  if (m.includes("unable to validate email address")) return "Indirizzo email non valido.";
-  if (m.includes("too many requests") || m.includes("rate limit")) return "Troppe richieste. Riprova tra qualche minuto.";
-  if (m.includes("network") || m.includes("fetch")) return "Errore di rete. Controlla la connessione.";
-  if (m.includes("expired") || m.includes("token")) return "Sessione scaduta. Effettua nuovamente l'accesso.";
-  return message;
-}
 
 const CATEGORIES_PRO = [
   "Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist",
