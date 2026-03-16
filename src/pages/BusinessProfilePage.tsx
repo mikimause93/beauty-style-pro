@@ -27,7 +27,7 @@ export default function BusinessProfilePage() {
 
   const fetchBusiness = async () => {
     const [bizRes, svcRes, revRes] = await Promise.all([
-      supabase.from("businesses").select("*").eq("id", id!).single(),
+      supabase.from("businesses").select("*").eq("id", id!).maybeSingle(),
       supabase.from("services").select("*").eq("professional_id", id!).eq("active", true),
       supabase.from("reviews").select("*, profiles:client_id(display_name, avatar_url)").eq("professional_id", id!).order("created_at", { ascending: false }).limit(10),
     ]);

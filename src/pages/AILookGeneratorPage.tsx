@@ -162,7 +162,7 @@ const AILookGeneratorPage = () => {
       .from("profiles")
       .select("avatar_url")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
     if (profile?.avatar_url) {
       setPhotoUrl(profile.avatar_url);
       setStep("styles");

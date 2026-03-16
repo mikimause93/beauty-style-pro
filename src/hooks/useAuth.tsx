@@ -15,30 +15,40 @@ interface AuthContextType {
 }
 
 /** Translates Supabase English error messages to Italian. */
-export function localizeAuthError(message: string): string {
+export function localizeAuthError(message?: string): string {
   if (!message) return "Si è verificato un errore. Riprova.";
   const m = message.toLowerCase();
-  if (m.includes("invalid login credentials") || m.includes("invalid credentials"))
+  // Supabase v2 error codes (checked before text matching)
+  if (m.includes("invalid_credentials") || m.includes("invalid login credentials") || m.includes("invalid credentials"))
     return "Credenziali non valide. Controlla email e password.";
-  if (m.includes("email not confirmed"))
-    return "Email non verificata. Controlla la tua casella di posta.";
-  if (m.includes("user already registered") || m.includes("already been registered"))
+  if (m.includes("email_not_confirmed") || m.includes("email not confirmed"))
+    return "Email non verificata. Controlla la tua casella di posta e clicca il link di conferma.";
+  if (m.includes("user_already_exists") || m.includes("user already registered") || m.includes("already been registered") || m.includes("already registered"))
     return "Questa email è già registrata. Prova ad accedere.";
-  if (m.includes("password should be at least"))
+  if (m.includes("weak_password") || m.includes("password should be at least") || m.includes("password is too short"))
     return "La password deve contenere almeno 6 caratteri.";
-  if (m.includes("signup is disabled"))
+  if (m.includes("signup_disabled") || m.includes("signup is disabled") || m.includes("registrations"))
     return "La registrazione è temporaneamente disabilitata.";
-  if (m.includes("email rate limit exceeded") || m.includes("rate limit"))
+  if (m.includes("over_request_rate_limit") || m.includes("email rate limit") || m.includes("rate limit") || m.includes("too many requests"))
     return "Troppi tentativi. Aspetta qualche minuto e riprova.";
-  if (m.includes("invalid phone") || m.includes("phone number"))
+  if (m.includes("invalid_phone") || m.includes("invalid phone") || m.includes("phone number"))
     return "Numero di telefono non valido.";
-  if (m.includes("otp expired") || m.includes("token has expired"))
+  if (m.includes("otp_expired") || m.includes("otp expired") || m.includes("token has expired"))
     return "Il codice OTP è scaduto. Richiedine uno nuovo.";
-  if (m.includes("invalid otp") || m.includes("token is invalid"))
+  if (m.includes("otp_disabled") || m.includes("invalid otp") || m.includes("token is invalid") || m.includes("invalid token"))
     return "Codice OTP non valido. Controlla il codice ricevuto.";
-  if (m.includes("network") || m.includes("fetch"))
+  if (m.includes("same_password"))
+    return "La nuova password deve essere diversa da quella attuale.";
+  if (m.includes("email_address_invalid") || m.includes("invalid email") || m.includes("unable to validate email"))
+    return "Indirizzo email non valido.";
+  if (m.includes("network") || m.includes("fetch") || m.includes("failed to fetch") || m.includes("networkerror"))
     return "Errore di rete. Controlla la connessione e riprova.";
-  return message;
+  if (m.includes("timeout") || m.includes("timed out"))
+    return "La richiesta ha impiegato troppo tempo. Riprova.";
+  if (m.includes("unauthorized") || m.includes("not authorized"))
+    return "Non autorizzato. Rieffettua il login.";
+  // Return a generic Italian message for any unrecognized error instead of raw English
+  return "Si è verificato un errore. Riprova.";
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -115,20 +125,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, userType: string = "client") => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName, user_type: userType },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: displayName, user_type: userType },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      return { error };
+    } catch (e: any) {
+      return { error: { message: e?.message || "Errore di rete. Controlla la connessione." } };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    } catch (e: any) {
+      return { error: { message: e?.message || "Errore di rete. Controlla la connessione." } };
+    }
   };
 
   const signOut = async () => {
@@ -143,10 +161,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth?mode=reset`,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+      return { error };
+    } catch (e: any) {
+      return { error: { message: e?.message || "Errore di rete. Controlla la connessione." } };
+    }
   };
 
   return (

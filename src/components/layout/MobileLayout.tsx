@@ -19,7 +19,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <main className={showRadio ? "pb-32" : "pb-20"}>
+      <main className={showRadio ? "pb-32" : "pb-20"} style={{ paddingBottom: `calc(${showRadio ? "8rem" : "5rem"} + env(safe-area-inset-bottom, 0px))` }}>
         {children}
       </main>
       <FloatingAIButton />

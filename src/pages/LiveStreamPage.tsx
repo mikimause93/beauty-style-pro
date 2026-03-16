@@ -135,7 +135,7 @@ export default function LiveStreamPage() {
         const comment = payload.new as any;
         // Don't add own messages (already added locally)
         if (comment.user_id === user?.id) return;
-        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).single();
+        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).maybeSingle();
         setChatMessages(prev => [...prev, {
           id: comment.id,
           user: prof?.display_name || "Utente",

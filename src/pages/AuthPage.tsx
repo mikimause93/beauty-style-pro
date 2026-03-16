@@ -132,6 +132,8 @@ export default function AuthPage() {
       const { error } = await signIn(email, password);
       if (error) toast.error(localizeAuthError(error.message));
       else { toast.success("Benvenuto!"); navigate("/"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
     } finally {
       setLoading(false);
     }
@@ -146,6 +148,8 @@ export default function AuthPage() {
       const { error } = await resetPassword(resetEmail.trim());
       if (error) toast.error(localizeAuthError(error.message));
       else setResetSent(true);
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
     } finally {
       setLoading(false);
     }
@@ -161,6 +165,8 @@ export default function AuthPage() {
       const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
       if (error) { toast.error(localizeAuthError(error.message)); }
       else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
     } finally {
       setLoading(false);
     }
@@ -175,6 +181,8 @@ export default function AuthPage() {
       const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
       if (error) { toast.error(localizeAuthError(error.message)); }
       else { toast.success("Accesso effettuato!"); navigate("/"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
     } finally {
       setLoading(false);
     }
@@ -189,38 +197,42 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
-    
-    if (error) { 
-      toast.error(localizeAuthError(error.message)); 
-      setLoading(false); 
-      return; 
+    try {
+      const { error } = await signUp(email, password, displayName, accountType);
+
+      if (error) {
+        toast.error(localizeAuthError(error.message));
+        setLoading(false);
+        return;
+      }
+
+      // Save IBAN to payment_methods if provided
+      if (iban.trim()) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            await supabase.from("payment_methods").insert({
+              user_id: session.user.id,
+              method_type: "iban",
+              label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
+              iban_number: iban.trim(),
+              holder_name: bankHolder || displayName,
+            });
+          }
+        } catch { /* Will be addable from Wallet later */ }
+      }
+
+      // Since email verification is now enabled, show verification screen
+      setRegistrationResult({
+        success: true,
+        email: email,
+        accountType: accountType
+      });
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
     }
-
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
-    }
-
-    // Since email verification is now enabled, show verification screen
-    setRegistrationResult({
-      success: true,
-      email: email,
-      accountType: accountType
-    });
-
-    setLoading(false);
   };
 
   // ─── Step logic per account type ─────────────────────
