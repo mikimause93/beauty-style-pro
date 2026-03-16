@@ -16,6 +16,7 @@ import {
   Download, Share2, Bookmark, CalendarPlus, Wand2,
   Crown, Zap, History, ChevronRight, ImagePlus, X
 } from "lucide-react";
+import { azureAnalyzeFace, isAzureFaceEnabled, type DetectedFace } from "@/lib/azureAI";
 
 // ── Style Categories ─────────────────────────────────────────
 const STYLE_CATEGORIES = [
@@ -134,6 +135,7 @@ const AILookGeneratorPage = () => {
   const [autoSuggestions, setAutoSuggestions] = useState<any[] | null>(null);
   const [showAutoLook, setShowAutoLook] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [faceAnalysis, setFaceAnalysis] = useState<DetectedFace[] | null>(null);
 
   // ── Photo Upload ───────────────────────────────────────────
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,6 +187,37 @@ const AILookGeneratorPage = () => {
   const isSelected = (category: string, name: string) =>
     selectedStyles.some((s) => s.category === category && s.name === name);
 
+  // ── Azure Face Analysis ────────────────────────────────────
+  const analyzeFaceWithAzure = useCallback(async (imgUrl: string): Promise<DetectedFace[] | null> => {
+    if (!isAzureFaceEnabled()) return null;
+    try {
+      const faces = await azureAnalyzeFace(imgUrl);
+      setFaceAnalysis(faces);
+      if (faces.length > 0) {
+        const attrs = faces[0].faceAttributes;
+        const hairColors = attrs?.hair?.hairColor
+          ?.sort((a, b) => b.confidence - a.confidence)
+          .slice(0, 2)
+          .map((h) => h.color)
+          .join(", ");
+        const details = [
+          attrs?.gender && `Genere rilevato: ${attrs.gender}`,
+          hairColors && `Colore capelli: ${hairColors}`,
+          attrs?.glasses && attrs.glasses !== "NoGlasses" && `Occhiali: ${attrs.glasses}`,
+          typeof attrs?.facialHair?.beard === "number" && attrs.facialHair.beard > 0.5 && "Barba rilevata",
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        if (details) {
+          toast({ title: `🔍 Azure Vision: ${details}` });
+        }
+      }
+      return faces;
+    } catch {
+      return null;
+    }
+  }, []);
+
   // ── Generation ─────────────────────────────────────────────
   const generateLook = async (styles?: StyleSelection[]) => {
     if (!photoUrl) return;
@@ -198,12 +231,18 @@ const AILookGeneratorPage = () => {
     }, 500);
 
     try {
+      // Run Azure Face analysis in parallel when available (non-blocking)
+      if (isAzureFaceEnabled()) {
+        analyzeFaceWithAzure(photoUrl).catch(() => null);
+      }
+
       const { data, error } = await supabase.functions.invoke("ai-look-generator", {
         body: {
           action: "generate",
           imageUrl: photoUrl,
           styles: styles || selectedStyles,
           autoMode: !!styles,
+          faceAnalysis: faceAnalysis || undefined,
         },
       });
 
@@ -242,6 +281,11 @@ const AILookGeneratorPage = () => {
     if (!photoUrl) return;
     setShowAutoLook(true);
     try {
+      // Run Azure Face analysis in parallel when available
+      if (isAzureFaceEnabled()) {
+        analyzeFaceWithAzure(photoUrl).catch(() => null);
+      }
+
       const { data, error } = await supabase.functions.invoke("ai-look-generator", {
         body: { action: "auto_suggest", imageUrl: photoUrl },
       });

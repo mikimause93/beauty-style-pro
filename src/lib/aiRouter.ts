@@ -1,4 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
+import {
+  azureOpenAIChat,
+  azureOpenAIStream,
+  isAzureOpenAIEnabled,
+} from "@/lib/azureAI";
 
 type AIRole = "user" | "business" | "admin" | "beauty" | "shop" | "job" | "live" | "map" | "auto";
 
@@ -11,11 +16,50 @@ interface AIRouterOptions {
   stream?: boolean;
 }
 
+/** System prompt per role, used when calling Azure OpenAI directly. */
+const ROLE_SYSTEM_PROMPTS: Record<string, string> = {
+  user:     "Sei Stella, assistente AI di STYLE. Aiuta l'utente con consigli beauty, prenotazioni e uso dell'app. Rispondi in italiano.",
+  business: "Sei un consulente AI per professionisti della bellezza su STYLE. Aiuta con gestione clienti, marketing e crescita del business. Rispondi in italiano.",
+  admin:    "Sei un assistente per l'amministrazione di STYLE. Rispondi in italiano.",
+  beauty:   "Sei un esperto di beauty e moda su STYLE. Dai consigli su tagli, colori, tendenze e cura della persona. Rispondi in italiano.",
+  shop:     "Sei un assistente per lo shop di STYLE. Aiuta con prodotti, ordini e promozioni. Rispondi in italiano.",
+  job:      "Sei un recruiter AI per il settore beauty su STYLE. Aiuta con annunci di lavoro e candidature. Rispondi in italiano.",
+  live:     "Sei un assistente per le live su STYLE. Aiuta streamer e spettatori. Rispondi in italiano.",
+  map:      "Sei un assistente per la ricerca geolocalizzata su STYLE. Aiuta a trovare professionisti vicini. Rispondi in italiano.",
+  auto:     "Sei Stella, assistente AI di STYLE. Aiuta l'utente con qualsiasi domanda. Rispondi in italiano.",
+};
+
+type AzureMsg = { role: "system" | "user" | "assistant"; content: string };
+
+/** Build the Azure OpenAI messages array from AIRouterOptions. */
+function buildAzureMessages(options: AIRouterOptions): AzureMsg[] {
+  const role = options.role || "auto";
+  const systemPrompt = ROLE_SYSTEM_PROMPTS[role] ?? ROLE_SYSTEM_PROMPTS.auto;
+  const systemMsg: AzureMsg = { role: "system", content: systemPrompt };
+
+  if (options.messages) {
+    return [
+      systemMsg,
+      ...options.messages.map((m) => ({
+        role: m.role as "user" | "assistant" | "system",
+        content: m.content,
+      })),
+    ];
+  }
+
+  return [systemMsg, { role: "user", content: options.message ?? "" }];
+}
+
 /**
- * Call the AI Router edge function for role-based AI responses.
- * Uses Lovable AI Gateway with automatic prompt routing.
+ * Call the AI Router for role-based AI responses.
+ * Uses Azure OpenAI when configured, otherwise falls back to the Supabase Edge Function.
  */
 export async function askAI(options: AIRouterOptions): Promise<string> {
+  if (isAzureOpenAIEnabled()) {
+    return azureOpenAIChat({ messages: buildAzureMessages(options) });
+  }
+
+  // Fallback: Supabase Edge Function
   const { data, error } = await supabase.functions.invoke("ai-router", {
     body: {
       role: options.role || "auto",
@@ -32,13 +76,25 @@ export async function askAI(options: AIRouterOptions): Promise<string> {
 }
 
 /**
- * Stream AI response from the AI Router with SSE.
+ * Stream AI response.
+ * Uses Azure OpenAI when configured, otherwise falls back to the Supabase Edge Function SSE stream.
  */
 export async function streamAI(options: AIRouterOptions & {
   onDelta: (text: string) => void;
   onDone: () => void;
   onError?: (error: string) => void;
 }) {
+  if (isAzureOpenAIEnabled()) {
+    await azureOpenAIStream({
+      messages: buildAzureMessages(options),
+      onDelta: options.onDelta,
+      onDone: options.onDone,
+      onError: options.onError,
+    });
+    return;
+  }
+
+  // Fallback: Supabase Edge Function SSE stream
   const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-router`;
 
   const resp = await fetch(CHAT_URL, {
@@ -62,7 +118,6 @@ export async function streamAI(options: AIRouterOptions & {
     return;
   }
   if (!resp.ok) {
-    // Try to extract fallback reply from JSON response
     try {
       const fallback = await resp.json();
       if (fallback?.reply) {
