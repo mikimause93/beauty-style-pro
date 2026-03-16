@@ -19,12 +19,30 @@ const CATEGORIES_BIZ = [
   "Salone", "Brand", "Accademia", "Shop", "Agenzia",
 ];
 
-// ─── Component ───────────────────────────────────────────
+// ─── Error localization ───────────────────────────────────
+function localizeAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("invalid login credentials") || lower.includes("invalid credentials"))
+    return "Credenziali non valide. Controlla email e password.";
+  if (lower.includes("email not confirmed") || lower.includes("email link is invalid"))
+    return "Email non verificata. Controlla la tua casella di posta e clicca il link di conferma.";
+  if (lower.includes("user already registered") || lower.includes("already been registered"))
+    return "Questa email è già registrata. Prova ad accedere.";
+  if (lower.includes("too many requests") || lower.includes("rate limit"))
+    return "Troppi tentativi. Riprova tra qualche minuto.";
+  if (lower.includes("password should be") || lower.includes("password must"))
+    return "La password deve essere di almeno 6 caratteri.";
+  if (lower.includes("network") || lower.includes("fetch"))
+    return "Errore di connessione. Controlla la tua rete e riprova.";
+  return message;
+}
+
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
 
@@ -119,12 +137,26 @@ export default function AuthPage() {
     setLocating(false);
   };
 
+  // ─── Forgot Password ─────────────────────────────────
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) { toast.error("Inserisci la tua email per reimpostare la password"); return; }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    if (error) toast.error(localizeAuthError(error.message));
+    else toast.success("Email per reimpostazione password inviata! Controlla la casella di posta.");
+    setLoading(false);
+    setShowForgotPassword(false);
+  };
+
   // ─── Login ───────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
+    if (error) toast.error(localizeAuthError(error.message));
     else { toast.success("Benvenuto!"); navigate("/"); }
     setLoading(false);
   };
@@ -136,7 +168,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(localizeAuthError(error.message)); }
     else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
     setLoading(false);
   };
@@ -147,7 +179,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(localizeAuthError(error.message)); }
     else { toast.success("Accesso effettuato!"); navigate("/"); }
     setLoading(false);
   };
@@ -164,7 +196,7 @@ export default function AuthPage() {
     const { error } = await signUp(email, password, displayName, accountType);
     
     if (error) { 
-      toast.error(error.message); 
+      toast.error(localizeAuthError(error.message)); 
       setLoading(false); 
       return; 
     }
@@ -303,6 +335,26 @@ export default function AuthPage() {
           </div>
 
           {loginMode === "email" ? (
+            showForgotPassword ? (
+              <form onSubmit={handleForgotPassword} className="space-y-3">
+                <p className="text-sm text-muted-foreground text-center mb-2">
+                  Inserisci la tua email per ricevere il link di reimpostazione password.
+                </p>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
+                    className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                </div>
+                <button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                  {loading ? "Invio..." : "Invia link di reimpostazione"}
+                </button>
+                <button type="button" onClick={() => setShowForgotPassword(false)}
+                  className="w-full text-center text-xs text-primary font-medium">
+                  Torna al login
+                </button>
+              </form>
+            ) : (
             <form onSubmit={handleLogin} className="space-y-3">
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -320,9 +372,10 @@ export default function AuthPage() {
               </div>
               <button type="submit" disabled={loading}
                 className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
-                {loading ? "Caricamento..." : "Accedi"}
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-2" />Caricamento...</> : "Accedi"}
               </button>
             </form>
+            )
           ) : !otpSent ? (
             <form onSubmit={handleSendOtp} className="space-y-3">
               <div className="relative">
@@ -351,7 +404,9 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          {!showForgotPassword && loginMode === "email" && (
+            <button type="button" onClick={() => setShowForgotPassword(true)} className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          )}
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
