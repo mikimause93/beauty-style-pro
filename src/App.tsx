@@ -84,6 +84,7 @@ const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
 const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
+const ProjectStatusPage = lazy(() => import("./pages/ProjectStatusPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
@@ -148,6 +149,7 @@ const App = () => {
             <Route path="/spa-terme" element={<SpaTermePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/stato-progetto" element={<ProjectStatusPage />} />
 
             {/* Protected routes */}
             <Route path="/profile" element={<P><ProfilePage /></P>} />
