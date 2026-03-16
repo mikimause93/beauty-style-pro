@@ -1,6 +1,6 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import InteractiveMap, { MapMarker } from "@/components/map/InteractiveMap";
-import { ArrowLeft, Search, MapPin, Star, Filter, Sparkles, Home, Locate, Briefcase, Calendar, Tag } from "lucide-react";
+import { ArrowLeft, Search, MapPin, Star, Filter, Sparkles, Home, Locate, Briefcase, Calendar, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,11 +66,15 @@ export default function MapSearchPage() {
   const [markerFilter, setMarkerFilter] = useState<MarkerFilter>("all");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    loadProfessionals();
-    loadJobs();
-    loadEvents();
+    const init = async () => {
+      setDataLoading(true);
+      await Promise.all([loadProfessionals(), loadJobs(), loadEvents()]);
+      setDataLoading(false);
+    };
+    init();
     loadUserPrefs();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -236,6 +240,10 @@ export default function MapSearchPage() {
     if (maxDistance > 10) return 13;
     return 15;
   }, [maxDistance]);
+
+  const emptyStateMessage = search
+    ? `Nessun risultato per "${search}". Prova con un termine diverso.`
+    : "Prova ad ampliare la distanza o cambia filtri.";
 
   const handleAiSearch = async () => {
     if (!search.trim()) { toast.error("Scrivi cosa cerchi..."); return; }
@@ -430,13 +438,23 @@ export default function MapSearchPage() {
           </div>
         ))}
 
-        {filtered.length === 0 && (
+        {dataLoading ? (
+          <div className="text-center py-12">
+            <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
+            <p className="text-sm text-muted-foreground">Caricamento professionisti...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Nessun risultato</p>
-            <p className="text-xs text-muted-foreground mt-1">Prova ad ampliare la distanza</p>
+            <p className="text-sm text-muted-foreground">Nessun professionista trovato</p>
+            <p className="text-xs text-muted-foreground mt-1">{emptyStateMessage}</p>
+            {search && (
+              <button onClick={() => setSearch("")} className="mt-3 text-xs text-primary font-medium">
+                Rimuovi filtro ricerca
+              </button>
+            )}
           </div>
-        )}
+        ) : null}
       </div>
     </MobileLayout>
   );
