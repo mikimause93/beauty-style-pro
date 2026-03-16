@@ -187,9 +187,9 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* Quick Actions — premium minimal icons */}
+      {/* Quick Actions — single compact scrollable row under stories */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-4 px-5 mb-5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
           {[
             { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
@@ -210,9 +210,9 @@ export default function HomePage() {
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-2 min-w-[68px] shrink-0 group">
-              <div className="w-16 h-16 rounded-2xl gradient-luxury shadow-luxury flex items-center justify-center transition-all duration-200 group-active:scale-90 group-hover:scale-105">
-                <item.Icon className="w-7 h-7 text-primary-foreground drop-shadow-sm" />
+              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
+              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
+                <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
               <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
             </button>
