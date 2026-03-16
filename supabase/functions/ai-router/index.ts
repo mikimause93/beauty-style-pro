@@ -261,13 +261,13 @@ serve(async (req) => {
         message_type: role || "chat",
         content: `User: ${userMsg}\nBot: ${reply}`,
         status: "completed"
-      }).catch(() => { /* Intentionally ignored: chat log persistence is non-critical */ });
+      }).then(() => {}).catch(() => { /* Intentionally ignored: chat log persistence is non-critical */ });
     }
 
     return jsonResponse({ reply, role: role || "auto" });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("ai-router error:", e);
-    return jsonResponse({ error: e.message }, 500);
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 
