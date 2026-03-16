@@ -52,10 +52,10 @@ export default function ProfileShowcasePanel({ isOwnProfile, userId }: ProfileSh
           .map(f => {
             const { data: urlData } = supabase.storage.from("posts").getPublicUrl(`showcase/${userId}/${f.name}`);
             const parts = f.name.split("__");
-            const type = (parts[0] as any) || "image";
+            const type = parts[0] || "image";
             return {
               id: f.name,
-              type: ["image", "video", "catalog", "promo"].includes(type) ? type as any : "image",
+              type: (["image", "video", "catalog", "promo"].includes(type) ? type : "image") as "image" | "video" | "catalog" | "promo",
               url: urlData.publicUrl,
               title: parts[1]?.replace(/\.[^.]+$/, "").replace(/-/g, " ") || f.name,
             };
@@ -87,7 +87,7 @@ export default function ProfileShowcasePanel({ isOwnProfile, userId }: ProfileSh
       setNewPrice("");
       setNewDescription("");
       await loadShowcase();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error("Errore nel caricamento");
       console.error(err);
     }

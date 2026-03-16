@@ -11,11 +11,19 @@ interface Props {
   currentName?: string;
 }
 
+interface Professional {
+  id: string;
+  business_name: string;
+  user_id: string;
+  rating: number | null;
+  city: string | null;
+}
+
 export default function BattleChallengeButton({ streamId, currentProfessionalId, currentName }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [professionals, setProfessionals] = useState<any[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -36,7 +44,7 @@ export default function BattleChallengeButton({ streamId, currentProfessionalId,
     fetchProfessionals();
   };
 
-  const challenge = async (pro: any) => {
+  const challenge = async (pro: Professional) => {
     if (!user) return;
     const { data, error } = await supabase.from("live_battles").insert({
       stream_id: streamId,
@@ -52,7 +60,7 @@ export default function BattleChallengeButton({ streamId, currentProfessionalId,
     if (error) { toast.error("Errore nella creazione della battle"); return; }
     toast.success(`Battle avviata con ${pro.business_name}!`);
     setOpen(false);
-    navigate(`/live-battle?id=${(data as any).id}`);
+    navigate(`/live-battle?id=${data?.id}`);
   };
 
   const filtered = professionals.filter(p =>

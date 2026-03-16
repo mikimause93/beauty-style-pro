@@ -5,6 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+interface BarcodeDetectorResult { rawValue: string }
+interface BarcodeDetectorInstance { detect(image: HTMLCanvasElement): Promise<BarcodeDetectorResult[]> }
+declare const BarcodeDetector: { new(options?: { formats?: string[] }): BarcodeDetectorInstance }
+
 interface QRTransferModalProps {
   open: boolean;
   onClose: () => void;
@@ -89,8 +93,8 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
 
     // Use BarcodeDetector if available (Chrome, Edge, Android)
     if ("BarcodeDetector" in window) {
-      const detector = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
-      detector.detect(canvas).then((barcodes: any[]) => {
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      detector.detect(canvas).then((barcodes: BarcodeDetectorResult[]) => {
         if (barcodes.length > 0) {
           handleScannedValue(barcodes[0].rawValue);
         }

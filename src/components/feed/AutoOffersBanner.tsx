@@ -3,9 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tag, MapPin, Percent, ChevronRight } from "lucide-react";
 
+interface Offer {
+  professional_id: string;
+  discount: number;
+  service_name: string;
+  professional_name: string;
+  original_price: number;
+  offer_price: number;
+  city?: string;
+}
+
 export default function AutoOffersBanner() {
   const navigate = useNavigate();
-  const [offers, setOffers] = useState<any[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
 
   useEffect(() => {
     loadOffers();

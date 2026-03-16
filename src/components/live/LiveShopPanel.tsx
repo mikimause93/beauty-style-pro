@@ -37,8 +37,8 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
   const fetchData = async () => {
     setLoading(true);
     try {
-      let svcData: any[] = [];
-      let prodData: any[] = [];
+      let svcData: Service[] = [];
+      let prodData: Product[] = [];
 
       if (professionalId) {
         const { data: svc } = await supabase.from("services").select("id, name, price, duration").eq("professional_id", professionalId).limit(5);
