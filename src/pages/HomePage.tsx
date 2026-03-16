@@ -41,7 +41,58 @@ interface Post {
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
 
-// No mock data — only real DB content in production
+const DEMO_POSTS: Post[] = [
+  {
+    id: "demo-1",
+    user_id: "demo",
+    caption: "✨ Nuovo look autunnale! Balayage caldo su capelli castani. Che ne pensate? #balayage #beauty #hairstyle",
+    image_url: beauty1,
+    video_url: null,
+    like_count: 347,
+    comment_count: 52,
+    post_type: "image",
+    created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
+    profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional", verification_status: "verified" },
+  },
+  {
+    id: "demo-2",
+    user_id: "demo",
+    caption: "🌊 Summer vibes! Ombré perfetto per l'estate 🏖️ Prenota subito il tuo appuntamento! #ombre #summer #hair",
+    image_url: beauty2,
+    video_url: null,
+    like_count: 218,
+    comment_count: 34,
+    post_type: "image",
+    created_at: new Date(Date.now() - 5 * 3600000).toISOString(),
+    profileData: { display_name: "Sylvie Leaciu", avatar_url: stylist1, user_type: "professional", verification_status: "verified" },
+  },
+  {
+    id: "demo-3",
+    user_id: "demo",
+    caption: "💅 Nail art floreale primavera 2025 — handmade! DM per prenotare 🌸 #nailart #nails #manicure",
+    image_url: beauty3,
+    video_url: null,
+    like_count: 189,
+    comment_count: 28,
+    post_type: "image",
+    created_at: new Date(Date.now() - 8 * 3600000).toISOString(),
+    profileData: { display_name: "Sofia Nail Art", avatar_url: beauty3, user_type: "professional", verification_status: null },
+  },
+];
+
+const DEMO_STYLISTS = [
+  { id: "demo-s1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, hourly_rate: 45, avatar: stylist2 },
+  { id: "demo-s2", business_name: "Sylvie Leaciu", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, hourly_rate: 55, avatar: stylist1 },
+  { id: "demo-s3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, hourly_rate: 35, avatar: beauty1 },
+];
+
+const DEMO_STORIES = [
+  { id: "ds1", name: "Martina", avatar: stylist2, isLive: true, hasStory: true },
+  { id: "ds2", name: "Sylvie", avatar: stylist1, isLive: true, hasStory: true },
+  { id: "ds3", name: "Sofia", avatar: beauty3, isLive: false, hasStory: true },
+  { id: "ds4", name: "Lucia", avatar: beauty1, isLive: false, hasStory: true },
+  { id: "ds5", name: "Marco", avatar: beauty2, isLive: false, hasStory: true },
+];
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -111,9 +162,13 @@ export default function HomePage() {
     } catch (error) { console.error('Error:', error); }
   };
 
-  const displayStories = stories;
-  const displayLiveStreams = liveStreams;
-  const displayPosts = posts;
+  const displayStories = stories.length > 0 ? stories : DEMO_STORIES;
+  const displayLiveStreams = liveStreams.length > 0 ? liveStreams : [
+    { id: "demo-live-h1", title: "Tutorial Balayage — Tecnica Avanzata", thumbnail_url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800", viewer_count: 312, status: "live", professional: { business_name: "Martina Rossi" } },
+    { id: "demo-live-h2", title: "Nail Art Primavera 2025", thumbnail_url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800", viewer_count: 198, status: "live", professional: { business_name: "Sofia Nail Art" } },
+  ];
+  const displayPosts = posts.length > 0 ? posts : DEMO_POSTS;
+  const displayStylists = stylists.length > 0 ? stylists : DEMO_STYLISTS;
 
   const handleLike = async (postId: string) => {
     const isLiked = likedPosts.includes(postId);
@@ -308,7 +363,7 @@ export default function HomePage() {
               <h3 className="text-sm font-semibold tracking-tight">Professionisti</h3>
               <button onClick={() => navigate("/stylists")} className="text-xs text-primary font-semibold">Vedi tutti</button>
             </div>
-            {stylists.map(stylist => (
+            {displayStylists.map(stylist => (
               <button key={stylist.id} onClick={() => navigate(`/stylist/${stylist.id}`)}
                 className="w-full flex items-center gap-3 p-3.5 rounded-2xl luxury-card hover:border-primary/40 transition-all duration-200 text-left shadow-luxury">
                 <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/20 shadow-sm" />

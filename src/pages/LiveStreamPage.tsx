@@ -227,11 +227,17 @@ export default function LiveStreamPage() {
       .in('status', ['live', 'scheduled'])
       .order('viewer_count', { ascending: false });
 
-    if (data) {
+    if (data && data.length > 0) {
       setStreams(data.map(s => ({
         ...s,
         professional: Array.isArray(s.professional) ? s.professional[0] : s.professional
       })));
+    } else {
+      setStreams([
+        { id: "demo-live-1", title: "Tutorial Balayage — Tecnica Avanzata", description: "Come realizzare un balayage perfetto da zero", thumbnail_url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800", viewer_count: 312, total_tips: 150, total_earnings: 150, status: "live", category: "taglio", qr_coin_pool: 500, interaction_goal: 100, is_public: true, professional: { id: "demo-s1", business_name: "Martina Rossi", rating: 4.9 } },
+        { id: "demo-live-2", title: "Nail Art Primavera 2025 — Tendenze", description: "Le tendenze nail art della stagione", thumbnail_url: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800", viewer_count: 198, total_tips: 80, total_earnings: 80, status: "live", category: "nails", qr_coin_pool: 300, interaction_goal: 50, is_public: true, professional: { id: "demo-s3", business_name: "Sofia Nail Art", rating: 4.7 } },
+        { id: "demo-live-3", title: "Make-up Serale — Look Smoky Eye", description: "Crea il perfetto smoky eye per la sera", thumbnail_url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800", viewer_count: 145, total_tips: 60, total_earnings: 60, status: "scheduled", category: "makeup", qr_coin_pool: 200, interaction_goal: 30, is_public: true, professional: { id: "demo-s4", business_name: "Luna Beauty Studio", rating: 4.8 } },
+      ]);
     }
     setLoading(false);
   };

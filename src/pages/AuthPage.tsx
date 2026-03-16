@@ -28,6 +28,11 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
 
+  // Forgot password
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -126,6 +131,18 @@ export default function AuthPage() {
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
     else { toast.success("Benvenuto!"); navigate("/"); }
+    setLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) { toast.error("Inserisci la tua email"); return; }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    if (error) toast.error(error.message);
+    else { setForgotSent(true); toast.success("Email per il reset inviata!"); }
     setLoading(false);
   };
 
@@ -351,7 +368,33 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          {loginMode === "email" && !showForgotPassword && (
+            <button type="button" onClick={() => setShowForgotPassword(true)} className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          )}
+          {showForgotPassword && (
+            <div className="mt-4 space-y-3 fade-in">
+              <p className="text-xs text-muted-foreground text-center">Inserisci la tua email per ricevere il link di reset</p>
+              {forgotSent ? (
+                <div className="text-center py-3">
+                  <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">Email inviata! Controlla la tua casella di posta.</p>
+                  <button type="button" onClick={() => { setShowForgotPassword(false); setForgotSent(false); }} className="mt-3 text-xs text-primary font-medium">Torna al login</button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPassword} className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input type="email" placeholder="La tua email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required
+                      className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                    {loading ? "Invio..." : "Invia link di reset"}
+                  </button>
+                  <button type="button" onClick={() => setShowForgotPassword(false)} className="w-full text-center text-xs text-muted-foreground font-medium">Annulla</button>
+                </form>
+              )}
+            </div>
+          )}
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
