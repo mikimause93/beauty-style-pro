@@ -52,7 +52,7 @@ export default function CreatorApplicationPage() {
           </div>
           <h2 className="text-xl font-display font-bold mb-2">Candidatura Inviata!</h2>
           <p className="text-sm text-muted-foreground mb-6">Riceverai una notifica quando il tuo profilo sarà approvato.</p>
-          <button onClick={() => navigate("/")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold">Torna alla Home</button>
+          <button onClick={() => navigate("/home")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold">Torna alla Home</button>
         </div>
       </MobileLayout>
     );

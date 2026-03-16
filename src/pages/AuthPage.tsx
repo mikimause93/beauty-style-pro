@@ -82,7 +82,7 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user) navigate("/");
+    if (!authLoading && user) navigate("/home");
   }, [user, authLoading, navigate]);
 
   // ─── GPS ─────────────────────────────────────────────
@@ -125,7 +125,7 @@ export default function AuthPage() {
     setLoading(true);
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    else { toast.success("Benvenuto!"); navigate("/home"); }
     setLoading(false);
   };
 
@@ -148,7 +148,7 @@ export default function AuthPage() {
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
     if (error) { toast.error(error.message); }
-    else { toast.success("Accesso effettuato!"); navigate("/"); }
+    else { toast.success("Accesso effettuato!"); navigate("/home"); }
     setLoading(false);
   };
 

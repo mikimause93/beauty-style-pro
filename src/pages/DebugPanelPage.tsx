@@ -91,7 +91,7 @@ export default function DebugPanelPage() {
           <ShieldCheck className="w-16 h-16 text-destructive" />
           <h1 className="text-xl font-bold">Accesso Negato</h1>
           <p className="text-sm text-muted-foreground">Solo gli amministratori possono accedere al Debug Panel.</p>
-          <Button onClick={() => navigate("/")} variant="outline">Torna alla Home</Button>
+          <Button onClick={() => navigate("/home")} variant="outline">Torna alla Home</Button>
         </div>
       </MobileLayout>
     );

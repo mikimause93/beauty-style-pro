@@ -50,7 +50,7 @@ export default function AdminPage() {
           <ShieldCheck className="w-16 h-16 text-destructive" />
           <h1 className="text-xl font-bold">Accesso Negato</h1>
           <p className="text-sm text-muted-foreground">Non hai i permessi per accedere al pannello amministrativo.</p>
-          <button onClick={() => navigate("/")} className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+          <button onClick={() => navigate("/home")} className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
             Torna alla Home
           </button>
         </div>

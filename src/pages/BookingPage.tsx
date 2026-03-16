@@ -136,7 +136,7 @@ export default function BookingPage() {
     return (
       <MobileLayout>
         <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+          <button onClick={() => navigate("/home")} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-display font-bold">Ricevuta</h1>
@@ -159,7 +159,7 @@ export default function BookingPage() {
             <button onClick={() => navigate("/my-bookings")} className="flex-1 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm">
               Le Mie Prenotazioni
             </button>
-            <button onClick={() => navigate("/")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
+            <button onClick={() => navigate("/home")} className="flex-1 py-3 rounded-xl bg-muted font-semibold text-sm">
               Home
             </button>
           </div>
