@@ -304,7 +304,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const panelHeight = isFullscreen ? "h-[85vh]" : "h-[28rem]";
 
   return (
-    <div className={`fixed z-50 ${className}`} style={{ bottom: 80, right: 16 }}>
+    <div className={`fixed z-[100] ${className}`} style={{ bottom: "calc(80px + env(safe-area-inset-bottom, 0px))", right: 16 }}>
       {/* Voice Call — minimal floating indicator (no full screen) */}
       <AnimatePresence>
         {isVoiceCallActive && (
@@ -574,7 +574,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
             height: 52,
             position: "fixed",
             right: fabPos.x === 0 ? 16 : undefined,
-            bottom: fabPos.y === 0 ? 80 : undefined,
+            bottom: fabPos.y === 0 ? "calc(80px + env(safe-area-inset-bottom, 0px))" : undefined,
             left: fabPos.x !== 0 ? fabPos.x : undefined,
             top: fabPos.y !== 0 ? fabPos.y : undefined,
             zIndex: 9999,
@@ -644,7 +644,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
       {/* Wake word hint */}
       {isMinimized && isWakeWordListening && fabPos.x === 0 && fabPos.y === 0 && (
-        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: 64, right: 8, zIndex: 9998 }}>
+        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: "calc(64px + env(safe-area-inset-bottom, 0px))", right: 8, zIndex: 9998 }}>
           🎙️ Dì "Stella"
         </p>
       )}

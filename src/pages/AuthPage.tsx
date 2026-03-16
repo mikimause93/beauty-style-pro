@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, localizeAuthError } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -26,13 +26,18 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, loading: authLoading, resetPassword } = useAuth();
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
   // Shared fields
   const [email, setEmail] = useState("");
@@ -123,10 +128,31 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
-    setLoading(false);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) toast.error(localizeAuthError(error.message));
+      else { toast.success("Benvenuto!"); navigate("/"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Forgot Password ──────────────────────────────────
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) { toast.error("Inserisci l'indirizzo email"); return; }
+    setLoading(true);
+    try {
+      const { error } = await resetPassword(resetEmail.trim());
+      if (error) toast.error(localizeAuthError(error.message));
+      else setResetSent(true);
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── Phone OTP Login ──────────────────────────────────
@@ -134,22 +160,32 @@ export default function AuthPage() {
     e.preventDefault();
     if (!phoneNumber.trim()) { toast.error("Inserisci il numero di telefono"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
-    else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
-    setLoading(false);
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+      if (error) { toast.error(localizeAuthError(error.message)); }
+      else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode.trim()) { toast.error("Inserisci il codice OTP"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
-    else { toast.success("Accesso effettuato!"); navigate("/"); }
-    setLoading(false);
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
+      if (error) { toast.error(localizeAuthError(error.message)); }
+      else { toast.success("Accesso effettuato!"); navigate("/"); }
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── Signup ──────────────────────────────────────────
@@ -161,38 +197,42 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
-    
-    if (error) { 
-      toast.error(error.message); 
-      setLoading(false); 
-      return; 
+    try {
+      const { error } = await signUp(email, password, displayName, accountType);
+
+      if (error) {
+        toast.error(localizeAuthError(error.message));
+        setLoading(false);
+        return;
+      }
+
+      // Save IBAN to payment_methods if provided
+      if (iban.trim()) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            await supabase.from("payment_methods").insert({
+              user_id: session.user.id,
+              method_type: "iban",
+              label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
+              iban_number: iban.trim(),
+              holder_name: bankHolder || displayName,
+            });
+          }
+        } catch { /* Will be addable from Wallet later */ }
+      }
+
+      // Since email verification is now enabled, show verification screen
+      setRegistrationResult({
+        success: true,
+        email: email,
+        accountType: accountType
+      });
+    } catch (e: any) {
+      toast.error(localizeAuthError(e?.message));
+    } finally {
+      setLoading(false);
     }
-
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
-    }
-
-    // Since email verification is now enabled, show verification screen
-    setRegistrationResult({
-      success: true,
-      email: email,
-      accountType: accountType
-    });
-
-    setLoading(false);
   };
 
   // ─── Step logic per account type ─────────────────────
@@ -279,6 +319,59 @@ export default function AuthPage() {
   }
 
   // ─── RENDER: LOGIN ──────────────────────────────────
+  if (isLogin && showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+        <div className="w-full">
+          <div className="flex flex-col items-center mb-10">
+            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
+            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+          </div>
+
+          {resetSent ? (
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Mail className="w-10 h-10 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-display font-bold mb-2">Email inviata!</h2>
+                <p className="text-sm text-muted-foreground mb-1">Controlla la casella di posta per</p>
+                <p className="text-sm font-semibold">{resetEmail}</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Il link per reimpostare la password è valido per 1 ora. Controlla anche lo spam.</p>
+              <button onClick={() => { setShowForgotPassword(false); setResetSent(false); }}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm">
+                Torna al Login
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div className="text-center">
+                <h2 className="text-xl font-display font-bold mb-1">Password dimenticata?</h2>
+                <p className="text-sm text-muted-foreground">Inserisci la tua email per ricevere il link di reset</p>
+              </div>
+              <form onSubmit={handleResetPassword} className="space-y-3">
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="email" placeholder="Email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required
+                    className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                </div>
+                <button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Invia link di reset"}
+                </button>
+              </form>
+              <button type="button" onClick={() => setShowForgotPassword(false)}
+                className="w-full text-center text-xs text-primary font-medium">
+                <ChevronLeft className="w-3 h-3 inline mr-1" />Torna al Login
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (isLogin) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
@@ -351,7 +444,8 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          <button type="button" onClick={() => { setShowForgotPassword(true); setResetEmail(email); }}
+            className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
