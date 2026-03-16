@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, localizeAuthError } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -26,13 +26,18 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, resetPassword, user, loading: authLoading } = useAuth();
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+
+  // Forgot password
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
 
   // Shared fields
   const [email, setEmail] = useState("");
@@ -124,8 +129,19 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
+    if (error) toast.error(localizeAuthError(error));
     else { toast.success("Benvenuto!"); navigate("/"); }
+    setLoading(false);
+  };
+
+  // ─── Forgot Password ─────────────────────────────────
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) { toast.error("Inserisci la tua email"); return; }
+    setLoading(true);
+    const { error } = await resetPassword(forgotEmail.trim());
+    if (error) { toast.error(localizeAuthError(error)); }
+    else { setForgotSent(true); }
     setLoading(false);
   };
 
@@ -136,7 +152,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(localizeAuthError(error)); }
     else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
     setLoading(false);
   };
@@ -147,7 +163,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(localizeAuthError(error)); }
     else { toast.success("Accesso effettuato!"); navigate("/"); }
     setLoading(false);
   };
@@ -164,7 +180,7 @@ export default function AuthPage() {
     const { error } = await signUp(email, password, displayName, accountType);
     
     if (error) { 
-      toast.error(error.message); 
+      toast.error(localizeAuthError(error)); 
       setLoading(false); 
       return; 
     }
@@ -278,6 +294,68 @@ export default function AuthPage() {
     );
   }
 
+  // ─── RENDER: FORGOT PASSWORD ────────────────────────
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+        <div className="w-full">
+          <div className="flex flex-col items-center mb-10">
+            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
+            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+            <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
+          </div>
+
+          {forgotSent ? (
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Mail className="w-10 h-10 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-display font-bold mb-2">Email inviata!</h2>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Abbiamo inviato un link per reimpostare la password a:
+                </p>
+                <p className="text-sm font-semibold">{forgotEmail}</p>
+              </div>
+              <div className="bg-muted/50 rounded-2xl p-4 text-left">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Importante:</strong> Controlla anche lo spam. Il link scade dopo 1 ora.
+                </p>
+              </div>
+              <button
+                onClick={() => { setShowForgotPassword(false); setForgotSent(false); setForgotEmail(""); }}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm"
+              >
+                Torna al Login
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-display font-bold mb-1">Password dimenticata</h2>
+                <p className="text-sm text-muted-foreground">Inserisci la tua email e ti invieremo un link per reimpostare la password.</p>
+              </div>
+              <form onSubmit={handleForgotPassword} className="space-y-3">
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="email" placeholder="La tua email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required
+                    className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                </div>
+                <button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                  {loading ? "Invio..." : "Invia link di reset"}
+                </button>
+              </form>
+              <button onClick={() => setShowForgotPassword(false)} className="w-full text-center text-xs text-primary font-medium mt-2">
+                ← Torna al Login
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // ─── RENDER: LOGIN ──────────────────────────────────
   if (isLogin) {
     return (
@@ -351,7 +429,7 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          <button onClick={() => { setShowForgotPassword(true); setForgotSent(false); }} className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>

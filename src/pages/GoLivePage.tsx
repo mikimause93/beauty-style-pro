@@ -49,7 +49,7 @@ export default function GoLivePage() {
       .from("professionals")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!pro) {
       toast.error("Devi avere un profilo professionale per trasmettere");

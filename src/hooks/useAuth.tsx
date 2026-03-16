@@ -1,6 +1,21 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
+import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+
+/** Translate Supabase auth error messages to Italian. */
+export function localizeAuthError(error: AuthError | { message: string } | null): string {
+  if (!error) return "Errore sconosciuto";
+  const msg = (error.message || "").toLowerCase();
+  if (msg.includes("invalid login credentials") || msg.includes("invalid email or password")) return "Credenziali non valide. Controlla email e password.";
+  if (msg.includes("email not confirmed")) return "Email non confermata. Controlla la tua casella di posta.";
+  if (msg.includes("user already registered") || msg.includes("already exists")) return "Questa email è già registrata.";
+  if (msg.includes("password should be at least")) return "La password deve essere di almeno 6 caratteri.";
+  if (msg.includes("rate limit") || msg.includes("too many requests")) return "Troppi tentativi. Riprova tra qualche minuto.";
+  if (msg.includes("network") || msg.includes("fetch")) return "Errore di connessione. Controlla la rete.";
+  if (msg.includes("token") || msg.includes("session")) return "Sessione scaduta. Accedi di nuovo.";
+  if (msg.includes("otp")) return "Codice OTP non valido o scaduto.";
+  return error.message || "Errore sconosciuto";
+}
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +25,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string, userType?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -22,12 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    setProfile(data);
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setProfile(data ?? null);
+    } catch {
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
@@ -106,12 +126,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    return { error };
+  };
+
   const refreshProfile = async () => {
     if (user) await fetchProfile(user.id);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
