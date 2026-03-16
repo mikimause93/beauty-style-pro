@@ -274,9 +274,9 @@ serve(async (req) => {
       trigger_type,
       timestamp: new Date().toISOString(),
     });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("ai-automation-triggers error:", e);
-    return jsonResponse({ error: e.message }, 500);
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 

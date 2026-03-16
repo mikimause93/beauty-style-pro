@@ -294,9 +294,9 @@ serve(async (req) => {
     }
 
     return jsonResponse({ error: "Unknown action" }, 400);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("ai-growth-engine error:", e);
-    return new Response(JSON.stringify({ error: e.message }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

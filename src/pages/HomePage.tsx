@@ -187,34 +187,34 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* Quick Actions — single compact scrollable row under stories */}
+      {/* Quick Actions — glossy scrollable icons, larger & luminous */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-3 px-5 mb-5 overflow-x-auto no-scrollbar py-1">
           {[
-            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
-            { Icon: Wand2, label: "AI Look", path: "/ai-look" },
-            { Icon: Scissors, label: "Stilisti", path: "/stylists" },
-            { Icon: CalendarDays, label: "Prenota", path: "/booking" },
-            { Icon: ShoppingBag, label: "Shop", path: "/shop" },
-            { Icon: MapIcon, label: "Mappa", path: "/map-search" },
-            { Icon: Droplets, label: "Spa", path: "/spa-terme" },
-            { Icon: Home, label: "Domicilio", path: "/map-search" },
-            { Icon: Target, label: "Missioni", path: "/missions" },
-            { Icon: Zap, label: "Quiz", path: "/quiz-live" },
-            { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
-            { Icon: Film, label: "Shorts", path: "/shorts" },
-            { Icon: Gift, label: "Vinci", path: "/spin" },
-            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
-            { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
-            { Icon: Radio, label: "Radio", path: "/radio" },
-            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant", gradient: "from-purple-500 via-pink-500 to-fuchsia-500" },
+            { Icon: Wand2, label: "AI Look", path: "/ai-look", gradient: "from-violet-500 to-indigo-500" },
+            { Icon: Scissors, label: "Stilisti", path: "/stylists", gradient: "from-pink-500 to-rose-500" },
+            { Icon: CalendarDays, label: "Prenota", path: "/booking", gradient: "from-blue-500 to-cyan-500" },
+            { Icon: ShoppingBag, label: "Shop", path: "/shop", gradient: "from-amber-500 to-orange-500" },
+            { Icon: MapIcon, label: "Mappa", path: "/map-search", gradient: "from-emerald-500 to-teal-500" },
+            { Icon: Droplets, label: "Spa", path: "/spa-terme", gradient: "from-sky-400 to-blue-500" },
+            { Icon: Home, label: "Domicilio", path: "/map-search", gradient: "from-lime-500 to-green-500" },
+            { Icon: Target, label: "Missioni", path: "/missions", gradient: "from-red-500 to-pink-500" },
+            { Icon: Zap, label: "Quiz", path: "/quiz-live", gradient: "from-yellow-400 to-amber-500" },
+            { Icon: Gamepad2, label: "Talent", path: "/talent-game", gradient: "from-indigo-500 to-purple-500" },
+            { Icon: Film, label: "Shorts", path: "/shorts", gradient: "from-rose-500 to-red-500" },
+            { Icon: Gift, label: "Vinci", path: "/spin", gradient: "from-fuchsia-500 to-pink-500" },
+            { Icon: Trophy, label: "Challenge", path: "/transformation-challenge", gradient: "from-amber-400 to-yellow-500" },
+            { Icon: Camera, label: "Prima/Dopo", path: "/before-after", gradient: "from-teal-500 to-cyan-500" },
+            { Icon: Radio, label: "Radio", path: "/radio", gradient: "from-violet-400 to-purple-500" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard", gradient: "from-orange-500 to-red-500" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[54px] shrink-0 group">
-              <div className="w-11 h-11 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-200 group-active:scale-95">
-                <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
+              className="flex flex-col items-center gap-1.5 min-w-[64px] shrink-0 group">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} shadow-lg shadow-primary/20 flex items-center justify-center transition-all duration-200 group-active:scale-90 group-hover:scale-105 ring-1 ring-white/20`}>
+                <item.Icon className="w-6 h-6 text-white drop-shadow-md" />
               </div>
-              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
+              <span className="text-[10px] text-foreground/80 font-bold leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>

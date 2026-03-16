@@ -746,9 +746,9 @@ Regole: max 60 char per messaggio, emoji, tono motivante, CTA chiare. Italiano.`
     }
 
     return jsonResponse({ error: "Unknown action" }, 400);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("chatbot-assistant error:", e);
-    return jsonResponse({ error: e.message }, 500);
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 
