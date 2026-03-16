@@ -119,6 +119,7 @@ export default function BookingPage() {
       start_time: selectedTime,
       total_price: selectedServiceData?.price,
       notes: notes || undefined,
+      location_type: selectedLocation,
     });
 
     if (error) {
