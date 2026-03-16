@@ -69,7 +69,7 @@ export default function AdminPage() {
       supabase.from("products").select("id", { count: "exact", head: true }),
       supabase.from("user_subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("profile_boosts").select("id", { count: "exact", head: true }).eq("active", true),
-      supabase.from("platform_settings").select("value").eq("key", "booking_commission_percent").single(),
+      supabase.from("platform_settings").select("value").eq("key", "booking_commission_percent").maybeSingle(),
       supabase.from("user_subscriptions").select("*, subscription_plans(name, slug)").eq("status", "active"),
       supabase.from("transactions").select("id, amount", { count: "exact" }),
     ]);

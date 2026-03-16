@@ -34,7 +34,7 @@ export function useFollow(targetUserId: string | undefined) {
       .from("profiles")
       .select("follower_count, following_count")
       .eq("user_id", targetUserId)
-      .single();
+      .maybeSingle();
     if (data) {
       setFollowerCount(data.follower_count || 0);
       setFollowingCount(data.following_count || 0);

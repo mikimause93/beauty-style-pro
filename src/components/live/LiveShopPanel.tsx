@@ -44,7 +44,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
         const { data: svc } = await supabase.from("services").select("id, name, price, duration").eq("professional_id", professionalId).limit(5);
         svcData = svc || [];
 
-        const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).single();
+        const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).maybeSingle();
         if (pro) {
           const { data: prods } = await supabase.from("products").select("id, name, price, image_url, rating").eq("seller_id", pro.user_id).eq("active", true).limit(5);
           prodData = prods || [];
