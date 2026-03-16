@@ -19,7 +19,7 @@ serve(async (req) => {
 
     // ===== ACTION: Personalized growth suggestions =====
     if (action === "user_suggestions") {
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).maybeSingle();
       if (!profile) return jsonResponse({ suggestions: [] });
 
       const [prosRes, bookingRes, postRes, subRes, boostRes] = await Promise.all([
@@ -223,7 +223,7 @@ serve(async (req) => {
         ]});
       }
 
-      const { data: profile } = await supabase.from("profiles").select("user_type, city, bio").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_type, city, bio").eq("user_id", user_id).maybeSingle();
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -296,10 +296,7 @@ serve(async (req) => {
     return jsonResponse({ error: "Unknown action" }, 400);
   } catch (e: unknown) {
     console.error("ai-growth-engine error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 

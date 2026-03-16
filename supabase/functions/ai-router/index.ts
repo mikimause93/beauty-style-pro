@@ -135,7 +135,7 @@ async function buildUserContext(supabase: any, userId: string): Promise<string> 
   const [profileRes, postsRes, bookingsRes, subsRes, transRes, proRes] = await Promise.all([
     supabase.from("profiles")
       .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
-      .eq("user_id", userId).single(),
+      .eq("user_id", userId).maybeSingle(),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", userId),
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", userId),
     supabase.from("user_subscriptions").select("*, subscription_plans(name)")
@@ -200,7 +200,7 @@ serve(async (req) => {
     // Build prompt from role
     let userType: string | undefined;
     if (user_id) {
-      const { data: profile } = await supabase.from("profiles").select("user_type").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_type").eq("user_id", user_id).maybeSingle();
       userType = profile?.user_type;
     }
 
