@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
+import { isUniqueViolation, localizeDbError } from "@/lib/errorCodes";
 
 const categories = [
   { id: "hairstylist", label: "Hairstylist", Icon: Scissors },
@@ -76,7 +77,7 @@ export default function CreatorApplicationPage() {
       });
 
       if (error) {
-        if (error.code === "23505") toast.error("Hai già un profilo professionale");
+        if (isUniqueViolation(error)) toast.error("Hai già un profilo professionale");
         else throw error;
       } else {
         // Update profile type
@@ -85,7 +86,7 @@ export default function CreatorApplicationPage() {
         toast.success("Candidatura inviata!");
       }
     } catch (err: any) {
-      toast.error(err.message || "Errore nell'invio");
+      toast.error(localizeDbError(err, "Errore nell'invio"));
     }
     setLoading(false);
   };

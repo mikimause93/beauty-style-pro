@@ -3,6 +3,7 @@ import { Mic, MicOff, X, Check, Clock, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { isUniqueViolation } from "@/lib/errorCodes";
 
 interface LiveGuestPanelProps {
   streamId: string;
@@ -71,7 +72,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
       status: "pending",
     });
     if (error) {
-      if (error.code === "23505") toast.error("Hai già inviato una richiesta");
+      if (isUniqueViolation(error)) toast.error("Hai già inviato una richiesta");
       else toast.error("Errore nell'invio della richiesta");
     } else {
       toast.success("🎤 Richiesta inviata! Attendi l'approvazione del professionista");
