@@ -134,7 +134,7 @@ async function processReminders(supabase: any) {
         .eq('id', reminder.id);
 
       processed++;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(`Error processing reminder ${reminder.id}:`, err);
     }
   }
