@@ -58,9 +58,10 @@ export default function BattleChallengeButton({ streamId, currentProfessionalId,
     }).select().single();
 
     if (error) { toast.error("Errore nella creazione della battle"); return; }
+    if (!data?.id) { toast.error("Errore: ID battle non trovato"); return; }
     toast.success(`Battle avviata con ${pro.business_name}!`);
     setOpen(false);
-    navigate(`/live-battle?id=${data?.id}`);
+    navigate(`/live-battle?id=${data.id}`);
   };
 
   const filtered = professionals.filter(p =>
