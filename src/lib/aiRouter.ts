@@ -7,7 +7,7 @@ interface AIRouterOptions {
   message?: string;
   messages?: Array<{ role: string; content: string }>;
   userId?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   stream?: boolean;
 }
 

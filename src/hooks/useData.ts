@@ -236,7 +236,7 @@ export function useSpin() {
         // Credits will be handled via profile update
         await supabase
           .from("profiles")
-          .update({ qr_coins: prizeValue } as any)
+          .update({ qr_coins: prizeValue } as never)
           .eq("user_id", userId);
       }
 

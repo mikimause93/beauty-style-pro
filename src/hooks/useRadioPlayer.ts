@@ -150,7 +150,7 @@ export function useRadioPlayer() {
         // Retry without crossOrigin (some streams block it)
         if (retryCountRef.current === 0 && audio.crossOrigin) {
           retryCountRef.current = 1;
-          audio.crossOrigin = null as any;
+          audio.crossOrigin = null;
           audio.src = target.stream_url;
           audio.load();
           audio.play().catch(() => {
@@ -187,12 +187,12 @@ export function useRadioPlayer() {
 
       await audio.play();
       setIsPlaying(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Radio play error:", err);
       // If it's a CORS issue, retry without crossOrigin
       if (audio.crossOrigin && retryCountRef.current === 0) {
         retryCountRef.current = 1;
-        audio.crossOrigin = null as any;
+        audio.crossOrigin = null;
         audio.src = (station || currentStation).stream_url;
         audio.load();
         try {

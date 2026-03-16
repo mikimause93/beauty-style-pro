@@ -29,7 +29,7 @@ export function useChatbot() {
   const [showChatbot, setShowChatbot] = useState(false);
 
   // Track user action
-  const trackAction = async (actionType: string, actionData: any = {}, pageContext?: string) => {
+  const trackAction = async (actionType: string, actionData: Record<string, unknown> = {}, pageContext?: string) => {
     if (!user) return;
     
     try {
@@ -81,7 +81,7 @@ export function useChatbot() {
   };
 
   // Handle suggestion interaction
-  const handleSuggestionClick = async (suggestion: ChatbotSuggestion, action: any) => {
+  const handleSuggestionClick = async (suggestion: ChatbotSuggestion, action: { action: string; target?: string }) => {
     if (!user) return;
 
     try {
