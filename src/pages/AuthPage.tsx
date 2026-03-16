@@ -10,6 +10,21 @@ import { toast } from "sonner";
 type AccountType = "client" | "professional" | "business";
 type RegistrationResult = { success: boolean; email?: string; accountType?: AccountType } | null;
 
+// ─── Localize Supabase auth errors to Italian ─────────────
+function localizeAuthError(message: string): string {
+  if (!message) return "Errore sconosciuto";
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials") || m.includes("invalid email or password")) return "Credenziali non valide. Controlla email e password.";
+  if (m.includes("email not confirmed")) return "Email non confermata. Controlla la tua casella di posta.";
+  if (m.includes("user already registered") || m.includes("already been registered")) return "Questo indirizzo email è già registrato.";
+  if (m.includes("password should be at least")) return "La password deve essere di almeno 6 caratteri.";
+  if (m.includes("unable to validate email address")) return "Indirizzo email non valido.";
+  if (m.includes("too many requests") || m.includes("rate limit")) return "Troppe richieste. Riprova tra qualche minuto.";
+  if (m.includes("network") || m.includes("fetch")) return "Errore di rete. Controlla la connessione.";
+  if (m.includes("expired") || m.includes("token")) return "Sessione scaduta. Effettua nuovamente l'accesso.";
+  return message;
+}
+
 const CATEGORIES_PRO = [
   "Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist",
   "Makeup Artist", "Tattoo Artist", "Photographer", "Creator",
@@ -26,7 +41,12 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, loading: authLoading, resetPassword } = useAuth();
+
+  // Forgot password
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
@@ -123,10 +143,27 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
-    setLoading(false);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) toast.error(localizeAuthError(error.message));
+      else { toast.success("Benvenuto!"); navigate("/"); }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Forgot Password ─────────────────────────────────
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) { toast.error("Inserisci la tua email"); return; }
+    setLoading(true);
+    try {
+      const { error } = await resetPassword(resetEmail.trim());
+      if (error) { toast.error(localizeAuthError(error.message)); }
+      else { setResetSent(true); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── Phone OTP Login ──────────────────────────────────
@@ -134,22 +171,28 @@ export default function AuthPage() {
     e.preventDefault();
     if (!phoneNumber.trim()) { toast.error("Inserisci il numero di telefono"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
-    else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
-    setLoading(false);
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+      if (error) { toast.error(localizeAuthError(error.message)); }
+      else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode.trim()) { toast.error("Inserisci il codice OTP"); return; }
     setLoading(true);
-    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
-    const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
-    else { toast.success("Accesso effettuato!"); navigate("/"); }
-    setLoading(false);
+    try {
+      const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+      const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
+      if (error) { toast.error(localizeAuthError(error.message)); }
+      else { toast.success("Accesso effettuato!"); navigate("/"); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── Signup ──────────────────────────────────────────
@@ -164,7 +207,7 @@ export default function AuthPage() {
     const { error } = await signUp(email, password, displayName, accountType);
     
     if (error) { 
-      toast.error(error.message); 
+      toast.error(localizeAuthError(error.message)); 
       setLoading(false); 
       return; 
     }
@@ -213,6 +256,67 @@ export default function AuthPage() {
     if (step < totalSteps) setStep(step + 1);
     else handleSignup();
   };
+
+  // ─── RENDER: FORGOT PASSWORD ──────────────────────────
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+        <div className="w-full">
+          <div className="flex flex-col items-center mb-10">
+            <img src={logo} alt="STYLE" className="w-16 h-16 mb-3" />
+            <h1 className="text-2xl font-display font-bold tracking-tight">STYLE</h1>
+            <p className="text-xs text-muted-foreground mt-1">La piattaforma beauty</p>
+          </div>
+
+          {resetSent ? (
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Mail className="w-10 h-10 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-display font-bold mb-2">Email inviata</h2>
+                <p className="text-sm text-muted-foreground mb-1">Ti abbiamo inviato le istruzioni per il reset della password a:</p>
+                <p className="text-sm font-semibold">{resetEmail}</p>
+              </div>
+              <div className="bg-muted/50 rounded-2xl p-4 text-left">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Importante:</strong> Controlla anche lo spam. Il link scade in 1 ora.
+                </p>
+              </div>
+              <button
+                onClick={() => { setShowForgotPassword(false); setResetSent(false); setResetEmail(""); }}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm"
+              >
+                Torna al Login
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-xl font-display font-bold">Password dimenticata?</h2>
+              <p className="text-sm text-muted-foreground">Inserisci la tua email e ti invieremo un link per reimpostare la password.</p>
+              <form onSubmit={handleResetPassword} className="space-y-3">
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input type="email" placeholder="La tua email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required
+                    className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                </div>
+                <button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Invio...</> : "Invia link di reset"}
+                </button>
+              </form>
+              <button
+                onClick={() => setShowForgotPassword(false)}
+                className="w-full h-10 rounded-xl bg-muted text-foreground font-medium text-sm"
+              >
+                Torna al Login
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // ─── RENDER: EMAIL VERIFICATION SUCCESS ──────────────
   if (registrationResult?.success) {
@@ -351,7 +455,7 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
+          <button type="button" onClick={() => { setShowForgotPassword(true); setResetEmail(email); setResetSent(false); }} className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
           <p className="text-center text-[10px] text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
