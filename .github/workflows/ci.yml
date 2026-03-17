@@ -24,10 +24,13 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint --if-present
 
-      - name: Run tests
-        run: npm test
+      - name: Test
+        run: npm test --if-present
+
+      - name: Audit
+        run: npm audit --audit-level=high
