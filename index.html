@@ -55,7 +55,7 @@
       var p = params.get('p');
       if (p) {
         var base = '/beauty-style-pro';
-        var path = decodeURIComponent(p.replace(/^\//, ''));
+        var path = decodeURIComponent(p);
         var query = params.get('q') ? '?' + decodeURIComponent(params.get('q')) : '';
         var hash = window.location.hash;
         window.history.replaceState(null, null, base + path + query + hash);
