@@ -39,7 +39,7 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
   });
 
   const copyCode = () => {
-    navigator.clipboard.writeText(myCode);
+    try { navigator.clipboard.writeText(myCode); } catch { /* unavailable in restricted contexts */ }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success("Codice copiato!");
@@ -275,7 +275,7 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
                   navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
                   toast.success("Messaggio copiato!");
                 }
-              } catch { navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); toast.success("Messaggio copiato!"); }
+              } catch { try { navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); toast.success("Messaggio copiato!"); } catch { /* unavailable */ } }
             }}
               className="w-full flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border border-border/50 hover:bg-muted transition-colors">
               <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
@@ -370,7 +370,7 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
               <button onClick={() => {
                 const shareData = { title: "Ricevi QR Coins", text: `Inviami ${receiveAmount || ""} QR Coins su STYLE Beauty! Codice: ${myCode}`, url: window.location.origin };
                 if (navigator.share && navigator.canShare?.(shareData)) navigator.share(shareData);
-                else { navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); toast.success("Link copiato!"); }
+                else { try { navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); toast.success("Link copiato!"); } catch { /* unavailable in restricted contexts */ } }
               }}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
                 <Send className="w-4 h-4" /> Condividi

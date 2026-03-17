@@ -282,7 +282,9 @@ const AILookGeneratorPage = () => {
         url: generatedUrl,
       });
     } else {
-      await navigator.clipboard.writeText(generatedUrl);
+      try {
+        await navigator.clipboard.writeText(generatedUrl);
+      } catch { /* clipboard may be unavailable in restricted contexts */ }
       toast({ title: "Link copiato!" });
     }
   };

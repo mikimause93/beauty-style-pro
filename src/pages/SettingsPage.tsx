@@ -37,6 +37,11 @@ export default function SettingsPage() {
     if (!user) return;
     if (!shareLocation) {
       setLocating(true);
+      if (!('geolocation' in navigator)) {
+        toast.error("Geolocalizzazione non disponibile su questo dispositivo.");
+        setLocating(false);
+        return;
+      }
       try {
         const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });

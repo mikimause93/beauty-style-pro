@@ -48,7 +48,7 @@ export default function ReferralPage() {
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(referralCode);
+    try { navigator.clipboard.writeText(referralCode); } catch { /* unavailable in restricted contexts */ }
     setCopied(true);
     toast.success("Codice copiato!");
     setTimeout(() => setCopied(false), 2000);
