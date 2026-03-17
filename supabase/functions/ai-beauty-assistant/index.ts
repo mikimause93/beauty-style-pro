@@ -5,6 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,10 +22,7 @@ serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "AI non configurata" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "AI non configurata" }, 500);
     }
 
     const systemPrompt = `Sei "Beauty AI", l'assistente virtuale di Style, la super app italiana per il settore beauty & wellness.
@@ -55,15 +59,14 @@ Rispondi in massimo 3-4 paragrafi brevi.`;
     const FALLBACK_CONTENT = "Ciao! 👋 Al momento il servizio AI è temporaneamente offline. Puoi consultare i nostri professionisti su /stylists per consigli personalizzati. Tornerò presto! ✨";
 
     if (!response.ok) {
-      if (response.status === 429 || response.status === 402) {
-        return new Response(JSON.stringify({ content: FALLBACK_CONTENT }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (response.status === 429) {
+        return jsonResponse({ content: FALLBACK_CONTENT }, 429);
+      }
+      if (response.status === 402) {
+        return jsonResponse({ content: FALLBACK_CONTENT });
       }
       console.error("AI gateway error:", response.status);
-      return new Response(JSON.stringify({ content: FALLBACK_CONTENT }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ content: FALLBACK_CONTENT });
     }
 
     // Stream mode - pass through SSE
@@ -76,14 +79,9 @@ Rispondi in massimo 3-4 paragrafi brevi.`;
     const result = await response.json();
     const content = result.choices?.[0]?.message?.content || "Mi dispiace, non riesco a rispondere.";
 
-    return new Response(JSON.stringify({ content }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ content });
   } catch (error: unknown) {
     console.error("AI assistant error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
