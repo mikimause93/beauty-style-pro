@@ -1,7 +1,7 @@
 import { useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const TAB_ROUTES = ["/", "/explore", "/shop", "/live", "/profile"];
+const TAB_ROUTES = ["/home", "/explore", "/shop", "/live", "/profile"];
 const SWIPE_THRESHOLD = 120;
 const SWIPE_MAX_Y_RATIO = 0.5; // dy must be < dx * ratio
 

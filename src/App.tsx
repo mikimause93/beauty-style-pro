@@ -90,6 +90,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const LandingPage = lazy(() => import("./pages/Index"));
 
 const queryClient = new QueryClient();
 
@@ -131,7 +132,8 @@ const App = () => {
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />

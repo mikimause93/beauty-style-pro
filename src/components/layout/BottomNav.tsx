@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { path: "/", icon: Home, label: "Home" },
+  { path: "/home", icon: Home, label: "Home" },
   { path: "/explore", icon: Compass, label: "Esplora" },
   { path: "/shop", icon: ShoppingBag, label: "Shop" },
   { path: "/live", icon: Video, label: "Live" },
@@ -23,7 +23,7 @@ export default function BottomNav() {
           {tabs.map((tab, i) => {
             const isActive =
               location.pathname === tab.path ||
-              (tab.path !== "/" && location.pathname.startsWith(tab.path));
+              (tab.path !== "/home" && location.pathname.startsWith(tab.path));
             const Icon = tab.icon;
             const isCenter = i === centerIndex;
 

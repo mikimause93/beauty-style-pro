@@ -102,7 +102,7 @@ export default function CreatePostPage() {
       });
       if (error) throw error;
       toast.success("Post pubblicato!");
-      navigate("/");
+      navigate("/home");
     } catch {
       toast.error("Errore nella pubblicazione");
     }

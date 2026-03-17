@@ -50,7 +50,7 @@ export default function OnboardingPage() {
 
   // Client redirect
   if (userType === "client") {
-    navigate("/");
+    navigate("/home");
     return null;
   }
 
@@ -213,7 +213,7 @@ export default function OnboardingPage() {
 
       await refreshProfile();
       toast.success("Profilo completato! 🎉");
-      navigate("/");
+      navigate("/home");
     } catch (error: any) {
       toast.error(error.message || "Errore nel salvataggio");
     } finally {
@@ -520,7 +520,7 @@ export default function OnboardingPage() {
             </button>
           )}
         </div>
-        <button onClick={() => navigate("/")} className="w-full text-center text-xs text-muted-foreground">
+        <button onClick={() => navigate("/home")} className="w-full text-center text-xs text-muted-foreground">
           Salta per ora
         </button>
       </div>

@@ -49,7 +49,7 @@ export function useStellaVoiceActions() {
 
     // Navigation commands
     if (text.includes("vai alla home") || text.includes("apri home")) {
-      navigate("/");
+      navigate("/home");
       return { matched: true, response: "Ti porto alla home!" };
     }
     if (text.includes("apri chat") || text.includes("vai alla chat") || text.includes("messaggi")) {
@@ -191,7 +191,7 @@ export function useStellaVoiceActions() {
 
     // Like commands
     if (text.match(/metti\s+like|dai\s+like|aggiungi\s+like|mi\s+piace/)) {
-      navigate("/");
+      navigate("/home");
       toast.success("Like aggiunto!");
       return { matched: true, response: "Ho messo like al post!" };
     }
