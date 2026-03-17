@@ -189,7 +189,7 @@ export default function HomePage() {
 
       {/* Quick Actions — premium minimal icons */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-4 px-5 mb-5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex gap-3 px-5 mb-5 overflow-x-auto no-scrollbar py-1">
           {[
             { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
@@ -210,11 +210,12 @@ export default function HomePage() {
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-2 min-w-[68px] shrink-0 group">
-              <div className="w-16 h-16 rounded-2xl gradient-luxury shadow-luxury flex items-center justify-center transition-all duration-200 group-active:scale-90 group-hover:scale-105">
-                <item.Icon className="w-7 h-7 text-primary-foreground drop-shadow-sm" />
+              className="flex flex-col items-center gap-2 min-w-[64px] shrink-0 group">
+              <div className="w-14 h-14 rounded-2xl chrome-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-105 group-hover:chrome-icon-active relative overflow-hidden">
+                <item.Icon className="w-6 h-6 text-primary drop-shadow-sm relative z-10" />
+                <div className="absolute inset-0 chrome-shimmer rounded-2xl" />
               </div>
-              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-wide">{item.label}</span>
+              <span className="text-[10px] text-foreground/50 font-medium leading-tight tracking-wide">{item.label}</span>
             </button>
           ))}
         </div>

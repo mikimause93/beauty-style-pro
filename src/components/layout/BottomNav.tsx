@@ -19,7 +19,7 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
       <div className="glass-nav">
-        <div className="flex items-center justify-around h-[62px] max-w-lg mx-auto px-2">
+        <div className="flex items-center justify-around h-[64px] max-w-lg mx-auto px-3">
           {tabs.map((tab, i) => {
             const isActive =
               location.pathname === tab.path ||
@@ -34,24 +34,23 @@ export default function BottomNav() {
                     onClick={() => navigate(tab.path)}
                     aria-label={tab.label}
                     className={cn(
-                      "absolute -top-5 w-[58px] h-[58px] rounded-full flex items-center justify-center transition-all duration-300 shadow-luxury",
+                      "absolute -top-6 w-[56px] h-[56px] rounded-2xl flex items-center justify-center transition-all duration-300",
                       isActive
-                        ? "gradient-luxury scale-110 shadow-glow"
-                        : "gradient-primary hover:scale-105 animate-pulse-glow"
+                        ? "gradient-primary shadow-glow scale-105"
+                        : "chrome-icon hover:scale-105 animate-pulse-glow"
                     )}
                   >
                     <Icon
                       className={cn(
-                        "w-[26px] h-[26px] text-white drop-shadow-sm transition-all duration-300",
-                        isActive && "animate-pulse"
+                        "w-[24px] h-[24px] transition-all duration-300",
+                        isActive ? "text-white" : "text-primary"
                       )}
                     />
-                    <span className="absolute inset-0 rounded-full border-2 border-white/20" />
                   </button>
                   <span
                     className={cn(
-                      "text-[10px] font-bold tracking-wide mt-1 transition-all duration-300",
-                      isActive ? "text-primary" : "text-foreground/50"
+                      "text-[10px] font-semibold tracking-wide mt-2 transition-all duration-300",
+                      isActive ? "text-primary" : "text-foreground/40"
                     )}
                   >
                     {tab.label}
@@ -64,30 +63,27 @@ export default function BottomNav() {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-300"
+                className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-300"
               >
                 <div
                   className={cn(
-                    "relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300",
+                    "relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
                     isActive
-                      ? "gradient-primary shadow-glow scale-105"
-                      : "bg-primary/8 hover:bg-primary/15"
+                      ? "gradient-primary shadow-glow"
+                      : "hover:bg-secondary"
                   )}
                 >
                   <Icon
                     className={cn(
-                      "w-[22px] h-[22px] transition-all duration-300",
-                      isActive ? "text-white drop-shadow-sm" : "text-foreground/60"
+                      "w-[20px] h-[20px] transition-all duration-300",
+                      isActive ? "text-white" : "text-foreground/50"
                     )}
                   />
-                  {isActive && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/70" />
-                  )}
                 </div>
                 <span
                   className={cn(
-                    "text-[10px] font-semibold tracking-wide transition-all duration-300",
-                    isActive ? "text-primary" : "text-foreground/50"
+                    "text-[10px] font-medium tracking-wide transition-all duration-300",
+                    isActive ? "text-primary" : "text-foreground/40"
                   )}
                 >
                   {tab.label}
