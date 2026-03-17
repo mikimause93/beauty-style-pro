@@ -124,7 +124,13 @@ export default function JobDetailPage() {
   };
 
   const handleChatApply = () => {
-    navigate("/chat/1"); // Opens chat with employer
+    const employer = job?.businesses || job?.professionals;
+    const employerId = employer?.user_id;
+    if (!employerId) {
+      toast.error("Impossibile trovare il datore di lavoro");
+      return;
+    }
+    navigate(`/chat/${employerId}`);
     toast.success("Aperta chat diretta con il datore di lavoro");
   };
 

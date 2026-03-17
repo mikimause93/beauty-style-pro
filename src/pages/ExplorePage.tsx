@@ -93,7 +93,7 @@ export default function ExplorePage() {
             {/* Grid view */}
             <div className="grid grid-cols-3 gap-1 rounded-2xl overflow-hidden">
               {posts.slice(0, 9).map((post) => (
-                <button key={post.id} onClick={() => {}} className="aspect-square relative overflow-hidden">
+                <button key={post.id} onClick={() => navigate(`/?post=${post.id}`)} className="aspect-square relative overflow-hidden">
                   <img src={post.image_url || beauty3} alt="" className="w-full h-full object-cover" />
                   <div className="absolute bottom-1 left-1 flex items-center gap-0.5 bg-black/50 rounded-full px-1.5 py-0.5">
                     <Star className="w-2.5 h-2.5 text-white" />

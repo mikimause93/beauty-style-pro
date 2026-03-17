@@ -71,7 +71,7 @@ export default function StylistsPage() {
             <div className="text-right">
               <p className="text-sm font-bold">€{stylist.hourly_rate}</p>
               <p className="text-[10px] text-muted-foreground">/ora</p>
-              <button onClick={e => { e.stopPropagation(); navigate(`/booking`); }}
+              <button onClick={e => { e.stopPropagation(); navigate(`/booking/${stylist.id}`); }}
                 className="mt-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
                 Prenota
               </button>
