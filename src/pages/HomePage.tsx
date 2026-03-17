@@ -263,8 +263,8 @@ export default function HomePage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="w-2 h-2 rounded-full bg-red-500 live-pulse shadow-sm" />
-                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">In diretta</span>
+                    <span className="w-2 h-2 rounded-full bg-live live-pulse shadow-sm" />
+                    <span className="text-[10px] font-bold text-live uppercase tracking-widest">In diretta</span>
                   </div>
                   <p className="text-sm font-semibold tracking-tight">Beauty streaming</p>
                   <p className="text-[11px] text-muted-foreground">Tutorial in diretta</p>
