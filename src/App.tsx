@@ -10,6 +10,11 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
+import BusinessRoute from "@/components/BusinessRoute";
+import CreatorRoute from "@/components/CreatorRoute";
+import VerifiedRoute from "@/components/VerifiedRoute";
+import PaidRoute from "@/components/PaidRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
@@ -94,6 +99,11 @@ const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboa
 const queryClient = new QueryClient();
 
 const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{children}</ProtectedRoute>;
+const Admin = ({ children }: { children: React.ReactNode }) => <AdminRoute>{children}</AdminRoute>;
+const Business = ({ children }: { children: React.ReactNode }) => <BusinessRoute>{children}</BusinessRoute>;
+const Creator = ({ children }: { children: React.ReactNode }) => <CreatorRoute>{children}</CreatorRoute>;
+const Verified = ({ children }: { children: React.ReactNode }) => <VerifiedRoute>{children}</VerifiedRoute>;
+const Paid = ({ children }: { children: React.ReactNode }) => <PaidRoute>{children}</PaidRoute>;
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -178,14 +188,14 @@ const App = () => {
             <Route path="/missions" element={<P><MissionsPage /></P>} />
             <Route path="/reminders" element={<P><RemindersPage /></P>} />
             <Route path="/ai-assistant" element={<P><AIAssistantPage /></P>} />
-            <Route path="/go-live" element={<P><GoLivePage /></P>} />
+            <Route path="/go-live" element={<Verified><GoLivePage /></Verified>} />
             <Route path="/transformation-challenge" element={<P><TransformationChallengePage /></P>} />
             <Route path="/live-battle" element={<P><LiveBattlePage /></P>} />
             <Route path="/quiz-live" element={<P><QuizLivePage /></P>} />
             <Route path="/talent-game" element={<P><TalentGamePage /></P>} />
-            <Route path="/manage-products" element={<P><ManageProductsPage /></P>} />
+            <Route path="/manage-products" element={<Creator><ManageProductsPage /></Creator>} />
             <Route path="/wallet" element={<P><WalletPage /></P>} />
-            <Route path="/admin" element={<P><AdminPage /></P>} />
+            <Route path="/admin" element={<Admin><AdminPage /></Admin>} />
             <Route path="/subscriptions" element={<P><SubscriptionPage /></P>} />
             <Route path="/boost" element={<P><BoostProfilePage /></P>} />
             <Route path="/become-creator" element={<P><CreatorApplicationPage /></P>} />
@@ -196,22 +206,22 @@ const App = () => {
             <Route path="/receipts" element={<P><ReceiptsPage /></P>} />
             <Route path="/verify-account" element={<P><VerifyAccountPage /></P>} />
             {/* Business & HR */}
-            <Route path="/business" element={<P><BusinessDashboardPage /></P>} />
-            <Route path="/business/team" element={<P><BusinessTeamPage /></P>} />
-            <Route path="/business/team/invite" element={<P><BusinessTeamPage /></P>} />
-            <Route path="/business/team/shifts" element={<P><EmployeeShiftsPage /></P>} />
-            <Route path="/business/team/activity" element={<P><EmployeeActivityPage /></P>} />
-            <Route path="/hr" element={<P><HRPage /></P>} />
-            <Route path="/hr/create-job" element={<P><CreateJobPostPage /></P>} />
-            <Route path="/hr/job/:id" element={<P><JobDetailPage /></P>} />
-            <Route path="/hr/job/:id/manage" element={<P><JobDetailPage /></P>} />
-            <Route path="/hr/application/:id" element={<P><HRPage /></P>} />
+            <Route path="/business" element={<Business><BusinessDashboardPage /></Business>} />
+            <Route path="/business/team" element={<Business><BusinessTeamPage /></Business>} />
+            <Route path="/business/team/invite" element={<Business><BusinessTeamPage /></Business>} />
+            <Route path="/business/team/shifts" element={<Business><EmployeeShiftsPage /></Business>} />
+            <Route path="/business/team/activity" element={<Business><EmployeeActivityPage /></Business>} />
+            <Route path="/hr" element={<Business><HRPage /></Business>} />
+            <Route path="/hr/create-job" element={<Business><CreateJobPostPage /></Business>} />
+            <Route path="/hr/job/:id" element={<Business><JobDetailPage /></Business>} />
+            <Route path="/hr/job/:id/manage" element={<Business><JobDetailPage /></Business>} />
+            <Route path="/hr/application/:id" element={<Business><HRPage /></Business>} />
             <Route path="/ai-look" element={<P><AILookGeneratorPage /></P>} />
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/auctions" element={<AuctionsPage />} />
-            <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
-            <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
-            <Route path="/debug" element={<P><DebugPanelPage /></P>} />
+            <Route path="/affiliate" element={<Paid><AffiliatePage /></Paid>} />
+            <Route path="/professional-dashboard" element={<Creator><ProfessionalDashboardPage /></Creator>} />
+            <Route path="/debug" element={<Admin><DebugPanelPage /></Admin>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
