@@ -14,21 +14,25 @@ export default function WeeklyLiveTracker() {
   const [claimed, setClaimed] = useState(false);
 
   useEffect(() => {
-    const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      const data = JSON.parse(stored);
-      setLiveCount(data.count || 0);
-      setClaimed(data.claimed || false);
-    }
+    try {
+      const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const data = JSON.parse(stored);
+        setLiveCount(data.count || 0);
+        setClaimed(data.claimed || false);
+      }
+    } catch (e) { console.warn('localStorage not available:', e); }
   }, []);
 
   const claimReward = () => {
     if (liveCount >= WEEKLY_GOAL && !claimed) {
       awardCoins("complete_mission");
       setClaimed(true);
-      const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
-      localStorage.setItem(key, JSON.stringify({ count: liveCount, claimed: true }));
+      try {
+        const key = `weekly_live_${new Date().toISOString().slice(0, 10).replace(/-\d{2}$/, '')}`;
+        localStorage.setItem(key, JSON.stringify({ count: liveCount, claimed: true }));
+      } catch (e) { console.warn('localStorage not available:', e); }
     }
   };
 

@@ -69,16 +69,19 @@
     <!-- SPA redirect handler for GitHub Pages 404 redirect -->
     <script>
       (function () {
-        var redirect = sessionStorage.getItem("spa-redirect");
-        if (redirect) {
-          sessionStorage.removeItem("spa-redirect");
-          try {
-            var data = JSON.parse(redirect);
-            var url = data.path + (data.search || "") + (data.hash || "");
-            window.history.replaceState(null, "", url);
-          } catch (e) {
-            console.error("Failed to parse spa-redirect:", e);
-          }        }
+        try {
+          var redirect = sessionStorage.getItem("spa-redirect");
+          if (redirect) {
+            sessionStorage.removeItem("spa-redirect");
+            try {
+              var data = JSON.parse(redirect);
+              var url = data.path + (data.search || "") + (data.hash || "");
+              window.history.replaceState(null, "", url);
+            } catch (e) {
+              console.error("Failed to parse spa-redirect:", e);
+            }
+          }
+        } catch (e) { console.warn('sessionStorage not available:', e); }
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
