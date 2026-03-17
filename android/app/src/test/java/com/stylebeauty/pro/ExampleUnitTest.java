@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.stylebeauty.pro;
 
 import static org.junit.Assert.*;
 
