@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import { useTheme } from "@/hooks/useTheme";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -102,18 +103,9 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    try {
-      const shown = sessionStorage.getItem("style_splash_shown");
-      return !shown;
-    } catch {
-      return false;
-    }
-  });
+  useTheme();
+  const [showSplash, setShowSplash] = useState(true);
   const handleSplashComplete = useCallback(() => {
-    try {
-      sessionStorage.setItem("style_splash_shown", "1");
-    } catch { /* intentionally empty */ }
     setShowSplash(false);
   }, []);
   return (
