@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ICONS: Record<string, any> = { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles };
+const ICONS: Record<string, React.ElementType> = { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles };
 
 const FALLBACK_SUGGESTIONS = [
   { icon: "Calendar", title: "Prenota il tuo primo appuntamento", description: "Scopri i migliori professionisti beauty vicino a te", target: "/booking" },
@@ -13,13 +14,20 @@ const FALLBACK_SUGGESTIONS = [
   { icon: "Gift", title: "Invita amici, guadagna QR Coins", description: "Ogni invito vale 20 QRC per te e il tuo amico", target: "/referral" },
 ];
 
+interface Suggestion {
+  icon: string;
+  title: string;
+  description: string;
+  target: string;
+}
+
 const SHOW_DURATION = 6000; // visible for 6 seconds
 const HIDE_DURATION = 8000; // hidden for 8 seconds between appearances
 
 export default function AIGrowthSuggestions() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [suggestions, setSuggestions] = useState<any[]>(FALLBACK_SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(FALLBACK_SUGGESTIONS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const [dismissed, setDismissed] = useState(false);

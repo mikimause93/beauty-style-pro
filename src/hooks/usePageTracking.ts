@@ -30,7 +30,7 @@ export function usePageTracking() {
     const track = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        await (supabase.from("page_views") as any).insert({
+        await supabase.from("page_views" as never).insert({
           page_path: path,
           referrer: document.referrer || null,
           user_agent: navigator.userAgent,

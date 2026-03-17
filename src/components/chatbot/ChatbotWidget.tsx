@@ -169,7 +169,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     try {
       await streamChat({
         userId: user!.id,
-        messages: history as any,
+        messages: history as Array<{ role: "user" | "assistant"; content: string }>,
         onDelta: (chunk) => {
           assistantSoFar += chunk;
           const currentContent = assistantSoFar;
@@ -260,7 +260,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     try {
       await streamChat({
         userId: user.id,
-        messages: history as any,
+        messages: history as Array<{ role: "user" | "assistant"; content: string }>,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => {
           setChatMessages(prev => prev.map(m => 
@@ -278,7 +278,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
           setIsAILoading(false);
         },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("AI stream error:", err);
       toast.error("Errore nella risposta AI");
       setChatMessages(prev => [...prev, {

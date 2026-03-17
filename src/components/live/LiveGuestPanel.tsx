@@ -80,7 +80,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
   };
 
   const handleRequest = async (guestId: string, action: "accepted" | "rejected") => {
-    const updates: any = { status: action };
+    const updates: { status: string; joined_at?: string } = { status: action };
     if (action === "accepted") updates.joined_at = new Date().toISOString();
     await supabase.from("live_guests").update(updates).eq("id", guestId);
     toast.success(action === "accepted" ? "✅ Ospite accettato!" : "❌ Richiesta rifiutata");

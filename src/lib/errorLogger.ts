@@ -9,7 +9,7 @@ interface LogEntry {
   stack?: string;
   user_id?: string;
   page_path?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   severity?: Severity;
 }
 
@@ -20,7 +20,7 @@ async function flushLogs() {
   if (logBuffer.length === 0) return;
   const batch = logBuffer.splice(0, logBuffer.length);
   try {
-    await (supabase as any).from("error_logs").insert(batch);
+    await supabase.from("error_logs" as never).insert(batch);
   } catch {
     // silently fail — don't cause cascading errors
     console.warn("[ErrorLogger] Failed to flush", batch.length, "logs");
@@ -47,11 +47,11 @@ export function logError(entry: LogEntry) {
   scheduleFlush();
 }
 
-export function logInfo(type: ErrorType, message: string, metadata?: Record<string, any>) {
+export function logInfo(type: ErrorType, message: string, metadata?: Record<string, unknown>) {
   logError({ error_type: type, message, severity: "info", metadata });
 }
 
-export function logWarn(type: ErrorType, message: string, metadata?: Record<string, any>) {
+export function logWarn(type: ErrorType, message: string, metadata?: Record<string, unknown>) {
   logError({ error_type: type, message, severity: "warn", metadata });
 }
 

@@ -2,8 +2,8 @@ import { useState, useCallback, useRef } from 'react';
 
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: { new(): SpeechRecognition };
+    webkitSpeechRecognition: { new(): SpeechRecognition };
   }
 }
 
@@ -50,8 +50,8 @@ export const useVoiceRecognition = (
   const [isWakeWordListening, setIsWakeWordListening] = useState(false);
   const [wakeWordDetected, setWakeWordDetected] = useState(false);
   
-  const recognitionRef = useRef<any>(null);
-  const wakeWordRecognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const wakeWordRecognitionRef = useRef<SpeechRecognition | null>(null);
   const isSupported = typeof window !== 'undefined' && 
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
@@ -87,7 +87,7 @@ export const useVoiceRecognition = (
         setError(null);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
         let currentInterimTranscript = '';
 
@@ -106,7 +106,7 @@ export const useVoiceRecognition = (
         setInterimTranscript(currentInterimTranscript);
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setError(`Speech recognition error: ${event.error}`);
         setIsListening(false);
       };
@@ -147,9 +147,9 @@ export const useVoiceRecognition = (
         setError(null);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const currentTranscript = Array.from(event.results)
-          .map((result: any) => result[0].transcript)
+          .map((result: SpeechRecognitionResult) => result[0].transcript)
           .join('').toLowerCase();
 
         const wakeWordFound = wakeWords.some(word => 
@@ -164,7 +164,7 @@ export const useVoiceRecognition = (
         }
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setError(`Wake word detection error: ${event.error}`);
         setIsWakeWordListening(false);
       };

@@ -121,10 +121,11 @@ export function useGeolocation(defaultCity = "Milano") {
       if (userId) {
         savePositionToDB(userId, latitude, longitude, city);
       }
-    } catch (err: any) {
-      const msg = err.code === 1 ? "Permesso GPS negato" :
-                  err.code === 2 ? "Posizione non disponibile" :
-                  err.code === 3 ? "Timeout GPS" : "Errore GPS";
+    } catch (err: unknown) {
+      const errCode = err instanceof GeolocationPositionError ? err.code : 0;
+      const msg = errCode === 1 ? "Permesso GPS negato" :
+                  errCode === 2 ? "Posizione non disponibile" :
+                  errCode === 3 ? "Timeout GPS" : "Errore GPS";
       setError(msg);
       toast.error(msg);
     } finally {

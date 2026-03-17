@@ -18,6 +18,8 @@ interface PostCardProps {
     post_type: string | null;
     created_at: string;
     profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
+    before_image_url?: string;
+    after_image_url?: string;
   };
   onShare?: () => void;
   onComment?: () => void;
@@ -240,11 +242,11 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
       </div>
 
       {/* Image / Before-After */}
-      {post.post_type === "before_after" && (post as any).before_image_url && (post as any).after_image_url ? (
+      {post.post_type === "before_after" && post.before_image_url && post.after_image_url ? (
         <div className="relative aspect-square overflow-hidden">
-          <img src={(post as any).after_image_url} alt="Dopo" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={post.after_image_url} alt="Dopo" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
-            <img src={(post as any).before_image_url} alt="Prima" className="w-full h-full object-cover"
+            <img src={post.before_image_url} alt="Prima" className="w-full h-full object-cover"
               style={{ width: `${100 / (sliderPos / 100)}%`, maxWidth: "none" }} />
           </div>
           <div className="absolute top-0 bottom-0 w-0.5 bg-primary-foreground z-10" style={{ left: `${sliderPos}%` }}>

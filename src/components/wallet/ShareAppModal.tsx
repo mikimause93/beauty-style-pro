@@ -34,8 +34,8 @@ export default function ShareAppModal({ open, onClose }: ShareAppModalProps) {
         await navigator.clipboard.writeText(window.location.origin);
         toast.success("Link copiato!");
       }
-    } catch (err: any) {
-      if (err?.name !== "AbortError") {
+    } catch (err: unknown) {
+      if ((err as { name?: string })?.name !== "AbortError") {
         await navigator.clipboard.writeText(window.location.origin);
         toast.success("Link copiato!");
       }

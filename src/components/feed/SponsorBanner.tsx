@@ -9,6 +9,7 @@ interface AdCampaign {
   image_url: string | null;
   target_url: string | null;
   campaign_type: string;
+  clicks?: number;
 }
 
 export default function SponsorBanner() {
@@ -30,7 +31,7 @@ export default function SponsorBanner() {
 
   const trackClick = async () => {
     if (!ad) return;
-    try { await supabase.from("ad_campaigns").update({ clicks: (ad as any).clicks + 1 }).eq("id", ad.id); } catch { /* Intentionally ignored: click tracking is non-critical */ }
+    try { await supabase.from("ad_campaigns").update({ clicks: (ad.clicks ?? 0) + 1 }).eq("id", ad.id); } catch { /* Intentionally ignored: click tracking is non-critical */ }
     if (ad.target_url) window.open(ad.target_url, "_blank", "noopener");
   };
 

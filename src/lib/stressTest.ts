@@ -7,15 +7,15 @@ interface TestResult {
   duration_ms: number;
   success: boolean;
   error_message?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   user_id?: string;
 }
 
 async function saveResult(r: TestResult) {
-  await (supabase as any).from("stress_test_results").insert(r);
+  await supabase.from("stress_test_results" as never).insert(r);
 }
 
-async function timedTest(name: string, type: string, fn: () => Promise<any>): Promise<TestResult> {
+async function timedTest(name: string, type: string, fn: () => Promise<unknown>): Promise<TestResult> {
   const start = performance.now();
   try {
     const result = await fn();
@@ -23,10 +23,11 @@ async function timedTest(name: string, type: string, fn: () => Promise<any>): Pr
     const r: TestResult = { test_name: name, test_type: type, duration_ms, success: true, metadata: { result } };
     await saveResult(r);
     return r;
-  } catch (err: any) {
+  } catch (err: unknown) {
     const duration_ms = Math.round(performance.now() - start);
-    const r: TestResult = { test_name: name, test_type: type, duration_ms, success: false, error_message: err.message };
-    logError({ error_type: "database", message: `Test failed: ${name}`, metadata: { error: err.message } });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    const r: TestResult = { test_name: name, test_type: type, duration_ms, success: false, error_message: errMsg };
+    logError({ error_type: "database", message: `Test failed: ${name}`, metadata: { error: errMsg } });
     await saveResult(r);
     return r;
   }
@@ -111,7 +112,7 @@ export async function testChatSystem(): Promise<TestResult> {
 
 export async function testWalletTransactions(): Promise<TestResult> {
   return timedTest("Transactions Read", "database", async () => {
-    const { error } = await supabase.from("transactions" as any).select("id").limit(5);
+    const { error } = await supabase.from("transactions" as never).select("id").limit(5);
     if (error) throw error;
     return { accessible: true };
   });
