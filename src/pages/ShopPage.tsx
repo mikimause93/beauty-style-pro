@@ -37,6 +37,28 @@ interface ServiceItem {
 
 const fallbackImages = [beauty1, beauty2, beauty3, stylist1, stylist2];
 
+const DEMO_PRODUCTS: Product[] = [
+  { id: "dp1", name: "Shampoo Nutriente Argan", price: 18.90, image_url: beauty1, rating: 4.8, review_count: 142, category: "Capelli", description: "Formula professionale con olio di argan per capelli luminosi", seller_id: "demo" },
+  { id: "dp2", name: "Maschera Rivitalizzante", price: 24.50, image_url: beauty2, rating: 4.9, review_count: 98, category: "Capelli", description: "Maschera intensiva per capelli danneggiati e secchi", seller_id: "demo" },
+  { id: "dp3", name: "Siero Viso Vitamina C", price: 32.00, image_url: beauty3, rating: 4.7, review_count: 76, category: "Viso", description: "Siero antiossidante con vitamina C per una pelle luminosa", seller_id: "demo" },
+  { id: "dp4", name: "Olio Corpo Lusso", price: 28.00, image_url: stylist1, rating: 4.6, review_count: 61, category: "Corpo", description: "Olio idratante di lusso con estratti botanici pregiati", seller_id: "demo" },
+  { id: "dp5", name: "Base Coat Rinforzante", price: 12.90, image_url: stylist2, rating: 4.5, review_count: 54, category: "Unghie", description: "Base coat professionale per unghie forti e resistenti", seller_id: "demo" },
+  { id: "dp6", name: "Palette Ombretti Smoky", price: 39.90, image_url: beauty1, rating: 4.8, review_count: 87, category: "Makeup", description: "12 tonalità per look smoky impeccabili", seller_id: "demo" },
+];
+
+const DEMO_SERVICES: ServiceItem[] = [
+  { id: "ds1", name: "Taglio & Piega", price: 35, duration: 60, description: "Taglio personalizzato con piega professionale", professional_id: "demo-s1", professional_name: "Martina Rossi", professional_city: "Milano" },
+  { id: "ds2", name: "Colorazione Completa", price: 85, duration: 120, description: "Colorazione professionale con prodotti premium", professional_id: "demo-s2", professional_name: "Sylvie Leaciu", professional_city: "Roma" },
+  { id: "ds3", name: "Manicure Gel", price: 25, duration: 45, description: "Manicure con smalto semipermanente o gel", professional_id: "demo-s3", professional_name: "Sofia Nail Art", professional_city: "Firenze" },
+  { id: "ds4", name: "Trattamento Viso", price: 55, duration: 75, description: "Trattamento viso rigenerante con prodotti naturali", professional_id: "demo-s4", professional_name: "Luna Beauty", professional_city: "Milano" },
+];
+
+const DEMO_PROFESSIONALS = [
+  { id: "demo-s1", business_name: "Martina Rossi Hair Studio", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, profiles: { display_name: "Martina Rossi", avatar_url: stylist2 } },
+  { id: "demo-s2", business_name: "Sylvie Color Lab", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, profiles: { display_name: "Sylvie Leaciu", avatar_url: stylist1 } },
+  { id: "demo-s3", business_name: "Sofia Nail Atelier", specialty: "Nail Artist", city: "Firenze", rating: 4.7, review_count: 64, profiles: { display_name: "Sofia Conti", avatar_url: beauty3 } },
+];
+
 const sections = [
   { key: "products" as const, label: "Prodotti", icon: ShoppingBag },
   { key: "services" as const, label: "Servizi", icon: CalendarDays },
@@ -78,11 +100,10 @@ export default function ShopPage() {
     if (prodRes.data && prodRes.data.length > 0) {
       setProducts(prodRes.data);
     } else {
-      // No fallback with fake IDs — show empty state
-      setProducts([]);
+      setProducts(DEMO_PRODUCTS);
     }
 
-    if (svcRes.data) {
+    if (svcRes.data && svcRes.data.length > 0) {
       setServices(svcRes.data.map((s: any) => ({
         id: s.id,
         name: s.name,
@@ -93,10 +114,14 @@ export default function ShopPage() {
         professional_name: s.professionals?.business_name || "Professionista",
         professional_city: s.professionals?.city || "",
       })));
+    } else {
+      setServices(DEMO_SERVICES);
     }
 
-    if (proRes.data) {
+    if (proRes.data && proRes.data.length > 0) {
       setProfessionals(proRes.data);
+    } else {
+      setProfessionals(DEMO_PROFESSIONALS);
     }
 
     setLoading(false);
