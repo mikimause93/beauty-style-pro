@@ -1,13 +1,23 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, ElementType } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles, ChevronRight, X } from "lucide-react";
+import { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import safeStorage from "@/lib/safeStorage";
 
-const ICONS: Record<string, any> = { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles };
+const ICONS: Record<string, ElementType> = { MapPin, Calendar, Camera, Crown, Rocket, Video, Gift, Sparkles };
 
-const FALLBACK_SUGGESTIONS = [
+const DISMISS_KEY = "ai_suggestions_dismissed";
+
+interface Suggestion {
+  icon: string;
+  title: string;
+  description: string;
+  target?: string;
+}
+
+const FALLBACK_SUGGESTIONS: Suggestion[] = [
   { icon: "Calendar", title: "Prenota il tuo primo appuntamento", description: "Scopri i migliori professionisti beauty vicino a te", target: "/booking" },
   { icon: "Crown", title: "Completa il tuo profilo", description: "I profili completi ricevono 4x più interazioni", target: "/profile/edit" },
   { icon: "Gift", title: "Invita amici, guadagna QR Coins", description: "Ogni invito vale 20 QRC per te e il tuo amico", target: "/referral" },
@@ -19,15 +29,27 @@ const HIDE_DURATION = 8000; // hidden for 8 seconds between appearances
 export default function AIGrowthSuggestions() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [suggestions, setSuggestions] = useState<any[]>(FALLBACK_SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(FALLBACK_SUGGESTIONS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => safeStorage.getItem(DISMISS_KEY) === "true");
 
   useEffect(() => {
     if (user) loadSuggestions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Skip to next suggestion (temporary - component reappears after HIDE_DURATION)
+  const handleSkip = useCallback(() => {
+    setVisible(false);
+    setCurrentIndex(prev => (prev + 1) % suggestions.length);
+  }, [suggestions.length]);
+
+  // Permanently dismiss the component and persist preference
+  const handleDismissForever = useCallback(() => {
+    setDismissed(true);
+    safeStorage.setItem(DISMISS_KEY, "true");
+  }, []);
 
   // Auto show/hide cycle
   useEffect(() => {
@@ -37,10 +59,7 @@ export default function AIGrowthSuggestions() {
 
     if (visible) {
       // After SHOW_DURATION, hide and move to next
-      timer = setTimeout(() => {
-        setVisible(false);
-        setCurrentIndex(prev => (prev + 1) % suggestions.length);
-      }, SHOW_DURATION);
+      timer = setTimeout(handleSkip, SHOW_DURATION);
     } else {
       // After HIDE_DURATION, show again
       timer = setTimeout(() => {
@@ -49,7 +68,7 @@ export default function AIGrowthSuggestions() {
     }
 
     return () => clearTimeout(timer);
-  }, [visible, dismissed, suggestions.length]);
+  }, [visible, dismissed, suggestions.length, handleSkip]);
 
   const loadSuggestions = async () => {
     try {
@@ -61,15 +80,6 @@ export default function AIGrowthSuggestions() {
       // Keep fallback suggestions
     }
   };
-
-  const handleDismiss = useCallback(() => {
-    setVisible(false);
-    // Temporarily dismiss - will reappear after HIDE_DURATION
-    setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % suggestions.length);
-      setVisible(true);
-    }, HIDE_DURATION);
-  }, [suggestions.length]);
 
   if (dismissed || suggestions.length === 0) return null;
 
@@ -94,7 +104,7 @@ export default function AIGrowthSuggestions() {
               <p className="text-xs font-semibold truncate">{s.title}</p>
               <p className="text-[10px] text-muted-foreground line-clamp-1">{s.description}</p>
             </button>
-            <button onClick={handleDismiss} className="w-6 h-6 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
+            <button onClick={handleDismissForever} className="w-6 h-6 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
               <X className="w-3 h-3 text-muted-foreground" />
             </button>
           </div>
