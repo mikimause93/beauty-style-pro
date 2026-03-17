@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Mic as MicIcon, Volume2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,15 +7,9 @@ import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
-import { streamChat } from "@/lib/streamChat";
 import AIQuickActions from "@/components/ai/AIQuickActions";
 import AIChatMessages from "@/components/ai/AIChatMessages";
-
-interface ChatMsg {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+import { AIChatProvider, useAIChat } from "@/contexts/AIChatContext";
 
 const suggestedQuestions = [
   "Quale taglio va di moda questa stagione?",
@@ -26,26 +20,24 @@ const suggestedQuestions = [
   "Come andare in live?",
 ];
 
-export default function AIAssistantPage() {
+// ─────────────────────────────────────────────────────────────────────────────
+// Inner component (must live inside AIChatProvider)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AIAssistantInner() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
-  const [messages, setMessages] = useState<ChatMsg[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!`,
-    },
-  ]);
+  const { user } = useAuth();
+  const { messages, isLoading, error, sendMessage, retryLastMessage } = useAIChat();
+
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const [isTTSEnabled, setIsTTSEnabled] = useState(false);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
-  
+
   const { speak, cancel: cancelTTS } = useVoiceSynthesis();
   const { processVoiceCommand } = useStellaVoiceActions();
-  
+
   const {
     isListening, transcript, startListening, stopListening, resetTranscript,
     isWakeWordListening, startWakeWordListening, stopWakeWordListening
@@ -62,7 +54,6 @@ export default function AIAssistantPage() {
 
   useEffect(() => {
     if (transcript && !isListening) {
-      // Try voice command first
       const { matched, response } = processVoiceCommand(transcript);
       if (matched) {
         if (isTTSEnabled) speak(response);
@@ -75,68 +66,16 @@ export default function AIAssistantPage() {
     }
   }, [transcript, isListening, resetTranscript, processVoiceCommand, isTTSEnabled, speak]);
 
-  const sendMessage = useCallback(async () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text || isLoading || !user) return;
-
-    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
-    setMessages(prev => [...prev, userMsg]);
     setInput("");
-    setIsLoading(true);
+    await sendMessage(text);
+  };
 
-    const history = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    let assistantSoFar = "";
-
-    const upsertAssistant = (nextChunk: string) => {
-      assistantSoFar += nextChunk;
-      const currentContent = assistantSoFar;
-      setMessages(prev => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant" && last.id === "streaming") {
-          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
-        }
-        return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
-      });
-    };
-
-    try {
-      await streamChat({
-        userId: user.id,
-        messages: history as any,
-        onDelta: (chunk) => upsertAssistant(chunk),
-        onDone: () => {
-          // Finalize the streaming message with a stable ID
-          setMessages(prev => prev.map(m => 
-            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
-          ));
-          setIsLoading(false);
-          if (isTTSEnabled && assistantSoFar) speak(assistantSoFar);
-        },
-        onError: (error) => {
-          toast.error(error);
-          setMessages(prev => [...prev, {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
-          }]);
-          setIsLoading(false);
-        },
-      });
-    } catch (err: any) {
-      console.error("AI stream error:", err);
-      toast.error("Errore nella risposta AI");
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
-      }]);
-      setIsLoading(false);
-    }
-  }, [input, isLoading, user, messages, isTTSEnabled, speak]);
+  const handleSuggestionClick = (q: string) => {
+    setInput(q);
+  };
 
   return (
     <MobileLayout>
@@ -207,7 +146,6 @@ export default function AIAssistantPage() {
 
       <AIQuickActions onCommand={(cmd) => {
         setInput(cmd);
-        // Auto-send slash commands
         setTimeout(() => {
           const btn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
           btn?.click();
@@ -217,17 +155,22 @@ export default function AIAssistantPage() {
       <AIChatMessages
         messages={messages}
         isLoading={isLoading}
+        error={error}
         suggestedQuestions={suggestedQuestions}
-        onSuggestionClick={setInput}
+        onSuggestionClick={handleSuggestionClick}
+        onRetry={retryLastMessage}
         messagesEndRef={messagesEndRef}
       />
 
-      {/* Input bar */}
-      <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2">
+      {/* Input bar — respects safe-area-inset-bottom on iOS */}
+      <div
+        className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2"
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && sendMessage()}
+          onKeyDown={e => e.key === "Enter" && handleSend()}
           placeholder="Chiedi qualsiasi cosa a Stella..."
           className="flex-1 h-11 rounded-full bg-muted px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           disabled={isLoading}
@@ -247,11 +190,23 @@ export default function AIAssistantPage() {
         >
           <MicIcon className="w-5 h-5" />
         </button>
-        <button onClick={sendMessage} disabled={!input.trim() || isLoading} data-send-btn
+        <button onClick={handleSend} disabled={!input.trim() || isLoading} data-send-btn
           className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 active:scale-95 transition-transform">
           <Send className="w-5 h-5 text-primary-foreground" />
         </button>
       </div>
     </MobileLayout>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Export — wraps inner component with the global AI chat provider
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function AIAssistantPage() {
+  return (
+    <AIChatProvider>
+      <AIAssistantInner />
+    </AIChatProvider>
   );
 }
