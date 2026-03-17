@@ -15,6 +15,8 @@ interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   content: string;
+  timestamp?: Date;
+  error?: boolean;
 }
 
 const suggestedQuestions = [
@@ -34,6 +36,7 @@ export default function AIAssistantPage() {
       id: "welcome",
       role: "assistant",
       content: `Ciao${profile?.display_name ? ` ${profile.display_name}` : ""}! 👋 Sono Stella AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!`,
+      timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
@@ -79,7 +82,7 @@ export default function AIAssistantPage() {
     const text = input.trim();
     if (!text || isLoading || !user) return;
 
-    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
+    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
@@ -111,7 +114,7 @@ export default function AIAssistantPage() {
         onDone: () => {
           // Finalize the streaming message with a stable ID
           setMessages(prev => prev.map(m => 
-            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
+            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString(), timestamp: new Date() } : m
           ));
           setIsLoading(false);
           if (isTTSEnabled && assistantSoFar) speak(assistantSoFar);
@@ -122,6 +125,8 @@ export default function AIAssistantPage() {
             id: (Date.now() + 1).toString(),
             role: "assistant",
             content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
+            timestamp: new Date(),
+            error: true,
           }]);
           setIsLoading(false);
         },
@@ -133,6 +138,8 @@ export default function AIAssistantPage() {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Mi dispiace, c'è stato un problema. Riprova tra poco! 🙏",
+        timestamp: new Date(),
+        error: true,
       }]);
       setIsLoading(false);
     }
