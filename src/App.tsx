@@ -13,6 +13,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 initGlobalErrorHandler();
 
@@ -219,6 +220,7 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  <SpeedInsights />
   </ErrorBoundary>
   );
 };
