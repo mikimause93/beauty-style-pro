@@ -143,7 +143,7 @@ export default function HomePage() {
       {/* Header — luxury & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-display font-bold tracking-tight text-gradient-chrome">Style</span>
+          <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
           <div className="flex items-center gap-1.5">
             <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full chrome-icon flex items-center justify-center hover:scale-105 transition-transform">
               <Search className="w-[18px] h-[18px] text-foreground/70" />
