@@ -196,7 +196,7 @@ export default function StoriesBar() {
             <div className="w-16 h-16 rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, hsl(262 88% 63%), hsl(302 78% 56%), hsl(42 98% 62%))" }}>
               <img src={group.avatar_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-background" />
             </div>
-            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[64px]">{group.display_name}</span>
+            <span className="text-xs text-muted-foreground font-medium truncate max-w-[64px]">{group.display_name}</span>
           </button>
         ))}
       </div>
