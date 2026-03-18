@@ -197,7 +197,7 @@ export default function NotificationsPage() {
         ) : (
           groups.map(group => (
             <div key={group.label}>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">
                 {group.label}
               </p>
               <div className="space-y-2">
