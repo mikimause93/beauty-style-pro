@@ -39,8 +39,8 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved" | "vetrina">("grid");
   const [myPosts, setMyPosts] = useState<ProfilePost[]>([]);
-  const [myProducts, setMyProducts] = useState<any[]>([]);
-  const [viewProfile, setViewProfile] = useState<any>(null);
+  const [myProducts, setMyProducts] = useState<{ id: string; name: string; price: number; image_url: string | null; category: string | null }[]>([]);
+  const [viewProfile, setViewProfile] = useState<{ user_id: string; display_name: string | null; avatar_url: string | null; bio: string | null; user_type: string; follower_count: number; following_count: number; verification_status: string | null; city: string | null } | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [sharePost, setSharePost] = useState<ProfilePost | null>(null);
   const [showMenu, setShowMenu] = useState(false);
