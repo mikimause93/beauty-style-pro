@@ -264,7 +264,9 @@ export default function NotificationsPage() {
                               </button>
                             )}
                             <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                              aria-label="Elimina notifica"
                               className="ml-auto p-1.5 rounded-full hover:bg-destructive/10 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
