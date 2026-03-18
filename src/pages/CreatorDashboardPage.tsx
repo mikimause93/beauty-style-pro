@@ -77,11 +77,11 @@ export default function CreatorDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
 
-    // Fetch creator profile
+    // Fetch creator profile (id = user uuid, PK references profiles.user_id)
     const { data: profile } = await supabase
       .from("creator_profiles")
       .select("*")
-      .eq("user_id", user!.id)
+      .eq("id", user!.id)
       .maybeSingle();
     setCreatorProfile(profile as CreatorProfile | null);
 
@@ -131,13 +131,12 @@ export default function CreatorDashboardPage() {
     const { data: profileData } = await supabase
       .from("profiles")
       .select("display_name")
-      .eq("id", user.id)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     const { error } = await supabase.from("creator_profiles").insert({
-      user_id: user.id,
-      display_name: (profileData as any)?.display_name ?? user.email?.split("@")[0] ?? "Creator",
-      tier: "free",
+      id: user.id,
+      creator_tier: "free",
     });
 
     if (error) {

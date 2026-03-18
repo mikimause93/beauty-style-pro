@@ -24,7 +24,7 @@ export const sendCourseNotification = async (data: NotificationData) => {
   } catch { /* ignore */ }
 };
 
-export const scheduleCoursReminders = async (userId: string) => {
+export const scheduleCourseReminders = async (userId: string) => {
   const { data: enrollments } = await supabase
     .from('enrollments')
     .select('*, course:course_id(title)')

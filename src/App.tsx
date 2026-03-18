@@ -59,6 +59,7 @@ const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
 const ShortsPage = lazy(() => import("./pages/ShortsPage"));
 const GoLivePage = lazy(() => import("./pages/GoLivePage"));
 const TransformationChallengePage = lazy(() => import("./pages/TransformationChallengePage"));
+const FormationPage = lazy(() => import("./pages/FormationPage"));
 const CourseDetailPage = lazy(() => import("./pages/CourseDetailPage"));
 const LessonPlayerPage = lazy(() => import("./pages/LessonPlayerPage"));
 const MyCoursesPage = lazy(() => import("./pages/MyCoursesPage"));
@@ -187,13 +188,6 @@ const App = () => {
             <Route path="/ai-assistant" element={<P><AIAssistantPage /></P>} />
             <Route path="/go-live" element={<P><GoLivePage /></P>} />
             <Route path="/transformation-challenge" element={<P><TransformationChallengePage /></P>} />
-            <Route path="/formation/course/:id" element={<P><CourseDetailPage /></P>} />
-            <Route path="/formation/lesson/:id" element={<P><LessonPlayerPage /></P>} />
-            <Route path="/formation/my-courses" element={<P><MyCoursesPage /></P>} />
-            <Route path="/formation/create-course" element={<P><CreateCoursePage /></P>} />
-            <Route path="/formation/edit-course/:id" element={<P><EditCoursePage /></P>} />
-            <Route path="/formation/analytics/:id" element={<P><CourseAnalyticsPage /></P>} />
-            <Route path="/formation/creator-dashboard" element={<P><CreatorDashboardPage /></P>} />
             <Route path="/live-battle" element={<P><LiveBattlePage /></P>} />
             <Route path="/quiz-live" element={<P><QuizLivePage /></P>} />
             <Route path="/talent-game" element={<P><TalentGamePage /></P>} />
@@ -225,6 +219,15 @@ const App = () => {
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
+            {/* Academy / Formation Routes */}
+            <Route path="/formation" element={<FormationPage />} />
+            <Route path="/formation/course/:id" element={<CourseDetailPage />} />
+            <Route path="/formation/lesson/:id" element={<P><LessonPlayerPage /></P>} />
+            <Route path="/formation/my-courses" element={<P><MyCoursesPage /></P>} />
+            <Route path="/formation/create-course" element={<P><CreateCoursePage /></P>} />
+            <Route path="/formation/course/:id/edit" element={<P><EditCoursePage /></P>} />
+            <Route path="/formation/course/:id/analytics" element={<P><CourseAnalyticsPage /></P>} />
+            <Route path="/formation/creator-dashboard" element={<P><CreatorDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

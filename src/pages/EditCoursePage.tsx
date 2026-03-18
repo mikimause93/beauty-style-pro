@@ -229,7 +229,7 @@ export default function EditCoursePage() {
           onClick={() => setActiveSection("curriculum")}
           className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${activeSection === "curriculum" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
         >
-          Curriculum ({lessons.length})
+          Programma ({lessons.length})
         </button>
       </div>
 
@@ -319,7 +319,7 @@ export default function EditCoursePage() {
           </>
         )}
 
-        {/* Curriculum section */}
+        {/* Programma section */}
         {activeSection === "curriculum" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">

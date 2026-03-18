@@ -174,7 +174,7 @@ export default function CreateCoursePage() {
     setPublishing(false);
   };
 
-  const stepLabels = ["Informazioni", "Curriculum", "Anteprima"];
+  const stepLabels = ["Informazioni", "Programma", "Anteprima"];
 
   return (
     <MobileLayout>
@@ -282,7 +282,7 @@ export default function CreateCoursePage() {
           </div>
         )}
 
-        {/* Step 2: Curriculum */}
+        {/* Step 2: Programma */
         {step === 2 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
