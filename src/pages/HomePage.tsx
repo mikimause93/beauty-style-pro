@@ -143,7 +143,7 @@ export default function HomePage() {
       {/* Header — luxury & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
+          <span className="text-2xl font-bold tracking-widest neon-title animate-neon-flicker" style={{ fontFamily: "'Orbitron', 'Space Grotesk', sans-serif", letterSpacing: '0.15em' }}>STYLE</span>
           <div className="flex items-center gap-1.5">
             <button type="button" onClick={() => navigate("/search")} aria-label="Cerca" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
               <Search className="w-[18px] h-[18px] text-neon" />
@@ -211,10 +211,10 @@ export default function HomePage() {
           ].map(item => (
             <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group" aria-label={item.label}>
-              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative">
-                <item.Icon className="w-7 h-7 text-neon relative z-10" />
+              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative animate-pulse-glow">
+                <item.Icon className="w-7 h-7 text-neon relative z-10 drop-shadow-[0_0_6px_hsl(262_80%_72%/0.8)]" />
               </div>
-              <span className="text-xs text-foreground/60 font-medium leading-tight tracking-wide" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{item.label}</span>
+              <span className="text-[10px] text-foreground/70 font-semibold leading-tight tracking-widest uppercase" style={{ fontFamily: "'Orbitron', sans-serif" }}>{item.label}</span>
             </button>
           ))}
         </div>
