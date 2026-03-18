@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon, GraduationCap } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
@@ -232,6 +232,24 @@ export default function HomePage() {
 
       {/* Auto Offers */}
       {activeTab === "Nuovi" && <AutoOffersBanner />}
+
+      {/* Academy Banner */}
+      {activeTab === "Nuovi" && (
+        <div className="px-5">
+          <button onClick={() => navigate("/formation")} className="w-full rounded-2xl overflow-hidden relative p-5 gradient-primary shadow-glow">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-background/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="w-7 h-7 text-primary-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-bold text-primary-foreground mb-0.5">🎓 Beauty Academy</p>
+                <p className="text-xs text-primary-foreground/90">Corsi, certificati e formazione professionale</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-primary-foreground" />
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* AI Smart Match */}
       {activeTab === "Nuovi" && <AIMatchBanner />}

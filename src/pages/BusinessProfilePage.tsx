@@ -15,6 +15,7 @@ export default function BusinessProfilePage() {
   const [business, setBusiness] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"services" | "shop" | "reviews">("services");
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +32,16 @@ export default function BusinessProfilePage() {
       supabase.from("services").select("*").eq("professional_id", id!).eq("active", true),
       supabase.from("reviews").select("*, profiles:client_id(display_name, avatar_url)").eq("professional_id", id!).order("created_at", { ascending: false }).limit(10),
     ]);
-    if (bizRes.data) setBusiness(bizRes.data);
+    if (bizRes.data) {
+      setBusiness(bizRes.data);
+      const { data: productsData } = await supabase
+        .from("products")
+        .select("*")
+        .eq("seller_id", bizRes.data.user_id)
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      if (productsData) setProducts(productsData);
+    }
     if (svcRes.data) setServices(svcRes.data);
     if (revRes.data) setReviews(revRes.data);
     setLoading(false);
@@ -155,7 +165,7 @@ export default function BusinessProfilePage() {
                 activeTab === tab ? "border-primary text-primary" : "border-transparent text-muted-foreground"
               }`}
             >
-              {tab === "services" ? `Servizi (${services.length})` : tab === "shop" ? "Shop" : `Recensioni (${reviews.length})`}
+              {tab === "services" ? `Servizi (${services.length})` : tab === "shop" ? `Shop (${products.length})` : `Recensioni (${reviews.length})`}
             </button>
           ))}
         </div>
@@ -187,13 +197,36 @@ export default function BusinessProfilePage() {
         )}
 
         {activeTab === "shop" && (
-          <div className="text-center py-12">
-            <ShoppingBag className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-            <p className="text-muted-foreground text-sm">Shop in arrivo</p>
-            <button onClick={() => navigate("/shop")} className="mt-3 px-5 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
-              Vai allo Shop
-            </button>
-          </div>
+          <>
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingBag className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">Nessun prodotto disponibile</p>
+                <button onClick={() => navigate("/shop")} className="mt-3 px-5 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
+                  Vai allo Shop
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 pb-4">
+                {products.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => navigate("/shop")}
+                    className="text-left rounded-xl bg-card border border-border overflow-hidden hover:border-primary/30 transition-all"
+                  >
+                    {p.image_url && (
+                      <img src={p.image_url} alt={p.name} className="w-full h-32 object-cover" />
+                    )}
+                    <div className="p-3">
+                      <p className="font-semibold text-sm line-clamp-2">{p.name}</p>
+                      <p className="text-primary font-bold mt-1">€{p.price}</p>
+                      <span className="text-[10px] text-muted-foreground">Compra →</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === "reviews" && (
