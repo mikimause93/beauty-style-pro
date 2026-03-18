@@ -379,7 +379,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                     <span className="text-muted-foreground">{c.message}</span>
                   </p>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[10px] text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
+                    <span className="text-xs text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
                     {/* Like */}
                     <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
                       <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
