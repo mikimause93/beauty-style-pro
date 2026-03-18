@@ -187,9 +187,9 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* Quick Actions — premium minimal icons */}
+      {/* Quick Actions — Neon LED icons */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-3 px-5 mb-5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex gap-4 px-5 mb-5 overflow-x-auto no-scrollbar py-2">
           {[
             { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
@@ -209,13 +209,12 @@ export default function HomePage() {
             { Icon: Radio, label: "Radio", path: "/radio" },
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
-            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-2 min-w-[64px] shrink-0 group">
-              <div className="w-14 h-14 rounded-2xl chrome-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-105 group-hover:chrome-icon-active relative overflow-hidden">
-                <item.Icon className="w-6 h-6 text-primary drop-shadow-sm relative z-10" />
-                <div className="absolute inset-0 chrome-shimmer rounded-2xl" />
+            <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
+              className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group" aria-label={item.label}>
+              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative">
+                <item.Icon className="w-7 h-7 text-neon relative z-10" />
               </div>
-              <span className="text-[10px] text-foreground/50 font-medium leading-tight tracking-wide">{item.label}</span>
+              <span className="text-xs text-foreground/60 font-medium leading-tight tracking-wide" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{item.label}</span>
             </button>
           ))}
         </div>
