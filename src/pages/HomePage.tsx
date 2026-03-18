@@ -145,24 +145,24 @@ export default function HomePage() {
         <div className="flex items-center justify-between px-5 py-3">
           <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
           <div className="flex items-center gap-1.5">
-            <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full chrome-icon flex items-center justify-center hover:scale-105 transition-transform">
-              <Search className="w-[18px] h-[18px] text-foreground/70" />
+            <button type="button" onClick={() => navigate("/search")} aria-label="Cerca" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <Search className="w-[18px] h-[18px] text-neon" />
             </button>
-            <button onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full chrome-icon flex items-center justify-center hover:scale-105 transition-transform">
-              {theme === "dark" ? <Sun className="w-[18px] h-[18px] text-foreground/70" /> : <Moon className="w-[18px] h-[18px] text-foreground/70" />}
+            <button type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              {theme === "dark" ? <Sun className="w-[18px] h-[18px] text-neon" /> : <Moon className="w-[18px] h-[18px] text-neon" />}
             </button>
-            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
+            <button type="button" onClick={() => navigate("/qr-coins")} aria-label="QR Coins" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
               <Coins className="w-3.5 h-3.5" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
-            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full chrome-icon flex items-center justify-center hover:scale-105 transition-transform">
-              <Bell className="w-[18px] h-[18px] text-foreground/70" />
+            <button type="button" onClick={() => navigate("/notifications")} aria-label="Notifiche" className="relative w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <Bell className="w-[18px] h-[18px] text-neon" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-primary shadow-glow border border-background" />
               )}
             </button>
-            <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full chrome-icon flex items-center justify-center hover:scale-105 transition-transform">
-              <MessageCircle className="w-[18px] h-[18px] text-foreground/70" />
+            <button type="button" onClick={() => navigate("/chat")} aria-label="Messaggi" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <MessageCircle className="w-[18px] h-[18px] text-neon" />
             </button>
           </div>
         </div>
@@ -170,11 +170,11 @@ export default function HomePage() {
         {/* Tabs — chrome pill style */}
         <div className="flex gap-2 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
-            <button key={tab} onClick={() => handleTabClick(tab)}
+            <button type="button" key={tab} onClick={() => handleTabClick(tab)}
               className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 whitespace-nowrap ${
                 activeTab === tab
                    ? "gradient-primary text-white shadow-glow"
-                   : "chrome-icon text-foreground/60 hover:text-foreground/90"
+                   : "neon-icon text-foreground/60 hover:text-foreground/90"
               }`}>
               {tab}
             </button>

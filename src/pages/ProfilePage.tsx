@@ -39,7 +39,9 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved" | "vetrina">("grid");
   const [myPosts, setMyPosts] = useState<ProfilePost[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [myProducts, setMyProducts] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [viewProfile, setViewProfile] = useState<any>(null);
   const [showShare, setShowShare] = useState(false);
   const [sharePost, setSharePost] = useState<ProfilePost | null>(null);
