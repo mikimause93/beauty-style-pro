@@ -158,7 +158,8 @@ export default function NotificationsPage() {
 
         {/* Filter tabs */}
         <div className="flex gap-2 mt-3">
-          <button
+           <button
+            type="button"
             onClick={() => setFilter("all")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                filter === "all" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
