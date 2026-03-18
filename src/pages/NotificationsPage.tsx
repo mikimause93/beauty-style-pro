@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 
-const typeIcons: Record<string, any> = {
+const typeIcons: Record<string, typeof Heart> = {
   like: Heart,
   comment: MessageCircle,
   booking: Calendar,
