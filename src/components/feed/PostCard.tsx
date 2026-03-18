@@ -388,7 +388,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                     {/* Applause */}
                     <button onClick={() => toggleCommentApplause(c.id)} className="flex items-center gap-0.5">
                       <Sparkles className={`w-3 h-3 ${c.applauded_by_me ? "text-accent fill-accent" : "text-muted-foreground"}`} />
-                      {c.applause_count > 0 && <span className="text-[10px] text-muted-foreground">{c.applause_count}</span>}
+                      {c.applause_count > 0 && <span className="text-xs text-muted-foreground">{c.applause_count}</span>}
                     </button>
                   </div>
                 </div>
