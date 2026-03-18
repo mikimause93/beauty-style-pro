@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import PostCard from "@/components/feed/PostCard";
-import { Search, TrendingUp, MapPin, Star, Users, Crown, Sparkles, Film, ArrowLeft } from "lucide-react";
+import { Search, TrendingUp, MapPin, Star, Users, Crown, Sparkles, Film, ArrowLeft, Palette, ChevronRight } from "lucide-react";
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
@@ -176,22 +176,49 @@ export default function ExplorePage() {
 
         {/* Services Tab */}
         {activeTab === "Servizi" && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="space-y-4">
+            {/* Style Gallery Banner */}
+            <button
+              onClick={() => navigate("/styles")}
+              className="w-full rounded-2xl overflow-hidden relative h-24 bg-card border border-primary/20 flex items-center px-4 gap-4 hover:border-primary/40 transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-glow shrink-0">
+                <Palette className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-sm font-bold">Style Gallery</p>
+                <p className="text-[11px] text-muted-foreground">Scopri nail art, hair, brow e makeup</p>
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {["#French", "#Y2K", "#Ombre", "#Floral"].map(tag => (
+                    <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{tag}</span>
+                  ))}
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+            </button>
+
+            <div className="flex items-center gap-2">
               <Film className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold">Servizi Trending</h2>
             </div>
-            {["Balayage", "Taglio Uomo", "Extension", "Colore", "Manicure", "Trattamento Viso"].map(service => (
-              <button key={service} onClick={() => navigate("/stylists")}
-                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-card border border-border/50">
+            {[
+              { name: "Balayage", tag: "#Balayage", growth: "+38%" },
+              { name: "Taglio Uomo", tag: "#Cut", growth: "+22%" },
+              { name: "Extension", tag: "#Extension", growth: "+31%" },
+              { name: "Colore", tag: "#Color", growth: "+18%" },
+              { name: "Manicure", tag: "#French", growth: "+45%" },
+              { name: "Trattamento Viso", tag: "#Glow", growth: "+27%" },
+            ].map(service => (
+              <button key={service.name} onClick={() => navigate("/styles")}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold">{service}</p>
-                  <p className="text-[11px] text-muted-foreground">Tendenza in crescita</p>
+                  <p className="text-sm font-semibold">{service.name}</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{service.tag}</span>
                 </div>
-                <span className="text-[10px] text-primary font-bold">+{Math.floor(Math.random() * 40 + 10)}%</span>
+                <span className="text-[10px] text-primary font-bold">{service.growth}</span>
               </button>
             ))}
           </div>

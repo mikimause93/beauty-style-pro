@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon, Palette } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
@@ -193,6 +193,7 @@ export default function HomePage() {
           {[
             { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
+            { Icon: Palette, label: "Stili", path: "/styles" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
             { Icon: ShoppingBag, label: "Shop", path: "/shop" },
