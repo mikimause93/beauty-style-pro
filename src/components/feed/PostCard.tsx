@@ -383,7 +383,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                     {/* Like */}
                     <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
                       <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
-                      {c.like_count > 0 && <span className="text-[10px] text-muted-foreground">{c.like_count}</span>}
+                      {c.like_count > 0 && <span className="text-xs text-muted-foreground">{c.like_count}</span>}
                     </button>
                     {/* Applause */}
                     <button onClick={() => toggleCommentApplause(c.id)} className="flex items-center gap-0.5">
