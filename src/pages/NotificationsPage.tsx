@@ -256,8 +256,9 @@ export default function NotificationsPage() {
                             </button>
                             {!notification.read && (
                               <button
+                                type="button"
                                 onClick={(e) => { e.stopPropagation(); markRead(notification.id); }}
-                                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary/70 text-[10px] font-semibold flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary/70 text-xs font-semibold flex items-center gap-1"
                               >
                                 <Check className="w-3 h-3" /> Letto
                               </button>
