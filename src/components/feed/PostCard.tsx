@@ -253,8 +253,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
               <ChevronRight className="w-3 h-3 text-primary-foreground" />
             </div>
           </div>
-          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
-          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-xs font-bold">Prima</div>
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-xs font-bold">Dopo</div>
           <input type="range" min={10} max={90} value={sliderPos}
             onChange={e => setSliderPos(Number(e.target.value))}
             className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
