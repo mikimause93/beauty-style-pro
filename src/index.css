@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -204,6 +204,38 @@
     background: var(--gradient-primary);
     border: 1px solid hsl(262 80% 72% / 0.4);
     box-shadow: 0 4px 20px hsl(262 80% 62% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.15);
+  }
+
+  /* Neon LED icon — transparent bg with purple neon border glow */
+  .neon-icon {
+    background: transparent;
+    border: 2px solid hsl(262 80% 62% / 0.7);
+    box-shadow:
+      0 0 8px hsl(262 80% 62% / 0.4),
+      0 0 20px hsl(262 80% 62% / 0.15),
+      inset 0 0 8px hsl(262 80% 62% / 0.1);
+    transition: all 0.3s ease;
+  }
+  .neon-icon:hover,
+  .neon-icon:active {
+    border-color: hsl(262 80% 72% / 0.9);
+    box-shadow:
+      0 0 12px hsl(262 80% 62% / 0.6),
+      0 0 30px hsl(262 80% 62% / 0.25),
+      inset 0 0 12px hsl(262 80% 62% / 0.15);
+  }
+  .neon-icon-active {
+    border-color: hsl(262 80% 72%);
+    box-shadow:
+      0 0 14px hsl(262 80% 62% / 0.7),
+      0 0 40px hsl(262 80% 62% / 0.3),
+      inset 0 0 14px hsl(262 80% 62% / 0.2);
+  }
+
+  /* Neon text glow */
+  .text-neon {
+    color: hsl(262 80% 72%);
+    text-shadow: 0 0 6px hsl(262 80% 62% / 0.5), 0 0 20px hsl(262 80% 62% / 0.2);
   }
 
   /* Hide scrollbar */
