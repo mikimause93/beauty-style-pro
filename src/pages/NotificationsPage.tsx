@@ -1,7 +1,7 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Bell, Heart, MessageCircle, Calendar, Gift, Coins, Trash2, Users, Loader2, BellRing, Check, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
