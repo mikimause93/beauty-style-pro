@@ -236,7 +236,7 @@ export default function NotificationsPage() {
                             <p className={`text-sm font-semibold leading-tight ${!notification.read ? "text-foreground" : "text-foreground/70"}`}>
                               {notification.title}
                             </p>
-                            <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap mt-0.5">
                               {formatTimeAgo(notification.created_at)}
                             </span>
                           </div>
