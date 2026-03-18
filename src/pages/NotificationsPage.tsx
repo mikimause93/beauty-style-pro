@@ -140,7 +140,7 @@ export default function NotificationsPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-display font-bold">Notifiche</h1>
               {unreadCount > 0 && (
-                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
