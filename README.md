@@ -9,6 +9,7 @@
 ### Core
 - ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
 - ✅ Autenticazione tramite numero di telefono (OTP SMS, stile WhatsApp)
+- ✅ Verifica account con badge verificato
 - ✅ Feed social con like, commenti, condivisioni
 - ✅ Sistema Follow / Unfollow in tempo reale
 - ✅ Notifiche real-time e push (anche ad app chiusa, via Service Worker)
@@ -33,6 +34,11 @@
   - `"tema chiaro"` / `"tema scuro"` – cambio tema vocale
   - `"dimmi le notifiche"`, `"conferma prenotazione"`, `"aggiungi [nome]"`, e molti altri
 
+### Chatbot AI
+- ✅ Widget chatbot AI accessibile da ogni schermata
+- ✅ Risposte contestuali a domande su servizi, prenotazioni e professionisti
+- ✅ AI Look Generator: genera suggerimenti di look personalizzati tramite AI
+
 ### Chat avanzata
 - ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
 - ✅ Traduzione in tempo reale dei messaggi in arrivo (rileva lingua automaticamente)
@@ -44,22 +50,58 @@
 - ✅ Notifiche stile social: like, commenti, messaggi, prenotazioni, follower
 - ✅ Click sulla notifica apre direttamente il contenuto rilevante
 
+### Abbonamenti & Pagamenti
+- ✅ Piani di abbonamento: **Free**, **Pro** (€9.99/mese), **Business** (€19.99/mese), **Premium** (€29.99/mese)
+- ✅ Integrazione **Stripe** per pagamenti sicuri
+- ✅ Pagamenti a rate (installments) per servizi ad alto costo
+- ✅ Wallet e storico acquisti
+- ✅ Checkout con selezione metodo di pagamento
+
 ### Business & HR
-- ✅ Dashboard Business con analytics
-- ✅ Gestione annunci di lavoro (HR)
+- ✅ Dashboard Business con analytics avanzati
+- ✅ Gestione annunci di lavoro (HR) e dettaglio offerte
+- ✅ Gestione turni dipendenti (Employee Shifts)
+- ✅ Tracciamento attività dipendenti (Employee Activity)
+- ✅ Gestione team (Business Team)
 - ✅ Profilo Business con servizi, shop e recensioni
+- ✅ Boost profilo per maggiore visibilità
+
+### Marketplace & Servizi
+- ✅ Marketplace: richieste servizio, casting, collaborazioni, professionisti vicini
+- ✅ Creazione richieste servizio personalizzate
+- ✅ Servizi a domicilio (Home Service)
+- ✅ Aste in tempo reale su servizi beauty (Auctions)
+- ✅ SPA & Terme: ricerca e prenotazione centri benessere
 
 ### Entertainment & Gamification
 - ✅ Live Streaming con reactions, chat e tips (QRCoin)
+- ✅ Live Battle tra professionisti
+- ✅ Shorts: video brevi stile TikTok/Reels
 - ✅ Radio & Music Player integrato
 - ✅ Spin & Win, Challenges, Leaderboard
+- ✅ Missioni giornaliere e settimanali con premi
+- ✅ Quiz Live interattivi
+- ✅ Talent Game
+- ✅ Transformation Challenge: sfide before/after
 - ✅ Sistema QRCoin e Programma referral
+- ✅ Programma Affiliati
+
+### Creator Economy
+- ✅ Richiesta account Creator con candidatura
+- ✅ Go Live: streaming diretto con gestione audience
+- ✅ Sezione Reminders per eventi e appuntamenti imminenti
 
 ### E-commerce & Altro
-- ✅ Shop prodotti beauty
+- ✅ Shop prodotti beauty con gestione catalogo
 - ✅ Dettaglio servizi con prenotazione diretta
 - ✅ Before/After gallery, Eventi, PWA installabile
 - ✅ Impostazioni utente, Recensioni, Ricerca su mappa intelligente AI
+
+### Robustezza & Qualità
+- ✅ `ErrorBoundary` globale: l'app non crasha su errori imprevisti
+- ✅ `safeStorage`: accesso sicuro a `localStorage` (fallback su ambienti restrittivi)
+- ✅ Sistema centralizzato di codici di errore con messaggi localizzati in italiano (`errorCodes.ts`)
+- ✅ Error logger con report automatico degli errori runtime
 
 ---
 
