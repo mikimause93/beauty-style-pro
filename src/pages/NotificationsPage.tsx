@@ -167,7 +167,8 @@ export default function NotificationsPage() {
           >
             Tutte
           </button>
-          <button
+           <button
+            type="button"
             onClick={() => setFilter("unread")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                filter === "unread" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
