@@ -148,7 +148,7 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+               <button type="button" onClick={markAllRead} aria-label="Segna tutto come letto" className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1">
                  <CheckCheck className="w-3 h-3" /> Letto
                </button>
             )}
