@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="375" height="812" fill="#0f0f1a" rx="20"/>
+
+  <!-- Header -->
+  <rect width="375" height="52" fill="#0f0f1a"/>
+  <line x1="0" y1="52" x2="375" y2="52" stroke="#7c3aed" stroke-width="1" opacity="0.3"/>
+  <circle cx="28" cy="26" r="16" fill="#1a1a2e"/>
+  <text x="28" y="32" text-anchor="middle" font-size="14" fill="#888">←</text>
+  <text x="150" y="34" text-anchor="middle" font-family="Arial Black" font-size="16" font-weight="900" fill="white">Stilisti</text>
+  <rect x="280" y="12" width="82" height="28" rx="14" fill="#1a1a2e" stroke="#7c3aed" stroke-opacity="0.5"/>
+  <text x="321" y="30" text-anchor="middle" font-family="Arial" font-size="11" fill="#7c3aed">🗺️ Mappa AI</text>
+
+  <!-- Search bar -->
+  <rect x="12" y="64" width="351" height="40" rx="12" fill="#1a1a2e" stroke="#7c3aed" stroke-opacity="0.3"/>
+  <text x="30" y="88" font-size="16" fill="#555">🔍</text>
+  <text x="55" y="88" font-family="Arial" font-size="13" fill="#555">Cerca stilista, servizio...</text>
+
+  <!-- Filter chips -->
+  <rect x="12" y="116" width="375" height="36" fill="#0f0f1a"/>
+  <rect x="12" y="120" width="60" height="24" rx="12" fill="url(#grad1)"/>
+  <text x="42" y="136" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="white">Tutti</text>
+  <rect x="80" y="120" width="76" height="24" rx="12" fill="#1a1a2e"/>
+  <text x="118" y="136" text-anchor="middle" font-family="Arial" font-size="11" fill="#888">Hairstylist</text>
+  <rect x="164" y="120" width="60" height="24" rx="12" fill="#1a1a2e"/>
+  <text x="194" y="136" text-anchor="middle" font-family="Arial" font-size="11" fill="#888">Barber</text>
+  <rect x="232" y="120" width="72" height="24" rx="12" fill="#1a1a2e"/>
+  <text x="268" y="136" text-anchor="middle" font-family="Arial" font-size="11" fill="#888">Estetista</text>
+  <rect x="312" y="120" width="56" height="24" rx="12" fill="#1a1a2e"/>
+  <text x="340" y="136" text-anchor="middle" font-family="Arial" font-size="11" fill="#888">Nails</text>
+
+  <!-- Stylist Card 1 -->
+  <rect x="12" y="160" width="351" height="120" rx="14" fill="#1a1a2e" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.3"/>
+  <circle cx="54" cy="220" r="34" fill="url(#grad1)"/>
+  <circle cx="54" cy="220" r="28" fill="#2a1a2e"/>
+  <text x="54" y="228" text-anchor="middle" font-size="30">👩‍🦱</text>
+  <!-- Online badge -->
+  <circle cx="74" cy="244" r="8" fill="#0f0f1a"/>
+  <circle cx="74" cy="244" r="5" fill="#22c55e"/>
+  <text x="102" y="200" font-family="Arial Black" font-size="14" font-weight="900" fill="white">Martina Rossi</text>
+  <text x="168" y="200" font-family="Arial" font-size="12" fill="#7c3aed">✓</text>
+  <text x="102" y="218" font-family="Arial" font-size="11" fill="#888">Hairstylist · Milano</text>
+  <text x="102" y="236" font-family="Arial" font-size="11" fill="#f59e0b">⭐ 4.9</text>
+  <text x="128" y="236" font-family="Arial" font-size="11" fill="#888">(127 rec.) · 1.2km</text>
+  <rect x="102" y="246" width="70" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="137" y="261" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">✂️ Taglio</text>
+  <rect x="178" y="246" width="70" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="213" y="261" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">🎨 Colore</text>
+  <rect x="254" y="246" width="64" height="22" rx="8" fill="url(#grad1)"/>
+  <text x="286" y="261" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="white">Prenota</text>
+  <text x="330" y="200" text-anchor="middle" font-size="16" fill="#888">🔖</text>
+
+  <!-- Stylist Card 2 -->
+  <rect x="12" y="292" width="351" height="120" rx="14" fill="#1a1a2e" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.3"/>
+  <circle cx="54" cy="352" r="34" fill="url(#grad2)"/>
+  <circle cx="54" cy="352" r="28" fill="#2a1a2e"/>
+  <text x="54" y="360" text-anchor="middle" font-size="30">👨‍🦲</text>
+  <circle cx="74" cy="376" r="8" fill="#0f0f1a"/>
+  <circle cx="74" cy="376" r="5" fill="#22c55e"/>
+  <text x="102" y="332" font-family="Arial Black" font-size="14" font-weight="900" fill="white">Marco Barbieri</text>
+  <text x="102" y="350" font-family="Arial" font-size="11" fill="#888">Barbiere · Roma</text>
+  <text x="102" y="368" font-family="Arial" font-size="11" fill="#f59e0b">⭐ 4.8</text>
+  <text x="128" y="368" font-family="Arial" font-size="11" fill="#888">(89 rec.) · 2.4km</text>
+  <rect x="102" y="378" width="60" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="132" y="393" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">🪒 Barba</text>
+  <rect x="168" y="378" width="58" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="197" y="393" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">✂️ Fade</text>
+  <rect x="254" y="378" width="64" height="22" rx="8" fill="url(#grad1)"/>
+  <text x="286" y="393" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="white">Prenota</text>
+
+  <!-- Stylist Card 3 -->
+  <rect x="12" y="424" width="351" height="120" rx="14" fill="#1a1a2e" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.3"/>
+  <circle cx="54" cy="484" r="34" fill="url(#grad3)"/>
+  <circle cx="54" cy="484" r="28" fill="#1a1a2e"/>
+  <text x="54" y="492" text-anchor="middle" font-size="30">👩</text>
+  <circle cx="74" cy="508" r="8" fill="#0f0f1a"/>
+  <circle cx="74" cy="508" r="5" fill="#888"/>
+  <text x="102" y="464" font-family="Arial Black" font-size="14" font-weight="900" fill="white">Elena Conte</text>
+  <text x="102" y="482" font-family="Arial" font-size="11" fill="#888">Estetista · Firenze</text>
+  <text x="102" y="500" font-family="Arial" font-size="11" fill="#f59e0b">⭐ 5.0</text>
+  <text x="128" y="500" font-family="Arial" font-size="11" fill="#888">(54 rec.) · 3.1km</text>
+  <rect x="102" y="510" width="70" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="137" y="525" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">💆 Viso</text>
+  <rect x="178" y="510" width="70" height="22" rx="8" fill="#1e1e2e"/>
+  <text x="213" y="525" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">💅 Nails</text>
+  <rect x="254" y="510" width="64" height="22" rx="8" fill="url(#grad1)"/>
+  <text x="286" y="525" text-anchor="middle" font-family="Arial" font-size="10" font-weight="700" fill="white">Prenota</text>
+
+  <!-- AI Match Banner -->
+  <rect x="12" y="556" width="351" height="60" rx="14" fill="url(#grad1)" opacity="0.15"/>
+  <rect x="12" y="556" width="351" height="60" rx="14" stroke="#7c3aed" stroke-width="1" fill="none"/>
+  <text x="24" y="580" font-size="20">🤖</text>
+  <text x="54" y="577" font-family="Arial Black" font-size="13" font-weight="700" fill="white">AI Match</text>
+  <text x="54" y="595" font-family="Arial" font-size="11" fill="#888">Trovato 3 stilisti perfetti per te</text>
+  <text x="340" y="586" text-anchor="middle" font-size="16" fill="#7c3aed">→</text>
+
+  <!-- Bottom Nav -->
+  <rect x="0" y="752" width="375" height="60" fill="#0f0f1a" opacity="0.97"/>
+  <line x1="0" y1="752" x2="375" y2="752" stroke="#7c3aed" stroke-width="1" opacity="0.3"/>
+  <text x="37" y="778" text-anchor="middle" font-size="22" fill="#666">🏠</text>
+  <text x="37" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Home</text>
+  <text x="112" y="778" text-anchor="middle" font-size="22" fill="#7c3aed">🔍</text>
+  <text x="112" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#7c3aed">Cerca</text>
+  <circle cx="187" cy="775" r="20" fill="url(#grad1)"/>
+  <text x="187" y="781" text-anchor="middle" font-size="20" fill="white">+</text>
+  <text x="262" y="778" text-anchor="middle" font-size="22" fill="#666">💬</text>
+  <text x="262" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Chat</text>
+  <text x="337" y="778" text-anchor="middle" font-size="22" fill="#666">👤</text>
+  <text x="337" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Profilo</text>
+</svg>
