@@ -27,9 +27,9 @@ const missions = [
 ];
 
 const spinPackages = [
-  { spins: 3, price: 50, label: "3 Giri", badge: "" },
-  { spins: 5, price: 75, label: "5 Giri", badge: "-25%" },
-  { spins: 10, price: 120, label: "10 Giri", badge: "Best!" },
+  { spins: 3, price: 50, eurPrice: 0.49, label: "3 Giri", badge: "" },
+  { spins: 5, price: 75, eurPrice: 0.99, label: "5 Giri", badge: "-25%" },
+  { spins: 10, price: 120, eurPrice: 1.99, label: "10 Giri", badge: "Best!" },
 ];
 
 const leaderboard = [
@@ -56,6 +56,7 @@ export default function SpinWheelPage() {
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
   const [nextBonusTime, setNextBonusTime] = useState("");
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [selectedFiatPkg, setSelectedFiatPkg] = useState(spinPackages[1]);
   const [missionsProgress, setMissionsProgress] = useState<Record<string, number>>({ m1: 0, m2: 0, m3: 0, m4: 0 });
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -522,8 +523,10 @@ export default function SpinWheelPage() {
 
             <div className="space-y-3 mb-5">
               {spinPackages.map(pkg => (
-                <button key={pkg.spins} onClick={() => buySpins(pkg)}
-                  className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left relative">
+                <button key={pkg.spins} onClick={() => setSelectedFiatPkg(pkg)}
+                  className={`w-full flex items-center gap-3 p-4 rounded-2xl bg-card border transition-all text-left relative ${
+                    selectedFiatPkg.spins === pkg.spins ? 'border-primary' : 'border-border/50 hover:border-primary/20'
+                  }`}>
                   {pkg.badge && (
                     <span className="absolute -top-2 right-3 px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold">{pkg.badge}</span>
                   )}
@@ -532,23 +535,26 @@ export default function SpinWheelPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold">{pkg.label}</p>
-                    <p className="text-[11px] text-muted-foreground">{pkg.price} QRCoin</p>
+                    <p className="text-[11px] text-muted-foreground">€{pkg.eurPrice} EUR</p>
                   </div>
-                  <span className="text-sm font-bold text-primary">{pkg.price} QRC</span>
+                  <span className="text-sm font-bold text-primary">€{pkg.eurPrice}</span>
                 </button>
               ))}
             </div>
 
             <div className="border-t border-border/50 pt-4 space-y-2">
-              <p className="text-xs text-muted-foreground text-center mb-3">Oppure paga con</p>
+              <p className="text-xs text-muted-foreground text-center mb-3">Scegli metodo di pagamento</p>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: "Carta", icon: CreditCard },
                   { label: "PayPal", icon: Coins },
                   { label: "Klarna 3x", icon: ShoppingBag },
                 ].map(method => (
-                  <button key={method.label} onClick={() => { toast.info("Pagamento con " + method.label + " in arrivo"); setShowBuyModal(false); }}
-                    className="py-3 rounded-xl glass text-center text-xs font-semibold flex flex-col items-center gap-1.5">
+                  <button key={method.label} onClick={() => { 
+                    navigate(`/checkout?amount=${selectedFiatPkg.eurPrice}&desc=${encodeURIComponent(selectedFiatPkg.label + ' SpinWheel')}&type=spins`);
+                    setShowBuyModal(false);
+                  }}
+                    className="py-3 rounded-xl glass text-center text-xs font-semibold flex flex-col items-center gap-1.5 hover:border-primary/30 border border-transparent transition-all">
                     <method.icon className="w-4 h-4 text-primary" />
                     {method.label}
                   </button>

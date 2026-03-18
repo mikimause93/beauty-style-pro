@@ -1,6 +1,6 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
 ---
 
@@ -48,6 +48,13 @@
 - ✅ Dashboard Business con analytics
 - ✅ Gestione annunci di lavoro (HR)
 - ✅ Profilo Business con servizi, shop e recensioni
+
+### Academy & Formation
+- ✅ Piattaforma corsi e formazione per professionisti beauty
+- ✅ Video lezioni con tracciamento progresso
+- ✅ Certificati digitali al completamento
+- ✅ Creator Economy: dashboard guadagni e payouts
+- ✅ Brand partnerships e membership creators
 
 ### Entertainment & Gamification
 - ✅ Live Streaming con reactions, chat e tips (QRCoin)

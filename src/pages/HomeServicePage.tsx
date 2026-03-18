@@ -1,17 +1,11 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Home, MapPin, Calendar, Clock, CreditCard, MessageCircle, Star, Check, Sparkles } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import stylist2 from "@/assets/stylist-2.jpg";
-
-const mockServices = [
-  { id: "1", name: "Taglio Donna a Domicilio", price: 50, duration: 60 },
-  { id: "2", name: "Colore + Piega a Domicilio", price: 85, duration: 120 },
-  { id: "3", name: "Balayage a Domicilio", price: 150, duration: 150 },
-  { id: "4", name: "Piega a Domicilio", price: 35, duration: 45 },
-];
 
 const timeSlots = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
@@ -26,8 +20,29 @@ export default function HomeServicePage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [professional, setProfessional] = useState<any>(null);
 
-  const selectedServiceData = mockServices.find((s) => s.id === selectedService);
+  useEffect(() => {
+    if (id) fetchServices();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const fetchServices = async () => {
+    setLoadingServices(true);
+    try {
+      const [svcRes, profRes] = await Promise.all([
+        supabase.from("services").select("*").eq("professional_id", id!).eq("active", true).order("name"),
+        supabase.from("profiles").select("display_name, avatar_url").eq("user_id", id!).maybeSingle(),
+      ]);
+      if (svcRes.data) setServices(svcRes.data);
+      if (profRes.data) setProfessional(profRes.data);
+    } catch { /* ignore */ }
+    setLoadingServices(false);
+  };
+
+  const selectedServiceData = services.find((s) => s.id === selectedService);
 
   const handleConfirm = async () => {
     if (!user) {
@@ -40,10 +55,33 @@ export default function HomeServicePage() {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    toast.success("Prenotazione a domicilio confermata! Il professionista verrà da te.");
+    try {
+      const startTime = selectedTime;
+      const [h, m] = selectedTime.split(':').map(Number);
+      const endDate = new Date(0, 0, 0, h, m + (selectedServiceData?.duration_minutes || 60));
+      const endTime = `${String(endDate.getHours()).padStart(2,'0')}:${String(endDate.getMinutes()).padStart(2,'0')}`;
+      const { error } = await supabase.from("bookings").insert({
+        client_id: user.id,
+        professional_id: id,
+        service_id: selectedServiceData?.id,
+        booking_date: selectedDate,
+        start_time: startTime,
+        end_time: endTime,
+        total_price: selectedServiceData?.price,
+        notes: address + (notes ? ' - ' + notes : ''),
+        status: 'pending'
+      });
+      if (error) {
+        toast.error("Errore nella prenotazione");
+        setLoading(false);
+        return;
+      }
+      toast.success("Prenotazione a domicilio confermata!");
+      navigate("/my-bookings");
+    } catch {
+      toast.error("Errore nella prenotazione");
+    }
     setLoading(false);
-    navigate("/profile");
   };
 
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -51,6 +89,30 @@ export default function HomeServicePage() {
     d.setDate(d.getDate() + i + 1);
     return d.toISOString().split("T")[0];
   });
+
+  if (loadingServices) {
+    return (
+      <MobileLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  if (services.length === 0) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
+          <Home className="w-12 h-12 text-muted-foreground mb-3" />
+          <p className="text-muted-foreground text-center">Nessun servizio disponibile</p>
+          <button onClick={() => navigate(-1)} className="mt-4 px-5 py-2 rounded-xl gradient-primary text-primary-foreground text-sm font-semibold">
+            Indietro
+          </button>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout>
@@ -75,20 +137,16 @@ export default function HomeServicePage() {
         {step === 1 && (
           <div className="space-y-4 fade-in">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-              <img src={stylist2} alt="" className="w-12 h-12 rounded-xl object-cover" />
+              <img src={professional?.avatar_url || stylist2} alt="" className="w-12 h-12 rounded-xl object-cover" />
               <div>
-                <p className="text-sm font-bold">Professionista selezionato</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="w-3 h-3 text-gold fill-gold" />
-                  <span className="text-xs">4.9</span>
-                  <span className="text-xs text-muted-foreground">· Viene a domicilio</span>
-                </div>
+                <p className="text-sm font-bold">{professional?.display_name || "Professionista"}</p>
+                <span className="text-xs text-muted-foreground">Viene a domicilio</span>
               </div>
             </div>
 
             <h2 className="text-sm font-bold mt-4">Scegli il servizio</h2>
             <div className="space-y-2">
-              {mockServices.map((s) => (
+              {services.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setSelectedService(s.id)}
@@ -99,7 +157,7 @@ export default function HomeServicePage() {
                   <div>
                     <p className="text-sm font-medium">{s.name}</p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {s.duration} min
+                      <Clock className="w-3 h-3" /> {s.duration_minutes} min
                     </p>
                   </div>
                   <div className="text-right">
