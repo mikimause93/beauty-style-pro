@@ -188,7 +188,7 @@ export default function StoriesBar() {
               <Plus className="w-5 h-5 text-primary" />
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground font-medium">{uploading ? "..." : "La tua"}</span>
+          <span className="text-xs text-muted-foreground font-medium">{uploading ? "..." : "La tua"}</span>
         </button>
 
         {groups.map((group) => (
