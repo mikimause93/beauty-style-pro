@@ -1,6 +1,23 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+
+---
+
+## 🆕 Novità v2.0.0
+
+- ✅ Recupero password via email (flusso "Password dimenticata" in AuthPage)
+- ✅ Messaggi di errore autenticazione localizzati in italiano (`localizeAuthError`)
+- ✅ Correzione errori runtime: `.maybeSingle()` al posto di `.single()` per query SELECT opzionali (elimina errori PGRST116)
+- ✅ Sistema centralizzato codici errore: `src/lib/errorCodes.ts` con `localizeAuthError()`, `localizeDbError()`, `isUniqueViolation()`, `isNoRowsError()`
+- ✅ `NotificationsContext` condiviso e costanti `NEW_NOTIFICATION_EVENT` / `NOTIFICATION_BADGE_COLOR` in `src/lib/notificationConstants.ts`
+- ✅ `NotificationToast` asincrono tramite `CustomEvent` di finestra
+- ✅ Utility `safeStorage` per accesso sicuro a `localStorage`/`sessionStorage` (evita crash in contesti ristretti)
+- ✅ `ErrorBoundary` globale con recovery UI per prevenire crash bianchi
+- ✅ Guard geolocalizzazione: richiesta permesso sicura prima di accedere alla posizione
+- ✅ PWA `.catch()` su registrazione Service Worker per evitare promise non gestite
+- ✅ Guard `sessionStorage` per proteggere da errori in ambienti che bloccano lo storage
+- ✅ FAB ChatbotWidget posizionato sopra la BottomNav con `safe-area-inset-bottom`
 
 ---
 
@@ -9,6 +26,7 @@
 ### Core
 - ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
 - ✅ Autenticazione tramite numero di telefono (OTP SMS, stile WhatsApp)
+- ✅ Recupero password via email
 - ✅ Feed social con like, commenti, condivisioni
 - ✅ Sistema Follow / Unfollow in tempo reale
 - ✅ Notifiche real-time e push (anche ad app chiusa, via Service Worker)
