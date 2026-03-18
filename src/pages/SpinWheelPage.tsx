@@ -11,7 +11,7 @@ const spinPrizes = [
   { label: "25 QRC", type: "QR_COIN", value: 25, color: "hsl(35 80% 50%)", probability: 0.18 },
   { label: "50 QRC", type: "QR_COIN", value: 50, color: "hsl(155 50% 42%)", probability: 0.14 },
   { label: "10%", type: "DISCOUNT", value: 10, color: "hsl(220 70% 55%)", probability: 0.14 },
-  { label: "20%", type: "DISCOUNT", value: 20, color: "hsl(262 80% 55%)", probability: 0.10 },
+  { label: "20%", type: "DISCOUNT", value: 20, color: "hsl(0 84% 55%)", probability: 0.10 },
   { label: "100 QRC", type: "QR_COIN", value: 100, color: "hsl(330 70% 55%)", probability: 0.06 },
   { label: "SPA", type: "SPA_VOUCHER", value: 1, color: "hsl(180 60% 45%)", probability: 0.04 },
   { label: "500 QRC", type: "QR_COIN", value: 500, color: "hsl(40 75% 52%)", probability: 0.02 },
