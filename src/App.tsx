@@ -90,6 +90,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const StylesPage = lazy(() => import("./pages/StylesPage"));
 
 const queryClient = new QueryClient();
 
@@ -146,6 +147,7 @@ const App = () => {
             <Route path="/radio" element={<RadioPage />} />
             <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/map-search" element={<MapSearchPage />} />
+            <Route path="/styles" element={<StylesPage />} />
             <Route path="/spa-terme" element={<SpaTermePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
