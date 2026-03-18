@@ -52,11 +52,11 @@ function formatTimeAgo(date: string) {
   return new Date(date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
 }
 
-function groupNotifications(notifications: any[]) {
-  const today: any[] = [];
-  const yesterday: any[] = [];
-  const thisWeek: any[] = [];
-  const older: any[] = [];
+function groupNotifications(notifications: AppNotification[]) {
+  const today: AppNotification[] = [];
+  const yesterday: AppNotification[] = [];
+  const thisWeek: AppNotification[] = [];
+  const older: AppNotification[] = [];
   const now = Date.now();
 
   for (const n of notifications) {
