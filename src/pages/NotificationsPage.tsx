@@ -84,7 +84,7 @@ export default function NotificationsPage() {
   const filtered = filter === "unread" ? notifications.filter(n => !n.read) : notifications;
   const groups = groupNotifications(filtered);
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: AppNotification) => {
     if (!notification.read) markRead(notification.id);
     const type = notification.type || "info";
     const data = notification.data || {};
