@@ -170,11 +170,11 @@ export default function HomePage() {
         {/* Tabs — chrome pill style */}
         <div className="flex gap-2 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
-            <button key={tab} onClick={() => handleTabClick(tab)}
+            <button type="button" key={tab} onClick={() => handleTabClick(tab)}
               className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 whitespace-nowrap ${
                 activeTab === tab
                    ? "gradient-primary text-white shadow-glow"
-                   : "chrome-icon text-foreground/60 hover:text-foreground/90"
+                   : "neon-icon text-foreground/60 hover:text-foreground/90"
               }`}>
               {tab}
             </button>
