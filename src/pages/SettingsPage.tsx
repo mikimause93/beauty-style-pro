@@ -276,7 +276,7 @@ export default function SettingsPage() {
           Logout
         </button>
 
-        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v1.0.0</p>
+        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v2.0.0</p>
       </div>
     </MobileLayout>
   );
