@@ -240,7 +240,7 @@ export default function StoriesBar() {
           <div className="absolute bottom-8 left-0 right-0 flex justify-center">
             <div className="flex items-center gap-1 bg-white/10 rounded-full px-3 py-1">
               <Eye className="w-3 h-3 text-white/70" />
-              <span className="text-[10px] text-white/70">{viewingGroup.stories[currentIndex]?.view_count}</span>
+              <span className="text-xs text-white/70">{viewingGroup.stories[currentIndex]?.view_count}</span>
             </div>
           </div>
         </div>
