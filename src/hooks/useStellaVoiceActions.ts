@@ -1,15 +1,11 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-interface VoiceAction {
-  patterns: string[];
-  action: (params: string) => void;
-  description: string;
-}
+import { useStella, STELLA_LIMITS } from "@/contexts/StellaContext";
 
 export function useStellaVoiceActions() {
   const navigate = useNavigate();
+  const { canPerformAction, recordAction, requestConfirmation, getRemainingActions } = useStella();
 
   const processVoiceCommand = useCallback((transcript: string): { matched: boolean; response: string; action?: string } => {
     const text = transcript.toLowerCase().trim();
@@ -35,16 +31,40 @@ export function useStellaVoiceActions() {
     if (messageMatch) {
       const recipient = messageMatch[1].trim();
       const content = messageMatch[2].trim();
-      navigate("/chat");
-      toast.info(`Cerco "${recipient}" e preparo il messaggio: "${content}"`);
-      return { matched: true, response: `Cerco ${recipient} per inviare: "${content}"!` };
+      const msgCheck = canPerformAction("message");
+      if (!msgCheck.allowed) {
+        toast.error(msgCheck.reason ?? "Limite messaggi raggiunto");
+        return { matched: true, response: msgCheck.reason ?? "Limite messaggi orario raggiunto!" };
+      }
+      requestConfirmation(
+        "Invia messaggio",
+        `Invia a ${recipient}: "${content}"?`,
+        () => {
+          recordAction("message");
+          navigate("/chat");
+          toast.success(`Messaggio preparato per ${recipient}`);
+        }
+      );
+      return { matched: true, response: `Vuoi inviare a ${recipient}: "${content}"? Conferma per procedere.` };
     }
     const messageMatchSimple = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
     if (messageMatchSimple) {
       const recipient = messageMatchSimple[1];
-      navigate("/chat");
-      toast.info(`Cerco "${recipient}" nella chat...`);
-      return { matched: true, response: `Cerco ${recipient} per inviargli un messaggio!` };
+      const msgCheck2 = canPerformAction("message");
+      if (!msgCheck2.allowed) {
+        toast.error(msgCheck2.reason ?? "Limite messaggi raggiunto");
+        return { matched: true, response: msgCheck2.reason ?? "Limite messaggi orario raggiunto!" };
+      }
+      requestConfirmation(
+        "Invia messaggio",
+        `Apri chat con ${recipient}?`,
+        () => {
+          recordAction("message");
+          navigate("/chat");
+          toast.info(`Cerco "${recipient}" nella chat...`);
+        }
+      );
+      return { matched: true, response: `Vuoi aprire la chat con ${recipient}? Conferma per procedere.` };
     }
 
     // Navigation commands
@@ -69,8 +89,12 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Apro il tuo wallet!" };
     }
     if (text.includes("prenota") || text.includes("prenotazione")) {
-      navigate("/stylists");
-      return { matched: true, response: "Ti mostro i professionisti disponibili per prenotare!" };
+      requestConfirmation(
+        "Prenota appuntamento",
+        "Apro la selezione professionisti per la prenotazione. Confermi?",
+        () => { navigate("/stylists"); }
+      );
+      return { matched: true, response: "Vuoi aprire la sezione prenotazioni? Conferma per procedere." };
     }
     if (text.includes("apri mappa") || text.includes("cerca sulla mappa")) {
       navigate("/map-search");
@@ -173,12 +197,25 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Ecco le tue notifiche! Le leggo per te." };
     }
 
-    // Add friend / search
+    // Add friend / follow - rate limited
     const addMatch = text.match(/(?:aggiungi|segui)\s+(.+)/);
     if (addMatch) {
-      navigate("/search");
-      toast.info(`Cerco "${addMatch[1]}"...`);
-      return { matched: true, response: `Cerco ${addMatch[1]} per seguirlo!` };
+      const followResult = canPerformAction("follow");
+      if (!followResult.allowed) {
+        toast.error(followResult.reason ?? "Limite follow raggiunto");
+        return { matched: true, response: followResult.reason ?? "Limite follow giornaliero raggiunto!" };
+      }
+      const target = addMatch[1].trim();
+      requestConfirmation(
+        "Segui utente",
+        `Vuoi seguire "${target}"?`,
+        () => {
+          recordAction("follow");
+          navigate("/search");
+          toast.info(`Cerco "${target}"...`);
+        }
+      );
+      return { matched: true, response: `Vuoi seguire ${target}? Conferma per procedere.` };
     }
 
     // Generic search — navigate to search page with query
@@ -189,11 +226,18 @@ export function useStellaVoiceActions() {
       return { matched: true, response: `Cerco "${query}"!` };
     }
 
-    // Like commands
+    // Like commands - rate limited to STELLA_LIMITS.likes_per_day per day
     if (text.match(/metti\s+like|dai\s+like|aggiungi\s+like|mi\s+piace/)) {
+      const result = canPerformAction("like");
+      if (!result.allowed) {
+        toast.error(result.reason ?? "Limite like raggiunto");
+        return { matched: true, response: result.reason ?? `Limite di ${STELLA_LIMITS.likes_per_day} like al giorno raggiunto!` };
+      }
+      recordAction("like");
+      const remaining = getRemainingActions("like");
       navigate("/");
-      toast.success("Like aggiunto!");
-      return { matched: true, response: "Ho messo like al post!" };
+      toast.success(`Like aggiunto! (${remaining} rimasti oggi)`);
+      return { matched: true, response: `Ho messo like al post! Ti restano ${remaining} like oggi.` };
     }
 
     // Search match on map
@@ -220,7 +264,7 @@ export function useStellaVoiceActions() {
     }
 
     return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'torna indietro', 'invia messaggio a...', 'cerca [termine]', 'cerca match a 10 km', o 'dimmi le notifiche'." };
-  }, [navigate]);
+  }, [navigate, canPerformAction, recordAction, requestConfirmation, getRemainingActions]);
 
   return { processVoiceCommand };
 }

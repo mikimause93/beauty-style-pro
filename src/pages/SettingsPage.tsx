@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { APP_VERSION } from "@/lib/version";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -276,7 +277,9 @@ export default function SettingsPage() {
           Logout
         </button>
 
-        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v1.0.0</p>
+        <p className="text-center text-[10px] text-muted-foreground pb-4">
+          STYLE <span className="version-badge">v{APP_VERSION}</span>
+        </p>
       </div>
     </MobileLayout>
   );

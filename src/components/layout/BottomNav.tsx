@@ -19,6 +19,8 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom" aria-label="Navigazione principale">
       <div className="glass-nav">
+        {/* v2.0.0 top neon divider */}
+        <div className="neon-divider w-full" />
         <div className="flex items-center justify-around h-[64px] max-w-lg mx-auto px-3">
           {tabs.map((tab, i) => {
             const isActive =
@@ -35,9 +37,9 @@ export default function BottomNav() {
                     onClick={() => navigate(tab.path)}
                     aria-label={tab.label}
                     className={cn(
-                      "absolute -top-6 w-[56px] h-[56px] rounded-2xl flex items-center justify-center transition-all duration-300",
+                      "absolute -top-7 w-[58px] h-[58px] rounded-2xl flex items-center justify-center transition-all duration-300 tap-scale",
                       isActive
-                        ? "neon-icon-active scale-105"
+                        ? "neon-icon-active scale-105 nav-center-ring animate-glow-ring"
                         : "neon-icon hover:scale-105 animate-pulse-glow"
                     )}
                   >
@@ -66,14 +68,12 @@ export default function BottomNav() {
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
                 aria-label={tab.label}
-                className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-300"
+                className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-300 tap-scale"
               >
                 <div
                   className={cn(
                     "relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                    isActive
-                      ? "neon-icon-active"
-                      : "neon-icon"
+                    isActive ? "neon-icon-active" : "neon-icon"
                   )}
                 >
                   <Icon
@@ -82,6 +82,10 @@ export default function BottomNav() {
                       isActive ? "text-primary-foreground text-neon" : "text-neon"
                     )}
                   />
+                  {/* Active dot indicator */}
+                  {isActive && (
+                    <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary shadow-[0_0_6px_hsl(262_80%_62%/0.8)]" />
+                  )}
                 </div>
                 <span
                   className={cn(

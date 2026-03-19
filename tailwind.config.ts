@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         display: ["Space Grotesk", "Sora", "system-ui", "sans-serif"],
         body: ["DM Sans", "system-ui", "sans-serif"],
+        futuristic: ["Orbitron", "Space Grotesk", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",

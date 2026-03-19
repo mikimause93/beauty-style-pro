@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
+import { StellaProvider } from "@/contexts/StellaContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
@@ -127,6 +128,7 @@ const App = () => {
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
         <RadioProvider>
+        <StellaProvider>
           <PageTracker />
           <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -215,6 +217,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+        </StellaProvider>
         </RadioProvider>
         </AuthProvider>
       </BrowserRouter>
