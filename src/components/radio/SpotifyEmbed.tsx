@@ -50,17 +50,17 @@ export default function SpotifyEmbed() {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSearch()}
             placeholder="Cerca playlist..."
-            className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-[#1DB954]/50"
+            className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-success/50"
           />
         </div>
-        <button onClick={handleSearch} className="h-10 px-4 rounded-xl bg-[#1DB954] text-white text-xs font-bold shrink-0">
+        <button onClick={handleSearch} className="h-10 px-4 rounded-xl bg-success text-white text-xs font-bold shrink-0">
           Cerca
         </button>
       </div>
 
       {/* Info banner */}
       {query && !playlists.find(p => p.name.toLowerCase().includes(query.toLowerCase())) && (
-        <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-[#1DB954]/10 text-xs text-[#1DB954]">
+        <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-success/10 text-xs text-success">
           <Music2 className="w-3.5 h-3.5" />
           Seleziona una playlist dal catalogo qui sotto
         </div>
@@ -90,8 +90,8 @@ export default function SpotifyEmbed() {
             }}
             className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
               currentPlaylistId === pl.id && !customUri
-                ? "bg-[#1DB954] text-white"
-                : "bg-[#1DB954]/10 text-[#1DB954]"
+                ? "bg-success text-white"
+                : "bg-success/10 text-success"
             }`}
           >
             {pl.name}

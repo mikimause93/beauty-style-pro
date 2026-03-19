@@ -207,7 +207,7 @@ export default function SettingsPage() {
                 >
                   {/* Preview */}
                   <div className="w-full h-14 rounded-lg bg-[#0a0a0b] flex flex-col gap-1 p-2 overflow-hidden">
-                    <div className="h-1.5 w-10 rounded bg-[#d946ef] opacity-90" />
+                    <div className="h-1.5 w-10 rounded bg-primary opacity-90" />
                     <div className="h-1 w-16 rounded bg-gray-700" />
                     <div className="h-1 w-12 rounded bg-gray-700" />
                     <div className="flex gap-1 mt-1">
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                 >
                   {/* Preview */}
                   <div className="w-full h-14 rounded-lg bg-[#f8f8f8] flex flex-col gap-1 p-2 overflow-hidden border border-gray-200">
-                    <div className="h-1.5 w-10 rounded bg-[#d946ef] opacity-90" />
+                    <div className="h-1.5 w-10 rounded bg-primary opacity-90" />
                     <div className="h-1 w-16 rounded bg-gray-300" />
                     <div className="h-1 w-12 rounded bg-gray-300" />
                     <div className="flex gap-1 mt-1">
