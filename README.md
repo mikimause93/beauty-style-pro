@@ -1,6 +1,24 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+
+---
+
+## 🆕 Novità v2.0.0
+
+### ⭐ Stella AI – Limiti azioni & Conferme vocali
+- ✅ Rate limiting globale per le azioni automatiche di Stella:
+  - Max **20 like al giorno**
+  - Max **50 commenti al giorno**
+  - Max **20 messaggi all'ora**
+  - Max **15 follow al giorno**
+  - Cooldown di 2 s tra un'azione e l'altra
+- ✅ Dialog di conferma vocale/tap prima di ogni azione sensibile (prenotazione, invio messaggio, follow)
+- ✅ `StellaContext` condiviso → stato e limiti accessibili ovunque nell'app tramite `useStella()`
+- ✅ Logging azioni su tabella `stella_action_log` (Supabase)
+
+### 🔧 Bug fix: localStorage persistente
+- ✅ `safeStorage` ora usa `localStorage` reale (con fallback in-memory); il tema e le preferenze vengono correttamente ripristinati tra le sessioni
 
 ---
 
