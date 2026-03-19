@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import logoS from "@/assets/logo-s.png";
+import { APP_VERSION, APP_TAGLINE } from "@/lib/version";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -13,6 +14,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }, [onComplete]);
 
   useEffect(() => {
+    // Only load Playfair Display here — Orbitron is already loaded via index.css
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,300;1,400&display=swap";
     link.rel = "stylesheet";
@@ -41,6 +43,16 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       }`}
       style={{ backgroundColor: "#000" }}
     >
+      {/* Ambient neon glow background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(139,92,246,0.12) 0%, rgba(217,70,239,0.06) 50%, transparent 100%)",
+          transition: "opacity 1s ease",
+          opacity: phase === "founder" ? 0 : 1,
+        }}
+      />
+
       {/* Founder name — phase 1 */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center gap-4 transition-all duration-700 ${
@@ -92,6 +104,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           className={`w-28 h-28 mb-6 object-contain transition-all duration-700 ${
             phase === "logo" ? "scale-95 opacity-80" : "scale-100 opacity-100"
           }`}
+          style={{ filter: "drop-shadow(0 0 24px rgba(139,92,246,0.5))" }}
         />
 
         <h1
@@ -117,8 +130,28 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           }`}
           style={{ color: "rgba(255,255,255,0.4)" }}
         >
-          La piattaforma beauty
+          {APP_TAGLINE}
         </p>
+
+        {/* v2.0.0 version badge */}
+        <div
+          className={`mt-4 transition-all duration-500 delay-300 ${
+            phase === "text" || phase === "fade" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          }`}
+          style={{
+            fontFamily: "'Orbitron', monospace",
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.15em",
+            background: "linear-gradient(135deg, #8b5cf6, #d946ef)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            textShadow: "none",
+            filter: "drop-shadow(0 0 6px rgba(139,92,246,0.6))",
+          }}
+        >
+          v{APP_VERSION}
+        </div>
       </div>
 
       {/* Footer signature */}
@@ -154,3 +187,4 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     </div>
   );
 }
+

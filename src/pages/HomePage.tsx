@@ -19,6 +19,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
+import { APP_VERSION } from "@/lib/version";
 import logo from "@/assets/logo.png";
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
@@ -140,46 +141,52 @@ export default function HomePage() {
 
   return (
     <MobileLayout>
-      {/* Header — luxury & clean */}
-      <header className="sticky top-0 z-50 glass">
+      {/* Header v2.0.0 — holographic glass */}
+      <header className="sticky top-0 z-50 glass-v2">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
+            <span className="version-badge">v{APP_VERSION}</span>
+          </div>
           <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => navigate("/search")} aria-label="Cerca" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+            <button type="button" onClick={() => navigate("/search")} aria-label="Cerca" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform tap-scale">
               <Search className="w-[18px] h-[18px] text-neon" />
             </button>
-            <button type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+            <button type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform tap-scale">
               {theme === "dark" ? <Sun className="w-[18px] h-[18px] text-neon" /> : <Moon className="w-[18px] h-[18px] text-neon" />}
             </button>
-            <button type="button" onClick={() => navigate("/qr-coins")} aria-label="QR Coins" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
+            <button type="button" onClick={() => navigate("/qr-coins")} aria-label="QR Coins" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black tap-scale">
               <Coins className="w-3.5 h-3.5" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
-            <button type="button" onClick={() => navigate("/notifications")} aria-label="Notifiche" className="relative w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+            <button type="button" onClick={() => navigate("/notifications")} aria-label="Notifiche" className="relative w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform tap-scale">
               <Bell className="w-[18px] h-[18px] text-neon" />
               {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-primary shadow-glow border border-background" />
               )}
             </button>
-            <button type="button" onClick={() => navigate("/chat")} aria-label="Messaggi" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+            <button type="button" onClick={() => navigate("/chat")} aria-label="Messaggi" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform tap-scale">
               <MessageCircle className="w-[18px] h-[18px] text-neon" />
             </button>
           </div>
         </div>
 
-        {/* Tabs — chrome pill style */}
+        {/* Tabs — v2 pill style with neon indicator */}
         <div className="flex gap-2 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button type="button" key={tab} onClick={() => handleTabClick(tab)}
-              className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 whitespace-nowrap ${
+              className={`relative px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 whitespace-nowrap tap-scale ${
                 activeTab === tab
-                   ? "gradient-primary text-white shadow-glow"
+                   ? "gradient-primary text-white shadow-glow tab-active-indicator"
                    : "neon-icon text-foreground/60 hover:text-foreground/90"
               }`}>
               {tab}
             </button>
           ))}
         </div>
+
+        {/* v2.0.0 neon divider */}
+        <div className="neon-divider mx-5" />
       </header>
 
       {/* Stories */}
@@ -187,7 +194,7 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* Quick Actions — Neon LED icons */}
+      {/* Quick Actions — v2 Neon LED icons with stagger */}
       {activeTab === "Nuovi" && (
         <div className="flex gap-4 px-5 mb-5 overflow-x-auto no-scrollbar py-2">
           {[
@@ -208,10 +215,12 @@ export default function HomePage() {
             { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
             { Icon: Radio, label: "Radio", path: "/radio" },
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
-          ].map(item => (
+          ].map((item, idx) => (
             <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group" aria-label={item.label}>
-              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative">
+              className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group animate-slide-in-bottom stagger-child"
+              style={{ "--delay": `${idx * 30}ms` } as React.CSSProperties}
+              aria-label={item.label}>
+              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative tap-scale">
                 <item.Icon className="w-7 h-7 text-neon relative z-10" />
               </div>
               <span className="text-xs text-foreground/60 font-medium leading-tight tracking-wide" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{item.label}</span>
