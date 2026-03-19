@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 240 6% 4%;
+    --background: 240 8% 3%;
     --foreground: 220 15% 95%;
 
     --card: 240 5% 8%;
@@ -57,11 +57,12 @@
     --gradient-chrome-border: linear-gradient(135deg, hsl(0 0% 30%), hsl(262 20% 40%), hsl(0 0% 20%));
 
     /* Shadows */
-    --shadow-glow: 0 0 40px hsl(262 80% 62% / 0.3);
-    --shadow-glow-gold: 0 0 30px hsl(42 98% 62% / 0.3);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
-    --shadow-luxury: 0 8px 32px hsl(262 80% 62% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5);
-    --shadow-chrome: 0 4px 20px hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    --shadow-glow: 0 0 50px hsl(262 80% 62% / 0.45), 0 0 100px hsl(262 80% 62% / 0.15);
+    --shadow-glow-gold: 0 0 40px hsl(42 98% 62% / 0.4);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.6);
+    --shadow-luxury: 0 8px 32px hsl(262 80% 62% / 0.2), 0 2px 8px hsl(0 0% 0% / 0.6);
+    --shadow-chrome: 0 4px 20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    --shadow-neon-strong: 0 0 20px hsl(262 80% 62% / 0.9), 0 0 60px hsl(262 80% 62% / 0.5), 0 0 120px hsl(262 80% 62% / 0.2);
 
     --sidebar-background: 240 6% 5%;
     --sidebar-foreground: 220 15% 95%;
@@ -167,10 +168,11 @@
     -webkit-backdrop-filter: blur(20px);
   }
   .glass-nav {
-    background: hsl(var(--background) / 0.9);
-    backdrop-filter: blur(40px) saturate(1.5);
-    -webkit-backdrop-filter: blur(40px) saturate(1.5);
-    border-top: 1px solid hsl(0 0% 100% / 0.06);
+    background: hsl(var(--background) / 0.92);
+    backdrop-filter: blur(40px) saturate(1.6);
+    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    border-top: 1px solid hsl(262 80% 62% / 0.15);
+    box-shadow: 0 -4px 40px hsl(262 80% 62% / 0.08);
     overflow: visible;
   }
 
@@ -208,34 +210,96 @@
 
   /* Neon LED icon — transparent bg with purple neon border glow */
   .neon-icon {
-    background: transparent;
-    border: 2px solid hsl(262 80% 62% / 0.7);
+    background: hsl(262 80% 62% / 0.05);
+    border: 2px solid hsl(262 80% 62% / 0.75);
     box-shadow:
-      0 0 8px hsl(262 80% 62% / 0.4),
-      0 0 20px hsl(262 80% 62% / 0.15),
-      inset 0 0 8px hsl(262 80% 62% / 0.1);
+      0 0 10px hsl(262 80% 62% / 0.5),
+      0 0 24px hsl(262 80% 62% / 0.2),
+      inset 0 0 10px hsl(262 80% 62% / 0.12);
     transition: all 0.3s ease;
   }
   .neon-icon:hover,
   .neon-icon:active {
-    border-color: hsl(262 80% 72% / 0.9);
+    background: hsl(262 80% 62% / 0.12);
+    border-color: hsl(262 80% 78% / 0.95);
     box-shadow:
-      0 0 12px hsl(262 80% 62% / 0.6),
-      0 0 30px hsl(262 80% 62% / 0.25),
-      inset 0 0 12px hsl(262 80% 62% / 0.15);
+      0 0 18px hsl(262 80% 62% / 0.75),
+      0 0 44px hsl(262 80% 62% / 0.35),
+      inset 0 0 18px hsl(262 80% 62% / 0.2);
   }
   .neon-icon-active {
-    border-color: hsl(262 80% 72%);
+    background: hsl(262 80% 62% / 0.15);
+    border-color: hsl(262 80% 78%);
     box-shadow:
-      0 0 14px hsl(262 80% 62% / 0.7),
-      0 0 40px hsl(262 80% 62% / 0.3),
-      inset 0 0 14px hsl(262 80% 62% / 0.2);
+      0 0 20px hsl(262 80% 62% / 0.85),
+      0 0 55px hsl(262 80% 62% / 0.4),
+      inset 0 0 20px hsl(262 80% 62% / 0.25);
   }
 
   /* Neon text glow */
   .text-neon {
-    color: hsl(262 80% 72%);
-    text-shadow: 0 0 6px hsl(262 80% 62% / 0.5), 0 0 20px hsl(262 80% 62% / 0.2);
+    color: hsl(262 80% 78%);
+    text-shadow: 0 0 8px hsl(262 80% 62% / 0.7), 0 0 25px hsl(262 80% 62% / 0.35);
+  }
+
+  /* Neon logo title — Orbitron with animated glow */
+  .neon-title {
+    font-family: 'Orbitron', 'Space Grotesk', sans-serif;
+    color: hsl(262 80% 78%);
+    text-shadow:
+      0 0 8px hsl(262 80% 78% / 0.9),
+      0 0 20px hsl(262 80% 62% / 0.7),
+      0 0 45px hsl(262 80% 62% / 0.4),
+      0 0 80px hsl(262 80% 62% / 0.15);
+    animation: neon-title-pulse 4s ease-in-out infinite;
+  }
+  @keyframes neon-title-pulse {
+    0%, 100% {
+      text-shadow:
+        0 0 8px hsl(262 80% 78% / 0.9),
+        0 0 20px hsl(262 80% 62% / 0.7),
+        0 0 45px hsl(262 80% 62% / 0.4),
+        0 0 80px hsl(262 80% 62% / 0.15);
+    }
+    50% {
+      text-shadow:
+        0 0 12px hsl(262 80% 90% / 1),
+        0 0 30px hsl(262 80% 72% / 0.9),
+        0 0 65px hsl(262 80% 62% / 0.55),
+        0 0 120px hsl(262 80% 62% / 0.25);
+    }
+  }
+
+  /* Neon card — dark card with glowing purple border */
+  .neon-card {
+    background: hsl(240 8% 6%);
+    border: 1px solid hsl(262 80% 62% / 0.3);
+    box-shadow:
+      0 0 12px hsl(262 80% 62% / 0.12),
+      0 4px 24px hsl(0 0% 0% / 0.5),
+      inset 0 1px 0 hsl(262 80% 62% / 0.06);
+    border-radius: var(--radius);
+  }
+  .neon-card:hover {
+    border-color: hsl(262 80% 62% / 0.5);
+    box-shadow:
+      0 0 20px hsl(262 80% 62% / 0.2),
+      0 4px 24px hsl(0 0% 0% / 0.5),
+      inset 0 1px 0 hsl(262 80% 62% / 0.1);
+  }
+
+  /* Ambient app background glow */
+  .app-ambient::before {
+    content: '';
+    position: fixed;
+    top: -15vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70vw;
+    height: 40vh;
+    background: radial-gradient(ellipse at center, hsl(262 80% 62% / 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* Hide scrollbar */
@@ -295,8 +359,8 @@
   }
 
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsl(262 80% 62% / 0.35), 0 4px 20px hsl(0 0% 0% / 0.3); }
-    50% { box-shadow: 0 0 32px hsl(262 80% 62% / 0.5), 0 4px 28px hsl(0 0% 0% / 0.3); }
+    0%, 100% { box-shadow: 0 0 20px hsl(262 80% 62% / 0.5), 0 0 50px hsl(262 80% 62% / 0.2), 0 4px 20px hsl(0 0% 0% / 0.3); }
+    50% { box-shadow: 0 0 35px hsl(262 80% 62% / 0.7), 0 0 80px hsl(262 80% 62% / 0.3), 0 4px 28px hsl(0 0% 0% / 0.3); }
   }
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;

@@ -15,7 +15,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
   const { onTouchStart, onTouchEnd } = useSwipeNavigation();
 
   return (
-    <div className="min-h-screen bg-background max-w-lg mx-auto relative"
+    <div className="min-h-screen bg-background max-w-lg mx-auto relative app-ambient overflow-hidden"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >

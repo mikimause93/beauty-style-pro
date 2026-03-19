@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         display: ["Space Grotesk", "Sora", "system-ui", "sans-serif"],
         body: ["DM Sans", "system-ui", "sans-serif"],
+        futuristic: ["Orbitron", "Space Grotesk", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -92,11 +93,16 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "neon-flicker": {
+          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": { opacity: "1" },
+          "20%, 24%, 55%": { opacity: "0.6" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 3s ease-in-out infinite",
+        "neon-flicker": "neon-flicker 8s linear infinite",
       },
     },
   },

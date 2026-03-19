@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
+import { StellaProvider } from "@/contexts/StellaContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
@@ -66,6 +67,7 @@ const ManageProductsPage = lazy(() => import("./pages/ManageProductsPage"));
 const WalletPage = lazy(() => import("./pages/WalletPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const CreatorApplicationPage = lazy(() => import("./pages/CreatorApplicationPage"));
+const CreatorDashboardPage = lazy(() => import("./pages/CreatorDashboardPage"));
 const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"));
 const BoostProfilePage = lazy(() => import("./pages/BoostProfilePage"));
 const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
@@ -127,6 +129,7 @@ const App = () => {
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
         <RadioProvider>
+        <StellaProvider>
           <PageTracker />
           <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -189,6 +192,7 @@ const App = () => {
             <Route path="/subscriptions" element={<P><SubscriptionPage /></P>} />
             <Route path="/boost" element={<P><BoostProfilePage /></P>} />
             <Route path="/become-creator" element={<P><CreatorApplicationPage /></P>} />
+            <Route path="/creator-dashboard" element={<P><CreatorDashboardPage /></P>} />
             <Route path="/marketplace" element={<P><MarketplacePage /></P>} />
             <Route path="/marketplace/create-request" element={<P><CreateServiceRequestPage /></P>} />
             <Route path="/marketplace/create-casting" element={<P><CreateCastingPage /></P>} />
@@ -215,6 +219,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+        </StellaProvider>
         </RadioProvider>
         </AuthProvider>
       </BrowserRouter>

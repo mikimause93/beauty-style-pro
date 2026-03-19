@@ -3,22 +3,24 @@ import { useNavigate } from "react-router-dom";
 import {
   MessageCircle, X, Send, Sparkles, Minimize2, Maximize2,
   Calendar, MapPin, ShoppingBag, Video, Wallet, Briefcase,
-  Star, Radio, Bot, User, Loader2, Mic, MicOff, Phone, PhoneOff, HelpCircle
+  Star, Radio, Bot, User, Loader2, Mic, MicOff, Phone, PhoneOff, HelpCircle,
+  Clock, CheckCircle2, XCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
-import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
 import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
+import { useStella } from "@/hooks/useStella";
 
 interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   content: string;
+  confirmId?: string; // if set, render confirm/cancel buttons for this pending action
 }
 
 const quickActions = [
@@ -43,10 +45,20 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const {
     suggestions,
     showChatbot,
-    setShowChatbot,
     handleSuggestionClick,
     dismissSuggestion,
   } = useChatbot();
+
+  // ── Stella AI unified brain ──────────────────────────────────────────────
+  const stella = useStella();
+  const {
+    pendingConfirmation, scheduledActions, smartSuggestions,
+    processCommand: stellaProcess,
+    confirmPending, cancelPending,
+    cancelScheduled, getGreeting, learnEvent,
+    isVoiceEnabled, isTTSEnabled, isWakeWordEnabled,
+    toggleVoice, toggleTTS, toggleWakeWord,
+  } = stella;
 
   const [isMinimized, setIsMinimized] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -73,7 +85,6 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
   
-  const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
   const { speak, speaking: isSpeaking } = useVoiceSynthesis({ rate: 1.05, pitch: 1.05 });
 
   // Wake word detection
@@ -134,25 +145,39 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (!command) return;
     setVoicePhase("processing");
     
-    // Try voice action first (navigation, messages, etc.)
-    const result = executeVoiceCommand(command);
+    // Route through unified Stella brain
+    const result = await stellaProcess(command);
     
     if (result.matched) {
-      // Handle optional action field (e.g., theme change)
       if (result.action === "theme:light") setTheme("light");
       else if (result.action === "theme:dark") setTheme("dark");
+
+      if (result.requiresConfirmation && result.confirmationPrompt) {
+        // Add confirmation prompt to chat
+        const pendId = pendingConfirmation?.id ?? `confirm-${Date.now()}`;
+        const confirmMsg: ChatMsg = {
+          id: pendId,
+          role: "assistant",
+          content: `⚠️ ${result.confirmationPrompt}`,
+          confirmId: pendId,
+        };
+        setChatMessages(prev => [...prev, confirmMsg]);
+        setIsMinimized(false);
+        setVoicePhase("speaking");
+        speak(result.confirmationPrompt);
+        setTimeout(endVoiceCall, 1000);
+        return;
+      }
+
       setVoicePhase("speaking");
-      // Speak the response aloud — hands-free
       speak(result.response);
       toast.success(result.response);
-      // Auto-close after TTS completes (roughly 1.5s per 100 chars)
-      setTimeout(() => {
-        endVoiceCall();
-      }, Math.max(800, result.response.length * 15));
+      await learnEvent({ type: 'command', data: { text: command } });
+      setTimeout(endVoiceCall, Math.max(800, result.response.length * 15));
       return;
     }
 
-    // If not a navigation command, send to AI
+    // Not a Stella command → send to AI
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
     setChatMessages(prev => [...prev, userMsg]);
     setIsMinimized(false);
@@ -169,7 +194,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     try {
       await streamChat({
         userId: user!.id,
-        messages: history as any,
+        messages: history as Parameters<typeof streamChat>[0]["messages"],
         onDelta: (chunk) => {
           assistantSoFar += chunk;
           const currentContent = assistantSoFar;
@@ -185,9 +210,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
           setChatMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
-          // Speak the full AI response aloud
           if (assistantSoFar) {
-            // Truncate for TTS if very long
             const ttsText = assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar;
             speak(ttsText);
           }
@@ -223,10 +246,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
         m.id === "welcome" 
-          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!` }
+          ? { ...m, content: getGreeting() }
           : m
       ));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.display_name]);
 
   const sendMessage = useCallback(async () => {
@@ -236,6 +260,36 @@ export default function ChatbotWidget({ className = "" }: Props) {
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
     setChatMessages(prev => [...prev, userMsg]);
     setChatInput("");
+
+    // 1. Try Stella brain first
+    const stellaResult = await stellaProcess(text);
+    if (stellaResult.matched) {
+      if (stellaResult.action === "theme:light") setTheme("light");
+      else if (stellaResult.action === "theme:dark") setTheme("dark");
+
+      if (stellaResult.requiresConfirmation && stellaResult.confirmationPrompt) {
+        const pendId = pendingConfirmation?.id ?? `confirm-${Date.now()}`;
+        const confirmMsg: ChatMsg = {
+          id: pendId,
+          role: "assistant",
+          content: `⚠️ ${stellaResult.confirmationPrompt}`,
+          confirmId: pendId,
+        };
+        setChatMessages(prev => [...prev, confirmMsg]);
+        return;
+      }
+
+      const assistantMsg: ChatMsg = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `✅ ${stellaResult.response}`,
+      };
+      setChatMessages(prev => [...prev, assistantMsg]);
+      await learnEvent({ type: 'command', data: { text } });
+      return;
+    }
+
+    // 2. Not a command — send to AI
     setIsAILoading(true);
 
     const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
@@ -260,7 +314,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     try {
       await streamChat({
         userId: user.id,
-        messages: history as any,
+        messages: history as Parameters<typeof streamChat>[0]["messages"],
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => {
           setChatMessages(prev => prev.map(m => 
@@ -278,7 +332,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
           setIsAILoading(false);
         },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("AI stream error:", err);
       toast.error("Errore nella risposta AI");
       setChatMessages(prev => [...prev, {
@@ -288,7 +342,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
       }]);
       setIsAILoading(false);
     }
-  }, [chatInput, isAILoading, user, chatMessages]);
+  }, [chatInput, isAILoading, user, chatMessages, stellaProcess, pendingConfirmation, learnEvent, setTheme]);
 
   const suggestedQuestions = [
     "Quale taglio va di moda?",
@@ -409,7 +463,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
               {[
                 { key: "chat" as const, label: "💬 Chat AI" },
                 { key: "actions" as const, label: "⚡ Azioni" },
-                { key: "tips" as const, label: `💡 Tips${suggestions.length > 0 ? ` (${suggestions.length})` : ""}` },
+                { key: "tips" as const, label: `⏰ Prog.${scheduledActions.filter(a => a.status === 'pending').length > 0 ? ` (${scheduledActions.filter(a => a.status === 'pending').length})` : ""}` },
               ].map(tab => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                   className={`flex-1 px-2 py-2 text-[11px] font-semibold transition-colors ${
@@ -445,6 +499,31 @@ export default function ChatbotWidget({ className = "" }: Props) {
                             : "bg-muted/60 border border-border/30 rounded-bl-sm"
                         }`}>
                           <p className="text-xs whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                          {/* Confirmation buttons */}
+                          {msg.confirmId && pendingConfirmation && (
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={async () => {
+                                  const response = await confirmPending();
+                                  setChatMessages(prev => prev.map(m => m.id === msg.id ? { ...m, content: msg.content, confirmId: undefined } : m));
+                                  setChatMessages(prev => [...prev, { id: (Date.now()+1).toString(), role: "assistant", content: `✅ ${response}` }]);
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500 text-white text-[10px] font-bold hover:bg-green-600 transition-colors"
+                              >
+                                <CheckCircle2 className="w-3 h-3" /> Conferma
+                              </button>
+                              <button
+                                onClick={() => {
+                                  cancelPending();
+                                  setChatMessages(prev => prev.map(m => m.id === msg.id ? { ...m, confirmId: undefined } : m));
+                                  setChatMessages(prev => [...prev, { id: (Date.now()+1).toString(), role: "assistant", content: "❌ Azione annullata" }]);
+                                }}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold hover:opacity-80 transition-colors"
+                              >
+                                <XCircle className="w-3 h-3" /> Annulla
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -467,7 +546,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                       <div className="pt-1">
                         <p className="text-[10px] text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
                         <div className="flex flex-wrap gap-1.5">
-                          {suggestedQuestions.map(q => (
+                          {(smartSuggestions.length > 0 ? smartSuggestions : suggestedQuestions).map(q => (
                             <button key={q} onClick={() => setChatInput(q)}
                               className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-[10px] hover:border-primary/40 transition-colors">
                               {q}
@@ -520,40 +599,50 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
               {activeTab === "tips" && (
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                  {suggestions.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-xs text-muted-foreground">Nessun suggerimento al momento</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Continua a usare l'app!</p>
+                  <p className="text-[10px] text-muted-foreground font-medium mb-2">⏰ Azioni Programmate</p>
+                  {scheduledActions.filter(a => a.status === 'pending').length === 0 ? (
+                    <div className="text-center py-6">
+                      <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-xs text-muted-foreground">Nessuna azione programmata</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Es: "tra 5 minuti vai alla home"</p>
                     </div>
                   ) : (
-                    suggestions.map((suggestion) => (
-                      <motion.div key={suggestion.suggestion_id}
-                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                        className="bg-muted/40 rounded-xl p-3 border border-border/30">
-                        <p className="text-xs mb-2">{suggestion.content}</p>
-                        <div className="flex gap-1.5 items-center">
-                          {suggestion.action_buttons.map((btn, idx) => (
-                            <button key={idx}
-                              onClick={() => {
-                                handleSuggestionClick(suggestion, btn);
-                                if (btn.action === "navigate") setIsMinimized(true);
-                              }}
-                              className={`px-3 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
-                                btn.action === "dismiss"
-                                  ? "bg-muted text-muted-foreground hover:bg-muted/80"
-                                  : "bg-primary text-primary-foreground hover:bg-primary/90"
-                              }`}>
-                              {btn.text}
-                            </button>
-                          ))}
-                          <button onClick={() => dismissSuggestion(suggestion)}
-                            className="ml-auto w-5 h-5 rounded text-muted-foreground hover:text-foreground flex items-center justify-center">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </motion.div>
+                    scheduledActions.filter(a => a.status === 'pending').map(action => (
+                      <div key={action.id} className="bg-muted/40 rounded-xl p-3 border border-border/30">
+                        <p className="text-xs font-medium">{action.description}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          🕐 {new Date(action.scheduledAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <button onClick={() => cancelScheduled(action.id)}
+                          className="mt-1.5 px-2.5 py-0.5 rounded-full bg-destructive/10 text-destructive text-[10px] font-semibold">
+                          Annulla
+                        </button>
+                      </div>
                     ))
+                  )}
+                  {suggestions.length > 0 && (
+                    <>
+                      <p className="text-[10px] text-muted-foreground font-medium mt-3 mb-1">💡 Suggerimenti</p>
+                      {suggestions.map((suggestion) => (
+                        <motion.div key={suggestion.suggestion_id}
+                          initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                          className="bg-muted/40 rounded-xl p-3 border border-border/30">
+                          <p className="text-xs mb-2">{suggestion.content}</p>
+                          <div className="flex gap-1.5 items-center">
+                            {suggestion.action_buttons.map((btn, idx) => (
+                              <button key={idx}
+                                onClick={() => { handleSuggestionClick(suggestion, btn); if (btn.action === "navigate") setIsMinimized(true); }}
+                                className={`px-3 py-1 rounded-lg text-[10px] font-semibold transition-colors ${btn.action === "dismiss" ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
+                                {btn.text}
+                              </button>
+                            ))}
+                            <button onClick={() => dismissSuggestion(suggestion)} className="ml-auto w-5 h-5 rounded text-muted-foreground flex items-center justify-center">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </>
                   )}
                 </div>
               )}
