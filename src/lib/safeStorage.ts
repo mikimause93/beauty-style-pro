@@ -1,32 +1,23 @@
-const isStorageAvailable = (): boolean => {
-  try {
-    const test = '__storage_test__';
-    localStorage.setItem(test, test);
-    localStorage.removeItem(test);
-    return true;
-  } catch {
-    return false;
-  }
-};
+const memoryStore = new Map<string, string>();
 
 const safeStorage = {
-  getItem: (key: string): string | null => {
-    try { return isStorageAvailable() ? localStorage.getItem(key) : null; } catch { return null; }
-  },
+  getItem: (key: string): string | null => memoryStore.get(key) ?? null,
   setItem: (key: string, value: string): void => {
-    try { if (isStorageAvailable()) localStorage.setItem(key, value); } catch { /* intentionally empty */ }
+    memoryStore.set(key, value);
   },
   removeItem: (key: string): void => {
-    try { if (isStorageAvailable()) localStorage.removeItem(key); } catch { /* intentionally empty */ }
+    memoryStore.delete(key);
   },
   getJSON: <T>(key: string, fallback: T): T => {
     try {
       const item = safeStorage.getItem(key);
       return item ? (JSON.parse(item) as T) : fallback;
-    } catch { return fallback; }
+    } catch {
+      return fallback;
+    }
   },
   setJSON: <T>(key: string, value: T): void => {
-    try { safeStorage.setItem(key, JSON.stringify(value)); } catch { /* intentionally empty */ }
+    safeStorage.setItem(key, JSON.stringify(value));
   },
 };
 

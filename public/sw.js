@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stayle-beauty-v2';
+const CACHE_NAME = 'stayle-beauty-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,36 +8,35 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png'
 ];
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
+    caches.keys().then((cacheNames) => Promise.all(
+      cacheNames
+        .filter((name) => name !== CACHE_NAME)
+        .map((name) => caches.delete(name))
+    ))
   );
   self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('supabase.co')) return;
-  // Never cache OAuth redirects
   if (event.request.url.includes('/~oauth')) return;
+  if (event.request.url.includes('/assets/')) return;
 
   event.respondWith(
     fetch(event.request)
@@ -60,7 +59,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notifications - social style with preview
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {};
 
@@ -87,7 +85,6 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Notification click - navigate to relevant content
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -97,7 +94,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Focus existing window
       for (const client of clientList) {
         if ('focus' in client) {
           client.focus();
@@ -105,7 +101,6 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Open new window
       if (clients.openWindow) {
         return clients.openWindow(url);
       }
@@ -113,7 +108,6 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Background sync for offline actions
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-bookings') {
     event.waitUntil(syncBookings());

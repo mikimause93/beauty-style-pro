@@ -13,24 +13,20 @@ export function usePWA() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
 
-    // Listen for install prompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
     };
 
-    // Listen for successful installation
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
     };
 
-    // Online/offline status
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -39,12 +35,13 @@ export function usePWA() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Register service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then((reg) => {
+      const swPath = `${import.meta.env.BASE_URL}sw.js`;
+
+      navigator.serviceWorker.register(swPath).then((reg) => {
         setRegistration(reg);
-        
-        // Check for updates
+        void reg.update();
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
@@ -70,20 +67,20 @@ export function usePWA() {
 
   const installApp = async () => {
     if (!installPrompt) return false;
-    
+
     try {
       await installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      
+
       if (outcome === 'accepted') {
         setIsInstalled(true);
         setInstallPrompt(null);
         return true;
       }
     } catch (err) {
-      console.error("PWA install error:", err);
+      console.error('PWA install error:', err);
     }
-    
+
     return false;
   };
 
