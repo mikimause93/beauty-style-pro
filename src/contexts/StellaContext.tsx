@@ -75,6 +75,7 @@ export function StellaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
     loadDNA(user.id).then(setDNA);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // Reload scheduled actions from DB on mount
@@ -431,7 +432,6 @@ export function StellaProvider({ children }: { children: ReactNode }) {
       matched: false,
       response: 'Non ho capito. Puoi dirmi: "invia messaggio a [nome]: [testo]", "metti like a [nome]", "segui [nome]", "commenta [nome]: [testo]", "esamina profilo di [nome]", "conferma prenotazione", "vai alla home", "cerca [termine]", o programmare con "tra X minuti…".',
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dna, navigate, user, scheduleAction]);
 
   // Stable ref so scheduler callbacks always call the latest version
