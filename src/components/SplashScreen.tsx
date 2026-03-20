@@ -113,7 +113,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           }`}
           style={{ color: "rgba(255,255,255,0.4)" }}
         >
-          La piattaforma beauty
+          {APP_TAGLINE}
         </p>
 
         {/* Version badge */}
