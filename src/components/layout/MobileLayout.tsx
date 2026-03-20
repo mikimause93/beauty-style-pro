@@ -29,21 +29,3 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
     </div>
   );
 }
-  const [showRadio, setShowRadio] = useState(!hideRadio);
-  const { onTouchStart, onTouchEnd } = useSwipeNavigation();
-
-  return (
-    <div className="min-h-screen bg-background max-w-lg mx-auto relative"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
-      <main className={showRadio ? "pb-32" : "pb-20"}>
-        {children}
-      </main>
-      <FloatingAIButton />
-      <ChatbotWidget />
-      <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
-      <BottomNav />
-    </div>
-  );
-}
