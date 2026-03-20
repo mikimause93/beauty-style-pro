@@ -2,29 +2,55 @@
 
 **Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
+> Piattaforma all-in-one per il mondo beauty: prenotazioni, social, e-commerce, live streaming, gamification e molto altro.
+
 ---
 
 ## ✨ Funzionalità
 
-### Core
+### 🔐 Autenticazione & Profilo
 - ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
 - ✅ Autenticazione tramite numero di telefono (OTP SMS, stile WhatsApp)
+- ✅ Login con email e password
+- ✅ Recupero password via email
+- ✅ Profilo modificabile con avatar upload
+- ✅ Verifica account professionisti
+
+### 📱 Social Feed
 - ✅ Feed social con like, commenti, condivisioni
 - ✅ Sistema Follow / Unfollow in tempo reale
-- ✅ Notifiche real-time e push (anche ad app chiusa, via Service Worker)
-- ✅ Chat stile Messenger/WhatsApp con messaggi vocali e traduzione in tempo reale
+- ✅ Shorts (video brevi stile Reels/TikTok)
+- ✅ Esplora contenuti e profili
+- ✅ Ricerca utenti, servizi e professionisti
+
+### 💬 Chat avanzata
+- ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
+- ✅ Traduzione in tempo reale dei messaggi (rileva lingua automaticamente)
+- ✅ Chiamate vocali e video in-app
+- ✅ Registrazione messaggi vocali con Media Recorder API
+
+### 🔔 Notifiche
+- ✅ Notifiche real-time in-app
+- ✅ Notifiche push attive anche ad app chiusa tramite Service Worker
+- ✅ Notifiche stile social: like, commenti, messaggi, prenotazioni, follower
+- ✅ Click sulla notifica apre direttamente il contenuto rilevante
+
+### 📅 Prenotazioni & Servizi
 - ✅ Prenotazioni con selezione data, orario e luogo
-- ✅ Profilo modificabile con avatar upload
+- ✅ Elenco e dettaglio professionisti (stylist, barber, estetista, ecc.)
+- ✅ Servizi a domicilio con selezione indirizzo
+- ✅ Storico prenotazioni e gestione appuntamenti
+- ✅ Spa & Terme: scoperta e prenotazione centri benessere
 
-### Tema Dark / Light
-- ✅ Switch globale Dark/Light direttamente nell'header della home
+### 🎨 Tema Dark / Light
+- ✅ Switch globale Dark/Light direttamente nell'header
 - ✅ Il tema viene salvato e ripristinato automaticamente tra le sessioni
-- ✅ Tema scuro (nero, default) e chiaro (bianco, stile Instagram)
-- ✅ Controllo vocale del tema: "tema chiaro" / "tema scuro"
+- ✅ Controllo vocale del tema: `"tema chiaro"` / `"tema scuro"`
 
-### Stella AI – Assistente vocale
+### 🤖 Stella AI – Assistente vocale
 - ✅ Comandi vocali stile Alexa: esecuzione automatica di azioni in-app
-- ✅ Wake word: dì "Stella" per attivare l'assistente
+- ✅ Wake word: dì `"Stella"` per attivare l'assistente
+- ✅ Generatore look AI (suggerisce stili e acconciature)
 - ✅ Comandi supportati:
   - `"vai alla home"`, `"apri chat"`, `"apri mappa"`, `"prenota"`, `"apri shop"`
   - `"invia messaggio a [nome]: [testo]"` – invia un messaggio con contenuto specificato
@@ -33,33 +59,57 @@
   - `"tema chiaro"` / `"tema scuro"` – cambio tema vocale
   - `"dimmi le notifiche"`, `"conferma prenotazione"`, `"aggiungi [nome]"`, e molti altri
 
-### Chat avanzata
-- ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
-- ✅ Traduzione in tempo reale dei messaggi in arrivo (rileva lingua automaticamente)
-- ✅ Chiamate vocali e video in-app
-- ✅ Registrazione messaggi vocali con Media Recorder API
-
-### Notifiche Push
-- ✅ Notifiche push attive anche ad app chiusa tramite Service Worker
-- ✅ Notifiche stile social: like, commenti, messaggi, prenotazioni, follower
-- ✅ Click sulla notifica apre direttamente il contenuto rilevante
-
-### Business & HR
-- ✅ Dashboard Business con analytics
-- ✅ Gestione annunci di lavoro (HR)
+### 🏢 Business & HR
+- ✅ Dashboard Business con analytics avanzate
 - ✅ Profilo Business con servizi, shop e recensioni
+- ✅ Gestione team e turni dipendenti
+- ✅ Pannello HR: annunci di lavoro, candidature, attività dipendenti
+- ✅ Dashboard professionista con statistiche
 
-### Entertainment & Gamification
+### 🎪 Entertainment & Creator
 - ✅ Live Streaming con reactions, chat e tips (QRCoin)
+- ✅ Live Battle tra creator
+- ✅ Quiz Live interattivi
 - ✅ Radio & Music Player integrato
-- ✅ Spin & Win, Challenges, Leaderboard
-- ✅ Sistema QRCoin e Programma referral
+- ✅ Applicazione Creator per professionisti
+- ✅ Casting e ricerca collaborazioni
 
-### E-commerce & Altro
-- ✅ Shop prodotti beauty
-- ✅ Dettaglio servizi con prenotazione diretta
-- ✅ Before/After gallery, Eventi, PWA installabile
-- ✅ Impostazioni utente, Recensioni, Ricerca su mappa intelligente AI
+### 🎮 Gamification & Premi
+- ✅ Spin & Win: ruota della fortuna giornaliera
+- ✅ Challenges settimanali e Leaderboard
+- ✅ Missioni e obiettivi con ricompense
+- ✅ Sistema QRCoin (valuta virtuale in-app)
+- ✅ Aste con offerte in QRCoin
+- ✅ Programma Referral con guadagni
+- ✅ Programma Affiliati con link personalizzato e dashboard vendite
+- ✅ Talent Game
+- ✅ Boost profilo
+
+### 🛒 E-commerce & Wallet
+- ✅ Shop prodotti beauty con ricerca e filtri
+- ✅ Marketplace peer-to-peer
+- ✅ Gestione prodotti per venditori
+- ✅ Checkout e pagamenti
+- ✅ Wallet digitale e storico acquisti
+- ✅ Rate e piani di pagamento a rate
+- ✅ Abbonamenti premium
+- ✅ Ricevute digitali
+- ✅ Offerte e promozioni
+
+### 🗺️ Scoperta & Mappa
+- ✅ Ricerca su mappa con filtri intelligenti AI
+- ✅ Ricerca per categoria, zona, distanza
+- ✅ Before/After gallery con trasformazioni
+- ✅ Recensioni e valutazioni
+- ✅ Creazione richieste di servizio personalizzate
+
+### 📆 Altro
+- ✅ Sezione eventi beauty
+- ✅ Promemoria e calendario
+- ✅ Pagina Privacy e Termini
+- ✅ Onboarding guidato per nuovi utenti
+- ✅ PWA installabile su iOS e Android
+- ✅ Debug panel per sviluppatori
 
 ---
 
@@ -84,6 +134,14 @@ npm run test:watch # esegui i test in modalità watch (rieseguiti ad ogni modifi
 Test inclusi:
 - `useTheme.test.ts` – default theme, localStorage restore, toggle, CSS variables
 - `voiceCommands.test.ts` – pattern matching comandi vocali (navigazione, messaggi, like, mappa, tema)
+
+### Build & Lint
+
+```bash
+npm run build      # genera la cartella dist/
+npm run lint       # controlla la qualità del codice
+npm run preview    # anteprima locale del build su http://localhost:4173
+```
 
 ### CI automatica
 
@@ -115,13 +173,6 @@ Il workflow **Deploy – GitHub Pages** (`.github/workflows/deploy.yml`) si atti
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
    - `VITE_SUPABASE_PROJECT_ID`
 4. Il sito sarà disponibile all'URL mostrato nel tab *Pages* (es. `https://<utente>.github.io/beauty-style-pro/`)
-
-Per testare il build web in locale:
-
-```bash
-npm run build      # genera la cartella dist/
-npm run preview    # anteprima locale del build su http://localhost:4173
-```
 
 ### 🤖 Android – Google Play (AAB)
 
@@ -168,6 +219,21 @@ Ogni modifica su `main` attiva automaticamente:
 | CI – Lint & Test | `.github/workflows/ci.yml` | Esegue lint e test su ogni push e PR |
 | Deploy – GitHub Pages | `.github/workflows/deploy.yml` | Pubblica l'app su GitHub Pages |
 | Build & Publish Android | `.github/workflows/android.yml` | Genera e pubblica l'AAB sul Play Store |
+
+---
+
+## 🗂️ Struttura del progetto
+
+```
+src/
+├── components/       # Componenti riutilizzabili (layout, UI, chatbot, ecc.)
+├── contexts/         # React Contexts (auth, tema, notifiche, Stella AI, ecc.)
+├── hooks/            # Custom hooks (useAuth, useTheme, useNotifications, ecc.)
+├── integrations/     # Client Supabase e tipi generati
+├── lib/              # Utility, gestione errori, storage sicuro
+├── pages/            # Tutte le pagine dell'app (~70+ pagine)
+└── test/             # Suite di test (Vitest)
+```
 
 ---
 
