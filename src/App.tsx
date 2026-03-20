@@ -102,18 +102,8 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    try {
-      const shown = sessionStorage.getItem("style_splash_shown");
-      return !shown;
-    } catch {
-      return false;
-    }
-  });
+  const [showSplash, setShowSplash] = useState(false);
   const handleSplashComplete = useCallback(() => {
-    try {
-      sessionStorage.setItem("style_splash_shown", "1");
-    } catch { /* intentionally empty */ }
     setShowSplash(false);
   }, []);
   return (
