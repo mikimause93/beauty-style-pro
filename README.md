@@ -1,30 +1,29 @@
-# 💇 STYLE - La Piattaforma Beauty Completa
+# 💇 Beauty Style Pro – La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
 ---
 
 ## ✨ Funzionalità
 
-### Core
+### 🔐 Autenticazione & Profilo
 - ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
-- ✅ Autenticazione tramite numero di telefono (OTP SMS, stile WhatsApp)
-- ✅ Feed social con like, commenti, condivisioni
-- ✅ Sistema Follow / Unfollow in tempo reale
-- ✅ Notifiche real-time e push (anche ad app chiusa, via Service Worker)
-- ✅ Chat stile Messenger/WhatsApp con messaggi vocali e traduzione in tempo reale
-- ✅ Prenotazioni con selezione data, orario e luogo
-- ✅ Profilo modificabile con avatar upload
+- ✅ Login via email/password e OTP SMS (stile WhatsApp)
+- ✅ Recupero password via email
+- ✅ Onboarding guidato al primo accesso
+- ✅ Profilo modificabile con avatar upload e badge verificato
+- ✅ Boost profilo e verifica account
 
-### Tema Dark / Light
-- ✅ Switch globale Dark/Light direttamente nell'header della home
-- ✅ Il tema viene salvato e ripristinato automaticamente tra le sessioni
-- ✅ Tema scuro (nero, default) e chiaro (bianco, stile Instagram)
-- ✅ Controllo vocale del tema: "tema chiaro" / "tema scuro"
+### 🎨 Tema & UI
+- ✅ Switch globale Dark/Light nell'header della home
+- ✅ Tema salvato e ripristinato automaticamente tra le sessioni
+- ✅ Tema neon LED con font Orbitron (v2.0.0)
+- ✅ UI glassmorphism, animazioni glow, holo-border
+- ✅ Controllo vocale del tema: `"tema chiaro"` / `"tema scuro"`
 
-### Stella AI – Assistente vocale
+### 🤖 Stella AI – Assistente vocale
 - ✅ Comandi vocali stile Alexa: esecuzione automatica di azioni in-app
-- ✅ Wake word: dì "Stella" per attivare l'assistente
+- ✅ Wake word: dì `"Stella"` per attivare l'assistente
 - ✅ Comandi supportati:
   - `"vai alla home"`, `"apri chat"`, `"apri mappa"`, `"prenota"`, `"apri shop"`
   - `"invia messaggio a [nome]: [testo]"` – invia un messaggio con contenuto specificato
@@ -33,33 +32,93 @@
   - `"tema chiaro"` / `"tema scuro"` – cambio tema vocale
   - `"dimmi le notifiche"`, `"conferma prenotazione"`, `"aggiungi [nome]"`, e molti altri
 
-### Chat avanzata
+### 🤖 AI Look Generator
+- ✅ Generazione look personalizzati tramite intelligenza artificiale
+- ✅ Pagina dedicata `/ai-look` con suggerimenti di stile
+
+### 💬 Chat & Comunicazione
 - ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
 - ✅ Traduzione in tempo reale dei messaggi in arrivo (rileva lingua automaticamente)
 - ✅ Chiamate vocali e video in-app
 - ✅ Registrazione messaggi vocali con Media Recorder API
+- ✅ Pulsante WhatsApp per contatto rapido esterno
 
-### Notifiche Push
+### 🔔 Notifiche
 - ✅ Notifiche push attive anche ad app chiusa tramite Service Worker
 - ✅ Notifiche stile social: like, commenti, messaggi, prenotazioni, follower
 - ✅ Click sulla notifica apre direttamente il contenuto rilevante
+- ✅ Promemoria (`/reminders`) personalizzati
 
-### Business & HR
-- ✅ Dashboard Business con analytics
-- ✅ Gestione annunci di lavoro (HR)
-- ✅ Profilo Business con servizi, shop e recensioni
+### 📅 Prenotazioni & Servizi
+- ✅ Prenotazioni con selezione data, orario e luogo
+- ✅ Storico prenotazioni con dettaglio e stato
+- ✅ Servizi a domicilio (`/home-service`)
+- ✅ Dettaglio servizio con prenotazione diretta
+- ✅ Recensioni post-servizio
+- ✅ Ricevute e pagamenti rateali (`/installments`, `/receipts`)
+- ✅ Checkout integrato con wallet virtuale
 
-### Entertainment & Gamification
-- ✅ Live Streaming con reactions, chat e tips (QRCoin)
-- ✅ Radio & Music Player integrato
-- ✅ Spin & Win, Challenges, Leaderboard
-- ✅ Sistema QRCoin e Programma referral
+### 🗺️ Esplora & Ricerca
+- ✅ Pagina Explore con feed personalizzato
+- ✅ Ricerca su mappa intelligente AI (`/map-search`)
+- ✅ Lista stilisti e professionisti con filtri
+- ✅ Spa & Terme (`/spa-terme`)
+- ✅ Offerte e sconti (`/offers`)
 
-### E-commerce & Altro
-- ✅ Shop prodotti beauty
-- ✅ Dettaglio servizi con prenotazione diretta
-- ✅ Before/After gallery, Eventi, PWA installabile
-- ✅ Impostazioni utente, Recensioni, Ricerca su mappa intelligente AI
+### 📱 Social & Feed
+- ✅ Feed social con like, commenti, condivisioni
+- ✅ Shorts video stile TikTok (`/shorts`)
+- ✅ Sistema Follow / Unfollow in tempo reale
+- ✅ Gallery Before/After (`/before-after`)
+- ✅ Creazione post con media
+
+### 🎬 Live & Entertainment
+- ✅ Live Streaming con reactions, chat e tips QRCoin (`/live`)
+- ✅ Go Live con trasmissione in diretta (`/go-live`)
+- ✅ Live Battle tra professionisti (`/live-battle`)
+- ✅ Quiz Live interattivo (`/quiz-live`)
+- ✅ Talent Game (`/talent-game`)
+- ✅ Transformation Challenge (`/transformation-challenge`)
+- ✅ Radio & Music Player integrato (`/radio`)
+
+### 🎮 Gamification & Reward
+- ✅ Spin & Win ruota premi (`/spin`)
+- ✅ Challenges settimanali (`/challenges`)
+- ✅ Missioni giornaliere (`/missions`)
+- ✅ Leaderboard globale (`/leaderboard`)
+- ✅ Sistema QRCoin: guadagna e spendi coin in-app (`/qr-coins`)
+- ✅ Programma referral con link univoco (`/referral`)
+- ✅ Programma affiliazione (`/affiliate`)
+
+### 🛍️ E-commerce & Marketplace
+- ✅ Shop prodotti beauty (`/shop`)
+- ✅ Marketplace lavori & servizi (`/marketplace`)
+- ✅ Richieste di servizio personalizzate
+- ✅ Casting beauty & talent
+- ✅ Aste prodotti beauty (`/auctions`)
+- ✅ Gestione prodotti (per Business) (`/manage-products`)
+- ✅ Wallet virtuale con storico transazioni (`/wallet`)
+- ✅ Storico acquisti (`/purchases`)
+
+### 👔 Business & HR
+- ✅ Dashboard Business con analytics avanzati
+- ✅ Gestione team con turni e attività (`/business/team`)
+- ✅ Pubblicazione annunci di lavoro HR (`/hr`)
+- ✅ Dashboard del Professionista (`/professional-dashboard`)
+- ✅ Subscriptions e piani a pagamento (`/subscriptions`)
+- ✅ Analytics dashboard completa (`/analytics`)
+
+### 🛡️ Admin & Sicurezza
+- ✅ Pannello Admin (`/admin`)
+- ✅ Debug panel per sviluppatori (`/debug`)
+- ✅ ErrorBoundary con fallback UI
+- ✅ Storage sicuro con safeStorage utility
+
+### 📲 PWA & Mobile
+- ✅ PWA installabile su iOS e Android
+- ✅ App Android con Capacitor (build `.aab` per Google Play)
+- ✅ Service Worker per notifiche push offline
+- ✅ Splash Screen e icone native
 
 ---
 
