@@ -90,6 +90,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const ArchitecturePage = lazy(() => import("./pages/ArchitecturePage"));
 
 const queryClient = new QueryClient();
 
@@ -139,6 +140,7 @@ const App = () => {
             <Route path="/spa-terme" element={<SpaTermePage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/architecture" element={<ArchitecturePage />} />
 
             {/* Protected routes */}
             <Route path="/profile" element={<P><ProfilePage /></P>} />
