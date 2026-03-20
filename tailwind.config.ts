@@ -17,6 +17,7 @@ export default {
       fontFamily: {
         display: ["Space Grotesk", "Sora", "system-ui", "sans-serif"],
         body: ["DM Sans", "system-ui", "sans-serif"],
+        futuristic: ["Orbitron", "Space Grotesk", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -92,11 +93,41 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "glow-ring": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(262 80% 62% / 0.5)" },
+          "50%": { boxShadow: "0 0 0 8px hsl(262 80% 62% / 0)" },
+        },
+        "slide-in-bottom": {
+          from: { transform: "translateY(20px)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+        "scale-in": {
+          from: { transform: "scale(0.9)", opacity: "0" },
+          to: { transform: "scale(1)", opacity: "1" },
+        },
+        "holo-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
+        "neon-flicker": {
+          "0%, 100%": { opacity: "1" },
+          "92%": { opacity: "1" },
+          "93%": { opacity: "0.7" },
+          "94%": { opacity: "1" },
+          "96%": { opacity: "0.8" },
+          "97%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 3s ease-in-out infinite",
+        "glow-ring": "glow-ring 2.5s ease-out infinite",
+        "slide-in-bottom": "slide-in-bottom 0.45s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "scale-in": "scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "holo-shift": "holo-shift 4s linear infinite",
+        "neon-flicker": "neon-flicker 5s ease-in-out infinite",
       },
     },
   },

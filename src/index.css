@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -62,6 +62,11 @@
     --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
     --shadow-luxury: 0 8px 32px hsl(262 80% 62% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5);
     --shadow-chrome: 0 4px 20px hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+
+    /* v2.0.0 additions */
+    --gradient-holographic: linear-gradient(135deg, hsl(262 80% 62%), hsl(200 90% 60%), hsl(160 80% 55%), hsl(42 98% 62%), hsl(320 85% 62%), hsl(262 80% 62%));
+    --shadow-neon: 0 0 12px hsl(262 80% 62% / 0.5), 0 0 40px hsl(262 80% 62% / 0.2);
+    --radius-pill: 9999px;
 
     --sidebar-background: 240 6% 5%;
     --sidebar-foreground: 220 15% 95%;
@@ -310,6 +315,172 @@
     background: linear-gradient(90deg, transparent 0%, hsl(0 0% 100% / 0.06) 50%, transparent 100%);
     background-size: 200% 100%;
     animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* ── v2.0.0 utilities ── */
+
+  /* Glass card: glass base + hover lift + neon glow border */
+  .glass-card {
+    background: hsl(var(--background) / 0.85);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid hsl(var(--primary) / 0.18);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-neon), var(--shadow-card);
+  }
+
+  /* Version badge: small pill with futuristic font */
+  .version-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-family: "Orbitron", "Space Grotesk", system-ui, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.08);
+    border: 1px solid hsl(var(--primary) / 0.25);
+  }
+
+  /* Tap / press micro-interaction */
+  .tap-scale {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .tap-scale:active {
+    transform: scale(0.94);
+    opacity: 0.85;
+  }
+
+  /* Neon divider: 1-px gradient separator */
+  .neon-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--primary) / 0.5) 30%,
+      hsl(var(--primary) / 0.7) 50%,
+      hsl(var(--primary) / 0.5) 70%,
+      transparent
+    );
+  }
+
+  /* Primary CTA button */
+  .btn-primary {
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .btn-primary:hover {
+    box-shadow: var(--shadow-neon);
+  }
+  .btn-primary:active {
+    transform: scale(0.96);
+  }
+
+  /* Gold CTA button */
+  .btn-gold {
+    background: var(--gradient-gold);
+    color: hsl(var(--gold-foreground));
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .btn-gold:hover {
+    box-shadow: var(--shadow-glow-gold);
+  }
+  .btn-gold:active {
+    transform: scale(0.96);
+  }
+
+  /* Holographic animated border */
+  .holo-border {
+    position: relative;
+  }
+  .holo-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-holographic);
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: holo-shift 4s linear infinite;
+    pointer-events: none;
+  }
+
+  /* Stagger children animation */
+  .stagger-children > * {
+    animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .stagger-children > *:nth-child(1)  { animation-delay: 0.05s; }
+  .stagger-children > *:nth-child(2)  { animation-delay: 0.10s; }
+  .stagger-children > *:nth-child(3)  { animation-delay: 0.15s; }
+  .stagger-children > *:nth-child(4)  { animation-delay: 0.20s; }
+  .stagger-children > *:nth-child(5)  { animation-delay: 0.25s; }
+  .stagger-children > *:nth-child(6)  { animation-delay: 0.30s; }
+
+  /* Keyframes */
+  @keyframes holo-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes neon-flicker {
+    0%, 100% { opacity: 1; }
+    92%       { opacity: 1; }
+    93%       { opacity: 0.7; }
+    94%       { opacity: 1; }
+    96%       { opacity: 0.8; }
+    97%       { opacity: 1; }
+  }
+  .animate-neon-flicker {
+    animation: neon-flicker 5s ease-in-out infinite;
+  }
+
+  @keyframes glow-ring {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(262 80% 62% / 0.5); }
+    50%       { box-shadow: 0 0 0 8px hsl(262 80% 62% / 0); }
+  }
+  .animate-glow-ring {
+    animation: glow-ring 2.5s ease-out infinite;
+  }
+
+  @keyframes slide-in-bottom {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .animate-slide-in-bottom {
+    animation: slide-in-bottom 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes scale-in {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .animate-scale-in {
+    animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Font utility for futuristic/Orbitron */
+  .font-futuristic {
+    font-family: "Orbitron", "Space Grotesk", system-ui, sans-serif;
   }
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import logoS from "@/assets/logo-s.png";
+import { APP_NAME, APP_VERSION, APP_TAGLINE } from "@/lib/version";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -13,11 +14,6 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }, [onComplete]);
 
   useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,300;1,400&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-
     const timers = [
       setTimeout(() => setPhase("logo"), 2500),
       setTimeout(() => setPhase("text"), 3700),
@@ -117,8 +113,19 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           }`}
           style={{ color: "rgba(255,255,255,0.4)" }}
         >
-          La piattaforma beauty
+          {APP_TAGLINE}
         </p>
+
+        {/* Version badge */}
+        <div
+          className={`mt-4 transition-all duration-500 delay-300 ${
+            phase === "text" || phase === "fade" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+          }`}
+        >
+          <span className="version-badge">
+            {APP_NAME} v{APP_VERSION}
+          </span>
+        </div>
       </div>
 
       {/* Footer signature */}

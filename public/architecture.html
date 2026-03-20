@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BEAUTY STYLE PRO — Master Architecture Prompt</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #050508;
+    --deep: #0a0a12;
+    --panel: #0f0f1a;
+    --border: #1a1a2e;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.1);
+    --rose: #ff4d6d;
+    --rose-dim: rgba(255,77,109,0.1);
+    --green: #00ff88;
+    --green-dim: rgba(0,255,136,0.08);
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --subtle: #3a3a55;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--void);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 80px 40px;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(0,212,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 90%, rgba(255,77,109,0.03) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .label-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeDown 1s ease both;
+  }
+  .label-top::before, .label-top::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 140px);
+    letter-spacing: 0.05em;
+    line-height: 0.9;
+    text-align: center;
+    position: relative;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  h1 .line-gold { color: var(--gold); }
+  h1 .line-white { color: var(--text); }
+  h1 .line-outline {
+    -webkit-text-stroke: 1px rgba(201,168,76,0.4);
+    color: transparent;
+  }
+
+  .hero-sub {
+    margin-top: 32px;
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.7;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+
+  .badge {
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .badge.gold { border-color: rgba(201,168,76,0.4); color: var(--gold); background: var(--gold-dim); }
+  .badge.cyan { border-color: rgba(0,212,255,0.3); color: var(--cyan); background: var(--cyan-dim); }
+  .badge.rose { border-color: rgba(255,77,109,0.3); color: var(--rose); background: var(--rose-dim); }
+  .badge.green { border-color: rgba(0,255,136,0.3); color: var(--green); background: var(--green-dim); }
+
+  /* SCROLL INDICATOR */
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: pulse 2s ease infinite;
+  }
+  .scroll-hint span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+
+  /* SECTIONS */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin-bottom: 48px;
+  }
+
+  /* PROMPT BLOCK */
+  .prompt-container {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .prompt-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .prompt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.03);
+  }
+
+  .prompt-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dot-row {
+    display: flex;
+    gap: 6px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c840; }
+
+  .prompt-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .copy-btn:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+  }
+  .copy-btn.copied {
+    color: var(--green);
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .prompt-body {
+    padding: 32px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: none;
+  }
+
+  .ph { color: var(--gold); font-weight: 500; }
+  .pc { color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .pm { color: var(--muted); font-style: italic; }
+  .pg { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .pr { color: var(--rose); font-weight: 500; }
+  .ps { color: var(--subtle); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  /* ARCH DIAGRAM */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .arch-cell {
+    background: var(--panel);
+    padding: 28px 24px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .arch-cell:hover { background: rgba(201,168,76,0.04); }
+
+  .arch-cell-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .arch-cell-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .arch-cell-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .arch-cell-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .arch-cell::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+  }
+
+  /* LEGAL SECTION */
+  .legal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .legal-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    background: var(--panel);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .legal-card.critical { border-color: rgba(255,77,109,0.3); }
+  .legal-card.critical::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--rose);
+  }
+
+  .legal-card.warning { border-color: rgba(201,168,76,0.3); }
+  .legal-card.warning::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--gold);
+  }
+
+  .legal-card.ok { border-color: rgba(0,255,136,0.2); }
+  .legal-card.ok::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--green);
+  }
+
+  .legal-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .legal-card.critical .legal-card-label { color: var(--rose); }
+  .legal-card.warning .legal-card-label { color: var(--gold); }
+  .legal-card.ok .legal-card-label { color: var(--green); }
+
+  .legal-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+  }
+
+  .legal-card-text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ROADMAP */
+  .roadmap {
+    position: relative;
+    padding-left: 32px;
+  }
+  .roadmap::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold), var(--cyan), var(--rose), transparent);
+  }
+
+  .roadmap-item {
+    position: relative;
+    margin-bottom: 40px;
+    padding: 24px 28px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.3s;
+  }
+  .roadmap-item:hover { border-color: rgba(201,168,76,0.3); }
+
+  .roadmap-item::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 28px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.2);
+  }
+
+  .roadmap-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .roadmap-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+  }
+
+  .roadmap-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tech-tag {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0 40px;
+  }
+
+  /* FOOTER */
+  .footer {
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .footer-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .arch-grid { grid-template-columns: 1fr; }
+    .legal-grid { grid-template-columns: 1fr; }
+    .prompt-body { padding: 20px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="label-top">MASTER ARCHITECTURE DOCUMENT</div>
+
+  <h1>
+    <div class="line-gold">BEAUTY</div>
+    <div class="line-outline">STYLE</div>
+    <div class="line-white">PRO</div>
+  </h1>
+
+  <p class="hero-sub">
+    Super App Intelligente Autonoma — Architettura livello enterprise con AI continua,
+    voce attiva, posizione live, compliance GDPR e roadmap completa di sviluppo.
+  </p>
+
+  <div class="hero-badges">
+    <span class="badge gold">AI Core</span>
+    <span class="badge cyan">Realtime Engine</span>
+    <span class="badge rose">GDPR Compliant</span>
+    <span class="badge green">Voice Always-On</span>
+    <span class="badge gold">WebRTC Calls</span>
+    <span class="badge cyan">Location Live</span>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="divider"></div>
+
+<!-- MASTER PROMPT -->
+<section class="section">
+  <div class="section-label">01 — Master Prompt</div>
+  <h2 class="section-title">IL SUPER PROMPT<br><span style="color:var(--gold)">COMPLETO</span></h2>
+
+  <div class="prompt-container" id="mainPrompt">
+    <div class="prompt-header">
+      <div class="prompt-header-left">
+        <div class="dot-row">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div>
+        </div>
+        <span class="prompt-tag">beauty-style-pro · master-prompt-v3.0</span>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy Prompt</button>
+    </div>
+    <div class="prompt-body" id="promptText">
+<span class="ph">═══════════════════════════════════════════════════════════════
+BEAUTY STYLE PRO — SUPER PROMPT MASTER v3.0
+Sistema AI Autonomo Intelligente — Architettura Enterprise
+═══════════════════════════════════════════════════════════════</span>
+
+<span class="ph">## IDENTITÀ E MISSIONE</span>
+
+Sei l'architetto e sviluppatore principale di <span class="pc">Beauty Style Pro</span>, una Super App intelligente e autonoma che combina le funzionalità di Google Assistant, Telegram, WeChat, Life360 e ChatGPT in un'unica piattaforma nativa per iOS e Android.
+
+Il sistema deve essere progettato come un <span class="pg">ecosistema intelligente continuo</span>, non come una semplice applicazione. Ogni modulo comunica con gli altri attraverso un Core centralizzato. L'utente non percepisce mai i confini tra i servizi — tutto scorre in modo fluido e intelligente.
+
+<span class="ph">## VINCOLI TECNICI FONDAMENTALI (NON NEGOZIABILI)</span>
+
+<span class="pr">ATTENZIONE:</span> Prima di qualsiasi sviluppo, rispetta questi vincoli obbligatori:
+
+<span class="pc">MOBILE NATIVO OBBLIGATORIO:</span>
+— Wake word + mic sempre attiva → SOLO app nativa (React Native o Flutter)
+— Overlay sopra tutto → foreground service Android / iOS background mode
+— Location sempre attiva → permessi "Always Allow" nativi
+— NON è costruibile come web app / PWA
+
+<span class="pc">WAKE WORD — SOLO ON-DEVICE:</span>
+— Libreria: Porcupine (Picovoice) — modello ML locale, zero latenza
+— NON usare API cloud per wake word detection (privacy + latenza)
+— Modello custom: "Hey Style" o "Hey [NomeUtente]"
+— Training disponibile su Picovoice Console (gratuito per uso commerciale limitato)
+
+<span class="pc">AI MEMORIA UTENTE — ARCHITETTURA RAG:</span>
+— Vector DB: Pinecone o Weaviate per embedding semantici
+— Ogni azione utente → evento loggato → embedding → memoria persistente
+— Retrieval: top-K similarity search prima di ogni risposta AI
+— Modello: GPT-4o (OpenAI) o Claude 3.5 Sonnet (Anthropic) via API
+
+<span class="ph">## ARCHITETTURA CORE — 7 SERVIZI PRINCIPALI</span>
+
+<span class="ps">┌─────────────────────────────────────────────────────────────┐
+│                    CLIENT LAYER                              │
+│         iOS App (Swift/RN)  ·  Android App (Kotlin/RN)      │
+│   Wake Word Engine · Overlay Service · Location · WebRTC    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ HTTPS / WSS / WebRTC
+┌──────────────────────▼──────────────────────────────────────┐
+│                  API GATEWAY                                 │
+│         Kong / AWS API Gateway / Traefik                     │
+│   Rate Limiting · JWT Auth · Routing · Logging              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+┌───────▼──────┐ ┌─────▼──────┐ ┌────▼───────┐
+│ AUTH SERVICE │ │ AI SERVICE │ │  VOICE     │
+│  JWT + OAuth │ │ GPT-4o+RAG │ │  SERVICE   │
+│  PostgreSQL  │ │  Pinecone  │ │ Whisper STT│
+│  Redis sess. │ │  Context   │ │ ElevenLabs │
+└──────────────┘ └────────────┘ └────────────┘
+        │              │              │
+┌───────▼──────┐ ┌─────▼──────┐ ┌────▼───────┐
+│  LOCATION    │ │    CALL    │ │  NOTIFY    │
+│  SERVICE     │ │  SERVICE   │ │  SERVICE   │
+│ PostGIS+Supa │ │  LiveKit   │ │  FCM+APNs  │
+│  Geofencing  │ │  WebRTC    │ │  AI Rules  │
+└──────────────┘ └────────────┘ └────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│                   DATA LAYER                                 │
+│  PostgreSQL · Redis · Pinecone · Supabase · S3/Azure Blob   │
+└─────────────────────────────────────────────────────────────┘</span>
+
+<span class="ph">## MODULO 1 — AUTH SERVICE</span>
+
+<span class="pc">Stack:</span> Node.js / NestJS · PostgreSQL · Redis · JWT RS256
+
+<span class="pc">Funzionalità obbligatorie:</span>
+— Registrazione con email/telefono + verifica OTP (Twilio)
+— Login biometrico (FaceID / FingerPrint) tramite device keychain
+— OAuth 2.0 per Google/Apple Sign-In
+— JWT access token (15 min) + refresh token rotante (30 giorni) in HttpOnly cookie
+— Sessioni multi-device con revoca remota
+— 2FA via TOTP (Google Authenticator compatibile)
+— Rate limiting per IP: 5 tentativi/minuto poi blocco esponenziale
+— Audit log di ogni accesso con timestamp, IP, device fingerprint
+
+<span class="pc">Schema DB principale:</span>
+<span class="ps">users(id, email, phone, password_hash, created_at, deleted_at)
+sessions(id, user_id, device_id, token_hash, expires_at, ip, ua)
+permissions(id, user_id, type, granted_at, revoked_at, context)
+audit_log(id, user_id, action, ip, ua, metadata, created_at)</span>
+
+<span class="ph">## MODULO 2 — AI SERVICE (cervello centrale)</span>
+
+<span class="pc">Stack:</span> Python / FastAPI · OpenAI GPT-4o · Pinecone · Redis
+
+<span class="pc">Architettura RAG (Retrieval-Augmented Generation):</span>
+— Ogni interazione utente → chunked → embedded (text-embedding-3-large)
+— Storage in Pinecone con metadata: {user_id, timestamp, type, context}
+— Prima di ogni risposta: similarity search top-8 sull'history utente
+— System prompt dinamico = identità app + profilo utente recuperato
+— Streaming response via SSE (Server-Sent Events)
+
+<span class="pc">Intent Classification (obbligatorio):</span>
+— Classifier leggero (distilbert o regex rules) per routing comandi vocali:
+  LOCATION_SHARE · CALL · TRANSLATE · REMIND · NAVIGATE · SOS · CHAT · SEARCH
+
+<span class="pc">Context Memory Schema:</span>
+<span class="ps">user_events(id, user_id, type, content, embedding_id, created_at)
+user_profile_cache(user_id, summary, habits, last_updated)
+conversation_sessions(id, user_id, messages_json, started_at, ended_at)</span>
+
+<span class="ph">## MODULO 3 — VOICE SERVICE (sempre attivo)</span>
+
+<span class="pc">Stack:</span> Python · Porcupine · OpenAI Whisper · ElevenLabs
+
+<span class="pc">Pipeline voce on-device:</span>
+<span class="ps">MIC INPUT
+    ↓ [on-device, sempre]
+PORCUPINE (wake word detection — ML locale)
+    ↓ [solo dopo wake word]
+AUDIO BUFFER (2 sec max silence)
+    ↓
+WHISPER API (STT — cloud)
+    ↓
+INTENT CLASSIFIER
+    ↓
+AI SERVICE / COMMAND EXECUTOR
+    ↓
+ELEVENLABS TTS (voce naturale)
+    ↓
+AUDIO OUTPUT</span>
+
+<span class="pc">Comandi vocali supportati (esempi):</span>
+— "Hey Style, manda la mia posizione a [nome]"
+— "Hey Style, chiama [nome]"
+— "Hey Style, traduci [testo] in inglese"
+— "Hey Style, manda messaggio a [nome]: [testo]"
+— "Hey Style, SOS" → posizione + alert a contatti emergenza
+— "Hey Style, cosa ho in agenda oggi"
+
+<span class="ph">## MODULO 4 — LOCATION SERVICE (live + intelligente)</span>
+
+<span class="pc">Stack:</span> Node.js · PostGIS · Supabase Realtime · Redis
+
+<span class="pc">Funzionalità:</span>
+— Posizione live con aggiornamento configurabile (1s / 5s / 30s / manual)
+— Geofencing: zone personalizzate con trigger eventi (entrata/uscita)
+— Location sharing con scadenza: "condividi per 2 ore"
+— Cronologia percorsi (opt-in esplicito utente)
+— Clustering posizioni per privacy (non salvare punto esatto ma area)
+
+<span class="pc">Schema PostGIS:</span>
+<span class="ps">location_sessions(id, user_id, started_at, ended_at, accuracy_mode)
+location_points(id, session_id, geom POINT, accuracy, altitude, ts)
+geofences(id, user_id, geom POLYGON, name, trigger_type, active)
+location_shares(id, from_user, to_user, expires_at, precision_level)</span>
+
+<span class="pc">Precision levels per privacy:</span>
+— EXACT: latitudine/longitudine precisa (solo per utente stesso)
+— AREA: arrotondato a 500m (condivisione amici)
+— CITY: solo città (condivisione pubblica)
+
+<span class="ph">## MODULO 5 — CALL SERVICE (WebRTC)</span>
+
+<span class="pc">Stack:</span> LiveKit · STUN/TURN (Coturn self-hosted) · Redis · Node.js
+
+<span class="pc">Funzionalità:</span>
+— Chiamate audio P2P con fallback TURN
+— Videochiamate (max 8 partecipanti per room)
+— Condivisione schermo (solo Android/iOS nativo)
+— Registrazione chiamata (con consenso bilaterale obbligatorio)
+— Qualità adattiva: 8kbps (voce) → 128kbps (audio HD) → 2Mbps (video)
+
+<span class="pc">Signaling flow:</span>
+<span class="ps">Client A → WebSocket → Signaling Server → Client B
+           ↓
+     ICE Candidate exchange (STUN)
+           ↓
+     Direct P2P (se possibile) o TURN relay
+           ↓
+     LiveKit SFU per group calls (3+ utenti)</span>
+
+<span class="ph">## MODULO 6 — NOTIFICATION SERVICE (intelligente)</span>
+
+<span class="pc">Stack:</span> Node.js · Firebase FCM · APNs · Redis pub/sub
+
+<span class="pc">Tipologie notifiche:</span>
+— SYSTEM: messaggi, chiamate, alert sistema
+— LOCATION: "Marco è vicino a te (200m)"
+— AI_SMART: "Hai una riunione in 20 minuti, vuoi che prepari un riassunto?"
+— GEOFENCE: "Sei entrato in [zona] — attivazione automazione"
+— SOS: priorità massima, bypass Do Not Disturb
+
+<span class="pc">AI Rules Engine (automazioni):</span>
+<span class="ps">TRIGGER → CONDITION → ACTION
+es: ARRIVE_HOME → after 18:00 → send_location_to_family
+es: MESSAGE_RECEIVED → sender=boss → ai_draft_reply
+es: LOW_BATTERY → battery&lt;20% → notify_emergency_contacts</span>
+
+<span class="ph">## MODULO 7 — USER PROFILE SERVICE (apprendimento)</span>
+
+<span class="pc">Stack:</span> Python · PostgreSQL · Pinecone · Redis cache
+
+<span class="pc">Profilo intelligente (costruito nel tempo):</span>
+— Abitudini orarie (clustering su timestamp azioni)
+— Contatti frequenti (grafo relazioni con peso)
+— Luoghi frequenti (clustering PostGIS + naming)
+— Preferenze comunicazione (tono, lingua, orari)
+— Pattern comportamentali (ML su event log)
+
+<span class="pc">IMPORTANTE:</span> Tutto il profiling è:
+✓ Opt-in esplicito con spiegazione chiara
+✓ Visibile e scaricabile dall'utente (GDPR Art.15)
+✓ Cancellabile su richiesta entro 72h (GDPR Art.17)
+✓ Non condivisibile con terzi senza consenso separato
+
+<span class="ph">## STACK TECNOLOGICO DEFINITIVO</span>
+
+<span class="pc">Mobile:</span>
+— React Native 0.74+ (unico codebase iOS + Android)
+— Moduli nativi custom per: wake word, overlay, background location
+— Expo NO — build nativa obbligatoria per permessi avanzati
+
+<span class="pc">Backend Services:</span>
+— NestJS (Auth, Notification, User Profile)
+— FastAPI Python (AI Service, Voice Service)
+— Node.js puro (Location Service, Call Service)
+
+<span class="pc">Database:</span>
+— PostgreSQL 16 + PostGIS (dati principali)
+— Redis 7 (cache, sessioni, pub/sub, rate limiting)
+— Pinecone (vector search per AI memory)
+— Supabase (realtime subscriptions WebSocket)
+
+<span class="pc">Infrastructure:</span>
+— Hetzner VPS (development) → AWS/Azure (produzione)
+— Docker Compose (dev) → Kubernetes (produzione)
+— Nginx reverse proxy + SSL (Let's Encrypt)
+— GitHub Actions CI/CD
+
+<span class="pc">AI/ML:</span>
+— OpenAI GPT-4o (chat + intent)
+— OpenAI Whisper (STT)
+— ElevenLabs (TTS voce naturale)
+— Porcupine Picovoice (wake word on-device)
+— text-embedding-3-large (embeddings memoria)
+
+<span class="ph">## COMPLIANCE LEGALE — OBBLIGATORIA PRIMA DEL LANCIO</span>
+
+<span class="pr">GDPR (Reg. EU 2016/679) — OBBLIGATORIO per mercato italiano/europeo:</span>
+— Privacy Policy completa con legal basis per ogni tipo di dato
+— Cookie Policy (anche per app mobile con SDK analytics)
+— Consent Management: consenso granulare, revocabile, tracciato
+— DPO (Data Protection Officer): obbligatorio se tratti dati su larga scala
+— DPIA (Data Protection Impact Assessment): obbligatorio per:
+  • localizzazione continua, • dati biometrici, • profilazione AI
+— Data Retention Policy: definire e implementare cancellazione automatica
+— Breach Notification: procedura per notifica GARANTE entro 72h
+— Privacy by Design: minimizzazione dati in ogni modulo
+
+<span class="pr">GARANZIE MINIME UTENTE (non derogabili):</span>
+— Accesso ai propri dati (Art.15) entro 30 giorni
+— Rettifica (Art.16), Cancellazione (Art.17), Portabilità (Art.20)
+— Opposizione alla profilazione automatizzata (Art.21-22)
+— Consenso separato per: location, microfono, profilazione AI
+
+<span class="pr">REGISTRAZIONE MICROFONO SEMPRE ATTIVA:</span>
+— Disclosure obbligatoria in app store listing
+— Indicatore visivo SEMPRE visibile quando mic è attivo
+— Nessun audio cloud senza wake word rilevata (on-device first)
+— Log processamento audio disponibile all'utente
+
+<span class="pr">REGISTRAZIONE CHIAMATE:</span>
+— In Italia: consenso bilaterale (art. 617 c.p.)
+— Notifica audio automatica inizio registrazione
+— NON registrare mai senza conferma entrambe le parti
+
+<span class="pr">MINORI (GDPR Art.8 + COPPA):</span>
+— Verifica età obbligatoria al signup
+— Se &lt;16 anni (Italia): consenso genitoriale verificabile
+— Non raccogliere dati location/profilazione per under 16
+
+<span class="ph">## ROADMAP DI SVILUPPO — 6 FASI</span>
+
+<span class="pg">FASE 1 — Foundation (settimane 1-4):</span>
+Auth Service + API Gateway + PostgreSQL + Redis
+App mobile base React Native + navigazione + design system
+
+<span class="pg">FASE 2 — Chat Realtime (settimane 5-8):</span>
+Chat 1:1 e gruppi + Supabase Realtime + notifiche push base
+
+<span class="pg">FASE 3 — Location Live (settimane 9-11):</span>
+Posizione live + geofencing + sharing con scadenza + PostGIS
+
+<span class="pg">FASE 4 — AI Core (settimane 12-15):</span>
+GPT-4o integrato + RAG + Pinecone + profilazione utente base
+
+<span class="pg">FASE 5 — Calls + Voice (settimane 16-21):</span>
+LiveKit WebRTC + Porcupine wake word + Whisper + ElevenLabs
+
+<span class="pg">FASE 6 — Overlay + Automazioni (settimane 22-28):</span>
+Overlay nativo + Rules Engine + automazioni + AI suggestions
+
+<span class="ph">## OUTPUT RICHIESTO</span>
+
+Per ogni modulo che svilupperai, fornisci:
+
+1. <span class="pc">Struttura directory completa</span> del servizio
+2. <span class="pc">Schema database</span> con tipi precisi e indici
+3. <span class="pc">API endpoints</span> con metodo, path, request/response JSON
+4. <span class="pc">Codice implementazione</span> (NestJS / FastAPI / React Native)
+5. <span class="pc">Dockerfile</span> per containerizzazione
+6. <span class="pc">Checklist GDPR</span> specifica per il modulo
+7. <span class="pc">Test unitari</span> per logica critica
+
+Inizia sempre dal modulo indicato, implementa completamente prima di passare al successivo.
+
+<span class="pm">Ricorda: questo sistema gestisce dati personali sensibili (posizione, voce, conversazioni).
+La sicurezza e la privacy NON sono optional — sono requisiti fondamentali di architettura.</span>
+
+<span class="ph">═══════════════════════════════════════════════════════════════
+END OF MASTER PROMPT — Beauty Style Pro v3.0
+═══════════════════════════════════════════════════════════════</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARCHITECTURE GRID -->
+<section class="section">
+  <div class="section-label">02 — Architettura</div>
+  <h2 class="section-title">I 7 CORE<br><span style="color:var(--gold)">SERVICES</span></h2>
+
+  <div class="arch-grid">
+    <div class="arch-cell">
+      <span class="arch-cell-icon">🔐</span>
+      <div class="arch-cell-name">Auth Service</div>
+      <div class="arch-cell-tech">NestJS · PostgreSQL · Redis</div>
+      <div class="arch-cell-desc">JWT RS256, OAuth 2.0, biometrico, 2FA, sessioni multi-device, audit log completo</div>
+    </div>
+    <div class="arch-cell">
+      <span class="arch-cell-icon">🧠</span>
+      <div class="arch-cell-name">AI Service</div>
+      <div class="arch-cell-tech">FastAPI · GPT-4o · Pinecone</div>
+      <div class="arch-cell-desc">RAG memory, intent classifier, streaming SSE, profilo utente semantico</div>
+    </div>
+    <div class="arch-cell">
+      <span class="arch-cell-icon">🎙</span>
+      <div class="arch-cell-name">Voice Service</div>
+      <div class="arch-cell-tech">Porcupine · Whisper · ElevenLabs</div>
+      <div class="arch-cell-desc">Wake word on-device, STT cloud, TTS naturale, command pipeline</div>
+    </div>
+    <div class="arch-cell">
+      <span class="arch-cell-icon">📍</span>
+      <div class="arch-cell-name">Location Service</div>
+      <div class="arch-cell-tech">PostGIS · Supabase RT · Redis</div>
+      <div class="arch-cell-desc">Live tracking, geofencing, sharing con scadenza, 3 livelli privacy</div>
+    </div>
+    <div class="arch-cell">
+      <span class="arch-cell-icon">📞</span>
+      <div class="arch-cell-name">Call Service</div>
+      <div class="arch-cell-tech">LiveKit · STUN/TURN · WebRTC</div>
+      <div class="arch-cell-desc">Chiamate P2P, videochiamate gruppo, qualità adattiva, registrazione consensuale</div>
+    </div>
+    <div class="arch-cell">
+      <span class="arch-cell-icon">🔔</span>
+      <div class="arch-cell-name">Notification Service</div>
+      <div class="arch-cell-tech">FCM · APNs · AI Rules</div>
+      <div class="arch-cell-desc">Push intelligente, notifiche contestuali, SOS priority, automazioni trigger/action</div>
+    </div>
+    <div class="arch-cell" style="grid-column: 1/-1;">
+      <span class="arch-cell-icon">👤</span>
+      <div class="arch-cell-name">User Profile Service</div>
+      <div class="arch-cell-tech">Python · PostgreSQL · Pinecone · Redis</div>
+      <div class="arch-cell-desc">Apprendimento abitudini, grafo relazioni, luoghi frequenti, preferenze comunicazione — tutto opt-in e cancellabile GDPR</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEGAL -->
+<section class="section">
+  <div class="section-label">03 — Compliance Legale</div>
+  <h2 class="section-title">GDPR &amp;<br><span style="color:var(--rose)">SICUREZZA</span></h2>
+
+  <div class="legal-grid">
+    <div class="legal-card critical">
+      <div class="legal-card-label">⛔ Critico — Prima del lancio</div>
+      <div class="legal-card-title">DPIA Obbligatoria</div>
+      <div class="legal-card-text">Data Protection Impact Assessment richiesta per: localizzazione continua, profilazione AI, registrazione audio. Senza DPIA il servizio non può essere lanciato in EU.</div>
+    </div>
+    <div class="legal-card critical">
+      <div class="legal-card-label">⛔ Critico — Registrazione chiamate</div>
+      <div class="legal-card-title">Consenso Bilaterale</div>
+      <div class="legal-card-text">In Italia art. 617 c.p.: registrare chiamata senza consenso è reato penale. Notifica audio automatica + conferma entrambe le parti obbligatoria in ogni caso.</div>
+    </div>
+    <div class="legal-card warning">
+      <div class="legal-card-label">⚠ Importante — App Store</div>
+      <div class="legal-card-title">Mic Always-On Disclosure</div>
+      <div class="legal-card-text">Apple e Google richiedono disclosure esplicita in listing. Indicatore visivo obbligatorio quando il microfono è attivo. Nessun audio cloud senza wake word.</div>
+    </div>
+    <div class="legal-card warning">
+      <div class="legal-card-label">⚠ Importante — Minori</div>
+      <div class="legal-card-title">GDPR Art.8 + COPPA</div>
+      <div class="legal-card-text">Verifica età obbligatoria. Per under 16 in Italia: consenso genitoriale verificabile. Vietato raccogliere location e profilazione per under 16.</div>
+    </div>
+    <div class="legal-card ok">
+      <div class="legal-card-label">✓ Implementabile — Diritti utente</div>
+      <div class="legal-card-title">GDPR Art. 15-22</div>
+      <div class="legal-card-text">Accesso dati (30gg), rettifica, cancellazione (72h), portabilità, opposizione profilazione. Ogni endpoint dati deve avere il corrispettivo di cancellazione.</div>
+    </div>
+    <div class="legal-card ok">
+      <div class="legal-card-label">✓ Best Practice — Sicurezza</div>
+      <div class="legal-card-title">Security Architecture</div>
+      <div class="legal-card-text">JWT RS256, cifratura AES-256 at rest, TLS 1.3 in transit, zero-knowledge per audio, rate limiting, WAF, breach notification entro 72h al Garante.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ROADMAP -->
+<section class="section">
+  <div class="section-label">04 — Roadmap</div>
+  <h2 class="section-title">6 FASI DI<br><span style="color:var(--cyan)">SVILUPPO</span></h2>
+
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 1 · Settimane 1-4</div>
+      <div class="roadmap-title">Foundation &amp; Auth</div>
+      <div class="roadmap-text">API Gateway, Auth Service completo con JWT + biometrico, PostgreSQL + Redis setup, app mobile base React Native con design system e navigazione.</div>
+      <div class="tag-row">
+        <span class="tech-tag">NestJS</span>
+        <span class="tech-tag">PostgreSQL</span>
+        <span class="tech-tag">Redis</span>
+        <span class="tech-tag">React Native</span>
+        <span class="tech-tag">Docker</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 2 · Settimane 5-8</div>
+      <div class="roadmap-title">Chat Realtime</div>
+      <div class="roadmap-text">Messaggistica 1:1 e gruppi con Supabase Realtime, notifiche push FCM + APNs, invio media (immagini/audio), stato online/offline, ricevute di lettura.</div>
+      <div class="tag-row">
+        <span class="tech-tag">Supabase</span>
+        <span class="tech-tag">WebSocket</span>
+        <span class="tech-tag">FCM</span>
+        <span class="tech-tag">APNs</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 3 · Settimane 9-11</div>
+      <div class="roadmap-title">Location Live</div>
+      <div class="roadmap-text">Posizione live con 3 livelli privacy, geofencing personalizzato, sharing con scadenza temporale, mappa realtime contatti, SOS con auto-invio posizione.</div>
+      <div class="tag-row">
+        <span class="tech-tag">PostGIS</span>
+        <span class="tech-tag">Mapbox</span>
+        <span class="tech-tag">Background Location</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 4 · Settimane 12-15</div>
+      <div class="roadmap-title">AI Core + Memoria</div>
+      <div class="roadmap-text">GPT-4o integrato nella chat, sistema RAG con Pinecone, profilo utente che apprende nel tempo, risposte contestuali, traduzione live, riassunti intelligenti.</div>
+      <div class="tag-row">
+        <span class="tech-tag">GPT-4o</span>
+        <span class="tech-tag">Pinecone</span>
+        <span class="tech-tag">FastAPI</span>
+        <span class="tech-tag">SSE</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 5 · Settimane 16-21</div>
+      <div class="roadmap-title">Chiamate &amp; Voce</div>
+      <div class="roadmap-text">LiveKit WebRTC per chiamate/video, Porcupine wake word on-device, pipeline Whisper STT → AI → ElevenLabs TTS, comandi vocali completi.</div>
+      <div class="tag-row">
+        <span class="tech-tag">LiveKit</span>
+        <span class="tech-tag">Porcupine</span>
+        <span class="tech-tag">Whisper</span>
+        <span class="tech-tag">ElevenLabs</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 6 · Settimane 22-28</div>
+      <div class="roadmap-title">Overlay &amp; Automazioni</div>
+      <div class="roadmap-text">Overlay nativo Android (foreground service) + iOS, Rules Engine trigger/action, AI suggestions proattive, automazioni personalizzabili, profilo utente completo.</div>
+      <div class="tag-row">
+        <span class="tech-tag">Native Modules</span>
+        <span class="tech-tag">Rules Engine</span>
+        <span class="tech-tag">Foreground Service</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="divider"></div>
+<footer class="footer">
+  <div class="footer-title">BEAUTY STYLE PRO</div>
+  <div class="footer-sub">Master Architecture Document · v3.0 · 2026</div>
+</footer>
+
+<script>
+function copyPrompt() {
+  var btn = document.getElementById('copyBtn');
+  var el = document.getElementById('promptText');
+  var text = el.innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '✓ Copiato!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy Prompt';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+// Staggered entrance animations
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry, i) {
+    if (entry.isIntersecting) {
+      entry.target.style.animationDelay = (i * 0.08) + 's';
+      entry.target.style.animation = 'fadeUp 0.6s ease both';
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.arch-cell, .legal-card, .roadmap-item').forEach(function(el) {
+  el.style.opacity = '0';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
