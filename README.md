@@ -1,6 +1,6 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
 ---
 
@@ -46,20 +46,47 @@
 
 ### Business & HR
 - ✅ Dashboard Business con analytics
-- ✅ Gestione annunci di lavoro (HR)
+- ✅ Gestione annunci di lavoro (HR) con dettaglio offerta
 - ✅ Profilo Business con servizi, shop e recensioni
-
-### Entertainment & Gamification
+- ✅ Gestione team e turni dipendenti (EmployeeShifts / EmployeeActivity)
+- ✅ Aste (AuctionsPage) – offerte per servizi e prodotti
 - ✅ Live Streaming con reactions, chat e tips (QRCoin)
+- ✅ Live Battle tra creator in tempo reale
+- ✅ Shorts – contenuti video brevi stile TikTok/Reels
+- ✅ Quiz Live interattivi
 - ✅ Radio & Music Player integrato
 - ✅ Spin & Win, Challenges, Leaderboard
-- ✅ Sistema QRCoin e Programma referral
+- ✅ Missions – sfide giornaliere e settimanali con ricompense
+- ✅ Talent Game e Transformation Challenge
+- ✅ Sistema QRCoin, Wallet e Programma referral
 
-### E-commerce & Altro
-- ✅ Shop prodotti beauty
+### AI & Look
+- ✅ Assistente AI conversazionale integrato
+- ✅ AI Look Generator – genera look beauty personalizzati con IA
+- ✅ Ricerca su mappa intelligente AI
+
+### E-commerce & Marketplace
+- ✅ Shop prodotti beauty con checkout e storico acquisti
+- ✅ Marketplace multi-venditore
+- ✅ Offerte e promozioni (OffersPage)
+- ✅ Pagamenti a rate (InstallmentsPage)
+- ✅ Ricevute e scontrini digitali
+- ✅ Abbonamenti e piani premium (SubscriptionPage)
+- ✅ Gestione prodotti per i venditori
+
+### Creator & Casting
+- ✅ Programma Creator – candidatura e onboarding creator
+- ✅ Creazione annunci casting
+- ✅ Richieste di servizio personalizzate
+- ✅ Boost profilo e visibilità
+
+### Altro
 - ✅ Dettaglio servizi con prenotazione diretta
 - ✅ Before/After gallery, Eventi, PWA installabile
-- ✅ Impostazioni utente, Recensioni, Ricerca su mappa intelligente AI
+- ✅ Onboarding guidato per nuovi utenti
+- ✅ Verifica account
+- ✅ Promemoria appuntamenti
+- ✅ Impostazioni utente, Recensioni, Ricerca avanzata
 
 ---
 
