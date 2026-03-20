@@ -3316,6 +3316,171 @@ export type Database = {
         }
         Relationships: []
       }
+      stella_action_log: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_commands: {
+        Row: {
+          command_text: string
+          command_type: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          intent: Json | null
+          requires_confirmation: boolean | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          command_text: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          command_text?: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_scheduled_actions: {
+        Row: {
+          action_params: Json | null
+          action_type: string
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          scheduled_for: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_params?: Json | null
+          action_type: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_params?: Json | null
+          action_type?: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_user_settings: {
+        Row: {
+          auto_actions_enabled: boolean | null
+          can_book: boolean | null
+          can_follow: boolean | null
+          can_like_comment: boolean | null
+          can_send_messages: boolean | null
+          can_spend_coins: boolean | null
+          max_comments_per_hour: number | null
+          max_likes_per_hour: number | null
+          max_messages_per_hour: number | null
+          require_confirmation_for: string[] | null
+          scheduling_enabled: boolean | null
+          total_actions_executed: number | null
+          total_commands_issued: number | null
+          updated_at: string | null
+          user_id: string
+          voice_enabled: boolean | null
+        }
+        Insert: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id: string
+          voice_enabled?: boolean | null
+        }
+        Update: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id?: string
+          voice_enabled?: boolean | null
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           booking_id: string | null
@@ -4428,6 +4593,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      stella_check_rate_limit: {
+        Args: { _action_type: string; _user_id: string }
+        Returns: Json
       }
       track_user_action: {
         Args: {
