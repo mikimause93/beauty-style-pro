@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BEAUTY STYLE PRO — v1.0.0 → v2.0.0 Master Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #050508;
+    --deep: #0a0a12;
+    --panel: #0f0f1a;
+    --border: #1a1a2e;
+    --gold: #c9a84c;
+    --gold-dim: rgba(201,168,76,0.15);
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.1);
+    --rose: #ff4d6d;
+    --rose-dim: rgba(255,77,109,0.1);
+    --green: #00ff88;
+    --green-dim: rgba(0,255,136,0.08);
+    --purple: #b57bee;
+    --purple-dim: rgba(181,123,238,0.1);
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --subtle: #3a3a55;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--void);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* GRAIN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 80px 40px;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(181,123,238,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(0,212,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 90%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(181,123,238,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(181,123,238,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .version-arrow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: fadeDown 1s ease both;
+  }
+  .v-badge {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+  }
+  .v-badge.old { border: 1px solid rgba(107,107,136,0.4); color: var(--muted); background: rgba(107,107,136,0.08); }
+  .v-badge.new { border: 1px solid rgba(181,123,238,0.4); color: var(--purple); background: var(--purple-dim); }
+  .v-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 130px);
+    letter-spacing: 0.05em;
+    line-height: 0.9;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+  h1 .line-purple { color: var(--purple); }
+  h1 .line-gold { color: var(--gold); }
+  h1 .line-outline {
+    -webkit-text-stroke: 1px rgba(181,123,238,0.4);
+    color: transparent;
+  }
+
+  .hero-sub {
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 600px;
+    line-height: 1.8;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 36px;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-outline {
+    border-color: rgba(201,168,76,0.4);
+    color: var(--gold);
+    background: transparent;
+  }
+  .btn-outline:hover { background: var(--gold-dim); }
+  .btn-fill {
+    border-color: rgba(181,123,238,0.5);
+    color: var(--purple);
+    background: var(--purple-dim);
+  }
+  .btn-fill:hover { background: rgba(181,123,238,0.2); }
+
+  /* SCROLL HINT */
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: pulse 2s ease infinite;
+  }
+  .scroll-hint span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--purple), transparent);
+  }
+
+  /* SECTIONS */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin-bottom: 48px;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0 40px;
+  }
+
+  /* STACK ANALYSIS */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .stack-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .stack-panel.current { border-color: rgba(0,212,255,0.2); }
+  .stack-panel.upgrade { border-color: rgba(181,123,238,0.2); }
+
+  .stack-panel-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .stack-panel.current .stack-panel-header { color: var(--cyan); background: var(--cyan-dim); }
+  .stack-panel.upgrade .stack-panel-header { color: var(--purple); background: var(--purple-dim); }
+
+  .stack-list {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stack-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .stack-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .stack-dot.ok { background: var(--green); }
+  .stack-dot.boost { background: var(--gold); }
+  .stack-dot.replace { background: var(--rose); }
+  .stack-dot.add { background: var(--purple); }
+
+  .stack-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    white-space: nowrap;
+  }
+  .stack-tag.cyan { color: var(--cyan); background: var(--cyan-dim); border-color: rgba(0,212,255,0.2); }
+  .stack-tag.rose { color: var(--rose); background: var(--rose-dim); border-color: rgba(255,77,109,0.2); }
+  .stack-tag.green { color: var(--green); background: var(--green-dim); border-color: rgba(0,255,136,0.2); }
+  .stack-tag.purple { color: var(--purple); background: var(--purple-dim); border-color: rgba(181,123,238,0.2); }
+  .stack-tag.muted { color: var(--muted); background: transparent; border-color: var(--border); }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding: 16px 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ANALYSIS CARDS */
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .analysis-card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .analysis-card.ok { border-color: rgba(0,212,255,0.25); }
+  .analysis-card.evolve { border-color: rgba(201,168,76,0.25); }
+  .analysis-card.missing { border-color: rgba(181,123,238,0.25); }
+  .analysis-card.warn { border-color: rgba(255,77,109,0.25); }
+
+  .analysis-card-header {
+    padding: 14px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .analysis-card.ok .analysis-card-header { color: var(--cyan); background: var(--cyan-dim); }
+  .analysis-card.evolve .analysis-card-header { color: var(--gold); background: var(--gold-dim); }
+  .analysis-card.missing .analysis-card-header { color: var(--purple); background: var(--purple-dim); }
+  .analysis-card.warn .analysis-card-header { color: var(--rose); background: var(--rose-dim); }
+
+  .analysis-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.03em;
+    padding: 14px 20px 0;
+  }
+
+  .analysis-card-body {
+    padding: 10px 20px 20px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    background: var(--panel);
+  }
+
+  /* VERSION COMPARISON */
+  .version-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .version-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .version-card.v1 { border-color: rgba(107,107,136,0.3); }
+  .version-card.v2 { border-color: rgba(181,123,238,0.3); }
+
+  .version-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .version-card.v1 .version-card-header { background: rgba(107,107,136,0.06); }
+  .version-card.v2 .version-card-header { background: rgba(181,123,238,0.06); }
+
+  .version-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    margin-bottom: 6px;
+  }
+  .version-card.v1 .version-number { color: var(--muted); }
+  .version-card.v2 .version-number { color: var(--purple); }
+
+  .version-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .version-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .version-features {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .feature-emoji { font-size: 14px; flex-shrink: 0; }
+  .feature-text { color: var(--text); }
+  .feature-text .sub { color: var(--muted); font-size: 11px; }
+
+  /* ARCH CODE BLOCK */
+  .arch-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .arch-block-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(181,123,238,0.04);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .arch-block-body {
+    padding: 28px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.9;
+    color: var(--subtle);
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+  .arch-comment { color: var(--muted); font-style: italic; }
+  .arch-highlight { color: var(--cyan); }
+  .arch-new { color: var(--purple); }
+  .arch-ok { color: var(--green); }
+  .arch-warn { color: var(--gold); }
+
+  /* SERVICE CARDS */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .service-card {
+    background: var(--panel);
+    padding: 24px 20px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .service-card:hover { background: rgba(181,123,238,0.04); }
+
+  .service-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+  .service-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .service-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .service-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+  .service-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .service-badge.upgrade { color: var(--gold); background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.2); }
+  .service-badge.major { color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(181,123,238,0.2); }
+  .service-badge.present { color: var(--cyan); background: var(--cyan-dim); border: 1px solid rgba(0,212,255,0.2); }
+  .service-badge.new { color: var(--green); background: var(--green-dim); border: 1px solid rgba(0,255,136,0.2); }
+
+  /* PROMPT BLOCK */
+  .prompt-container {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 40px;
+  }
+  .prompt-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--purple), transparent);
+  }
+  .prompt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(181,123,238,0.03);
+  }
+  .prompt-header-left { display: flex; align-items: center; gap: 12px; }
+  .dot-row { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #28c840; }
+  .prompt-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .copy-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(181,123,238,0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--purple);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .copy-btn:hover { background: var(--purple-dim); border-color: var(--purple); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+  .prompt-body {
+    padding: 28px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .ph { color: var(--gold); font-weight: 700; }
+  .pc { color: var(--cyan); }
+  .pg { color: var(--green); }
+  .pr { color: var(--rose); }
+  .pp { color: var(--purple); }
+  .pm { color: var(--muted); font-style: italic; }
+  .ps { color: var(--subtle); }
+
+  /* LEGAL GRID */
+  .legal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .legal-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    background: var(--panel);
+    position: relative;
+    overflow: hidden;
+  }
+  .legal-card.critical { border-color: rgba(255,77,109,0.3); }
+  .legal-card.critical::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--rose); }
+  .legal-card.warning { border-color: rgba(201,168,76,0.3); }
+  .legal-card.warning::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); }
+  .legal-card.ok { border-color: rgba(0,255,136,0.2); }
+  .legal-card.ok::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--green); }
+  .legal-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .legal-card.critical .legal-card-label { color: var(--rose); }
+  .legal-card.warning .legal-card-label { color: var(--gold); }
+  .legal-card.ok .legal-card-label { color: var(--green); }
+  .legal-card-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .legal-card-text { font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+  /* ROADMAP */
+  .roadmap { position: relative; padding-left: 32px; }
+  .roadmap::before {
+    content: '';
+    position: absolute; left: 8px; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(to bottom, var(--purple), var(--cyan), var(--gold), var(--rose), transparent);
+  }
+  .roadmap-item {
+    position: relative;
+    margin-bottom: 36px;
+    padding: 22px 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.3s;
+  }
+  .roadmap-item:hover { border-color: rgba(181,123,238,0.3); }
+  .roadmap-item::before {
+    content: '';
+    position: absolute;
+    left: -28px; top: 24px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--purple);
+    border: 2px solid var(--void);
+    box-shadow: 0 0 0 3px rgba(181,123,238,0.2);
+  }
+  .roadmap-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--purple);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .roadmap-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .roadmap-text { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tech-tag {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* FOOTER */
+  .footer { padding: 60px 40px; text-align: center; }
+  .footer-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 12px; }
+  .footer-sub { font-size: 13px; color: var(--muted); font-weight: 300; letter-spacing: 0.05em; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .stack-grid { grid-template-columns: 1fr; }
+    .analysis-grid { grid-template-columns: 1fr; }
+    .version-grid { grid-template-columns: 1fr; }
+    .service-grid { grid-template-columns: 1fr; }
+    .legal-grid { grid-template-columns: 1fr; }
+    .prompt-body { font-size: 11px; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="version-arrow">
+    <span class="v-badge old">v1.0.0</span>
+    <span class="v-arrow">→</span>
+    <span class="v-badge new">v2.0.0</span>
+  </div>
+
+  <h1>
+    <div class="line-purple">Beauty</div>
+    <div class="line-outline">Style</div>
+    <div class="line-gold">Pro</div>
+  </h1>
+
+  <p class="hero-sub">
+    Documento Master Unico · Analisi Reale del Repository<br>
+    Evoluzione completa dalla versione beta 1.0.0 alla Super App intelligente 2.0.0 —
+    basata sull'analisi reale del tuo stack React + Vite + Supabase con 930 commit e AI Stella già attiva.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#analisi" class="btn btn-outline">Leggi Analisi</a>
+    <a href="#prompt" class="btn btn-fill">Vai al Prompt</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 01 — ANALISI REPOSITORY -->
+<section class="section" id="analisi">
+  <div class="section-label">01 — Analisi Repository Reale</div>
+  <h2 class="section-title">Cosa hai già,<br><span style="color:var(--purple)">cosa va evoluto</span></h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="stack-dot ok"></div> Già presente e funzionante</div>
+    <div class="legend-item"><div class="stack-dot boost"></div> Presente ma da potenziare</div>
+    <div class="legend-item"><div class="stack-dot replace"></div> Da sostituire / aggiornare</div>
+    <div class="legend-item"><div class="stack-dot add"></div> Nuovo da aggiungere in v2</div>
+  </div>
+
+  <div class="stack-grid">
+    <div class="stack-panel current">
+      <div class="stack-panel-header">Stack attuale rilevato</div>
+      <div class="stack-list">
+        <div class="stack-item"><div class="stack-dot ok"></div><span>React 18</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>TypeScript</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Vite</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Tailwind CSS</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Supabase</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Capacitor Android</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>GitHub Actions CI/CD</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>shadcn/ui</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Vercel deploy</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Service Worker Push</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Bun package manager</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot ok"></div><span>Vitest</span><span class="stack-tag green">✓</span></div>
+        <div class="stack-item"><div class="stack-dot boost"></div><span>Stella Wake Word</span><span class="stack-tag muted">→ potenziare</span></div>
+        <div class="stack-item"><div class="stack-dot boost"></div><span>Chat Messenger</span><span class="stack-tag muted">→ potenziare</span></div>
+        <div class="stack-item"><div class="stack-dot replace"></div><span>PWA Web</span><span class="stack-tag rose">→ App Nativa Capacitor</span></div>
+        <div class="stack-item"><div class="stack-dot replace"></div><span>AI basic</span><span class="stack-tag rose">→ GPT-4o + RAG Memory</span></div>
+      </div>
+    </div>
+    <div class="stack-panel upgrade">
+      <div class="stack-panel-header">Nuove tecnologie v2</div>
+      <div class="stack-list">
+        <div class="stack-item"><div class="stack-dot add"></div><span>Porcupine Wake Word</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>OpenAI GPT-4o</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>Pinecone Vector DB</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>LiveKit WebRTC</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>ElevenLabs TTS</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>PostGIS Location</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>Redis Cache</span><span class="stack-tag purple">Nuovo</span></div>
+        <div class="stack-item"><div class="stack-dot add"></div><span>FastAPI AI Service</span><span class="stack-tag purple">Nuovo</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-card ok">
+      <div class="analysis-card-header">✓ Già ottimo · Foundation Solida</div>
+      <div class="analysis-card-title">Foundation Solida</div>
+      <div class="analysis-card-body">Auth multi-ruolo completo con OTP SMS · Feed social realtime · Chat con vocali e traduzione live · AI Stella già operativa · CI/CD GitHub Actions completo · Supabase Realtime già integrato · 930 commit: codebase maturo · QRCoin, gamification, live streaming già presenti</div>
+    </div>
+    <div class="analysis-card evolve">
+      <div class="analysis-card-header">⚡ Da evolvere · Upgrade v1 → v2</div>
+      <div class="analysis-card-title">Upgrade v1 → v2</div>
+      <div class="analysis-card-body">AI Stella: regex → GPT-4o + RAG Pinecone · Wake word: browser → Porcupine on-device · Chiamate: base → LiveKit WebRTC · Location: aggiungere PostGIS + geofencing · TTS: aggiungere ElevenLabs italiano · Capacitor: abilitare permessi nativi avanzati · Backend: aggiungere FastAPI microservice AI · Redis: cache layer per sessioni e pub/sub</div>
+    </div>
+    <div class="analysis-card missing">
+      <div class="analysis-card-header">✗ Mancante in v1 · Nuovo in v2</div>
+      <div class="analysis-card-title">Nuovo in v2</div>
+      <div class="analysis-card-body">Memoria persistente AI (Pinecone) · Location live realtime con geofencing · Overlay nativo (bolla AI flottante) · Automazioni intelligenti trigger/condition/action · DPIA e Privacy Policy GDPR adeguata · iOS build + TestFlight pipeline · Profilo AI personalizzato memorizzato</div>
+    </div>
+    <div class="analysis-card warn">
+      <div class="analysis-card-header">⚠ Attenzione tecnica · Decisione Architetturale</div>
+      <div class="analysis-card-title">Decisioni Chiave</div>
+      <div class="analysis-card-body">Capacitor è la scelta giusta per wake word avanzata · Supabase edge functions non basta per RAG: serve FastAPI separato · 113 PR aperte: review e cleanup prima di v2 · Mic always-on in PWA limitato: Capacitor con plugin nativo necessario · Sicurezza: aggiungere CSP headers e rotazione chiavi Supabase</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 02 — CONFRONTO VERSIONI -->
+<section class="section">
+  <div class="section-label">02 — Confronto Versioni</div>
+  <h2 class="section-title">v1.0.0 beta<br><span style="color:var(--gold)">vs v2.0.0</span></h2>
+
+  <div class="version-grid">
+    <div class="version-card v1">
+      <div class="version-card-header">
+        <div class="version-number">● v1.0.0 · Beta attuale</div>
+        <div class="version-name">Foundation App</div>
+        <div class="version-sub">React PWA + Capacitor Android · Supabase · AI Stella base</div>
+      </div>
+      <div class="version-features">
+        <div class="feature-row"><span class="feature-emoji">💄</span><span class="feature-text">Feed social beauty con like, commenti, condivisioni</span></div>
+        <div class="feature-row"><span class="feature-emoji">💬</span><span class="feature-text">Chat stile Messenger con vocali e traduzione realtime</span></div>
+        <div class="feature-row"><span class="feature-emoji">🔐</span><span class="feature-text">Auth multi-ruolo (Cliente / Pro / Business) con OTP SMS</span></div>
+        <div class="feature-row"><span class="feature-emoji">🎙</span><span class="feature-text">AI Stella con wake word "Stella" e comandi vocali base</span></div>
+        <div class="feature-row"><span class="feature-emoji">📅</span><span class="feature-text">Prenotazioni con calendario, orari e luogo</span></div>
+        <div class="feature-row"><span class="feature-emoji">📞</span><span class="feature-text">Chiamate vocali e video in-app (base)</span></div>
+        <div class="feature-row"><span class="feature-emoji">🏪</span><span class="feature-text">Shop prodotti beauty + profilo business</span></div>
+        <div class="feature-row"><span class="feature-emoji">🎮</span><span class="feature-text">Gamification: QRCoin, Spin &amp; Win, Leaderboard</span></div>
+        <div class="feature-row"><span class="feature-emoji">📻</span><span class="feature-text">Live Streaming con reactions e tips</span></div>
+        <div class="feature-row"><span class="feature-emoji">🌙</span><span class="feature-text">Tema Dark/Light con controllo vocale</span></div>
+        <div class="feature-row"><span class="feature-emoji">🤖</span><span class="feature-text">GitHub Actions CI/CD completo</span></div>
+        <div class="feature-row"><span class="feature-emoji">📱</span><span class="feature-text">Android build + Google Play pipeline</span></div>
+      </div>
+    </div>
+    <div class="version-card v2">
+      <div class="version-card-header">
+        <div class="version-number">✦ v2.0.0 · Super App AI</div>
+        <div class="version-name">Intelligent Beauty Platform</div>
+        <div class="version-sub">React Native nativo · 7 Core Services · AI con memoria · Always-On</div>
+      </div>
+      <div class="version-features">
+        <div class="feature-row"><span class="feature-emoji">🧠</span><span class="feature-text">AI Stella con GPT-4o + RAG Memory — ricorda ogni cliente, preferenza e stile</span></div>
+        <div class="feature-row"><span class="feature-emoji">🎙</span><span class="feature-text">Wake word "Stella" on-device con Porcupine — zero latenza, funziona offline</span></div>
+        <div class="feature-row"><span class="feature-emoji">🗣</span><span class="feature-text">Voce naturale italiana con ElevenLabs TTS per risposte di Stella</span></div>
+        <div class="feature-row"><span class="feature-emoji">📍</span><span class="feature-text">Location live con geofencing — clienti vicini al salone → notifica automatica</span></div>
+        <div class="feature-row"><span class="feature-emoji">📞</span><span class="feature-text">Chiamate HD con LiveKit WebRTC — qualità professionale, group calls</span></div>
+        <div class="feature-row"><span class="feature-emoji">🔔</span><span class="feature-text">Notifiche AI contestuali — "appuntamento tra 20 min, vuoi confermare?"</span></div>
+        <div class="feature-row"><span class="feature-emoji">⚡</span><span class="feature-text">Automazioni: trigger → condition → action personalizzabili</span></div>
+        <div class="feature-row"><span class="feature-emoji">💡</span><span class="feature-text">AI Overlay — bolla flottante sopra tutto, sempre accessibile</span></div>
+        <div class="feature-row"><span class="feature-emoji">👤</span><span class="feature-text">Profilo intelligente: stile, salone, prodotti — tutto memorizzato e appreso</span></div>
+        <div class="feature-row"><span class="feature-emoji">🛡</span><span class="feature-text">Compliance GDPR completa con DPIA, consent management e audit log</span></div>
+        <div class="feature-row"><span class="feature-emoji">🍎</span><span class="feature-text">iOS build nativo + TestFlight + App Store pipeline</span></div>
+        <div class="feature-row"><span class="feature-emoji">🚀</span><span class="feature-text">Backend microservizi: FastAPI AI + Redis + Pinecone separati da Supabase</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 03 — ARCHITETTURA -->
+<section class="section">
+  <div class="section-label">03 — Architettura</div>
+  <h2 class="section-title">Struttura v2.0.0<br><span style="color:var(--cyan)">adattata al tuo stack</span></h2>
+
+  <div class="arch-block">
+    <div class="arch-block-header">
+      <div class="dot-row"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      beauty-style-pro · architettura v2.0.0
+    </div>
+    <div class="arch-block-body"><span class="arch-comment">── CLIENT LAYER ──────────────────────────────────────────────────────</span>
+<span class="arch-ok">React + Capacitor (esistente, da estendere con plugin nativi)</span>
+  ├── <span class="arch-new">Porcupine Wake Word Plugin (nativo Android/iOS)</span>
+  ├── <span class="arch-new">Background Location Plugin (Capacitor Geolocation)</span>
+  ├── <span class="arch-new">Overlay Service (Foreground Service Android nativo)</span>
+  ├── <span class="arch-new">LiveKit WebRTC Client</span>
+  └── <span class="arch-new">Stella AI Bubble (overlay flottante)</span>
+
+<span class="arch-comment">── API GATEWAY ────────────────────────────────────────────────────────</span>
+<span class="arch-highlight">Nginx (Hetzner VPS esistente) + Kong o Traefik</span>
+  ├── <span class="arch-ok">JWT Auth middleware (Supabase JWT compatibile)</span>
+  ├── <span class="arch-new">Rate Limiting (Redis)</span>
+  └── <span class="arch-highlight">Routing verso microservizi</span>
+
+<span class="arch-comment">── SUPABASE (esistente — mantenere e estendere) ───────────────────────</span>
+  ├── <span class="arch-ok">Auth Service         → già funzionante, aggiungere biometrico</span>
+  ├── <span class="arch-ok">Chat Realtime        → già funzionante, aggiungere LiveKit per call</span>
+  ├── <span class="arch-ok">Feed / Social        → già funzionante, ottimizzare con indici</span>
+  ├── <span class="arch-ok">Prenotazioni         → già funzionante, aggiungere AI reminder</span>
+  ├── <span class="arch-ok">Notifiche Push       → già funzionante via Service Worker</span>
+  └── <span class="arch-ok">Storage media        → già funzionante (avatar, foto, audio)</span>
+
+<span class="arch-comment">── NUOVI MICROSERVIZI v2 (da aggiungere) ──────────────────────────────</span>
+  ┌── <span class="arch-new">AI SERVICE (FastAPI Python)</span>
+  │     ├── <span class="arch-new">GPT-4o via OpenAI API</span>
+  │     ├── <span class="arch-new">Pinecone Vector DB (memoria Stella)</span>
+  │     ├── <span class="arch-new">Intent Classifier (routing comandi vocali)</span>
+  │     └── <span class="arch-new">SSE Streaming responses</span>
+  │
+  ├── <span class="arch-new">VOICE SERVICE (Python)</span>
+  │     ├── <span class="arch-new">Porcupine wake word detection (on-device)</span>
+  │     ├── <span class="arch-new">OpenAI Whisper STT</span>
+  │     └── <span class="arch-new">ElevenLabs TTS (voce Stella italiana)</span>
+  │
+  ├── <span class="arch-new">LOCATION SERVICE (Node.js)</span>
+  │     ├── <span class="arch-ok">PostGIS + Supabase Realtime (già presente)</span>
+  │     ├── <span class="arch-new">Geofencing (zone salone, clienti vicini)</span>
+  │     └── <span class="arch-new">Sharing con scadenza + 3 livelli privacy</span>
+  │
+  └── <span class="arch-new">CALL SERVICE (LiveKit)</span>
+        ├── <span class="arch-new">WebRTC SFU per chiamate HD</span>
+        ├── <span class="arch-new">STUN/TURN Coturn self-hosted</span>
+        └── <span class="arch-new">Registrazione con consenso bilaterale</span>
+
+<span class="arch-comment">── DATA LAYER ─────────────────────────────────────────────────────────</span>
+  <span class="arch-ok">PostgreSQL/Supabase   → dati app (già esistente)</span>
+  <span class="arch-new">Redis                 → cache, sessioni, rate limit (nuovo)</span>
+  <span class="arch-new">Pinecone              → memoria vettoriale Stella (nuovo)</span>
+  <span class="arch-ok">S3/Supabase Storage   → media (già esistente)</span>
+
+<span class="arch-comment">── INFRASTRUTTURA ─────────────────────────────────────────────────────</span>
+  <span class="arch-warn">Hetzner VPS           → già usato per bot trading, aggiungere Docker</span>
+  <span class="arch-ok">Vercel                → deploy web già attivo</span>
+  <span class="arch-warn">GitHub Actions        → CI/CD già completo, estendere per iOS</span></div>
+  </div>
+
+  <div class="service-grid">
+    <div class="service-card">
+      <span class="service-icon">🔐</span>
+      <div class="service-name">Auth Service</div>
+      <div class="service-tech">Supabase · JWT · OTP</div>
+      <div class="service-desc">Già funzionante con multi-ruolo e OTP SMS. Aggiungere biometrico nativo Capacitor (FaceID/Fingerprint) e sessioni multi-device con revoca remota.</div>
+      <span class="service-badge upgrade">Upgrade</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">🧠</span>
+      <div class="service-name">Stella AI Core</div>
+      <div class="service-tech">FastAPI · GPT-4o · Pinecone</div>
+      <div class="service-desc">Evoluzione dell'AI Stella attuale: da comandi regex a GPT-4o con RAG memory. Stella ricorderà ogni cliente, il suo stile preferito e la sua storia beauty.</div>
+      <span class="service-badge major">Upgrade Major</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">🎙</span>
+      <div class="service-name">Voice Service</div>
+      <div class="service-tech">Porcupine · Whisper · ElevenLabs</div>
+      <div class="service-desc">Wake word "Stella" on-device (Porcupine) invece di Web Speech API. Whisper per STT accurato in italiano. ElevenLabs per voce naturale femminile di Stella.</div>
+      <span class="service-badge upgrade">Upgrade</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">💬</span>
+      <div class="service-name">Chat &amp; Social</div>
+      <div class="service-tech">Supabase RT · WebRTC</div>
+      <div class="service-desc">Chat esistente già ottima. Aggiungere AI Stella in-chat (risponde ai messaggi), traduzione automatica potenziata e reazioni emoji avanzate.</div>
+      <span class="service-badge present">Già presente</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">📍</span>
+      <div class="service-name">Location Live</div>
+      <div class="service-tech">PostGIS · Supabase · Capacitor</div>
+      <div class="service-desc">Nuovo in v2: location live con geofencing per saloni. "Cliente a 300m dal salone" → notifica automatica. Condivisione posizione con scadenza tra professionisti.</div>
+      <span class="service-badge new">Nuovo</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">📞</span>
+      <div class="service-name">Call Service</div>
+      <div class="service-tech">LiveKit · WebRTC · TURN</div>
+      <div class="service-desc">Sostituzione chiamate base con LiveKit WebRTC professionale. Consulenze beauty video HD, condivisione schermo, group calls per team salone.</div>
+      <span class="service-badge upgrade">Upgrade</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">🔔</span>
+      <div class="service-name">Smart Notifications</div>
+      <div class="service-tech">FCM · APNs · AI Rules</div>
+      <div class="service-desc">Notifiche push già funzionanti. Aggiungere AI Rules Engine: "appuntamento tra 1h" → Stella ricorda vocalmente, "cliente nel raggio" → alert salone.</div>
+      <span class="service-badge upgrade">Upgrade</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">⚡</span>
+      <div class="service-name">Automazioni</div>
+      <div class="service-tech">Rules Engine · Supabase</div>
+      <div class="service-desc">Trigger/condition/action personalizzabili per professionisti: "se cliente prenota" → conferma automatica + promemoria 24h + messaggio benvenuto.</div>
+      <span class="service-badge new">Nuovo</span>
+    </div>
+    <div class="service-card">
+      <span class="service-icon">💡</span>
+      <div class="service-name">AI Overlay</div>
+      <div class="service-tech">Capacitor · Foreground Service</div>
+      <div class="service-desc">Bolla AI flottante accessibile ovunque nello smartphone. Chiedi a Stella qualcosa senza aprire l'app. Solo Android v2 (iOS limitato da policy Apple).</div>
+      <span class="service-badge new">Nuovo</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 04 — SUPER PROMPT -->
+<section class="section" id="prompt">
+  <div class="section-label">04 — Super Prompt Master</div>
+  <h2 class="section-title">Il Prompt Completo<br><span style="color:var(--purple)">per ogni sessione AI</span></h2>
+
+  <div class="prompt-container">
+    <div class="prompt-header">
+      <div class="prompt-header-left">
+        <div class="dot-row">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div>
+        </div>
+        <span class="prompt-tag">beauty-style-pro · super-prompt-master-v2.0</span>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy Prompt</button>
+    </div>
+    <div class="prompt-body" id="promptText">
+<span class="ph">╔══════════════════════════════════════════════════════════════════════╗
+║         BEAUTY STYLE PRO — SUPER PROMPT MASTER v2.0                 ║
+║         Evoluzione 1.0.0 beta → 2.0.0 Super App AI                  ║
+╚══════════════════════════════════════════════════════════════════════╝</span>
+
+<span class="ph">## CONTESTO PROGETTO REALE</span>
+
+Stai lavorando su Beauty Style Pro, una Super App beauty già esistente con:
+
+<span class="pc">STACK ATTUALE (repository: github.com/mikimause93/beauty-style-pro):</span>
+— React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui
+— Supabase (Auth + Realtime DB + Storage)
+— Capacitor per build Android nativa
+— GitHub Actions CI/CD (lint, test, deploy web, build Android)
+— Vercel per deploy web + GitHub Pages
+— Bun come package manager
+— Vitest per test
+
+<span class="pc">GIÀ FUNZIONANTE IN v1.0.0:</span>
+— Auth multi-ruolo (Cliente / Professionista / Business) con OTP SMS
+— Feed social beauty (like, commenti, follow, condivisioni) realtime
+— Chat stile Messenger/WhatsApp (testo, immagini, file, vocali, traduzione live)
+— Chiamate vocali e video in-app (base)
+— AI Stella: wake word "Stella" attiva, comandi vocali navigazione/messaggi/prenotazioni
+— Notifiche push anche ad app chiusa (Service Worker)
+— Prenotazioni con calendario + selezione data/orario/luogo
+— Shop prodotti beauty + profilo business con analytics
+— Live Streaming con reactions, tips e chat
+— Gamification: QRCoin, Spin &amp; Win, Challenges, Leaderboard
+— Radio &amp; Music Player, Before/After gallery, Mappa con ricerca AI
+— Tema Dark/Light con controllo vocale
+— PWA installabile + Android AAB su Google Play (internal testing)
+
+<span class="ph">## OBIETTIVO: EVOLUZIONE v1.0.0 → v2.0.0</span>
+
+Ogni modifica che proponi deve:
+1. Preservare e rispettare il codice esistente — NON riscrivere da zero quello che funziona
+2. Integrare nel codice React + Supabase esistente — non proporre stack alternativi
+3. Usare Capacitor per funzioni native (non React Native — il progetto usa già Capacitor)
+4. Nominare componenti e file coerentemente con la naming convention esistente
+
+<span class="ph">## STELLA AI — UPGRADE CORE (priorità massima)</span>
+
+Stella è l'assistente AI vocale già presente. In v2 diventa:
+
+<span class="pp">STELLA v2 = GPT-4o + RAG Memory + ElevenLabs voce italiana</span>
+
+<span class="pc">Pipeline Stella v2:</span>
+<span class="ps">WAKE WORD "Stella" (Porcupine Capacitor plugin — on device)
+     ↓
+Audio buffer (silenzio = fine comando)
+     ↓
+OpenAI Whisper API (STT accurato italiano)
+     ↓
+GPT-4o con system prompt beauty + context RAG da Pinecone
+     ↓
+Intent classifier → routing azione (chat / prenotazione / location / call / shop)
+     ↓
+ElevenLabs TTS (voce femminile italiana naturale)
+     ↓
+Audio output + UI feedback</span>
+
+<span class="pc">Memory RAG di Stella (Pinecone):</span>
+Ogni interazione utente viene salvata come embedding.
+Prima di ogni risposta, Stella recupera le ultime 8 memorie rilevanti.
+Stella ricorderà: stile preferito, prodotti usati, salone frequentato,
+professionista di fiducia, ultime prenotazioni, problemi capelli/pelle.
+
+<span class="pc">System prompt di Stella (da inserire in ogni chiamata GPT-4o):</span>
+<span class="ps">"Sei Stella, l'assistente AI personale di Beauty Style Pro.
+Sei esperta di beauty, moda, capelli, skincare e benessere.
+Conosci l'utente [NOME] e ricordi le sue preferenze: [CONTEXT_RAG].
+Parli in italiano, con tono caldo e professionale come una stylist di fiducia.
+Puoi prenotare appuntamenti, consigliare look, cercare professionisti vicini,
+tradurre messaggi, inviare la posizione, gestire lo shop.
+Rispondi sempre in modo conciso e utile."</span>
+
+<span class="ph">## LOCATION LIVE v2 (nuovo modulo)</span>
+
+<span class="pc">Schema DB Supabase da aggiungere:</span>
+<span class="ps">location_sessions(id, user_id, started_at, ended_at, precision)
+location_points(id, session_id, lat, lng, accuracy, created_at)
+geofences(id, owner_id, name, lat, lng, radius_m, trigger_type, active)
+location_shares(id, from_user_id, to_user_id, expires_at, precision_level)</span>
+
+<span class="pc">Casi d'uso beauty:</span>
+— Professionista: "clienti entro 500m dal mio salone" → notifica automatica offerta
+— Cliente: condividi posizione con stylist per appuntamento a domicilio
+— SOS: "Stella, manda la mia posizione a [nome]" → invio immediato
+— Evento beauty: tracking partecipanti all'evento
+
+<span class="pc">Precision levels:</span>
+— EXACT: lat/lng precisa (solo per te stessa)
+— AREA: arrotondato a 500m (condivisione con professionista)
+— CITY: solo città (condivisione pubblica)
+
+<span class="ph">## CALL SERVICE UPGRADE (LiveKit)</span>
+
+<span class="pc">Sostituire le chiamate base attuali con LiveKit WebRTC:</span>
+— Consulenze beauty video HD con cliente + professionista
+— Condivisione schermo per mostrare look / prodotti
+— Group calls per team salone (max 8 persone)
+— Registrazione consulenza (con consenso bilaterale obbligatorio)
+
+<span class="ps">npm install @livekit/client @livekit/components-react</span>
+
+<span class="ph">## AUTOMAZIONI BEAUTY (nuovo)</span>
+
+<span class="pc">Rules Engine per professionisti e saloni:</span>
+<span class="ps">Trigger disponibili:
+  BOOKING_CREATED, BOOKING_CONFIRMED, BOOKING_REMINDER_24H,
+  BOOKING_REMINDER_1H, CLIENT_NEARBY (geofence), NEW_FOLLOWER,
+  NEW_REVIEW, MESSAGE_RECEIVED, SHOP_ORDER
+
+Condition:
+  role == "professionista", time_of_day, day_of_week,
+  client_is_vip, distance_meters, booking_count
+
+Action:
+  send_message, send_push_notification, ai_stella_call,
+  share_location, confirm_booking, send_promo, add_qrcoin</span>
+
+<span class="pc">Esempio automazione tipica salone:</span>
+<span class="ps">TRIGGER: BOOKING_REMINDER_1H
+CONDITION: client.appointment_count &gt; 5 (cliente fidelizzato)
+ACTION: send_message("Ciao [nome]! Stella ti ricorda il tuo appuntamento tra 1h ✨
+        Il tuo stylist [nome_pro] ti aspetta. Porta pure una foto ispirazione!")</span>
+
+<span class="ph">## BACKEND MICROSERVIZI (Hetzner VPS)</span>
+
+<span class="pc">Docker Compose da aggiungere al progetto:</span>
+<span class="ps">services:
+  stella-ai:        # FastAPI Python — GPT-4o + RAG Pinecone
+    image: python:3.12-slim
+    port: 8001
+
+  stella-voice:     # FastAPI Python — Whisper + ElevenLabs
+    image: python:3.12-slim
+    port: 8002
+
+  redis:            # Cache + Rate Limiting + Pub/Sub
+    image: redis:7-alpine
+    port: 6379
+
+  livekit:          # WebRTC SFU per chiamate HD
+    image: livekit/livekit-server
+    port: 7880
+
+  nginx:            # Reverse proxy + SSL
+    image: nginx:alpine
+    ports: [80, 443]</span>
+
+<span class="ph">## STRUTTURA FILE CONSIGLIATA per v2</span>
+
+<span class="ps">src/
+├── components/
+│   ├── stella/
+│   │   ├── StellaOverlay.tsx        ← bolla flottante (nuovo)
+│   │   ├── StellaVoiceV2.tsx        ← upgrade con Porcupine + Whisper
+│   │   ├── StellaChatAI.tsx         ← chat con GPT-4o (upgrade)
+│   │   └── StellaMemory.ts          ← gestione Pinecone (nuovo)
+│   ├── location/
+│   │   ├── LocationLive.tsx         ← tracking realtime (nuovo)
+│   │   ├── GeofenceManager.tsx      ← zone e alert (nuovo)
+│   │   └── LocationShare.tsx        ← condivisione con scadenza (nuovo)
+│   ├── calls/
+│   │   └── LiveKitRoom.tsx          ← upgrade chiamate (sostituisce base)
+│   └── automations/
+│       ├── RulesEngine.tsx          ← UI regole (nuovo)
+│       └── AutomationCard.tsx       ← singola regola (nuovo)
+├── services/
+│   ├── stellaAI.ts                  ← client FastAPI AI service
+│   ├── stellaVoice.ts               ← Whisper + ElevenLabs
+│   ├── locationService.ts           ← Capacitor + Supabase RT
+│   └── automationService.ts         ← Rules Engine logic
+└── hooks/
+    ├── useStellaMemory.ts            ← accesso memoria Pinecone
+    └── useLocationLive.ts            ← tracking realtime</span>
+
+<span class="ph">## REGOLE DI LAVORO PER OGNI SESSIONE</span>
+
+<span class="pr">Prima di qualsiasi modifica al codice:</span>
+1. Leggi il file esistente che stai modificando
+2. Preserva gli import e le props già presenti
+3. Aggiungi — non sostituire — la logica esistente
+4. Mantieni il design system Tailwind + shadcn/ui esistente
+5. Aggiungi test Vitest per ogni nuova funzione critica
+6. Usa Supabase client già configurato in src/integrations/supabase/
+
+<span class="pc">Naming convention (dal codice esistente):</span>
+— Componenti: PascalCase (StellaVoiceV2.tsx)
+— Hooks: camelCase con prefisso "use" (useStellaMemory.ts)
+— Servizi: camelCase (stellaAI.ts)
+— Tabelle Supabase: snake_case (location_sessions)
+— Variabili env: VITE_ prefix (VITE_OPENAI_API_KEY)
+
+<span class="ph">## OUTPUT RICHIESTO PER OGNI SESSIONE</span>
+
+Per ogni modifica proposta fornisci sempre:
+1. File completo con path preciso (es. src/components/stella/StellaVoiceV2.tsx)
+2. Migration SQL Supabase se aggiungi tabelle (cartella supabase/migrations/)
+3. Variabili .env nuove da aggiungere a .env.example
+4. Test Vitest per logica critica
+5. Istruzioni installazione dipendenze npm/bun nuove
+
+<span class="pm">NON proporre mai: riscrittura completa, cambio di stack, rimozione funzioni esistenti.
+SEMPRE: estendi ciò che esiste, aggiungi ciò che manca, rispetta il codice già scritto.</span>
+
+<span class="ph">╔══════════════════════════════════════════════════════════════════════╗
+║         END — Beauty Style Pro Super Prompt Master v2.0              ║
+╚══════════════════════════════════════════════════════════════════════╝</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 05 — COMPLIANCE LEGALE -->
+<section class="section">
+  <div class="section-label">05 — Compliance Legale</div>
+  <h2 class="section-title">GDPR &amp;<br><span style="color:var(--rose)">Sicurezza</span></h2>
+
+  <div class="legal-grid">
+    <div class="legal-card critical">
+      <div class="legal-card-label">⛔ Critico — Prima del lancio</div>
+      <div class="legal-card-title">DPIA Obbligatoria</div>
+      <div class="legal-card-text">L'app elabora: posizione live, audio microfono, biometria (foto before/after), profilazione AI abitudini beauty. Per ognuno serve Data Protection Impact Assessment separata. Senza DPIA non puoi lanciare nell'EU.</div>
+    </div>
+    <div class="legal-card critical">
+      <div class="legal-card-label">⛔ Critico — Registrazione</div>
+      <div class="legal-card-title">Chiamate Video</div>
+      <div class="legal-card-text">In Italia art. 617 c.p.: registrare una chiamata senza consenso è reato penale. Implementare notifica audio automatica "Questa chiamata viene registrata" + conferma entrambe le parti prima di avviare registrazione.</div>
+    </div>
+    <div class="legal-card critical">
+      <div class="legal-card-label">⛔ Critico — App Store</div>
+      <div class="legal-card-title">Mic Always-On Disclosure</div>
+      <div class="legal-card-text">Google Play e Apple App Store richiedono disclosure esplicita nell'app listing per microfono sempre attivo. Aggiungere indicatore visivo (pallino rosa animato) sempre visibile quando Stella è in ascolto.</div>
+    </div>
+    <div class="legal-card warning">
+      <div class="legal-card-label">⚠ Importante</div>
+      <div class="legal-card-title">Minori GDPR Art.8</div>
+      <div class="legal-card-text">Verifica età obbligatoria al signup. Per under 16 in Italia: consenso genitoriale verificabile. Non raccogliere location, foto, profilazione AI per under 16. Aggiungere flag age_verified al profilo utente.</div>
+    </div>
+    <div class="legal-card warning">
+      <div class="legal-card-label">⚠ Importante</div>
+      <div class="legal-card-title">Before/After e Foto</div>
+      <div class="legal-card-text">Le foto before/after sono dati biometrici ai sensi GDPR. Richiedono consenso esplicito separato, base giuridica specifica, retention policy definita (es. max 2 anni) e diritto alla cancellazione entro 72h.</div>
+    </div>
+    <div class="legal-card warning">
+      <div class="legal-card-label">⚠ Importante</div>
+      <div class="legal-card-title">QRCoin e Transazioni</div>
+      <div class="legal-card-text">Se QRCoin ha valore reale o è scambiabile con denaro, potresti rientrare nella normativa sui servizi di pagamento (PSD2). Verificare con commercialista se QRCoin è classificabile come strumento di pagamento.</div>
+    </div>
+    <div class="legal-card ok">
+      <div class="legal-card-label">✓ Implementare</div>
+      <div class="legal-card-title">Diritti GDPR Art. 15-22</div>
+      <div class="legal-card-text">Aggiungere in Impostazioni: "Scarica i miei dati" (Art.15), "Cancella account" entro 72h (Art.17), "Esporta dati" (Art.20), "Disabilita profilazione AI" (Art.21). Supabase Row Level Security già aiuta.</div>
+    </div>
+    <div class="legal-card ok">
+      <div class="legal-card-label">✓ Già buono</div>
+      <div class="legal-card-title">Sicurezza Tecnica</div>
+      <div class="legal-card-text">Supabase gestisce già JWT, RLS, HTTPS. Aggiungere: CSP headers in Nginx, audit delle 113 PR aperte prima del lancio, rotazione periodica ANON_KEY Supabase, rate limiting su login.</div>
+    </div>
+    <div class="legal-card ok">
+      <div class="legal-card-label">✓ Aggiungere</div>
+      <div class="legal-card-title">Privacy Policy v2</div>
+      <div class="legal-card-text">Aggiornare Privacy Policy esistente includendo: base giuridica per ogni tipo di dato (posizione, audio, foto, profilo AI), lista sub-processor (OpenAI, Supabase, Twilio, ElevenLabs), contact DPO se applicabile.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SEZIONE 06 — ROADMAP -->
+<section class="section">
+  <div class="section-label">06 — Roadmap</div>
+  <h2 class="section-title">Da v1.0.0<br><span style="color:var(--cyan)">a v2.0.0</span></h2>
+
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 1 · Settimane 1-3 · Cleanup &amp; Foundation</div>
+      <div class="roadmap-title">Pulizia e Preparazione v2</div>
+      <div class="roadmap-text">Prima di aggiungere funzioni: review e merge delle 113 PR aperte, audit sicurezza dipendenze npm, aggiornamento Supabase al piano Pro, configurazione Docker Compose su Hetzner VPS per i nuovi microservizi. Aggiungere .env.example con tutte le nuove variabili v2.</div>
+      <div class="tag-row">
+        <span class="tech-tag">PR Cleanup</span>
+        <span class="tech-tag">npm audit</span>
+        <span class="tech-tag">Docker setup Hetzner</span>
+        <span class="tech-tag">Supabase Pro</span>
+        <span class="tech-tag">SECURITY.md</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 2 · Settimane 4-7 · Stella AI v2</div>
+      <div class="roadmap-title">Upgrade Stella: GPT-4o + Memoria + Voce</div>
+      <div class="roadmap-text">Creare FastAPI microservice per AI (stella-ai su porta 8001). Integrare GPT-4o con system prompt beauty personalizzato. Aggiungere Pinecone per memoria persistente di Stella. Sostituire TTS browser con ElevenLabs voce italiana. Aggiornare StellaVoice.tsx esistente senza rompere comandi già funzionanti.</div>
+      <div class="tag-row">
+        <span class="tech-tag">FastAPI stella-ai</span>
+        <span class="tech-tag">OpenAI GPT-4o</span>
+        <span class="tech-tag">Pinecone vector DB</span>
+        <span class="tech-tag">ElevenLabs TTS</span>
+        <span class="tech-tag">RAG memory</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 3 · Settimane 8-10 · Wake Word Nativa</div>
+      <div class="roadmap-title">Porcupine Wake Word On-Device</div>
+      <div class="roadmap-text">Sostituire il riconoscimento wake word browser-based con Porcupine Capacitor plugin. Modello "Stella" addestrato su Picovoice Console. Zero latenza, funziona offline, non invia audio al cloud prima della wake word. Aggiornare permessi AndroidManifest per accesso microfono background.</div>
+      <div class="tag-row">
+        <span class="tech-tag">Porcupine Capacitor</span>
+        <span class="tech-tag">Picovoice Console</span>
+        <span class="tech-tag">Background mic</span>
+        <span class="tech-tag">AndroidManifest</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 4 · Settimane 11-13 · Location Live</div>
+      <div class="roadmap-title">Posizione Live + Geofencing Beauty</div>
+      <div class="roadmap-text">Aggiungere tabelle Supabase per location (migration SQL). Integrare Capacitor Geolocation plugin per tracking background. Geofencing: zone salone con alert "cliente nel raggio". Sharing posizione con scadenza tra professionista e cliente. Mappa realtime upgrade con layer posizioni live.</div>
+      <div class="tag-row">
+        <span class="tech-tag">Capacitor Geolocation</span>
+        <span class="tech-tag">Supabase RT</span>
+        <span class="tech-tag">Geofencing</span>
+        <span class="tech-tag">PostGIS</span>
+        <span class="tech-tag">Location sharing</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 5 · Settimane 14-17 · Call HD + Overlay</div>
+      <div class="roadmap-title">LiveKit Chiamate HD + Stella Overlay</div>
+      <div class="roadmap-text">Integrare @livekit/client nel componente chiamate esistente. Mantenere UI attuale, sostituire il motore WebRTC. Group calls per consulenze team salone. Aggiungere Stella Overlay (bolla flottante Android) tramite Capacitor Foreground Service plugin. Permesso SYSTEM_ALERT_WINDOW richiesto.</div>
+      <div class="tag-row">
+        <span class="tech-tag">LiveKit WebRTC</span>
+        <span class="tech-tag">@livekit/client</span>
+        <span class="tech-tag">Foreground Service</span>
+        <span class="tech-tag">Stella Overlay</span>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Fase 6 · Settimane 18-22 · Automazioni + iOS + Compliance</div>
+      <div class="roadmap-title">Rules Engine + iOS Build + GDPR Completo</div>
+      <div class="roadmap-text">Implementare Rules Engine per automazioni salone (trigger/condition/action). Aggiungere pipeline iOS Capacitor con build TestFlight in GitHub Actions. Completare DPIA, aggiornare Privacy Policy con tutti i nuovi processor v2 (OpenAI, Pinecone, ElevenLabs, LiveKit). Aggiungere schermata "I miei dati" per diritti GDPR Art.15-22.</div>
+      <div class="tag-row">
+        <span class="tech-tag">Rules Engine</span>
+        <span class="tech-tag">iOS Capacitor</span>
+        <span class="tech-tag">TestFlight</span>
+        <span class="tech-tag">DPIA</span>
+        <span class="tech-tag">GDPR screens</span>
+        <span class="tech-tag">Privacy Policy v2</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="divider"></div>
+<footer class="footer">
+  <div class="footer-title">BEAUTY STYLE PRO</div>
+  <div class="footer-sub">Documento Master v2.0 · Basato su analisi reale repository mikimause93/beauty-style-pro · 930 commit · 2026</div>
+</footer>
+
+<script>
+function copyPrompt() {
+  var btn = document.getElementById('copyBtn');
+  var el = document.getElementById('promptText');
+  var text = el.innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '✓ Copiato!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy Prompt';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+
+// Staggered entrance animations on scroll
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry, i) {
+    if (entry.isIntersecting) {
+      entry.target.style.animationDelay = (i * 0.06) + 's';
+      entry.target.style.animation = 'fadeUp 0.6s ease both';
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll(
+  '.analysis-card, .version-card, .service-card, .legal-card, .roadmap-item'
+).forEach(function(el) {
+  el.style.opacity = '0';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

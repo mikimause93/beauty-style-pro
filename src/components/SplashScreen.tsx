@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import logoS from "@/assets/logo-s.png";
-import { APP_NAME, APP_VERSION } from "@/lib/version";
+import { APP_NAME, APP_VERSION, APP_TAGLINE } from "@/lib/version";
 
 interface SplashScreenProps {
   onComplete: () => void;
