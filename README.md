@@ -1,6 +1,6 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
 ---
 
@@ -60,6 +60,48 @@
 - ✅ Dettaglio servizi con prenotazione diretta
 - ✅ Before/After gallery, Eventi, PWA installabile
 - ✅ Impostazioni utente, Recensioni, Ricerca su mappa intelligente AI
+
+---
+
+## 🆕 Novità v2.0.0
+
+### AI & Intelligenza Artificiale
+- ✅ **AI Assistant** – assistente AI conversazionale dedicato
+- ✅ **AI Look Generator** – generazione look beauty tramite AI
+- ✅ **Chatbot integrato** (ChatbotWidget) – supporto in-app always-on
+- ✅ **Stella Voice Agent** potenziato – nuovi comandi e risposte più naturali
+
+### Contenuti & Social avanzato
+- ✅ **Shorts** – video brevi stile TikTok/Reels
+- ✅ **Live Battle** – sfide live tra creator in tempo reale
+- ✅ **Quiz Live** – quiz interattivi in diretta
+- ✅ **Talent Game** – gioco per scoprire nuovi talenti beauty
+- ✅ **Transformation Challenge** – sfide di trasformazione look
+
+### Creator & Monetizzazione
+- ✅ **Creator Application** – candidatura programma creator
+- ✅ **Auctions** – aste su servizi e prodotti beauty
+- ✅ **Installments** – pagamenti a rate
+- ✅ **Affiliate Program** – programma di affiliazione avanzato
+- ✅ **Boost Profile** – promozione profilo in evidenza
+- ✅ **Subscription** – piani di abbonamento
+
+### Business & Team
+- ✅ **Employee Activity** – tracciamento attività dipendenti
+- ✅ **Employee Shifts** – gestione turni del personale
+- ✅ **Business Team** – gestione team per attività
+
+### Servizi & Marketplace
+- ✅ **Home Service** – prenotazione servizi a domicilio
+- ✅ **Service Requests** – creazione richieste di servizio personalizzate
+- ✅ **Marketplace** – marketplace prodotti e servizi
+- ✅ **Offers** – offerte e promozioni dedicate
+- ✅ **Reminders** – promemoria appuntamenti e scadenze
+
+### Account & Sicurezza
+- ✅ **Verify Account** – verifica identità professionisti
+- ✅ **Onboarding** – flusso di benvenuto guidato
+- ✅ **Debug Panel** – pannello diagnostico (solo admin)
 
 ---
 
