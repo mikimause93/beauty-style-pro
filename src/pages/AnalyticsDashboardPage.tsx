@@ -155,9 +155,9 @@ export default function AnalyticsDashboardPage() {
         <div className="rounded-xl bg-card border border-border p-5">
           <div className="flex items-center gap-2 mb-4"><Calendar className="w-5 h-5 text-primary" /><h3 className="font-semibold">Prenotazioni</h3></div>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center"><p className="text-2xl font-bold">{bookingStats?.total || 0}</p><p className="text-[10px] text-muted-foreground">Totali</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-success">{bookingStats?.completed || 0}</p><p className="text-[10px] text-muted-foreground">Completate</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-gold">€{bookingStats?.revenue?.toFixed(0) || 0}</p><p className="text-[10px] text-muted-foreground">Ricavi</p></div>
+            <div className="text-center"><p className="text-2xl font-bold">{bookingStats?.total || 0}</p><p className="text-xs text-muted-foreground">Totali</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-success">{bookingStats?.completed || 0}</p><p className="text-xs text-muted-foreground">Completate</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-gold">€{bookingStats?.revenue?.toFixed(0) || 0}</p><p className="text-xs text-muted-foreground">Ricavi</p></div>
           </div>
         </div>
 
@@ -165,9 +165,9 @@ export default function AnalyticsDashboardPage() {
         <div className="rounded-xl bg-card border border-border p-5">
           <div className="flex items-center gap-2 mb-4"><TrendingUp className="w-5 h-5 text-secondary" /><h3 className="font-semibold">Coinvolgimento</h3></div>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center"><p className="text-2xl font-bold">{postStats?.posts || 0}</p><p className="text-[10px] text-muted-foreground">Post</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-primary">{postStats?.likes || 0}</p><p className="text-[10px] text-muted-foreground">Like</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-accent">{postStats?.comments || 0}</p><p className="text-[10px] text-muted-foreground">Commenti</p></div>
+            <div className="text-center"><p className="text-2xl font-bold">{postStats?.posts || 0}</p><p className="text-xs text-muted-foreground">Post</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-primary">{postStats?.likes || 0}</p><p className="text-xs text-muted-foreground">Like</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-accent">{postStats?.comments || 0}</p><p className="text-xs text-muted-foreground">Commenti</p></div>
           </div>
         </div>
 
@@ -176,9 +176,9 @@ export default function AnalyticsDashboardPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <div className="flex items-center gap-2 mb-4"><Coins className="w-5 h-5 text-gold" /><h3 className="font-semibold">Portafoglio</h3></div>
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center"><p className="text-2xl font-bold text-success">+{txStats.earned}</p><p className="text-[10px] text-muted-foreground">Guadagnati</p></div>
-              <div className="text-center"><p className="text-2xl font-bold text-live">-{txStats.spent}</p><p className="text-[10px] text-muted-foreground">Spesi</p></div>
-              <div className="text-center"><p className="text-2xl font-bold">{txStats.count}</p><p className="text-[10px] text-muted-foreground">Transazioni</p></div>
+              <div className="text-center"><p className="text-2xl font-bold text-success">+{txStats.earned}</p><p className="text-xs text-muted-foreground">Guadagnati</p></div>
+              <div className="text-center"><p className="text-2xl font-bold text-live">-{txStats.spent}</p><p className="text-xs text-muted-foreground">Spesi</p></div>
+              <div className="text-center"><p className="text-2xl font-bold">{txStats.count}</p><p className="text-xs text-muted-foreground">Transazioni</p></div>
             </div>
           </div>
         )}
@@ -188,10 +188,10 @@ export default function AnalyticsDashboardPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <div className="flex items-center gap-2 mb-4"><Eye className="w-5 h-5 text-live" /><h3 className="font-semibold">Live Stream</h3></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center"><p className="text-2xl font-bold">{streamStats.count}</p><p className="text-[10px] text-muted-foreground">Dirette</p></div>
-              <div className="text-center"><p className="text-2xl font-bold">{streamStats.totalViews}</p><p className="text-[10px] text-muted-foreground">Visualizzazioni</p></div>
-              <div className="text-center"><p className="text-2xl font-bold text-gold">{streamStats.totalEarnings}</p><p className="text-[10px] text-muted-foreground">QRC Guadagnati</p></div>
-              <div className="text-center"><p className="text-2xl font-bold text-primary">{streamStats.peakViewers}</p><p className="text-[10px] text-muted-foreground">Picco Spettatori</p></div>
+              <div className="text-center"><p className="text-2xl font-bold">{streamStats.count}</p><p className="text-xs text-muted-foreground">Dirette</p></div>
+              <div className="text-center"><p className="text-2xl font-bold">{streamStats.totalViews}</p><p className="text-xs text-muted-foreground">Visualizzazioni</p></div>
+              <div className="text-center"><p className="text-2xl font-bold text-gold">{streamStats.totalEarnings}</p><p className="text-xs text-muted-foreground">QRC Guadagnati</p></div>
+              <div className="text-center"><p className="text-2xl font-bold text-primary">{streamStats.peakViewers}</p><p className="text-xs text-muted-foreground">Picco Spettatori</p></div>
             </div>
           </div>
         )}
@@ -203,11 +203,11 @@ export default function AnalyticsDashboardPage() {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center">
                 <p className="text-2xl font-bold">{viewStats.totalViews}</p>
-                <p className="text-[10px] text-muted-foreground">Pagine viste</p>
+                <p className="text-xs text-muted-foreground">Pagine viste</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-primary">{viewStats.uniqueVisitors}</p>
-                <p className="text-[10px] text-muted-foreground">Visitatori unici</p>
+                <p className="text-xs text-muted-foreground">Visitatori unici</p>
               </div>
             </div>
 
@@ -223,7 +223,7 @@ export default function AnalyticsDashboardPage() {
                   <div key={d.key} className="flex-1 flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
                     <d.Icon className="w-4 h-4 text-muted-foreground" />
                     <p className="text-sm font-bold">{viewStats.devices[d.key] || 0}</p>
-                    <p className="text-[9px] text-muted-foreground">{d.label}</p>
+                    <p className="text-xs text-muted-foreground">{d.label}</p>
                   </div>
                 ))}
               </div>
@@ -237,7 +237,7 @@ export default function AnalyticsDashboardPage() {
                   {viewStats.topPages.map((p, i) => (
                     <div key={p.path} className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-muted/30">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-muted-foreground w-4">{i + 1}</span>
+                        <span className="text-xs font-bold text-muted-foreground w-4">{i + 1}</span>
                         <span className="text-xs font-medium truncate max-w-[180px]">{p.path === "/" ? "Home" : p.path.slice(1)}</span>
                       </div>
                       <span className="text-xs font-bold">{p.count}</span>
@@ -261,7 +261,7 @@ export default function AnalyticsDashboardPage() {
               className="p-4 rounded-xl bg-card border border-border text-left hover:border-primary/30 transition-colors">
               <item.Icon className="w-6 h-6 text-primary mb-2" />
               <p className="text-sm font-semibold">{item.label}</p>
-              <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+              <p className="text-xs text-muted-foreground">{item.desc}</p>
             </button>
           ))}
         </div>
@@ -276,7 +276,7 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
     <div className="rounded-xl bg-card border border-border p-4 text-center">
       <div className={`${colorMap[color] || "text-primary"} mx-auto mb-2 flex justify-center`}>{icon}</div>
       <p className="text-xl font-bold">{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }

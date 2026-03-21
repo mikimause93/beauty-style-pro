@@ -36,24 +36,9 @@ export function usePWA() {
     window.addEventListener('offline', handleOffline);
 
     if ('serviceWorker' in navigator) {
-      const swPath = `${import.meta.env.BASE_URL}sw.js`;
-
-      navigator.serviceWorker.register(swPath).then((reg) => {
-        setRegistration(reg);
-        void reg.update();
-
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setUpdateAvailable(true);
-              }
-            });
-          }
-        });
-      }).catch((err) => {
-        console.warn('Service worker registration failed:', err);
+      // Unregister any existing service workers to prevent stale caches
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.unregister());
       });
     }
 

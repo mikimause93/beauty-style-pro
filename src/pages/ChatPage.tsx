@@ -514,20 +514,20 @@ export default function ChatPage() {
               ))}
             </div>
           </div>
-          <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+          <span className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
             {formatDuration(msg.duration || 0)}
           </span>
         </button>
         {/* Translate voice button */}
         {msg.sender === "other" && autoTranslate && !hasTranscript && (
           <button onClick={() => transcribeAndTranslateVoice(msg)} disabled={isTranscribing}
-            className={`flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${msg.sender === "other" ? "bg-primary/10 text-primary" : "bg-primary-foreground/10 text-primary-foreground/70"}`}>
+            className={`flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${msg.sender === "other" ? "bg-primary/10 text-primary" : "bg-primary-foreground/10 text-primary-foreground/70"}`}>
             <Globe className="w-2.5 h-2.5" />
             {isTranscribing ? "Traduco..." : "Traduci audio"}
           </button>
         )}
         {hasTranscript && (
-          <p className={`text-[10px] italic mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+          <p className={`text-xs italic mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
             🌐 {voiceTranscripts[msg.id]}
           </p>
         )}
@@ -550,7 +550,7 @@ export default function ChatPage() {
             </div>
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-[10px] text-green-500 font-medium">● Online</p>
+              <p className="text-xs text-green-500 font-medium">● Online</p>
             </div>
           </button>
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
@@ -605,7 +605,7 @@ export default function ChatPage() {
               <div className="absolute bottom-36 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-bold text-primary">Traduzione Live</span>
+                  <span className="text-xs font-bold text-primary">Traduzione Live</span>
                   {callTranslating && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </div>
                 <p className="text-sm">{callTranslation}</p>
@@ -637,7 +637,7 @@ export default function ChatPage() {
         {autoTranslate && (
           <div className="px-4 py-1.5 bg-primary/5 border-b border-border flex items-center justify-center gap-2">
             <Globe className="w-3 h-3 text-primary" />
-            <span className="text-[10px] text-primary font-medium">Traduzione AI automatica attiva</span>
+            <span className="text-xs text-primary font-medium">Traduzione AI automatica attiva</span>
           </div>
         )}
 
@@ -675,7 +675,7 @@ export default function ChatPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{msg.fileName || "File"}</p>
-                      <p className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Tocca per aprire</p>
+                      <p className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Tocca per aprire</p>
                     </div>
                   </a>
                 )}
@@ -687,7 +687,7 @@ export default function ChatPage() {
                 )}
                 {msg.type !== "image" && msg.type !== "video" && (
                   <div className={`flex items-center justify-end gap-1 mt-1`}>
-                    <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
+                    <span className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
                     {msg.sender === "me" && <CheckCheck className="w-3.5 h-3.5 text-primary-foreground/60" />}
                   </div>
                 )}
@@ -706,7 +706,7 @@ export default function ChatPage() {
             ].map(item => (
               <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1">
                 <div className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center text-primary-foreground`}>{item.icon}</div>
-                <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
+                <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
               </button>
             ))}
           </div>
@@ -806,7 +806,7 @@ export default function ChatPage() {
                 />
                 <div className="flex-1 text-left">
                   <p className="font-semibold text-sm">{u.display_name || "Utente"}</p>
-                  <p className="text-[10px] text-muted-foreground">Tocca per iniziare una chat</p>
+                  <p className="text-xs text-muted-foreground">Tocca per iniziare una chat</p>
                 </div>
                 <UserPlus className="w-4 h-4 text-primary" />
               </button>
@@ -845,12 +845,12 @@ export default function ChatPage() {
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-sm">{conv.name}</p>
-                  <span className="text-[10px] text-muted-foreground">{conv.time}</span>
+                  <span className="text-xs text-muted-foreground">{conv.time}</span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
               </div>
               {conv.unread > 0 && (
-                <span className="w-5 h-5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                   {conv.unread}
                 </span>
               )}

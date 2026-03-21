@@ -320,7 +320,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-primary">Stella</p>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {isSpeaking && "🔊 Rispondo..."}
                   {!isSpeaking && voicePhase === "listening" && "🎤 Ti ascolto..."}
                   {!isSpeaking && voicePhase === "processing" && "⚡ Eseguo..."}
@@ -372,7 +372,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Stella AI</h4>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {isWakeWordListening ? '🎙️ Dì "Stella" per attivare' : "Assistente STYLE"}
                   </p>
                 </div>
@@ -465,11 +465,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
                     {chatMessages.length <= 2 && !isAILoading && (
                       <div className="pt-1">
-                        <p className="text-[10px] text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
+                        <p className="text-xs text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {suggestedQuestions.map(q => (
                             <button key={q} onClick={() => setChatInput(q)}
-                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-[10px] hover:border-primary/40 transition-colors">
+                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-xs hover:border-primary/40 transition-colors">
                               {q}
                             </button>
                           ))}
@@ -501,7 +501,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
               {activeTab === "actions" && (
                 <div className="flex-1 overflow-y-auto p-3">
-                  <p className="text-[10px] text-muted-foreground font-medium mb-3">Cosa vuoi fare?</p>
+                  <p className="text-xs text-muted-foreground font-medium mb-3">Cosa vuoi fare?</p>
                   <div className="grid grid-cols-2 gap-2">
                     {quickActions.map(action => (
                       <motion.button key={action.path} whileTap={{ scale: 0.97 }}
@@ -511,7 +511,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                           <action.icon className={`w-5 h-5 ${action.color}`} />
                         </div>
                         <span className="text-xs font-semibold">{action.label}</span>
-                        <span className="text-[9px] text-muted-foreground">{action.desc}</span>
+                        <span className="text-xs text-muted-foreground">{action.desc}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -524,7 +524,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                     <div className="text-center py-8">
                       <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                       <p className="text-xs text-muted-foreground">Nessun suggerimento al momento</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Continua a usare l'app!</p>
+                      <p className="text-xs text-muted-foreground mt-1">Continua a usare l'app!</p>
                     </div>
                   ) : (
                     suggestions.map((suggestion) => (
@@ -539,7 +539,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                                 handleSuggestionClick(suggestion, btn);
                                 if (btn.action === "navigate") setIsMinimized(true);
                               }}
-                              className={`px-3 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
+                              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
                                 btn.action === "dismiss"
                                   ? "bg-muted text-muted-foreground hover:bg-muted/80"
                                   : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -635,7 +635,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
             </>
           )}
           {suggestions.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
               {suggestions.length}
             </span>
           )}
@@ -644,7 +644,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
       {/* Wake word hint */}
       {isMinimized && isWakeWordListening && fabPos.x === 0 && fabPos.y === 0 && (
-        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: 64, right: 8, zIndex: 9998 }}>
+        <p className="text-center text-xs text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: 64, right: 8, zIndex: 9998 }}>
           🎙️ Dì "Stella"
         </p>
       )}
@@ -673,7 +673,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold">Comandi Vocali Stella</h3>
-                  <p className="text-[10px] text-muted-foreground">Parla senza toccare lo schermo</p>
+                  <p className="text-xs text-muted-foreground">Parla senza toccare lo schermo</p>
                 </div>
                 <button onClick={() => setShowVoiceHelp(false)} className="ml-auto w-7 h-7 rounded-full bg-muted flex items-center justify-center">
                   <X className="w-3.5 h-3.5" />
@@ -691,7 +691,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   { title: "❓ AI libero", cmds: ['Dopo "Stella", fai qualsiasi domanda:', '"Quale taglio di capelli va di moda?"', '"Come funziona il wallet?"'] },
                 ].map(section => (
                   <div key={section.title}>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{section.title}</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{section.title}</p>
                     <div className="space-y-1">
                       {section.cmds.map(cmd => (
                         <div key={cmd} className="px-3 py-1.5 rounded-lg bg-muted/40 border border-border/30">

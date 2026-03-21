@@ -178,7 +178,7 @@ export default function BusinessProfilePage() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-primary">€{s.price}</p>
-                    <span className="text-[10px] text-muted-foreground">Prenota →</span>
+                    <span className="text-xs text-muted-foreground">Prenota →</span>
                   </div>
                 </button>
               ))

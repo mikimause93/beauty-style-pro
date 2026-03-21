@@ -126,14 +126,14 @@ export default function EmployeeShiftsPage() {
                       <div key={s.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                         <User className="w-3 h-3 text-primary" />
                         <span className="text-xs font-medium">{s.business_employees?.first_name} {s.business_employees?.last_name}</span>
-                        <span className="ml-auto text-[10px] text-muted-foreground flex items-center gap-1">
+                        <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3 h-3" />{s.start_time?.slice(0, 5)} - {s.end_time?.slice(0, 5)}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[10px] text-muted-foreground">Nessun turno</p>
+                  <p className="text-xs text-muted-foreground">Nessun turno</p>
                 )}
               </div>
             );
@@ -163,11 +163,11 @@ export default function EmployeeShiftsPage() {
             <Input type="date" value={shiftForm.shift_date} onChange={e => setShiftForm(f => ({ ...f, shift_date: e.target.value }))} />
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="text-[10px] text-muted-foreground mb-1">Inizio</p>
+                <p className="text-xs text-muted-foreground mb-1">Inizio</p>
                 <Input type="time" value={shiftForm.start_time} onChange={e => setShiftForm(f => ({ ...f, start_time: e.target.value }))} />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground mb-1">Fine</p>
+                <p className="text-xs text-muted-foreground mb-1">Fine</p>
                 <Input type="time" value={shiftForm.end_time} onChange={e => setShiftForm(f => ({ ...f, end_time: e.target.value }))} />
               </div>
             </div>

@@ -44,12 +44,12 @@ export default function SponsorBanner() {
       <div className="p-3">
         <div className="flex items-center gap-1.5 mb-1">
           <Megaphone className="w-3 h-3 text-muted-foreground" />
-          <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">Sponsorizzato</span>
+          <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Sponsorizzato</span>
         </div>
         <p className="text-sm font-semibold">{ad.title}</p>
         {ad.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{ad.description}</p>}
         {ad.target_url && (
-          <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-primary font-semibold">
+          <span className="inline-flex items-center gap-1 mt-2 text-xs text-primary font-semibold">
             Scopri di più <ExternalLink className="w-3 h-3" />
           </span>
         )}

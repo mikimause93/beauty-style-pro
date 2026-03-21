@@ -263,7 +263,7 @@ export default function HomePage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="w-2 h-2 rounded-full bg-live live-pulse shadow-sm" />
-                    <span className="text-[10px] font-bold text-live uppercase tracking-widest">In diretta</span>
+                    <span className="text-xs font-bold text-live uppercase tracking-widest">In diretta</span>
                   </div>
                   <p className="text-sm font-semibold tracking-tight">Beauty streaming</p>
                   <p className="text-[11px] text-muted-foreground">Tutorial in diretta</p>
@@ -324,7 +324,7 @@ export default function HomePage() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-bold text-gradient-primary">€{stylist.hourly_rate || 40}</p>
-                  <p className="text-[10px] text-muted-foreground">/ora</p>
+                  <p className="text-xs text-muted-foreground">/ora</p>
                 </div>
               </button>
             ))}
@@ -349,8 +349,8 @@ export default function HomePage() {
                           <h3 className="font-semibold text-sm truncate">{job.title}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">{name} · {job.location}</p>
                           <div className="flex flex-wrap gap-1.5 mt-2">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium">{job.category}</span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">{job.employment_type}</span>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">{job.category}</span>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground">{job.employment_type}</span>
                           </div>
                         </div>
                       </div>
@@ -369,7 +369,7 @@ export default function HomePage() {
                     <p className="text-xs font-medium truncate">{post.profileData?.display_name || 'Beauty Pro'}</p>
                     <div className="flex items-center gap-1.5 mt-1">
                       <Heart className="w-3 h-3 text-primary fill-primary" />
-                      <span className="text-[10px] text-muted-foreground">{post.like_count}</span>
+                      <span className="text-xs text-muted-foreground">{post.like_count}</span>
                     </div>
                   </div>
                 </div>
@@ -395,7 +395,7 @@ export default function HomePage() {
                 <button key={item.label} onClick={() => navigate(item.path)}
                    className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl gradient-primary shadow-glow transition-all duration-200 shrink-0">
                    <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
-                   <span className="text-[10px] text-white font-semibold tracking-wide">{item.label}</span>
+                   <span className="text-xs text-white font-semibold tracking-wide">{item.label}</span>
                  </button>
               ))}
             </div>
@@ -415,12 +415,12 @@ export default function HomePage() {
                   <img src={stream.thumbnail_url || beauty2} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/80" />
                   <div className="absolute top-3 left-3">
-                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" />Live
                     </span>
                   </div>
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 glass px-2 py-1 rounded-full">
-                    <Eye className="w-3 h-3" /><span className="text-[10px]">{stream.viewer_count}</span>
+                    <Eye className="w-3 h-3" /><span className="text-xs">{stream.viewer_count}</span>
                   </div>
                   <div className="absolute bottom-3 left-3">
                     <p className="font-semibold text-sm">{stream.title}</p>

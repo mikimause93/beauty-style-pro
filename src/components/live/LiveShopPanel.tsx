@@ -141,7 +141,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
                       </div>
                       <div className="flex items-center gap-1 mt-1">
                         <Coins className="w-3 h-3 text-accent" />
-                        <span className="text-[10px] text-muted-foreground">+{Math.round(p.price * 0.5)} QRC</span>
+                        <span className="text-xs text-muted-foreground">+{Math.round(p.price * 0.5)} QRC</span>
                       </div>
                     </button>
                   ))}

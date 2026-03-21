@@ -37,7 +37,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
         <div className="flex items-center gap-3">
           <Hash className="w-4 h-4 text-muted-foreground shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground">ID Prenotazione</p>
+            <p className="text-xs text-muted-foreground">ID Prenotazione</p>
             <p className="text-xs font-mono font-medium">{booking.id.slice(0, 8).toUpperCase()}</p>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
         <div className="flex items-center gap-3">
           <User className="w-4 h-4 text-muted-foreground shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground">Cliente</p>
+            <p className="text-xs text-muted-foreground">Cliente</p>
             <p className="text-sm font-medium">{clientName}</p>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
           <div className="flex items-center gap-3">
             <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
             <div>
-              <p className="text-[10px] text-muted-foreground">Professionista</p>
+              <p className="text-xs text-muted-foreground">Professionista</p>
               <p className="text-sm font-medium">{professional.business_name}</p>
               {professional.city && <p className="text-[11px] text-muted-foreground">{professional.city}</p>}
             </div>
@@ -65,7 +65,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
           <div className="flex items-center gap-3">
             <CreditCard className="w-4 h-4 text-muted-foreground shrink-0" />
             <div>
-              <p className="text-[10px] text-muted-foreground">Servizio</p>
+              <p className="text-xs text-muted-foreground">Servizio</p>
               <p className="text-sm font-medium">{service.name}</p>
               <p className="text-[11px] text-muted-foreground">{service.duration_minutes} min</p>
             </div>
@@ -75,7 +75,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
         <div className="flex items-center gap-3">
           <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground">Data</p>
+            <p className="text-xs text-muted-foreground">Data</p>
             <p className="text-sm font-medium">{new Date(booking.booking_date).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
         <div className="flex items-center gap-3">
           <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground">Orario</p>
+            <p className="text-xs text-muted-foreground">Orario</p>
             <p className="text-sm font-medium">{booking.start_time}</p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function BookingReceipt({ booking, professional, service, clientN
         </div>
 
         {/* Footer */}
-        <p className="text-[10px] text-center text-muted-foreground pt-2">
+        <p className="text-xs text-center text-muted-foreground pt-2">
           STYLE · {new Date().toLocaleDateString("it-IT")} · Grazie per la prenotazione!
         </p>
       </div>

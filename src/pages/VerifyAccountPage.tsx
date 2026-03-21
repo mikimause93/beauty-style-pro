@@ -270,7 +270,7 @@ export default function VerifyAccountPage() {
               {submitting ? "Invio in corso..." : "Invia Verifica"}
             </button>
 
-            <p className="text-[10px] text-center text-muted-foreground">
+            <p className="text-xs text-center text-muted-foreground">
               I tuoi documenti sono protetti e verranno utilizzati solo per la verifica dell'identità. Conforme al GDPR.
             </p>
           </div>

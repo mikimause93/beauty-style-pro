@@ -62,17 +62,17 @@ export default function StylistsPage() {
               <div className="flex items-center gap-2 mt-1.5">
                 <Star className="w-3 h-3 text-accent fill-accent" />
                 <span className="text-xs font-medium">{stylist.rating}</span>
-                <span className="text-[10px] text-muted-foreground">({stylist.review_count})</span>
-                <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                <span className="text-xs text-muted-foreground">({stylist.review_count})</span>
+                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                   <MapPin className="w-3 h-3" /> {stylist.city}
                 </span>
               </div>
             </div>
             <div className="text-right">
               <p className="text-sm font-bold">€{stylist.hourly_rate}</p>
-              <p className="text-[10px] text-muted-foreground">/ora</p>
+              <p className="text-xs text-muted-foreground">/ora</p>
               <button onClick={e => { e.stopPropagation(); navigate(`/booking`); }}
-                className="mt-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+                className="mt-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                 Prenota
               </button>
             </div>

@@ -155,7 +155,7 @@ export default function AIAssistantPage() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm font-bold tracking-tight text-gradient-primary">Stella AI</h1>
-            <p className="text-[10px] text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {isListening ? "🔴 Sto ascoltando..." : isWakeWordListening ? "🎤 Dì 'Stella' per attivare" : "Assistente STYLE · Voce + AI"}
             </p>
           </div>

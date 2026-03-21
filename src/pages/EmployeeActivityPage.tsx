@@ -68,7 +68,7 @@ export default function EmployeeActivityPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold">{log.business_employees?.first_name} {log.business_employees?.last_name}</p>
                   <p className="text-xs text-muted-foreground">{log.description || log.action_type}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {format(new Date(log.created_at), "d MMM HH:mm", { locale: it })}
                   </p>
                 </div>
