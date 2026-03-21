@@ -270,7 +270,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Non hai ricevuto l'email? Controlla lo spam o clicca "Rinvia Email"
           </p>
         </div>
@@ -352,7 +352,7 @@ export default function AuthPage() {
             </form>
           )}
           <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
         </div>
@@ -630,7 +630,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground mt-6">
+      <p className="text-center text-xs text-muted-foreground mt-6">
         Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
       </p>
     </div>

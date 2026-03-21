@@ -414,7 +414,7 @@ export default function OnboardingPage() {
                   <FileText className="w-5 h-5 text-success flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold truncate">{doc.name}</p>
-                    <p className="text-[10px] text-success">Caricato ✓</p>
+                    <p className="text-xs text-success">Caricato ✓</p>
                   </div>
                 </div>
               ))}
@@ -442,7 +442,7 @@ export default function OnboardingPage() {
                 )}
               </button>
 
-              <p className="text-[10px] text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 Formati: PDF, JPG, PNG. Max 10MB per file.
               </p>
             </div>
@@ -473,10 +473,10 @@ export default function OnboardingPage() {
                 className={`${inputClass} font-mono text-xs`}
               />
               {iban && iban.length >= 2 && !iban.startsWith("IT") && (
-                <p className="text-[10px] text-gold">⚠️ L'IBAN deve iniziare con IT per conti italiani</p>
+                <p className="text-xs text-gold">⚠️ L'IBAN deve iniziare con IT per conti italiani</p>
               )}
               {iban && iban.length > 0 && iban.length !== 27 && (
-                <p className="text-[10px] text-muted-foreground">L'IBAN italiano ha 27 caratteri ({iban.length}/27)</p>
+                <p className="text-xs text-muted-foreground">L'IBAN italiano ha 27 caratteri ({iban.length}/27)</p>
               )}
             </div>
 

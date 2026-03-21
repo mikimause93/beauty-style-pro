@@ -136,7 +136,7 @@ export default function HomeServicePage() {
                       selectedDate === d ? "gradient-primary text-primary-foreground" : "bg-card border border-border"
                     }`}
                   >
-                    <p className="text-[10px] uppercase">{day}</p>
+                    <p className="text-xs uppercase">{day}</p>
                     <p className="text-lg font-bold">{num}</p>
                   </button>
                 );
@@ -242,7 +242,7 @@ export default function HomeServicePage() {
                 </div>
               </div>
 
-              <p className="text-[10px] text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 Supplemento domicilio incluso nel prezzo
               </p>
             </div>

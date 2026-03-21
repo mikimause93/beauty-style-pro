@@ -185,7 +185,7 @@ export default function BusinessDashboardPage() {
                 <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
                   <Icon className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span className="text-[10px] text-muted-foreground text-center">{action.label}</span>
+                <span className="text-xs text-muted-foreground text-center">{action.label}</span>
               </button>
             );
           })}
@@ -213,7 +213,7 @@ export default function BusinessDashboardPage() {
                       <h4 className="font-semibold text-sm">{job.title}</h4>
                       <p className="text-xs text-muted-foreground mt-1">{job.location} • {job.employment_type}</p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       job.status === "active" ? "bg-success/20 text-success" :
                       job.status === "paused" ? "bg-gold/20 text-gold" : "bg-muted text-muted-foreground"
                     }`}>
@@ -266,7 +266,7 @@ export default function BusinessDashboardPage() {
                     </div>
                   </div>
                   <p className="text-xs font-medium truncate">{member.business_name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{member.specialty || "Pro"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{member.specialty || "Pro"}</p>
                 </div>
               ))
             ) : (

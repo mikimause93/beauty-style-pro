@@ -267,7 +267,7 @@ export default function BookingPage() {
                       isSelected ? "gradient-primary text-primary-foreground" : "bg-card"
                     }`}
                   >
-                    <span className="text-[10px] font-medium">{dayNames[date.getDay()]}</span>
+                    <span className="text-xs font-medium">{dayNames[date.getDay()]}</span>
                     <span className="text-lg font-bold">{date.getDate()}</span>
                   </button>
                 );

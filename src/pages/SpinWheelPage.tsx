@@ -192,7 +192,7 @@ export default function SpinWheelPage() {
                 <div className="mt-3 w-full h-2 rounded-full bg-muted overflow-hidden">
                   <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${(progress / m.target) * 100}%` }} />
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1">{progress}/{m.target}</p>
+                <p className="text-xs text-muted-foreground mt-1">{progress}/{m.target}</p>
               </div>
             );
           })}
@@ -227,7 +227,7 @@ export default function SpinWheelPage() {
                   <p className="text-[11px] font-semibold">{p.name}</p>
                   <div className={`w-16 ${heights[i]} rounded-t-xl ${colors[i]} flex flex-col items-center justify-center`}>
                     <p className="text-lg font-bold">{p.rank}</p>
-                    <p className="text-[9px] text-muted-foreground">{p.won} QRC</p>
+                    <p className="text-xs text-muted-foreground">{p.won} QRC</p>
                   </div>
                 </div>
               );
@@ -269,7 +269,7 @@ export default function SpinWheelPage() {
             </button>
             <div>
               <h1 className="text-lg font-display font-bold">Gira & Vinci</h1>
-              <p className="text-[10px] text-muted-foreground">{spinsRemaining} giri rimasti</p>
+              <p className="text-xs text-muted-foreground">{spinsRemaining} giri rimasti</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -362,7 +362,7 @@ export default function SpinWheelPage() {
                   left: `${x}%`, top: `${y}%`,
                   transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                 }}>
-                  <span className="text-[10px] font-bold text-white drop-shadow-lg whitespace-nowrap">{prize.label}</span>
+                  <span className="text-xs font-bold text-white drop-shadow-lg whitespace-nowrap">{prize.label}</span>
                 </div>
               );
             })}
@@ -371,7 +371,7 @@ export default function SpinWheelPage() {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-card to-muted border-4 border-accent flex flex-col items-center justify-center z-10 shadow-xl">
                 <Sparkles className="w-4 h-4 text-accent mb-0.5" />
                 <span className="text-xs font-bold">GIRA</span>
-                <span className="text-[9px] text-muted-foreground">{spinsRemaining}</span>
+                <span className="text-xs text-muted-foreground">{spinsRemaining}</span>
               </div>
             </div>
           </div>
@@ -409,15 +409,15 @@ export default function SpinWheelPage() {
         <div className="grid grid-cols-3 gap-2 w-full mb-4">
           <div className="rounded-xl bg-card border border-border/50 p-2.5 text-center">
             <p className="text-lg font-bold text-primary">{totalSpins}</p>
-            <p className="text-[9px] text-muted-foreground">Giri totali</p>
+            <p className="text-xs text-muted-foreground">Giri totali</p>
           </div>
           <div className="rounded-xl bg-card border border-border/50 p-2.5 text-center">
             <p className="text-lg font-bold text-accent">{totalWon}</p>
-            <p className="text-[9px] text-muted-foreground">QRC vinti</p>
+            <p className="text-xs text-muted-foreground">QRC vinti</p>
           </div>
           <div className="rounded-xl bg-card border border-border/50 p-2.5 text-center">
             <p className="text-lg font-bold">{spinsRemaining}</p>
-            <p className="text-[9px] text-muted-foreground">Giri rimasti</p>
+            <p className="text-xs text-muted-foreground">Giri rimasti</p>
           </div>
         </div>
 
@@ -427,7 +427,7 @@ export default function SpinWheelPage() {
           <ShoppingBag className="w-5 h-5 text-primary shrink-0" />
           <div className="flex-1 text-left">
             <p className="text-sm font-semibold">Acquista giri extra</p>
-            <p className="text-[10px] text-muted-foreground">Con QRCoin, carta, PayPal o Klarna</p>
+            <p className="text-xs text-muted-foreground">Con QRCoin, carta, PayPal o Klarna</p>
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
@@ -447,7 +447,7 @@ export default function SpinWheelPage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-[11px] font-medium">{m.title}</span>
-                    <span className="text-[10px] text-muted-foreground">{progress}/{m.target}</span>
+                    <span className="text-xs text-muted-foreground">{progress}/{m.target}</span>
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${(progress / m.target) * 100}%` }} />
@@ -525,7 +525,7 @@ export default function SpinWheelPage() {
                 <button key={pkg.spins} onClick={() => buySpins(pkg)}
                   className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left relative">
                   {pkg.badge && (
-                    <span className="absolute -top-2 right-3 px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[9px] font-bold">{pkg.badge}</span>
+                    <span className="absolute -top-2 right-3 px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-xs font-bold">{pkg.badge}</span>
                   )}
                   <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center">
                     <Sparkles className="w-6 h-6 text-gold-foreground" />

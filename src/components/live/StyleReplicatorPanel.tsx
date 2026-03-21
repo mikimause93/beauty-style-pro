@@ -143,7 +143,7 @@ export default function StyleReplicatorPanel({ streamTitle, streamCategory, prof
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h4 className="font-bold text-base">{styleCard.name}</h4>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">{styleCard.category}</span>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold capitalize">{styleCard.category}</span>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Durata</p>
@@ -153,20 +153,20 @@ export default function StyleReplicatorPanel({ streamTitle, streamCategory, prof
 
               <div className="space-y-2 text-sm">
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">Tecnica</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Tecnica</p>
                   <p className="text-xs">{styleCard.technique}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">Prodotti Consigliati</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Prodotti Consigliati</p>
                   <div className="flex flex-wrap gap-1.5">
                     {styleCard.products.map((p, i) => (
-                      <span key={i} className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{p}</span>
+                      <span key={i} className="px-2 py-1 rounded-full bg-muted text-xs font-medium">{p}</span>
                     ))}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground">Difficoltà:</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  <span className="text-xs text-muted-foreground">Difficoltà:</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                     styleCard.difficulty === "facile" ? "bg-green-500/10 text-green-600" :
                     styleCard.difficulty === "avanzato" ? "bg-red-500/10 text-red-600" :
                     "bg-accent/10 text-accent"
@@ -203,16 +203,16 @@ export default function StyleReplicatorPanel({ streamTitle, streamCategory, prof
                         <p className="text-sm font-semibold truncate">{pro.business_name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <Star className="w-3 h-3 text-accent fill-accent" />
-                          <span className="text-[10px] font-medium">{pro.rating || "4.5"}</span>
-                          <span className="text-[10px] text-muted-foreground">({pro.review_count || 0})</span>
-                          {pro.city && <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{pro.city}</span>}
+                          <span className="text-xs font-medium">{pro.rating || "4.5"}</span>
+                          <span className="text-xs text-muted-foreground">({pro.review_count || 0})</span>
+                          {pro.city && <span className="text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{pro.city}</span>}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-bold">€{pro.hourly_rate || 40}</p>
                         <div className="flex items-center gap-1 mt-0.5">
                           <Coins className="w-3 h-3 text-accent" />
-                          <span className="text-[10px] text-accent font-medium">+{Math.round((pro.hourly_rate || 40) * 0.5)} QRC</span>
+                          <span className="text-xs text-accent font-medium">+{Math.round((pro.hourly_rate || 40) * 0.5)} QRC</span>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />

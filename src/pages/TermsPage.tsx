@@ -89,7 +89,7 @@ export default function TermsPage() {
             <p>{s.content}</p>
           </section>
         ))}
-        <p className="text-[10px] text-center pt-4">Ultimo aggiornamento: Marzo 2026</p>
+        <p className="text-xs text-center pt-4">Ultimo aggiornamento: Marzo 2026</p>
       </div>
     </MobileLayout>
   );

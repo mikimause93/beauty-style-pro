@@ -241,8 +241,8 @@ export default function LiveBattlePage() {
               <span className="text-xs font-bold text-accent">{pctB}%</span>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Zap className="w-3 h-3" /> {selectedBattle.score_a + selectedBattle.score_b} voti totali</span>
-              <span className="text-[10px] text-gold font-bold flex items-center gap-1"><Trophy className="w-3 h-3" /> {selectedBattle.prize_pool} QRC in palio</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Zap className="w-3 h-3" /> {selectedBattle.score_a + selectedBattle.score_b} voti totali</span>
+              <span className="text-xs text-gold font-bold flex items-center gap-1"><Trophy className="w-3 h-3" /> {selectedBattle.prize_pool} QRC in palio</span>
             </div>
           </div>
 
@@ -338,7 +338,7 @@ export default function LiveBattlePage() {
                         tipAmount === amt ? "gradient-gold text-gold-foreground scale-105" : "bg-card border border-border"
                       }`}>
                       <p className="text-lg font-bold">{amt}</p>
-                      <p className="text-[10px] opacity-70">QRC</p>
+                      <p className="text-xs opacity-70">QRC</p>
                     </button>
                   ))}
                 </div>
@@ -414,10 +414,10 @@ export default function LiveBattlePage() {
                 <button key={b.id} onClick={() => setSelectedBattle(b)}
                   className="w-full glass rounded-2xl p-4 text-left border border-border/50 hover:border-primary/30 transition-all">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 text-destructive text-[10px] font-bold">
+                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">
                       <Flame className="w-3 h-3" /> {b.status === "live" ? "LIVE" : "IN ATTESA"}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] text-gold font-bold">
+                    <span className="flex items-center gap-1 text-xs text-gold font-bold">
                       <Coins className="w-3 h-3" /> {b.prize_pool} QRC
                     </span>
                   </div>

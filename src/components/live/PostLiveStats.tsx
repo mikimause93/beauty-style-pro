@@ -55,7 +55,7 @@ export default function PostLiveStats({ stats, onClose }: PostLiveStatsProps) {
               style={{ width: `${goalPct}%` }}
             />
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {stats.interactionsAchieved} / {stats.interactionGoal} interazioni
           </p>
         </div>
@@ -78,10 +78,10 @@ function StatCard({ icon, label, value, sub, highlight }: {
     <div className={`rounded-xl p-3 ${highlight ? "border border-gold/30 bg-gold/5" : "bg-card border border-border"}`}>
       <div className="flex items-center gap-1.5 mb-1">
         {icon}
-        <span className="text-[10px] text-muted-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <p className={`text-lg font-bold ${highlight ? "text-gold" : ""}`}>{typeof value === "number" ? value.toLocaleString() : value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }

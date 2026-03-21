@@ -521,7 +521,7 @@ const AILookGeneratorPage = () => {
                             <cat.icon className="w-4 h-4 text-white" />
                           </div>
                           {item.premium && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-yellow-500/50 text-yellow-600">
+                            <Badge variant="outline" className="text-xs px-1.5 py-0 border-yellow-500/50 text-yellow-600">
                               <Crown className="w-2.5 h-2.5 mr-0.5" /> PRO
                             </Badge>
                           )}
@@ -665,11 +665,11 @@ const AILookGeneratorPage = () => {
             <div className="grid grid-cols-2 gap-0.5 p-2">
               <div className="relative">
                 <img src={photoUrl || ""} alt="Before" className="w-full aspect-square object-cover rounded-l-lg" />
-                <Badge className="absolute bottom-2 left-2 bg-background/80 text-foreground text-[10px]">Prima</Badge>
+                <Badge className="absolute bottom-2 left-2 bg-background/80 text-foreground text-xs">Prima</Badge>
               </div>
               <div className="relative">
                 <img src={generatedUrl || ""} alt="After" className="w-full aspect-square object-cover rounded-r-lg" />
-                <Badge className="absolute bottom-2 right-2 bg-primary/80 text-primary-foreground text-[10px]">Dopo</Badge>
+                <Badge className="absolute bottom-2 right-2 bg-primary/80 text-primary-foreground text-xs">Dopo</Badge>
               </div>
             </div>
           </DialogContent>
@@ -706,7 +706,7 @@ const AILookGeneratorPage = () => {
                         <p className="text-xs text-muted-foreground">{sug.description}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {sug.styles.map((s: any, j: number) => (
-                            <Badge key={j} variant="outline" className="text-[10px]">
+                            <Badge key={j} variant="outline" className="text-xs">
                               {s.name}
                             </Badge>
                           ))}
@@ -757,12 +757,12 @@ const AILookGeneratorPage = () => {
                     <div className="p-2">
                       <div className="flex items-center gap-1 flex-wrap">
                         {(gen.categories || []).slice(0, 2).map((c: string) => (
-                          <Badge key={c} variant="outline" className="text-[9px] px-1">
+                          <Badge key={c} variant="outline" className="text-xs px-1">
                             {c}
                           </Badge>
                         ))}
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {new Date(gen.created_at).toLocaleDateString("it")}
                       </p>
                     </div>

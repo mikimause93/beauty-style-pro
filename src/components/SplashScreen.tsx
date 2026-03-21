@@ -48,7 +48,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }`}
       >
         <p
-          className="text-[10px] tracking-[0.25em] uppercase"
+          className="text-xs tracking-[0.25em] uppercase"
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             color: "rgba(255,255,255,0.4)",
@@ -69,7 +69,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           Michele Peschechera
         </p>
         <p
-          className="text-[10px] mt-1"
+          className="text-xs mt-1"
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontStyle: "italic",
@@ -123,7 +123,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
       {/* Footer signature */}
       <p
-        className={`absolute bottom-12 text-[10px] italic tracking-wide transition-all duration-500 ${
+        className={`absolute bottom-12 text-xs italic tracking-wide transition-all duration-500 ${
           phase === "text" || phase === "fade" ? "opacity-100" : "opacity-0"
         }`}
         style={{
