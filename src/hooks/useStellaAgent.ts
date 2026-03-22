@@ -269,6 +269,60 @@ export function useStellaAgent() {
       return { id: Date.now().toString(), type: 'info', text, response: 'Apro le tue prenotazioni per verificare!', requiresConfirmation: false, execute: () => navigate('/my-bookings') };
     }
 
+    // ── THEME ─────────────────────────────────────────────────────────────
+    if (t.includes('tema chiaro') || t.includes('light mode') || t.includes('modalità chiara')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema chiaro! ☀️', requiresConfirmation: false, execute: () => {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        toast.success('Tema chiaro attivato');
+      }};
+    }
+    if (t.includes('tema scuro') || t.includes('dark mode') || t.includes('modalità scura')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema scuro! 🌙', requiresConfirmation: false, execute: () => {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        toast.success('Tema scuro attivato');
+      }};
+    }
+
+    // ── SCHEDULING (requires confirmation) ────────────────────────────────
+    const scheduleMatch = t.match(/(?:ricordami|promemoria|schedula|programma)\s+(?:di\s+)?(.+?)(?:\s+(?:tra|fra|per|il|domani|dopodomani)\s+(.+))?$/);
+    if (scheduleMatch && user) {
+      const actionDesc = scheduleMatch[1]?.trim() || 'azione programmata';
+      const timeDesc = scheduleMatch[2]?.trim() || 'domani';
+      // Simple time parsing
+      let scheduledDate = new Date();
+      if (timeDesc.includes('domani')) scheduledDate.setDate(scheduledDate.getDate() + 1);
+      else if (timeDesc.includes('dopodomani')) scheduledDate.setDate(scheduledDate.getDate() + 2);
+      else if (timeDesc.match(/(\d+)\s*(?:ore|ora|h)/)) {
+        const hours = parseInt(timeDesc.match(/(\d+)\s*(?:ore|ora|h)/)![1]);
+        scheduledDate.setHours(scheduledDate.getHours() + hours);
+      } else if (timeDesc.match(/(\d+)\s*(?:minuti|min)/)) {
+        const mins = parseInt(timeDesc.match(/(\d+)\s*(?:minuti|min)/)![1]);
+        scheduledDate.setMinutes(scheduledDate.getMinutes() + mins);
+      } else if (timeDesc.match(/(\d+)\s*(?:giorni|giorno|gg)/)) {
+        const days = parseInt(timeDesc.match(/(\d+)\s*(?:giorni|giorno|gg)/)![1]);
+        scheduledDate.setDate(scheduledDate.getDate() + days);
+      }
+
+      return {
+        id: Date.now().toString(), type: 'schedule' as StellaCommand['type'], text,
+        response: `Programmo "${actionDesc}" per ${scheduledDate.toLocaleDateString('it-IT')} ${scheduledDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}. Confermi?`,
+        requiresConfirmation: true,
+        execute: () => {
+          supabase.from('stella_scheduled_actions').insert({
+            user_id: user.id,
+            action_type: 'booking_reminder',
+            action_params: { message: actionDesc },
+            scheduled_for: scheduledDate.toISOString(),
+          }).then(({ error }) => {
+            if (error) toast.error('Errore nella programmazione');
+            else toast.success('Azione programmata con successo!');
+          });
+        },
+      };
+    }
+
     return null;
   }, [navigate, profile]);
 
