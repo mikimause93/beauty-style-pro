@@ -93,7 +93,8 @@ export default function AIGrowthSuggestions() {
   if (dismissed || suggestions.length === 0) return null;
 
   const suggestion = suggestions[currentIndex];
-  const Icon = suggestion.icon ? ICONS[suggestion.icon] : Sparkles;
+  if (!suggestion) return null;
+  const IconComponent = (suggestion.icon ? ICONS[suggestion.icon] : null) || Sparkles;
 
   return (
     <AnimatePresence>
