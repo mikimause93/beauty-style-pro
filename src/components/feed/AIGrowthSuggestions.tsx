@@ -108,7 +108,7 @@ export default function AIGrowthSuggestions() {
         >
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary/5 border border-primary/15">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Icon className="w-4 h-4 text-primary" />
+              <IconComponent className="w-4 h-4 text-primary" />
             </div>
             <button
               type="button"
