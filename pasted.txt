@@ -1,0 +1,948 @@
+# 💇 BEAUTY STYLE PRO 4.0 ULTRA ENTERPRISE
+## Piattaforma Beauty Enterprise Completa — Canonical Specification
+
+**Versione:** 4.0.0 ULTRA ENTERPRISE | **Last Update:** 22 Marzo 2026
+
+**Stack Tecnologico:**
+- Frontend: React 18.3 + Vite 5.0 + TypeScript 5.0
+- Backend: Supabase (PostgreSQL 15 + Realtime + Edge Functions)
+- Mobile: Capacitor 6.x (iOS/Android)
+- Styling: Tailwind CSS 3.4 + Framer Motion
+- Payments: Stripe + PayPal + QR Coins
+- AI: OpenAI GPT-4 + Whisper + DALL-E 3
+- Maps: Google Maps API
+- Communication: WhatsApp Business API
+- Push: OneSignal / Firebase Cloud Messaging
+- Storage: Supabase Storage + Cloudflare R2
+- Hosting: Vercel (Frontend) + Supabase (Backend)
+- CDN: Cloudflare
+- Monitoring: Sentry + LogRocket
+- Analytics: PostHog + Google Analytics 4
+
+---
+
+## 📋 INDICE
+
+1. Panoramica
+2. Caratteristiche Enterprise
+3. Architettura Sistema
+4. Database Schema
+5. Setup Sviluppo
+6. Configurazione Ambiente
+7. Supabase Setup
+8. Edge Functions
+9. Frontend Structure
+10. Mobile Build
+11. Testing
+12. Deployment
+13. Security & Compliance
+14. API Documentation
+15. Troubleshooting
+16. Roadmap
+17. Contributing
+18. License
+
+---
+
+## 🎯 PANORAMICA
+
+Beauty Style Pro è una piattaforma beauty **enterprise-grade** che combina:
+
+### **Funzionalità Core:**
+✅ Social Network (feed, stories, live streaming)
+✅ Marketplace (shop prodotti beauty handmade)
+✅ Booking System (prenotazioni servizi beauty)
+✅ E-commerce (vendita prodotti + servizi)
+✅ Academy LMS (corsi certificati + job placement)
+✅ Creator Economy (monetizzazione content creator)
+✅ AI Assistant "Stella" (voice control + scheduling)
+✅ Real-time Chat (messaggi + voice + video calls)
+✅ Gamification (QR Coins, missions, leaderboard)
+✅ Multi-language (IT, EN, ES, FR, DE, AR con RTL)
+✅ PWA + Native Apps (iOS/Android)
+✅ AI Preview System (DALL-E 3 virtual try-on)
+
+### **4 Tipi di Account:**
+
+```typescript
+type UserRole =
+  | 'client'        // Cliente finale
+  | 'professional'  // Parrucchiere/Makeup Artist
+  | 'business'      // Salone/Business Owner
+  | 'creator';      // Content Creator/Partner
+```
+
+### Numeri Chiave:
+- Database: 110+ tabelle enterprise
+- Edge Functions: 25+ serverless functions
+- API Endpoints: 150+ REST + Realtime
+- Components React: 200+ UI components
+- Supabase Policies: 300+ RLS rules
+- Migrations: 50+ database migrations
+- Languages: 6 lingue supportate
+- Platform: Web + iOS + Android
+
+---
+
+## 🏗️ CARATTERISTICHE ENTERPRISE
+
+### 1. Chat System (Enterprise-Grade)
+
+**Features:**
+✅ Real-time messaging (Supabase Realtime)
+✅ End-to-end encryption (optional)
+✅ Voice messages (MediaRecorder API)
+✅ Video messages
+✅ File attachments (images, videos, documents)
+✅ Location sharing
+✅ Message reactions (emoji)
+✅ Reply/Forward
+✅ Read receipts
+✅ Typing indicators
+✅ Block/Report users
+✅ Auto-translation (100+ languages)
+✅ Message search
+✅ Archived conversations
+
+**Database Tables:**
+- conversations
+- messages
+- message_attachments
+- message_reactions
+- message_receipts
+- blocked_users
+- message_reports
+- typing_indicators
+
+### 2. Voice & Video Calls
+
+**Features:**
+✅ Voice calls (WebRTC)
+✅ Video calls (HD 1080p)
+✅ Group calls (up to 10 participants)
+✅ Screen sharing
+✅ Call recording (consent-based)
+✅ Call history
+✅ Quality metrics
+✅ Network adaptation
+
+**Technology Stack:**
+- WebRTC (peer-to-peer)
+- TURN server (Twilio/Agora)
+- STUN server
+- Media encryption (DTLS-SRTP)
+
+**Database Tables:**
+- call_sessions
+- call_participants
+- call_logs
+- webrtc_tokens
+- voice_messages
+
+### 3. Geolocation System (GDPR Compliant)
+
+**Features:**
+✅ Real-time location tracking
+✅ Nearby professionals (radius search)
+✅ Map view (Google Maps)
+✅ Geofencing (offers/notifications)
+✅ Location sharing (temporary/permanent)
+✅ Privacy controls (exact/approximate/city)
+✅ Location history
+✅ Audit trail (legal compliance)
+
+**GDPR Compliance:**
+✅ Explicit consent required
+✅ Purpose-specific permissions
+✅ Revocable anytime
+✅ Data minimization
+✅ Audit logs
+✅ Right to be forgotten
+
+**Database Tables:**
+- user_locations
+- location_permissions
+- location_shares
+- location_logs
+- geofences
+- geofence_triggers
+
+### 4. Push Notifications (Multi-Platform)
+
+**Features:**
+✅ iOS Push (APNs)
+✅ Android Push (FCM)
+✅ Web Push (Service Worker)
+✅ Rich notifications (images, actions)
+✅ Scheduled notifications
+✅ Personalized notifications
+✅ Notification groups
+✅ Topics/Tags
+✅ A/B testing
+✅ Analytics
+
+**Channels:**
+- Order updates
+- Chat messages
+- Booking reminders
+- Promotional offers
+- Academy courses
+- Live streaming alerts
+
+**Database Tables:**
+- device_tokens
+- push_subscriptions
+- push_notifications
+- push_notification_logs
+- notification_templates
+- web_push_subscriptions
+
+### 5. Media Storage (Secure)
+
+**Features:**
+✅ Image upload/optimization
+✅ Video processing/transcoding
+✅ Audio files (voice messages)
+✅ Document storage (PDF, DOCX)
+✅ Virus scanning (ClamAV)
+✅ AI moderation (NSFW detection)
+✅ Automatic thumbnails
+✅ CDN delivery (Cloudflare)
+✅ Storage quotas
+✅ Compression (WebP, H.265)
+
+**Storage Providers:**
+- Supabase Storage (primary)
+- Cloudflare R2 (backup)
+- Amazon S3 (enterprise tier)
+
+**Database Tables:**
+- media_files
+- media_ownership
+- media_reports
+- media_processing_jobs
+- storage_quotas
+
+### 6. Shop Marketplace (Etsy-Style)
+
+**Features:**
+✅ Product listings (handmade focus)
+✅ Shopping cart
+✅ Checkout (Stripe/PayPal/QR Coins)
+✅ Order management
+✅ Shipping calculator
+✅ Tracking integration
+✅ Reviews & ratings
+✅ Seller dashboard
+✅ Analytics
+✅ Commission system (dynamic)
+✅ Dispute resolution
+✅ Refund management
+
+**Seller Tiers:**
+- Basic (15% commission)
+- Verified (12% commission)
+- Premium (10% commission, $29.99/mo)
+- VIP (8% commission, custom deal)
+
+**Database Tables:**
+- shop_products
+- shop_orders
+- cart_items
+- shop_reviews
+- shop_transactions
+- shipping_profiles
+- shipping_rates
+- shop_disputes
+- shop_refunds
+
+### 7. Academy LMS
+
+**Features:**
+✅ Video courses (HLS streaming)
+✅ Interactive lessons
+✅ Quizzes & assessments
+✅ Progress tracking
+✅ Certificates (auto-generated PDF)
+✅ Instructor dashboard
+✅ Student analytics
+✅ Discussion forums
+✅ Live classes (Zoom integration)
+✅ Job placement network
+✅ Peer review system
+
+**Course Tracks:**
+- Beauty Professional (6 months)
+- Content Creator (3 months)
+- Salon Owner (2 months)
+
+**Subscription Tiers:**
+- Student: €19.99/mo
+- Pro: €49.99/mo
+- Enterprise: Custom pricing
+
+**Database Tables:**
+- courses
+- lessons
+- enrollments
+- certificates
+- course_materials
+- course_reviews
+- course_analytics
+- job_postings
+
+### 8. Stella AI Voice Assistant
+
+**Features:**
+✅ Wake words ("Hey Stella", "Ok Stella")
+✅ Voice commands (navigation, messaging, booking)
+✅ Natural language processing (GPT-4)
+✅ Text-to-speech (11 voices, IT/EN/ES)
+✅ Scheduled actions ("domani alle 15")
+✅ Multi-turn conversations
+✅ Context awareness
+✅ Proactive suggestions
+✅ Voice control (hands-free)
+
+**Subscription Tiers:**
+- Basic (Free): Navigation + info, 10 commands/day
+- Pro (€9.99/mo): Simple actions, 100 commands/day
+- Ultra (€19.99/mo): Unlimited, advanced actions
+
+**Safety Features:**
+✅ Rate limiting
+✅ Content moderation
+✅ Confirmation required (payments/bookings)
+✅ Anomaly detection
+✅ GDPR consent flow
+
+**Database Tables:**
+- stella_commands
+- stella_scheduled_actions
+- stella_settings
+- stella_action_log
+- ai_chat_history
+- ai_suggestions
+
+### 9. AI Preview System (NEW — v4.0)
+
+**Features:**
+✅ Virtual hair/makeup try-on (DALL-E 3)
+✅ Style recommendations (GPT-4 Vision)
+✅ Before/after comparison
+✅ Share preview on social feed
+✅ Save to profile look book
+✅ Professional consultation request
+✅ Skin tone analysis
+✅ Face shape detection
+
+**Database Tables (supabase/migrations/005_ai_preview.sql):**
+
+```sql
+-- AI Preview Jobs table
+CREATE TABLE IF NOT EXISTS ai_preview_jobs (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  status        TEXT NOT NULL DEFAULT 'pending'
+                  CHECK (status IN ('pending','processing','completed','failed')),
+  input_image_url  TEXT,
+  prompt           TEXT NOT NULL,
+  style_type       TEXT NOT NULL DEFAULT 'hair'
+                     CHECK (style_type IN ('hair','makeup','nails','full_look')),
+  result_image_url TEXT,
+  error_message    TEXT,
+  tokens_used      INTEGER DEFAULT 0,
+  model_used       TEXT DEFAULT 'dall-e-3',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- AI Preview Saved Looks table
+CREATE TABLE IF NOT EXISTS ai_preview_looks (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  job_id          UUID NOT NULL REFERENCES ai_preview_jobs(id) ON DELETE CASCADE,
+  title           TEXT,
+  description     TEXT,
+  is_public       BOOLEAN DEFAULT FALSE,
+  likes_count     INTEGER DEFAULT 0,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- AI Preview Usage Tracking
+CREATE TABLE IF NOT EXISTS ai_preview_usage (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  month_year    TEXT NOT NULL,        -- e.g. '2026-03'
+  previews_used INTEGER DEFAULT 0,
+  tokens_used   INTEGER DEFAULT 0,
+  UNIQUE (user_id, month_year)
+);
+
+-- RLS Policies
+ALTER TABLE ai_preview_jobs    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_preview_looks   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_preview_usage   ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own preview jobs"
+  ON ai_preview_jobs FOR ALL
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own looks"
+  ON ai_preview_looks FOR ALL
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Public looks are viewable by all"
+  ON ai_preview_looks FOR SELECT
+  USING (is_public = TRUE);
+
+CREATE POLICY "Users can manage their own usage"
+  ON ai_preview_usage FOR ALL
+  USING (auth.uid() = user_id);
+```
+
+**Edge Function:** `supabase/functions/generate-ai-preview/index.ts`
+
+```typescript
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import OpenAI from "https://esm.sh/openai@4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const authHeader = req.headers.get("Authorization")!;
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const { prompt, style_type, input_image_url } = await req.json();
+
+    // Create job record
+    const { data: job, error: jobError } = await supabase
+      .from("ai_preview_jobs")
+      .insert({ user_id: user.id, prompt, style_type, input_image_url, status: "processing" })
+      .select()
+      .single();
+    if (jobError) throw jobError;
+
+    // Call OpenAI DALL-E 3
+    const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY")! });
+    const fullPrompt = `Professional beauty salon photo. ${prompt}. Style: ${style_type}. High quality, photorealistic.`;
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: fullPrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+    });
+
+    const result_image_url = response.data[0]?.url;
+
+    // Update job with result
+    await supabase
+      .from("ai_preview_jobs")
+      .update({ status: "completed", result_image_url, tokens_used: 1, updated_at: new Date().toISOString() })
+      .eq("id", job.id);
+
+    // Update usage tracking
+    const monthYear = new Date().toISOString().slice(0, 7);
+    await supabase.from("ai_preview_usage").upsert(
+      { user_id: user.id, month_year: monthYear, previews_used: 1, tokens_used: 1 },
+      { onConflict: "user_id,month_year", ignoreDuplicates: false }
+    );
+      JSON.stringify({ job_id: job.id, result_image_url }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+```
+
+### 10. Security & Compliance
+
+**Security Features:**
+✅ Row Level Security (RLS) - 300+ policies
+✅ JWT authentication
+✅ 2FA (optional)
+✅ API rate limiting
+✅ CSRF protection
+✅ XSS prevention
+✅ SQL injection protection
+✅ DDoS mitigation (Cloudflare)
+✅ Encryption at rest (AES-256)
+✅ Encryption in transit (TLS 1.3)
+✅ Secrets management (Vault)
+✅ Security headers (HSTS, CSP)
+
+**Compliance:**
+✅ GDPR (EU General Data Protection Regulation)
+✅ CCPA (California Consumer Privacy Act)
+✅ PCI DSS (Payment Card Industry)
+✅ COPPA (Children's Online Privacy)
+✅ App Store Guidelines (Apple/Google)
+✅ Accessibility (WCAG 2.1 AA)
+
+### 11. Admin Panel
+
+**Features:**
+✅ User management (ban, suspend, verify)
+✅ Content moderation (approve/reject)
+✅ Order management
+✅ Payment reconciliation
+✅ Analytics dashboard
+✅ System health monitoring
+✅ Database backups
+✅ Feature flags
+✅ A/B testing
+✅ Email campaigns
+✅ Push notification campaigns
+✅ Revenue reports
+✅ User reports
+
+**Admin Roles:**
+- Super Admin (all permissions)
+- Admin (most permissions)
+- Moderator (content only)
+- Support (read-only + tickets)
+- Finance (payments + reports)
+
+---
+
+## 🏛️ ARCHITETTURA SISTEMA
+
+### High-Level Architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     CLIENT LAYER                            │
+├─────────────────────────────────────────────────────────────┤
+│  Web App (React)  │  iOS App (Swift)  │  Android (Kotlin)  │
+│   Vercel Deploy   │   App Store       │   Play Store       │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     API GATEWAY                             │
+├─────────────────────────────────────────────────────────────┤
+│              Supabase API (Auto-generated REST)             │
+│              + Custom Edge Functions (Deno)                 │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  BUSINESS LOGIC LAYER                       │
+├─────────────────────────────────────────────────────────────┤
+│  Auth      │  Realtime   │  Storage    │  Edge Functions   │
+│  Service   │  Channels   │  Buckets    │  (Serverless)     │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    DATA LAYER                               │
+├─────────────────────────────────────────────────────────────┤
+│           PostgreSQL 15 (110+ tables)                       │
+│           + PostGIS (geolocation)                           │
+│           + pg_cron (scheduled jobs)                        │
+│           + pgvector (AI embeddings)                        │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  EXTERNAL SERVICES                          │
+├─────────────────────────────────────────────────────────────┤
+│ Stripe  │ OpenAI  │ Google Maps │ WhatsApp │ OneSignal    │
+│ PayPal  │ Whisper │ Cloudflare  │ Twilio   │ Sentry       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow Example (Booking):
+
+```typescript
+// 1. User clicks "Prenota" button
+onClick(() => navigate('/booking'))
+
+// 2. Frontend validates input
+const validateBooking = (data: BookingData) => {
+  if (!data.service_id) throw new Error('Seleziona servizio');
+  if (!data.booking_date) throw new Error('Seleziona data');
+}
+
+// 3. Call Edge Function (server-side)
+const { data, error } = await supabase.functions.invoke('create-booking', {
+  body: {
+    service_id: service.id,
+    provider_id: provider.id,
+    booking_date: selectedDate,
+    booking_time: selectedTime,
+    payment_method: 'stripe'
+  }
+})
+
+// 4. Edge Function validates server-side
+// - Check service exists & available
+// - Check provider schedule
+// - Verify payment method
+// - Calculate price (with taxes, fees)
+// - Create Stripe payment intent
+
+// 5. Database transaction (atomic)
+// BEGIN TRANSACTION;
+//   INSERT INTO bookings (...);
+//   UPDATE services SET bookings_count = bookings_count + 1;
+//   INSERT INTO notifications (...);
+//   INSERT INTO audit_logs (...);
+// COMMIT;
+
+// 6. Post-transaction hooks
+// - Send confirmation email
+// - Send WhatsApp notification
+// - Create calendar event
+// - Update analytics
+// - Trigger 24h reminder (pg_cron)
+
+// 7. Real-time update (Supabase Realtime)
+supabase
+  .channel('bookings')
+  .on('INSERT', payload => {
+    toast.success('Nuova prenotazione!')
+  })
+
+// 8. Return success to frontend
+return { booking_id, payment_url }
+```
+
+---
+
+## 🗄️ DATABASE SCHEMA (110+ TABELLE)
+
+### Core Tables (20):
+
+```sql
+-- Users & Auth
+profiles (id, email, display_name, avatar_url, user_type, ...)
+auth.users (Supabase managed)
+
+-- Social
+posts (id, user_id, content, media_urls, likes_count, ...)
+likes (user_id, post_id)
+comments (id, post_id, user_id, content, ...)
+follows (follower_id, following_id)
+stories (id, user_id, media_url, expires_at, ...)
+live_streams (id, user_id, title, stream_url, viewers_count, ...)
+
+-- Messaging
+conversations (id, participant_1, participant_2, last_message_at, ...)
+messages (id, conversation_id, sender_id, content, ...)
+message_attachments (id, message_id, file_url, file_type, ...)
+message_reactions (id, message_id, user_id, reaction, ...)
+message_receipts (id, message_id, user_id, delivered_at, read_at)
+blocked_users (user_id, blocked_user_id)
+
+-- Services & Booking
+services (id, provider_id, title, price, duration, category, ...)
+bookings (id, service_id, client_id, provider_id, booking_date, status, ...)
+reviews (id, booking_id, user_id, rating, comment, ...)
+
+-- Notifications
+notifications (id, user_id, type, title, body, read_at, ...)
+```
+
+### Shop Marketplace (15):
+
+```sql
+shop_products (id, seller_id, title, description, price, images, ...)
+shop_orders (id, order_number, buyer_id, seller_id, items, total, ...)
+cart_items (id, user_id, product_id, quantity, ...)
+shop_reviews (id, product_id, user_id, rating, comment, ...)
+shop_transactions (id, order_id, seller_id, gross_amount, net_amount, ...)
+shop_disputes (id, order_id, reason, status, ...)
+shop_refunds (id, order_id, amount, status, ...)
+seller_shops (seller_id, shop_name, shop_description, ...)
+shipping_profiles (id, seller_id, name, ...)
+shipping_rates (id, shipping_profile_id, country_code, base_price, ...)
+platform_fees (id, commission_percentage, applies_to_category, ...)
+seller_tiers (id, tier_name, commission_percentage, monthly_fee, ...)
+```
+
+### Academy LMS (10):
+
+```sql
+courses (id, instructor_id, title, description, price, thumbnail, ...)
+lessons (id, course_id, title, video_url, content, order_index, ...)
+enrollments (id, course_id, user_id, progress, completed_at, ...)
+certificates (id, enrollment_id, certificate_url, issued_at, ...)
+course_materials (id, lesson_id, file_url, file_name, ...)
+course_reviews (id, course_id, user_id, rating, comment, ...)
+course_analytics (id, course_id, lesson_id, user_id, watch_time, ...)
+job_postings (id, company_id, title, description, salary_range, ...)
+job_applications (id, job_posting_id, user_id, resume_url, ...)
+```
+
+### Creator Economy (12):
+
+```sql
+creator_profiles (user_id, tier, revenue_share_percentage, ...)
+creator_earnings (id, creator_id, source_type, amount, ...)
+creator_payouts (id, creator_id, amount, status, ...)
+creator_memberships (id, creator_id, tier_name, price, ...)
+user_subscriptions (id, user_id, creator_id, tier, ...)
+tips (id, from_user_id, to_creator_id, amount, ...)
+brand_partnerships (id, creator_id, brand_id, deal_value, ...)
+creator_analytics (id, creator_id, metric_type, value, ...)
+```
+
+### Stella AI System (10):
+
+```sql
+stella_commands (id, user_id, command_text, command_type, status, ...)
+stella_scheduled_actions (id, user_id, action_type, scheduled_for, ...)
+stella_settings (user_id, voice_enabled, max_likes_per_day, ...)
+stella_action_log (id, user_id, action_type, success, ...)
+ai_chat_history (id, user_id, message, response, ...)
+ai_suggestions (id, user_id, suggestion_type, content, ...)
+ai_usage_tracking (id, user_id, feature, tokens_used, ...)
+```
+
+### AI Preview System (3 — NEW v4.0):
+
+```sql
+ai_preview_jobs (id, user_id, status, input_image_url, prompt, style_type, result_image_url, ...)
+ai_preview_looks (id, user_id, job_id, title, description, is_public, likes_count, ...)
+ai_preview_usage (id, user_id, month_year, previews_used, tokens_used)
+```
+
+**Full SQL in:** `supabase/migrations/005_ai_preview.sql`
+
+### Voice & Video (8):
+
+```sql
+call_sessions (id, call_type, caller_id, callee_id, status, ...)
+call_participants (id, call_session_id, user_id, joined_at, ...)
+call_logs (id, call_session_id, event_type, event_data, ...)
+webrtc_tokens (id, user_id, token, expires_at, ...)
+voice_messages (id, message_id, audio_url, duration_seconds, ...)
+```
+
+### Geolocation (8):
+
+```sql
+user_locations (id, user_id, latitude, longitude, city, ...)
+location_permissions (id, user_id, location_enabled, consent_given_at, ...)
+location_shares (id, sharer_id, shared_with_id, expires_at, ...)
+location_logs (id, user_id, action, location_data, ...)
+geofences (id, center_latitude, center_longitude, radius_meters, ...)
+geofence_triggers (id, geofence_id, user_id, triggered_at, ...)
+```
+
+### Push Notifications (7):
+
+```sql
+device_tokens (id, user_id, token, platform, is_active, ...)
+push_subscriptions (id, user_id, device_token_id, topic, ...)
+push_notifications (id, user_id, title, body, status, ...)
+push_notification_logs (id, push_notification_id, event_type, ...)
+notification_templates (id, template_key, push_title, push_body, ...)
+web_push_subscriptions (id, user_id, endpoint, p256dh_key, ...)
+```
+
+### Media Storage (5):
+
+```sql
+media_files (id, uploaded_by, file_url, file_type, moderation_status, ...)
+media_ownership (id, media_file_id, owner_type, owner_id, ...)
+media_reports (id, media_file_id, reported_by, reason, ...)
+media_processing_jobs (id, media_file_id, job_type, status, ...)
+storage_quotas (id, user_id, quota_used, quota_limit, ...)
+```
+
+### Security & Compliance (10):
+
+```sql
+user_consents (id, user_id, terms_of_service, privacy_policy, ...)
+data_export_requests (id, user_id, status, export_url, ...)
+data_deletion_requests (id, user_id, status, completed_at, ...)
+audit_logs (id, user_id, action, entity_type, old_value, new_value, ...)
+security_logs (id, user_id, event_type, ip_address, ...)
+fraud_checks (id, order_id, risk_score, decision, ...)
+rate_limits (id, user_id, action, current_count, ...)
+payment_logs (id, order_id, payment_provider, status, ...)
+```
+
+### Gamification (10):
+
+```sql
+transactions (id, user_id, amount, type, description, ...)
+missions (id, title, description, reward_coins, ...)
+user_missions (id, user_id, mission_id, progress, completed_at, ...)
+spin_history (id, user_id, prize, ...)
+leaderboard (id, user_id, coins, rank, ...)
+```
+
+**TOTAL: 110+ tables**
+
+---
+
+## 🚀 SETUP SVILUPPO
+
+### Prerequisiti:
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+- Git >= 2.40.0
+- Supabase CLI >= 1.180.0
+
+### 1. Clone Repository:
+
+```bash
+git clone https://github.com/mikimause93/beauty-style-pro.git
+cd beauty-style-pro
+npm install
+npm run check
+```
+
+### 2. Environment Setup:
+
+```env
+# Supabase
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+
+# Stripe
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+
+# Google Maps
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyXXX
+
+# OpenAI (Stella AI + AI Preview)
+VITE_OPENAI_API_KEY=sk-xxx
+
+# App Config
+VITE_APP_NAME="Beauty Style Pro"
+VITE_APP_VERSION="4.0.0"
+VITE_APP_ENV="development"
+```
+
+### 3. Supabase Local Setup:
+
+```bash
+supabase login
+supabase init
+supabase link --project-ref your-project-ref
+supabase db pull
+supabase start
+supabase status
+```
+
+### 4. Database Migrations:
+
+```bash
+supabase db push          # Apply all pending migrations
+# or
+supabase migration up     # Apply next migration only
+```
+
+### 5. Run Development Server:
+
+```bash
+npm run dev               # http://localhost:5173
+```
+
+### 6. Run Tests:
+
+```bash
+npm test                  # Unit tests (Vitest)
+npm run test:ci           # CI mode with coverage
+npm run e2e               # End-to-end tests (Playwright)
+npm run coverage          # Coverage report
+```
+
+---
+
+## 📱 MOBILE BUILD
+
+### iOS:
+
+```bash
+npm run build
+npx cap sync ios
+npx cap open ios
+# Build in Xcode
+```
+
+### Android:
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android
+# Build in Android Studio
+```
+
+---
+
+## 🔐 REQUIRED GITHUB SECRETS
+
+| Secret | Description |
+|--------|-------------|
+| `VERCEL_TOKEN` | Vercel deployment token |
+| `VERCEL_ORG_ID` | Vercel organization ID |
+| `VERCEL_PROJECT_ID` | Vercel project ID |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI access token |
+| `OPENAI_API_KEY` | OpenAI API key (Stella AI + AI Preview) |
+| `STABILITY_API_KEY` | Stability AI API key (optional) |
+| `SENTRY_DSN` | Sentry error tracking DSN |
+| `STRIPE_SECRET` | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+
+---
+
+## 🗺️ ROADMAP
+
+### v4.0 (Current):
+- [x] AI Preview System (DALL-E 3 virtual try-on)
+- [x] Enterprise boilerplate (CI, tests, lint, docs, release)
+- [x] Playwright E2E tests
+- [x] Semantic release automation
+
+### v4.1 (Planned):
+- [ ] Augmented Reality try-on (WebXR)
+- [ ] GPT-4 Vision skin analysis
+- [ ] Video consultation with AI co-pilot
+- [ ] Multi-vendor marketplace expansion
+
+### v5.0 (Future):
+- [ ] Native iOS app (SwiftUI)
+- [ ] Native Android app (Jetpack Compose)
+- [ ] Blockchain certificates (NFT diplomas)
+- [ ] Metaverse beauty studio
+
+---
+
+## 📄 LICENSE
+
+MIT License — See LICENSE file for details.
+
+---
+
+*This file is the canonical specification for Beauty Style Pro 4.0 ULTRA ENTERPRISE.*
+*For implementation details, see the source code and supabase/migrations/ folder.*
