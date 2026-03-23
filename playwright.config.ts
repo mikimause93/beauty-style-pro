@@ -27,13 +27,11 @@ export default defineConfig({
     },
   ],
 
-  // Start the dev server automatically when running E2E tests locally
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: "npm run dev",
-        url: "http://localhost:8080",
-        reuseExistingServer: true,
-        timeout: 120_000,
-      },
+  // In CI, serve the pre-built dist; locally, start the dev server.
+  webServer: {
+    command: process.env.CI ? "npx vite preview --port 8080" : "npm run dev",
+    url: "http://localhost:8080",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });
