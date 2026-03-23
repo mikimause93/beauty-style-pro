@@ -1,0 +1,446 @@
+# 💇 BEAUTY STYLE PRO 4.0 ULTRA ENTERPRISE - Full Specification
+
+**Version:** 4.0.0 ULTRA ENTERPRISE | **Last Update:** 22 March 2026
+
+## Stack Tecnologico
+
+- Frontend: React 18.3 + Vite 5.0 + TypeScript 5.0
+- Backend: Supabase (PostgreSQL 15 + Realtime + Edge Functions)
+- Mobile: Capacitor 6.x (iOS/Android)
+- Styling: Tailwind CSS 3.4 + Framer Motion
+- Payments: Stripe + PayPal + QR Coins
+- AI: OpenAI GPT-4 + Whisper + DALL-E 3 + Stability AI
+- Maps: Google Maps API
+- Communication: WhatsApp Business API
+- Push: OneSignal / Firebase Cloud Messaging
+- Storage: Supabase Storage + Cloudflare R2
+- Hosting: Vercel (Frontend) + Supabase (Backend)
+- CDN: Cloudflare
+- Monitoring: Sentry + LogRocket
+- Analytics: PostHog + Google Analytics 4
+
+---
+
+## User Roles
+
+```typescript
+type UserRole =
+  | 'client'        // Cliente finale
+  | 'professional'  // Parrucchiere/Makeup Artist
+  | 'business'      // Salone/Business Owner
+  | 'creator';      // Content Creator/Partner
+```
+
+---
+
+## Enterprise Features
+
+### 1. AI Preview System (4.0 NEW)
+
+The AI Preview feature allows clients to virtually try hairstyles, colors and beauty looks
+using AI-generated images powered by Stability AI and OpenAI DALL-E 3.
+
+#### AI Preview Tables (PostgreSQL)
+
+```sql
+-- AI Preview Sessions
+CREATE TABLE IF NOT EXISTS public.ai_preview_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','completed','failed')),
+  original_image_url TEXT,
+  style_prompt TEXT NOT NULL,
+  result_image_url TEXT,
+  model_used TEXT DEFAULT 'stability-ai/stable-diffusion-xl-1.0',
+  tokens_used INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- AI Preview Styles Catalog
+CREATE TABLE IF NOT EXISTS public.ai_preview_styles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL CHECK (category IN ('hair','makeup','nails','skincare')),
+  thumbnail_url TEXT,
+  prompt_template TEXT NOT NULL,
+  is_premium BOOLEAN DEFAULT false,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- AI Preview Favorites
+CREATE TABLE IF NOT EXISTS public.ai_preview_favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_id UUID NOT NULL REFERENCES public.ai_preview_sessions(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, session_id)
+);
+
+-- AI Preview Usage Tracking
+CREATE TABLE IF NOT EXISTS public.ai_preview_usage (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  free_previews_used INTEGER DEFAULT 0,
+  paid_previews_used INTEGER DEFAULT 0,
+  UNIQUE(user_id, date)
+);
+
+-- Row Level Security
+ALTER TABLE public.ai_preview_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_preview_styles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_preview_favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_preview_usage ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+CREATE POLICY "Users can manage own preview sessions"
+  ON public.ai_preview_sessions FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "AI preview styles are publicly readable"
+  ON public.ai_preview_styles FOR SELECT USING (true);
+
+CREATE POLICY "Users can manage own favorites"
+  ON public.ai_preview_favorites FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own usage"
+  ON public.ai_preview_usage FOR ALL USING (auth.uid() = user_id);
+```
+
+### 2. Edge Function: generate-ai-preview
+
+```typescript
+// supabase/functions/generate-ai-preview/index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    );
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json();
+    const { session_id, style_prompt, original_image_url } = body;
+
+    if (!session_id || !style_prompt) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Update session status to processing
+    await supabaseClient
+      .from("ai_preview_sessions")
+      .update({ status: "processing", updated_at: new Date().toISOString() })
+      .eq("id", session_id)
+      .eq("user_id", user.id);
+
+    // Call Stability AI API
+    const stabilityApiKey = Deno.env.get("STABILITY_API_KEY");
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+
+    let resultImageUrl = "";
+    let tokensUsed = 0;
+
+    if (stabilityApiKey) {
+      const stabilityResponse = await fetch(
+        "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${stabilityApiKey}`,
+          },
+          body: JSON.stringify({
+            text_prompts: [
+              {
+                text: `Beauty portrait, ${style_prompt}, professional photo, high quality, realistic`,
+                weight: 1,
+              },
+              {
+                text: "blurry, low quality, distorted, deformed",
+                weight: -1,
+              },
+            ],
+            cfg_scale: 7,
+            height: 1024,
+            width: 1024,
+            steps: 30,
+            samples: 1,
+          }),
+        }
+      );
+
+      if (stabilityResponse.ok) {
+        const stabilityData = await stabilityResponse.json();
+        const base64Image = stabilityData.artifacts[0]?.base64;
+
+        if (base64Image) {
+          // Upload to Supabase Storage
+          const imageBuffer = Uint8Array.from(atob(base64Image), (c) => c.charCodeAt(0));
+          const fileName = `ai-previews/${user.id}/${session_id}.png`;
+
+          const { data: uploadData, error: uploadError } = await supabaseClient.storage
+            .from("media")
+            .upload(fileName, imageBuffer, {
+              contentType: "image/png",
+              upsert: true,
+            });
+
+          if (!uploadError && uploadData) {
+            const { data: publicUrlData } = supabaseClient.storage
+              .from("media")
+              .getPublicUrl(fileName);
+            resultImageUrl = publicUrlData.publicUrl;
+          }
+        }
+        tokensUsed = 30; // steps
+      }
+    } else if (openaiApiKey) {
+      // Fallback to DALL-E 3
+      const dalleResponse = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: `Beauty portrait photo. Style: ${style_prompt}. Professional lighting, high quality, realistic.`,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        }),
+      });
+
+      if (dalleResponse.ok) {
+        const dalleData = await dalleResponse.json();
+        resultImageUrl = dalleData.data[0]?.url ?? "";
+        tokensUsed = 1;
+      }
+    }
+
+    if (!resultImageUrl) {
+      await supabaseClient
+        .from("ai_preview_sessions")
+        .update({ status: "failed", updated_at: new Date().toISOString() })
+        .eq("id", session_id);
+
+      return new Response(JSON.stringify({ error: "Failed to generate preview" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Update session with result
+    await supabaseClient
+      .from("ai_preview_sessions")
+      .update({
+        status: "completed",
+        result_image_url: resultImageUrl,
+        tokens_used: tokensUsed,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", session_id);
+
+    // Update usage tracking
+    await supabaseClient.rpc("increment_ai_preview_usage", {
+      p_user_id: user.id,
+    });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        result_image_url: resultImageUrl,
+        tokens_used: tokensUsed,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Internal server error" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+});
+```
+
+---
+
+## Database Schema Summary (110+ Tables)
+
+### Core Tables
+- profiles, posts, likes, comments, follows, stories, live_streams
+- conversations, messages, message_attachments, message_reactions, message_receipts, blocked_users
+- services, bookings, reviews, notifications
+
+### Shop Marketplace (15 tables)
+- shop_products, shop_orders, cart_items, shop_reviews, shop_transactions
+- shop_disputes, shop_refunds, seller_shops, shipping_profiles, shipping_rates
+- platform_fees, seller_tiers
+
+### Academy LMS (10 tables)
+- courses, lessons, enrollments, certificates, course_materials
+- course_reviews, course_analytics, job_postings, job_applications
+
+### Creator Economy (12 tables)
+- creator_profiles, creator_earnings, creator_payouts, creator_memberships
+- user_subscriptions, tips, brand_partnerships, creator_analytics
+
+### Stella AI System (10 tables)
+- stella_commands, stella_scheduled_actions, stella_settings, stella_action_log
+- ai_chat_history, ai_suggestions, ai_usage_tracking
+
+### Voice & Video (8 tables)
+- call_sessions, call_participants, call_logs, webrtc_tokens, voice_messages
+
+### Geolocation (8 tables)
+- user_locations, location_permissions, location_shares, location_logs
+- geofences, geofence_triggers
+
+### Push Notifications (7 tables)
+- device_tokens, push_subscriptions, push_notifications, push_notification_logs
+- notification_templates, web_push_subscriptions
+
+### Media Storage (5 tables)
+- media_files, media_ownership, media_reports, media_processing_jobs, storage_quotas
+
+### Security & Compliance (10 tables)
+- user_consents, data_export_requests, data_deletion_requests, audit_logs
+- security_logs, fraud_checks, rate_limits, payment_logs
+
+### Gamification (10 tables)
+- transactions, missions, user_missions, spin_history, leaderboard
+
+### AI Preview (4 tables)
+- ai_preview_sessions, ai_preview_styles, ai_preview_favorites, ai_preview_usage
+
+### Admin & Moderation (5 tables)
+- admin_roles, moderation_queue, feature_flags, system_settings
+
+---
+
+## Frontend Pages (200+ Components)
+
+Key pages:
+- HomePage, AuthPage, ProfilePage, FeedPage
+- BookingPage, BookingDetailPage, ServiceDetailPage, StylistDetailPage
+- ShopPage, ProductDetailPage, CheckoutPage
+- AcademyPage, CoursePage, LessonPage
+- ChatPage, ChatDetailPage
+- MapSearchPage, AnalyticsDashboardPage
+- AdminPage, ModerationPage
+- AIPreviewPage (NEW 4.0)
+- CreatorDashboardPage, EarningsPage
+- SettingsPage, NotificationsPage
+
+---
+
+## Mobile (Capacitor)
+
+- iOS: Swift + Capacitor Bridge
+- Android: Kotlin + Capacitor Bridge
+- Plugins: Camera, Geolocation, Push Notifications, Biometrics, NFC
+- Offline support: TanStack Query with persistence adapter
+- Deep linking: Universal Links (iOS) + App Links (Android)
+
+---
+
+## Required GitHub Secrets
+
+| Secret Name               | Description                                      |
+|---------------------------|--------------------------------------------------|
+| VERCEL_TOKEN              | Vercel deployment token                          |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key (never expose publicly)|
+| SUPABASE_URL              | Supabase project URL                             |
+| OPENAI_API_KEY            | OpenAI API key for Stella AI                    |
+| STABILITY_API_KEY         | Stability AI key for AI Preview                 |
+| SENTRY_DSN                | Sentry error tracking DSN                        |
+| STRIPE_SECRET             | Stripe secret key (server-side only)             |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     CLIENT LAYER                            │
+├─────────────────────────────────────────────────────────────┤
+│  Web App (React)  │  iOS App (Swift)  │  Android (Kotlin)  │
+│   Vercel Deploy   │   App Store       │   Play Store       │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     API GATEWAY                             │
+├─────────────────────────────────────────────────────────────┤
+│              Supabase API (Auto-generated REST)             │
+│              + Custom Edge Functions (Deno)                 │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  BUSINESS LOGIC LAYER                       │
+├─────────────────────────────────────────────────────────────┤
+│  Auth      │  Realtime   │  Storage    │  Edge Functions   │
+│  Service   │  Channels   │  Buckets    │  (Serverless)     │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    DATA LAYER                               │
+├─────────────────────────────────────────────────────────────┤
+│           PostgreSQL 15 (110+ tables)                       │
+│           + PostGIS (geolocation)                           │
+│           + pg_cron (scheduled jobs)                        │
+│           + pgvector (AI embeddings)                        │
+└─────────────────────────────────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  EXTERNAL SERVICES                          │
+├─────────────────────────────────────────────────────────────┤
+│ Stripe  │ OpenAI  │ Google Maps │ WhatsApp │ OneSignal    │
+│ PayPal  │ Whisper │ Cloudflare  │ Twilio   │ Sentry       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+*This file serves as the canonical specification for Beauty Style Pro 4.0 ULTRA ENTERPRISE.*
+*See docs/ folder for detailed documentation on each subsystem.*
