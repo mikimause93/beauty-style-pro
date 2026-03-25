@@ -81,8 +81,7 @@ export default function StellaModal({
       setInput(transcript);
       resetTranscript();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcript, isListening]);
+  }, [transcript, isListening, parseCommand, setTheme, ttsEnabled, speak, resetTranscript]);
 
   const addMessage = useCallback((msg: Omit<StellaMessage, 'id' | 'timestamp'>) => {
     setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random(), timestamp: new Date() }]);

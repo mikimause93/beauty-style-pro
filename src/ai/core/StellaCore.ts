@@ -10,8 +10,44 @@ import type {
   StellaParsedCommand,
 } from '../types/stella.types';
 
-// Tag format embedded in AI responses: [STELLA_ACTION:functionName|{"arg":"val"}]
-const ACTION_TAG_RE = /\[STELLA_ACTION:(\w+)\|(\{[^}]*\})\]/g;
+// Tag format embedded in AI responses: [STELLA_ACTION:functionName|{...json...}]
+// Use a robust extractor to handle nested braces in JSON args.
+const ACTION_TAG_START_RE = /\[STELLA_ACTION:(\w+)\|/g;
+
+function extractActionTags(text: string): Array<{ name: string; argsJson: string; fullMatch: string }> {
+  const results: Array<{ name: string; argsJson: string; fullMatch: string }> = [];
+  const re = new RegExp(ACTION_TAG_START_RE.source, 'g');
+  let m: RegExpExecArray | null;
+
+  while ((m = re.exec(text)) !== null) {
+    const name = m[1];
+    const afterPipe = m.index + m[0].length;
+    // Walk forward to find the matching closing brace, counting nesting
+    let depth = 0;
+    let i = afterPipe;
+    let started = false;
+    for (; i < text.length; i++) {
+      if (text[i] === '{') { depth++; started = true; }
+      else if (text[i] === '}') {
+        depth--;
+        if (started && depth === 0) {
+          // i is the position of the final '}'
+          const argsJson = text.slice(afterPipe, i + 1);
+          const closingBracket = text[i + 1] === ']' ? i + 1 : -1;
+          if (closingBracket !== -1) {
+            results.push({
+              name,
+              argsJson,
+              fullMatch: text.slice(m.index, closingBracket + 1),
+            });
+          }
+          break;
+        }
+      }
+    }
+  }
+  return results;
+}
 
 function buildSystemPrompt(contextStr: string, memoryStr: string): string {
   return `Sei Stella AI V3, l'assistente intelligente di Beauty Style Pro.
@@ -60,16 +96,22 @@ STILE:
 
 function parseActions(text: string): { cleanText: string; commands: StellaParsedCommand[] } {
   const commands: StellaParsedCommand[] = [];
-  const cleanText = text.replace(ACTION_TAG_RE, (_match, name, argsJson) => {
+  const tags = extractActionTags(text);
+  let cleanText = text;
+
+  // Process in reverse order to preserve string indices
+  for (let i = tags.length - 1; i >= 0; i--) {
+    const tag = tags[i];
     try {
-      const args = JSON.parse(argsJson) as Record<string, unknown>;
-      commands.push({ functionName: name as StellaActionName, args });
+      const args = JSON.parse(tag.argsJson) as Record<string, unknown>;
+      commands.unshift({ functionName: tag.name as StellaActionName, args });
     } catch {
-      // ignore malformed action tag
+      // ignore malformed JSON
     }
-    return '';
-  }).trim();
-  return { cleanText, commands };
+    cleanText = cleanText.replace(tag.fullMatch, '');
+  }
+
+  return { cleanText: cleanText.trim(), commands };
 }
 
 export async function stellaChat(

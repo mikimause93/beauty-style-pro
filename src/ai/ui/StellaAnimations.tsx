@@ -1,5 +1,5 @@
 // src/ai/ui/StellaAnimations.tsx
-import { motion, type Variants } from 'framer-motion';
+import { motion, type Variants, type PanInfo } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 // ── Pulse ring shown when Stella is listening ────────────────────────────────
@@ -60,7 +60,7 @@ export function ScaleInButton({
   onClick?: () => void;
   drag?: boolean;
   dragConstraints?: React.RefObject<HTMLElement>;
-  onDragEnd?: (e: MouseEvent | TouchEvent | PointerEvent, info: { point: { x: number; y: number } }) => void;
+  onDragEnd?: (e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
   ariaLabel?: string;
 }) {
   return (
@@ -75,8 +75,7 @@ export function ScaleInButton({
       drag={drag}
       dragConstraints={dragConstraints}
       dragElastic={0.1}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onDragEnd={onDragEnd as any}
+      onDragEnd={onDragEnd}
       onClick={onClick}
       className={className}
     >
