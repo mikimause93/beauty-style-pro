@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
+import StellaV3 from "@/ai/StellaV3";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
@@ -118,6 +119,7 @@ const App = () => {
         <AuthProvider>
         <RadioProvider>
           <PageTracker />
+          <StellaV3 />
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public routes */}
