@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Coins, ChevronRight, Clock, TrendingUp, TrendingDown, Sparkles, Video, Target, ShoppingBag, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 
 interface Transaction {
@@ -54,7 +55,7 @@ export default function QRCoinsPage() {
         })));
       }
     } catch (e) {
-      console.error("Error fetching transactions:", e);
+      logError({ error_type: "database", message: "Error fetching QR transactions", metadata: { error: String(e) } });
     }
     setLoading(false);
   };

@@ -8,6 +8,7 @@ import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
+import { logError } from "@/lib/errorLogger";
 import AIQuickActions from "@/components/ai/AIQuickActions";
 import AIChatMessages from "@/components/ai/AIChatMessages";
 
@@ -127,7 +128,7 @@ export default function AIAssistantPage() {
         },
       });
     } catch (err: any) {
-      console.error("AI stream error:", err);
+      logError({ error_type: "api", message: "AI stream error", metadata: { error: err?.message || String(err) } });
       toast.error("Errore nella risposta AI");
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),

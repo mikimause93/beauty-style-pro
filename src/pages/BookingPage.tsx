@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { logError } from "@/lib/errorLogger";
 import { toast } from "sonner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -122,7 +123,7 @@ export default function BookingPage() {
     });
 
     if (error) {
-      console.error("Booking error:", error);
+      logError({ error_type: "database", message: "Booking error", metadata: { error: String(error) } });
       toast.error("Errore nella prenotazione");
       setLoading(false);
     } else {

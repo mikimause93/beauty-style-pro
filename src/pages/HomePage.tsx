@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 import logo from "@/assets/logo.png";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -108,7 +109,7 @@ export default function HomePage() {
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
       if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
-    } catch (error) { console.error('Error:', error); }
+    } catch (error) { logError({ error_type: "database", message: "HomePage data fetch error", metadata: { error: String(error) } }); }
   };
 
   const displayStories = stories;

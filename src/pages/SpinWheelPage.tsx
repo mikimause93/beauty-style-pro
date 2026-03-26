@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Coins, Volume2, VolumeX, Star, Sparkles, Gift, Trophy, Crown, Share2, ShoppingBag, Timer, Target, ChevronRight, Zap, Users, CreditCard, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { toast } from "sonner";
 
@@ -125,7 +126,7 @@ export default function SpinWheelPage() {
         if (prize.type === 'QR_COIN') {
           await supabase.from('profiles').update({ qr_coins: qrCoins + prize.value }).eq('user_id', user.id);
         }
-      } catch (error) { console.error('Error:', error); }
+      } catch (error) { logError({ error_type: "database", message: "Spin result save error", metadata: { error: String(error) } }); }
 
       // Check mission completion
       const newSpins = totalSpins + 1;

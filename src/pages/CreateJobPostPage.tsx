@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/errorLogger";
 import { toast } from "sonner";
 
 export default function CreateJobPostPage() {
@@ -136,7 +137,7 @@ export default function CreateJobPostPage() {
       toast.success("Annuncio pubblicato con successo!");
       navigate("/hr");
     } catch (error) {
-      console.error("Create job error:", error);
+      logError({ error_type: "database", message: "Create job post error", metadata: { error: String(error) } });
       toast.error("Errore nella pubblicazione");
     } finally {
       setLoading(false);

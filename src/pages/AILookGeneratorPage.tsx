@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { logError } from "@/lib/errorLogger";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -226,7 +227,7 @@ const AILookGeneratorPage = () => {
       }, 500);
     } catch (err: any) {
       clearInterval(interval);
-      console.error("Generation error:", err);
+      logError({ error_type: "api", message: "Generation error", metadata: { error: err?.message || String(err) } });
       toast({
         title: "Errore nella generazione",
         description: err.message || "Riprova tra qualche secondo",
