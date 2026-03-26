@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -84,6 +84,7 @@ const BusinessTeamPage = lazy(() => import("./pages/BusinessTeamPage"));
 const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
 const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const IndexPage = lazy(() => import("./pages/Index"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
@@ -123,7 +124,7 @@ const App = () => {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/index" element={<Navigate to="/" replace />} />
+            <Route path="/index" element={<IndexPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
