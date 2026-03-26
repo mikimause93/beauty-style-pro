@@ -193,6 +193,9 @@ export default function AdminPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-display font-bold flex-1">Admin Panel</h1>
+        <button onClick={() => navigate("/stato-progetto")} className="p-2 rounded-xl hover:bg-muted transition-colors" title="Stato del Progetto" aria-label="Stato del Progetto">
+          <Rocket className="w-5 h-5 text-primary" />
+        </button>
         <ShieldCheck className="w-5 h-5 text-primary" />
       </header>
 
