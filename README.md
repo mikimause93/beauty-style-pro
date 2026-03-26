@@ -1,10 +1,16 @@
-# 💇 STYLE - La Piattaforma Beauty Completa
+# 💇 Beauty Style Pro — Piattaforma Beauty Enterprise
 
-**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+[![CI](https://github.com/mikimause93/beauty-style-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/mikimause93/beauty-style-pro/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/mikimause93/beauty-style-pro/actions/workflows/security-scan.yml/badge.svg)](https://github.com/mikimause93/beauty-style-pro/actions/workflows/security-scan.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+
+**Versione:** 3.0.0 ENTERPRISE | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
 
 ---
 
 ## 2.0.0 — Novità
+
 - Aggiornamento versione a 2.0.0.
 - Aggiunto file di compatibilità Lovable: `beauty_style_pro.md` (linee guida per modifiche sicure e preview).
 - Migliorata la compatibilità con l'ambiente Lovable Preview per evitare rotture in fase di editing e preview live.
@@ -18,6 +24,7 @@
 ## ✨ Funzionalità
 
 ### Core
+
 - ✅ Autenticazione multi-ruolo (Cliente / Professionista / Business)
 - ✅ Autenticazione tramite numero di telefono (OTP SMS, stile WhatsApp)
 - ✅ Feed social con like, commenti, condivisioni
@@ -28,12 +35,14 @@
 - ✅ Profilo modificabile con avatar upload
 
 ### Tema Dark / Light
+
 - ✅ Switch globale Dark/Light direttamente nell'header della home
 - ✅ Il tema viene salvato e ripristinato automaticamente tra le sessioni
 - ✅ Tema scuro (nero, default) e chiaro (bianco, stile Instagram)
 - ✅ Controllo vocale del tema: "tema chiaro" / "tema scuro"
 
 ### Stella AI – Assistente vocale
+
 - ✅ Comandi vocali stile Alexa: esecuzione automatica di azioni in-app
 - ✅ Wake word: dì "Stella" per attivare l'assistente
 - ✅ Comandi supportati:
@@ -45,28 +54,33 @@
   - "dimmi le notifiche", "conferma prenotazione", "aggiungi [nome]" e altri
 
 ### Chat avanzata
+
 - ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
 - ✅ Traduzione in tempo reale dei messaggi in arrivo (rileva lingua automaticamente)
 - ✅ Chiamate vocali e video in-app
 - ✅ Registrazione messaggi vocali con Media Recorder API
 
 ### Notifiche Push
+
 - ✅ Notifiche push attive anche ad app chiusa tramite Service Worker
 - ✅ Notifiche stile social: like, commenti, messaggi, prenotazioni, follower
 - ✅ Click sulla notifica apre direttamente il contenuto rilevante
 
 ### Business & HR
+
 - ✅ Dashboard Business con analytics
 - ✅ Gestione annunci di lavoro (HR)
 - ✅ Profilo Business con servizi, shop e recensioni
 
 ### Entertainment & Gamification
+
 - ✅ Live Streaming con reactions, chat e tips (QRCoin)
 - ✅ Radio & Music Player integrato
 - ✅ Spin & Win, Challenges, Leaderboard
 - ✅ Sistema QRCoin e Programma referral
 
 ### E-commerce & Altro
+
 - ✅ Shop prodotti beauty
 - ✅ Dettaglio servizi con prenotazione diretta
 - ✅ Before/After gallery, Eventi, PWA installabile
@@ -93,6 +107,7 @@ npm run test:watch # esegui i test in modalità watch (rieseguiti ad ogni modifi
 ```
 
 Test inclusi:
+
 - `useTheme.test.ts` – default theme, localStorage restore, toggle, CSS variables
 - `voiceCommands.test.ts` – pattern matching comandi vocali (navigazione, messaggi, like, mappa, tema)
 
