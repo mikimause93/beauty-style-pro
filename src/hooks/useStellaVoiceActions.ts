@@ -247,7 +247,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Attivo il tema scuro!", action: "theme:dark" };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'torna indietro', 'invia messaggio a...', 'cerca [termine]', 'cerca match a 10 km', o 'dimmi le notifiche'." };
+    return { matched: false, response: "Non ho capito il comando. Prova: 'apri chat', 'prenota', 'anteprima capelli', 'genera look', 'ricordami di...', 'cerca match a 10 km', 'invia messaggio a...', o 'dimmi le notifiche'." };
   }, [navigate]);
 
   return { processVoiceCommand };
