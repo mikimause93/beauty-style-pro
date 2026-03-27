@@ -24,7 +24,7 @@ import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
-import beauty3 from "@/assets/beauty-3.jpg";
+
 
 interface Post {
   id: string;
