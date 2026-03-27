@@ -107,7 +107,7 @@ export default function HomePage() {
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
-      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: p.avatar_url || p.logo_url || '' })));
+      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: (p.portfolio_images && p.portfolio_images[0]) || '' })));
     } catch (error) { console.error('Error:', error); }
   };
 
