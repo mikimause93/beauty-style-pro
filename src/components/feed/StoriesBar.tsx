@@ -4,9 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRadio } from "@/contexts/RadioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
+// Real data only — no static asset fallbacks for stories
 
 interface Story {
   id: string;
@@ -26,10 +24,7 @@ interface GroupedStory {
   isOwn: boolean;
 }
 
-const fallbackStories: GroupedStory[] = [
-  { user_id: "1", display_name: "Martina", avatar_url: stylist2, stories: [{ id: "s1", user_id: "1", media_url: beauty1, media_type: "image", caption: "New look today! ✨", view_count: 45, created_at: new Date().toISOString() }], isOwn: false },
-  { user_id: "2", display_name: "Sylvie", avatar_url: stylist1, stories: [{ id: "s2", user_id: "2", media_url: stylist1, media_type: "image", caption: "Work in progress 💇‍♀️", view_count: 32, created_at: new Date().toISOString() }], isOwn: false },
-];
+// No fallback/mock stories — only real DB content
 
 export default function StoriesBar() {
   const { user } = useAuth();
@@ -54,7 +49,7 @@ export default function StoriesBar() {
 
     if (error) {
       console.error("Stories load error:", error);
-      setGroups(fallbackStories);
+      setGroups([]);
       return;
     }
 
@@ -86,7 +81,7 @@ export default function StoriesBar() {
       arr.sort((a, b) => (a.isOwn ? -1 : b.isOwn ? 1 : 0));
       setGroups(arr);
     } else {
-      setGroups(fallbackStories);
+      setGroups([]);
     }
   };
 

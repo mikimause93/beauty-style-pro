@@ -49,19 +49,6 @@
   <meta name="twitter:title" content="STYLE - La Piattaforma Beauty">
   <meta property="og:description" content="Prenota appuntamenti, scopri professionisti, guarda live streaming e acquista prodotti beauty. La tua piattaforma beauty completa.">
   <meta name="twitter:description" content="Prenota appuntamenti, scopri professionisti, guarda live streaming e acquista prodotti beauty. La tua piattaforma beauty completa.">
-  <script>
-    (function() {
-      var params = new URLSearchParams(window.location.search);
-      var p = params.get('p');
-      if (p) {
-        var base = '/beauty-style-pro';
-        var path = decodeURIComponent(p.replace(/^\//, ''));
-        var query = params.get('q') ? '?' + decodeURIComponent(params.get('q')) : '';
-        var hash = window.location.hash;
-        window.history.replaceState(null, null, base + path + query + hash);
-      }
-    })();
-  </script>
 </head>
 
   <body>

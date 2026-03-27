@@ -19,12 +19,12 @@ import { useNotifications } from "@/hooks/useNotifications";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
-import logo from "@/assets/logo.png";
+
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
-import beauty3 from "@/assets/beauty-3.jpg";
+
 
 interface Post {
   id: string;
@@ -96,10 +96,10 @@ export default function HomePage() {
 
       if (streamsData) setLiveStreams(streamsData.map(s => ({ ...s, professional: Array.isArray(s.professional) ? s.professional[0] : s.professional })));
       if (profilesData) {
-        setStories(profilesData.map((p, i) => ({
-          id: p.user_id, name: p.display_name || 'User',
-          avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
-          isLive: i < 2, hasStory: true,
+        setStories(profilesData.filter(p => p.avatar_url).map((p) => ({
+          id: p.user_id, name: p.display_name || 'Utente',
+          avatar: p.avatar_url!,
+          isLive: false, hasStory: true,
         })));
       }
 
@@ -107,7 +107,7 @@ export default function HomePage() {
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
-      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
+      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: (p.portfolio_images && p.portfolio_images[0]) || '' })));
     } catch (error) { console.error('Error:', error); }
   };
 
