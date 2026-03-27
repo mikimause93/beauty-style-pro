@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import safeStorage from "@/lib/safeStorage";
 
-// Apply saved theme on mount
-const savedTheme = localStorage.getItem("style-theme");
+const savedTheme = safeStorage.getItem("style-theme");
+
 if (savedTheme === "light") {
   const root = document.documentElement;
   root.style.setProperty("--background", "0 0% 97%");

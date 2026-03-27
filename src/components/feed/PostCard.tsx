@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import PostCardActions from "./PostCardActions";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface PostCardProps {
   post: {
@@ -16,7 +17,7 @@ interface PostCardProps {
     comment_count: number;
     post_type: string | null;
     created_at: string;
-    profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+    profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
   };
   onShare?: () => void;
   onComment?: () => void;
@@ -223,9 +224,12 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           />
         </button>
         <div className="flex-1 min-w-0">
-          <button onClick={() => navigate(`/profile/${post.user_id}`)} className="text-sm font-semibold truncate block hover:text-primary transition-colors">
-            {post.profileData?.display_name || "Beauty Pro"}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => navigate(`/profile/${post.user_id}`)} className="text-sm font-semibold truncate hover:text-primary transition-colors">
+              {post.profileData?.display_name || "Beauty Pro"}
+            </button>
+            <VerifiedBadge status={post.profileData?.verification_status ?? undefined} userType={post.profileData?.user_type} size="xs" />
+          </div>
           <p className="text-[11px] text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
         </div>
         {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
@@ -249,8 +253,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
               <ChevronRight className="w-3 h-3 text-primary-foreground" />
             </div>
           </div>
-          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
-          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-xs font-bold">Prima</div>
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-xs font-bold">Dopo</div>
           <input type="range" min={10} max={90} value={sliderPos}
             onChange={e => setSliderPos(Number(e.target.value))}
             className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
@@ -285,10 +289,10 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <div className="flex-1" />
           {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
             <>
-              <button onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center gap-1">
+              <button type="button" onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center gap-1">
                 <Wand2 className="w-3 h-3" /> Prova AI
               </button>
-              <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              <button type="button" onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                 Prenota
               </button>
             </>
@@ -375,16 +379,16 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                     <span className="text-muted-foreground">{c.message}</span>
                   </p>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[10px] text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
+                    <span className="text-xs text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
                     {/* Like */}
                     <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
                       <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
-                      {c.like_count > 0 && <span className="text-[10px] text-muted-foreground">{c.like_count}</span>}
+                      {c.like_count > 0 && <span className="text-xs text-muted-foreground">{c.like_count}</span>}
                     </button>
                     {/* Applause */}
                     <button onClick={() => toggleCommentApplause(c.id)} className="flex items-center gap-0.5">
                       <Sparkles className={`w-3 h-3 ${c.applauded_by_me ? "text-accent fill-accent" : "text-muted-foreground"}`} />
-                      {c.applause_count > 0 && <span className="text-[10px] text-muted-foreground">{c.applause_count}</span>}
+                      {c.applause_count > 0 && <span className="text-xs text-muted-foreground">{c.applause_count}</span>}
                     </button>
                   </div>
                 </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -26,7 +26,13 @@ export default function AuthPage() {
   const [step, setStep] = useState(0); // 0=type select, 1+=form steps
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
+
+  // Phone OTP login state
+  const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   // Shared fields
   const [email, setEmail] = useState("");
@@ -65,6 +71,10 @@ export default function AuthPage() {
   const [website, setWebsite] = useState("");
   const [bizCategory, setBizCategory] = useState("");
 
+  // IBAN fields
+  const [iban, setIban] = useState("");
+  const [bankHolder, setBankHolder] = useState("");
+
   // Location
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
@@ -72,12 +82,16 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate("/");
-  }, [user]);
+    if (!authLoading && user) navigate("/");
+  }, [user, authLoading, navigate]);
 
   // ─── GPS ─────────────────────────────────────────────
   const requestLocation = async () => {
     setLocating(true);
+    if (!('geolocation' in navigator)) {
+      setLocating(false);
+      return;
+    }
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
@@ -115,6 +129,29 @@ export default function AuthPage() {
     setLoading(false);
   };
 
+  // ─── Phone OTP Login ──────────────────────────────────
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber.trim()) { toast.error("Inserisci il numero di telefono"); return; }
+    setLoading(true);
+    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+    const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
+    if (error) { toast.error(error.message); }
+    else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
+    setLoading(false);
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim()) { toast.error("Inserisci il codice OTP"); return; }
+    setLoading(true);
+    const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
+    const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
+    if (error) { toast.error(error.message); }
+    else { toast.success("Accesso effettuato!"); navigate("/"); }
+    setLoading(false);
+  };
+
   // ─── Signup ──────────────────────────────────────────
   const handleSignup = async () => {
     if (!accountType) return;
@@ -132,6 +169,22 @@ export default function AuthPage() {
       return; 
     }
 
+    // Save IBAN to payment_methods if provided
+    if (iban.trim()) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from("payment_methods").insert({
+            user_id: session.user.id,
+            method_type: "iban",
+            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
+            iban_number: iban.trim(),
+            holder_name: bankHolder || displayName,
+          });
+        }
+      } catch { /* Will be addable from Wallet later */ }
+    }
+
     // Since email verification is now enabled, show verification screen
     setRegistrationResult({
       success: true,
@@ -143,16 +196,16 @@ export default function AuthPage() {
   };
 
   // ─── Step logic per account type ─────────────────────
-  const totalSteps = accountType === "client" ? 3 : accountType === "professional" ? 3 : accountType === "business" ? 3 : 0;
+  const totalSteps = accountType === "client" ? 3 : accountType === "professional" ? 4 : accountType === "business" ? 3 : 0;
 
   const canProceed = () => {
     if (step === 0) return !!accountType;
     if (step === 1) {
-      if (accountType === "client") return !!name && !!email && !!password;
-      if (accountType === "professional") return !!name && !!email && !!password;
+      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate;
+      if (accountType === "professional") return !!name && !!email && !!password && !!phone;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
-    if (step === 2 && accountType === "client") return !!city && !!birthDate;
+    if (step === 2 && accountType === "client") return !!city;
     return true;
   };
 
@@ -217,7 +270,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Non hai ricevuto l'email? Controlla lo spam o clicca "Rinvia Email"
           </p>
         </div>
@@ -241,28 +294,65 @@ export default function AuthPage() {
             <button onClick={() => { setIsLogin(false); setStep(0); }} className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-muted-foreground">Registrati</button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-3">
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
-                className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
-                onChange={e => setPassword(e.target.value)} required minLength={6}
-                className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
-              </button>
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
-              {loading ? "Caricamento..." : "Accedi"}
+          {/* Email / Phone login tabs */}
+          <div className="flex gap-1 mb-4 bg-muted rounded-xl p-1">
+            <button onClick={() => { setLoginMode("email"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>Email</button>
+            <button onClick={() => { setLoginMode("phone"); setOtpSent(false); }} className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${loginMode === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+              <Phone className="w-3 h-3 inline mr-1" />Telefono
             </button>
-          </form>
+          </div>
+
+          {loginMode === "email" ? (
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type={showPassword ? "text" : "password"} placeholder="Password" value={password}
+                  onChange={e => setPassword(e.target.value)} required minLength={6}
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-11 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                  {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                </button>
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Caricamento..." : "Accedi"}
+              </button>
+            </form>
+          ) : !otpSent ? (
+            <form onSubmit={handleSendOtp} className="space-y-3">
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder="+39 333 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 pl-11 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Invio OTP..." : "Invia codice SMS"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center">Codice OTP inviato a <strong>{phoneNumber}</strong></p>
+              <div className="relative">
+                <input type="text" inputMode="numeric" maxLength={6} placeholder="Codice OTP (6 cifre)" value={otpCode} onChange={e => setOtpCode(e.target.value)} required
+                  className="w-full h-12 rounded-xl bg-card border border-border/50 px-4 text-sm text-center tracking-widest focus:outline-none focus:ring-1 focus:ring-primary/30" />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50">
+                {loading ? "Verifica..." : "Verifica e accedi"}
+              </button>
+              <button type="button" onClick={() => setOtpSent(false)} className="w-full text-center text-xs text-primary font-medium">
+                Modifica numero
+              </button>
+            </form>
+          )}
           <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
         </div>
@@ -339,7 +429,7 @@ export default function AuthPage() {
               {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
             </button>
           </div>
-          <InputField icon={<Phone className="w-4 h-4" />} placeholder="Telefono" value={phone} onChange={setPhone} type="tel" />
+          <InputField icon={<Phone className="w-4 h-4" />} placeholder="Telefono *" value={phone} onChange={setPhone} type="tel" />
           <InputField icon={<Calendar className="w-4 h-4" />} placeholder="Data di nascita *" value={birthDate} onChange={setBirthDate} type="date" />
         </div>
       )}
@@ -500,6 +590,30 @@ export default function AuthPage() {
         </div>
       )}
 
+      {/* ═══ STEP 4: Conto Bancario (Professional only) ═══ */}
+      {step === 4 && accountType === "professional" && (
+        <div className="space-y-4 fade-in">
+          <h2 className="text-lg font-display font-bold">Conto Bancario</h2>
+          <p className="text-xs text-muted-foreground">
+            Collega il tuo conto bancario al Wallet interno per ricevere pagamenti e rimborsi
+          </p>
+          <InputField icon={<Banknote className="w-4 h-4" />} placeholder="IBAN (es. IT60 X054 2811 1010 0000 0123 456)" value={iban} onChange={setIban} />
+          <InputField icon={<User className="w-4 h-4" />} placeholder="Intestatario conto" value={bankHolder} onChange={setBankHolder} />
+          <div className="p-3.5 rounded-2xl bg-primary/5 border border-primary/20 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-xs font-semibold">Dati protetti con crittografia SSL</p>
+            </div>
+            <p className="text-[11px] text-muted-foreground pl-6">
+              Potrai aggiungere o modificare i dati bancari anche in seguito dal tuo <strong>Wallet</strong>. Il campo è facoltativo.
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-muted/50 text-[11px] text-muted-foreground">
+            📱 <strong>Verifica numero:</strong> Dopo la registrazione riceverai un SMS di conferma sul numero {phone || "inserito"} per attivare i pagamenti.
+          </div>
+        </div>
+      )}
+
       {/* Navigation buttons */}
       {step > 0 && (
         <div className="mt-8 space-y-3">
@@ -516,7 +630,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground mt-6">
+      <p className="text-center text-xs text-muted-foreground mt-6">
         Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
       </p>
     </div>

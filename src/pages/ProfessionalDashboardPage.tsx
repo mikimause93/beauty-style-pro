@@ -116,10 +116,10 @@ export default function ProfessionalDashboardPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "confirmed": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold">Confermato</span>;
-      case "pending": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 font-semibold">In Attesa</span>;
-      case "cancelled": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-semibold">Annullato</span>;
-      default: return <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">{status}</span>;
+      case "confirmed": return <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold">Confermato</span>;
+      case "pending": return <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 font-semibold">In Attesa</span>;
+      case "cancelled": return <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-semibold">Annullato</span>;
+      default: return <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">{status}</span>;
     }
   };
 
@@ -132,7 +132,7 @@ export default function ProfessionalDashboardPage() {
         <div className="flex-1">
           <h1 className="text-lg font-display font-bold flex items-center gap-2">
             Pannello Pro
-            {profile?.verification_status === "approved" && <VerifiedBadge size="sm" />}
+            {profile?.verification_status === "verified" && <VerifiedBadge status="verified" userType={profile?.user_type} size="sm" />}
           </h1>
           <p className="text-[11px] text-muted-foreground">{professional.business_name}</p>
         </div>
@@ -144,13 +144,13 @@ export default function ProfessionalDashboardPage() {
 
       <div className="p-4 space-y-5">
         {/* Verification Warning */}
-        {profile?.verification_status !== "approved" && (
+        {profile?.verification_status !== "verified" && (
           <button onClick={() => navigate("/verify-account")}
             className="w-full p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-3">
             <XCircle className="w-5 h-5 text-yellow-500 shrink-0" />
             <div className="text-left flex-1">
               <p className="text-xs font-semibold text-yellow-600">Account non verificato</p>
-              <p className="text-[10px] text-muted-foreground">Verifica il tuo account per sbloccare tutte le funzioni</p>
+              <p className="text-xs text-muted-foreground">Verifica il tuo account per sbloccare tutte le funzioni</p>
             </div>
           </button>
         )}
@@ -160,7 +160,7 @@ export default function ProfessionalDashboardPage() {
           {statCards.map(card => (
             <div key={card.label} className="p-4 rounded-2xl bg-card border border-border/50">
               <div className={`w-9 h-9 rounded-xl ${card.color} flex items-center justify-center mb-2`}>
-                <card.icon className="w-4.5 h-4.5" />
+                <card.icon className="w-5 h-5" />
               </div>
               <p className="text-xl font-display font-bold">{card.value}</p>
               <p className="text-[11px] text-muted-foreground">{card.label}</p>
@@ -184,9 +184,9 @@ export default function ProfessionalDashboardPage() {
               <button key={action.label} onClick={() => navigate(action.path)}
                 className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all">
                 <action.icon className="w-5 h-5 text-muted-foreground" />
-                <span className="text-[10px] font-medium text-muted-foreground">{action.label}</span>
+                <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
                 {action.count !== null && (
-                  <span className="text-[10px] font-bold text-primary">{action.count}</span>
+                  <span className="text-xs font-bold text-primary">{action.count}</span>
                 )}
               </button>
             ))}

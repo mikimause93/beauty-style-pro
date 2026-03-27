@@ -25,6 +25,7 @@ export default function WalletPage() {
 
   useEffect(() => {
     if (user) { loadTransactions(); loadPaymentMethods(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadTransactions = async () => {
@@ -348,7 +349,7 @@ export default function WalletPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-sm font-bold">Conto Bancario</p>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold flex items-center gap-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold flex items-center gap-1">
                           <Check className="w-2.5 h-2.5" /> Collegato
                         </span>
                       </div>
@@ -528,7 +529,7 @@ export default function WalletPage() {
                     <p className="text-sm font-medium truncate">{tx.description || tx.type}</p>
                     <div className="flex items-center gap-2">
                       <p className="text-[11px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString("it-IT")}</p>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                         tx.status === "completed" ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"
                       }`}>{tx.status === "completed" ? "Completato" : "In attesa"}</span>
                     </div>
@@ -593,7 +594,7 @@ export default function WalletPage() {
               <input placeholder="IT60 X054 2811 1010 0000 0123 456" value={ibanForm.iban}
                 onChange={e => setIbanForm({ ...ibanForm, iban: e.target.value.toUpperCase() })}
                 className="w-full px-4 py-3 rounded-xl bg-muted text-sm font-mono tracking-wider focus:outline-none focus:ring-1 focus:ring-primary/30" />
-              <p className="text-[10px] text-muted-foreground">Inserisci il tuo IBAN completo (es. IT60X0542811101000000123456)</p>
+              <p className="text-xs text-muted-foreground">Inserisci il tuo IBAN completo (es. IT60X0542811101000000123456)</p>
             </div>
             <button onClick={saveIBAN} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold">
               {profile?.iban ? "Aggiorna IBAN" : "Collega Conto"}

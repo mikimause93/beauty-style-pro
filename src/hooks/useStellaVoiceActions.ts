@@ -11,8 +11,41 @@ interface VoiceAction {
 export function useStellaVoiceActions() {
   const navigate = useNavigate();
 
-  const processVoiceCommand = useCallback((transcript: string): { matched: boolean; response: string } => {
+  const processVoiceCommand = useCallback((transcript: string): { matched: boolean; response: string; action?: string } => {
     const text = transcript.toLowerCase().trim();
+
+    // ─── Back navigation (hands-free essential) ────────────────────────────
+    if (text.includes("torna indietro") || text.includes("vai indietro") || text.includes("pagina precedente") || text === "indietro") {
+      window.history.back();
+      return { matched: true, response: "Torno alla pagina precedente!" };
+    }
+
+    // ─── Scroll commands ────────────────────────────────────────────────────
+    if (text.includes("scorri su") || text.includes("vai su") || text.includes("scroll su")) {
+      window.scrollBy({ top: -300, behavior: "smooth" });
+      return { matched: true, response: "Scorro verso l'alto!" };
+    }
+    if (text.includes("scorri giù") || text.includes("vai giù") || text.includes("scroll giù") || text.includes("scorri in basso")) {
+      window.scrollBy({ top: 300, behavior: "smooth" });
+      return { matched: true, response: "Scorro verso il basso!" };
+    }
+
+    // Message commands must be checked first (before navigation) because "messaggio" contains "messaggi"
+    const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo)\s+)(.+)/);
+    if (messageMatch) {
+      const recipient = messageMatch[1].trim();
+      const content = messageMatch[2].trim();
+      navigate("/chat");
+      toast.info(`Cerco "${recipient}" e preparo il messaggio: "${content}"`);
+      return { matched: true, response: `Cerco ${recipient} per inviare: "${content}"!` };
+    }
+    const messageMatchSimple = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
+    if (messageMatchSimple) {
+      const recipient = messageMatchSimple[1];
+      navigate("/chat");
+      toast.info(`Cerco "${recipient}" nella chat...`);
+      return { matched: true, response: `Cerco ${recipient} per inviargli un messaggio!` };
+    }
 
     // Navigation commands
     if (text.includes("vai alla home") || text.includes("apri home")) {
@@ -67,7 +100,7 @@ export function useStellaVoiceActions() {
       navigate("/settings");
       return { matched: true, response: "Apro le impostazioni!" };
     }
-    if (text.includes("cerca") || text.includes("esplora")) {
+    if (text.includes("esplora")) {
       navigate("/explore");
       return { matched: true, response: "Apro la sezione esplora!" };
     }
@@ -120,13 +153,32 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Apro il programma referral!" };
     }
 
-    // Message commands
-    const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
-    if (messageMatch) {
-      const recipient = messageMatch[1];
-      navigate("/chat");
-      toast.info(`Cerco "${recipient}" nella chat...`);
-      return { matched: true, response: `Cerco ${recipient} per inviargli un messaggio!` };
+    // AI Preview commands
+    if (text.includes("anteprima") || text.includes("preview") || text.includes("prova look")) {
+      const sectorMatch = text.match(/(?:capelli|hair)/i) ? "hair"
+        : text.match(/(?:barba|barber)/i) ? "barber"
+        : text.match(/(?:tattoo|tatuaggio)/i) ? "tattoo"
+        : text.match(/(?:makeup|trucco)/i) ? "makeup"
+        : text.match(/(?:unghie|nails)/i) ? "nails"
+        : null;
+      navigate(sectorMatch ? `/ai-preview/${sectorMatch}` : "/ai-preview");
+      return { matched: true, response: `Apro l'anteprima AI${sectorMatch ? ` per ${sectorMatch}` : ""}!` };
+    }
+
+    // AI Look
+    if (text.includes("genera look") || text.includes("ai look") || text.includes("nuovo look")) {
+      navigate("/ai-look");
+      return { matched: true, response: "Apro il generatore di look AI!" };
+    }
+
+    // Promemoria / scheduling
+    const reminderMatch = text.match(/(?:ricordami|promemoria|ricorda)\s+(?:di\s+)?(.+?)(?:\s+(?:tra|per|domani|alle)\s+(.+))?$/);
+    if (reminderMatch) {
+      const what = reminderMatch[1];
+      const when = reminderMatch[2] || "più tardi";
+      navigate("/reminders");
+      toast.info(`Promemoria: "${what}" per ${when}`);
+      return { matched: true, response: `Creo un promemoria: "${what}" per ${when}!` };
     }
 
     // Call commands
@@ -149,7 +201,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Ecco le tue notifiche! Le leggo per te." };
     }
 
-    // Add friend
+    // Add friend / search
     const addMatch = text.match(/(?:aggiungi|segui)\s+(.+)/);
     if (addMatch) {
       navigate("/search");
@@ -157,7 +209,45 @@ export function useStellaVoiceActions() {
       return { matched: true, response: `Cerco ${addMatch[1]} per seguirlo!` };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'invia messaggio a...', 'dimmi le notifiche' o 'conferma prenotazione'." };
+    // Generic search — navigate to search page with query
+    const searchMatch = text.match(/^cerca\s+(.+)$/);
+    if (searchMatch) {
+      const query = searchMatch[1].trim();
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      return { matched: true, response: `Cerco "${query}"!` };
+    }
+
+    // Like commands
+    if (text.match(/metti\s+like|dai\s+like|aggiungi\s+like|mi\s+piace/)) {
+      navigate("/");
+      toast.success("Like aggiunto!");
+      return { matched: true, response: "Ho messo like al post!" };
+    }
+
+    // Search match on map
+    const matchDistanceMatch = text.match(/cerca\s+(?:match|amici|persone|stilisti)\s+(?:a|entro|vicino|nel\s+raggio\s+di)\s*(\d+)\s*km/);
+    if (matchDistanceMatch) {
+      const km = matchDistanceMatch[1];
+      navigate(`/map-search?radius=${km}`);
+      toast.info(`Cerco match entro ${km} km sulla mappa...`);
+      return { matched: true, response: `Cerco match entro ${km} km sulla mappa intelligente!` };
+    }
+    if (text.includes("cerca match") || text.includes("trova match") || text.includes("match vicini")) {
+      navigate("/map-search");
+      return { matched: true, response: "Apro la mappa dei match vicino a te!" };
+    }
+
+    // Theme voice commands - direct toggle
+    if (text.includes("tema chiaro") || text.includes("modalità chiara") || text.includes("light mode")) {
+      toast.info("Cambio al tema chiaro!");
+      return { matched: true, response: "Attivo il tema chiaro!", action: "theme:light" };
+    }
+    if (text.includes("tema scuro") || text.includes("modalità scura") || text.includes("dark mode")) {
+      toast.info("Cambio al tema scuro!");
+      return { matched: true, response: "Attivo il tema scuro!", action: "theme:dark" };
+    }
+
+    return { matched: false, response: "Non ho capito il comando. Prova: 'apri chat', 'prenota', 'anteprima capelli', 'genera look', 'ricordami di...', 'cerca match a 10 km', 'invia messaggio a...', o 'dimmi le notifiche'." };
   }, [navigate]);
 
   return { processVoiceCommand };

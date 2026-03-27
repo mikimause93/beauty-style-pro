@@ -72,6 +72,7 @@ export default function MapSearchPage() {
     loadJobs();
     loadEvents();
     loadUserPrefs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadUserPrefs = async () => {
@@ -319,7 +320,7 @@ export default function MapSearchPage() {
               }`}>
               <f.icon className="w-3 h-3" />
               {f.label}
-              <span className="text-[10px] opacity-70">({f.count})</span>
+              <span className="text-xs opacity-70">({f.count})</span>
             </button>
           ))}
         </div>
@@ -340,8 +341,8 @@ export default function MapSearchPage() {
             </div>
             <div>
               <div className="flex justify-between mb-1">
-                <span className="text-[10px] text-muted-foreground">Distanza max</span>
-                <span className="text-[10px] font-bold text-primary">{maxDistance} km</span>
+                <span className="text-xs text-muted-foreground">Distanza max</span>
+                <span className="text-xs font-bold text-primary">{maxDistance} km</span>
               </div>
               <input type="range" min={5} max={300} value={maxDistance} onChange={e => setMaxDistance(Number(e.target.value))} className="w-full accent-primary h-1" />
             </div>
@@ -378,48 +379,55 @@ export default function MapSearchPage() {
           }}
         />
         <div className="flex items-center justify-between mt-1.5 px-1">
-          <span className="text-[10px] text-muted-foreground">📍 {position.city}</span>
-          <span className="text-[10px] text-primary font-medium">{mapMarkers.length} risultati sulla mappa</span>
+          <span className="text-xs text-muted-foreground">📍 {position.city}</span>
+          <span className="text-xs text-primary font-medium">{mapMarkers.length} risultati sulla mappa</span>
         </div>
       </div>
 
       {/* Results */}
       <div className="px-5 py-4 space-y-2">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-muted-foreground font-medium">Ordinati per AI Match ↓</span>
+          <span className="text-xs text-muted-foreground font-medium">Ordinati per AI Match ↓</span>
         </div>
 
         {filtered.map((p, i) => (
-          <button key={p.id} onClick={() => navigate(`/stylist/${p.id}`)}
-            className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 text-left">
-            <div className="relative">
-              <img src={p.avatar || fallbackAvatars[i % 3]} alt="" className="w-12 h-12 rounded-xl object-cover" />
-              {p.is_verified && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-[7px] text-primary-foreground">✓</span>
+          <div key={p.id} className="rounded-2xl bg-card border border-border/50 overflow-hidden hover:border-primary/20 transition-all duration-200">
+            <button onClick={() => navigate(`/stylist/${p.id}`)}
+              className="w-full flex items-center gap-3 p-3.5 text-left">
+              <div className="relative">
+                <img src={p.avatar || fallbackAvatars[i % 3]} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                {p.is_verified && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-[7px] text-primary-foreground">✓</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm truncate">{p.business_name}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{p.specialty}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Star className="w-3 h-3 text-accent fill-accent" />
+                  <span className="text-[11px] font-medium">{p.rating || 0}</span>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <MapPin className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-primary">{p.distance} km</span>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <span className="text-xs text-emerald-500 font-medium">Disponibile</span>
                 </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">{p.business_name}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{p.specialty}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <Star className="w-3 h-3 text-accent fill-accent" />
-                <span className="text-[11px] font-medium">{p.rating || 0}</span>
-                <span className="text-[10px] text-muted-foreground">·</span>
-                <MapPin className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] font-semibold text-primary">{p.distance} km</span>
-                <span className="text-[10px] text-muted-foreground">·</span>
-                <span className="text-[10px] text-emerald-500 font-medium">Disponibile</span>
               </div>
-            </div>
-            <div className="text-right flex flex-col items-end gap-1">
-              <div className="px-2 py-0.5 rounded-full bg-primary/10">
-                <span className="text-[10px] font-bold text-primary">{p.aiScore}%</span>
+              <div className="text-right flex flex-col items-end gap-1">
+                <div className="px-2 py-0.5 rounded-full bg-primary/10">
+                  <span className="text-xs font-bold text-primary">{p.aiScore}%</span>
+                </div>
+                <p className="text-sm font-bold">€{p.hourly_rate || 0}</p>
               </div>
-              <p className="text-sm font-bold">€{p.hourly_rate || 0}</p>
-            </div>
-          </button>
+            </button>
+            <button
+              onClick={() => navigate(`/booking/${p.id}`)}
+              className="w-full py-2.5 bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors">
+              <Calendar className="w-3.5 h-3.5" /> Prenota ora
+            </button>
+          </div>
         ))}
 
         {filtered.length === 0 && (

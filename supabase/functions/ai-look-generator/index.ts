@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,16 +7,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS")
     return new Response(null, { headers: corsHeaders });
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY)
-    return new Response(
-      JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ error: "LOVABLE_API_KEY not configured" }, 500);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -160,22 +164,16 @@ serve(async (req) => {
       if (!aiResponse.ok) {
         const status = aiResponse.status;
         if (status === 429) {
-          return new Response(
-            JSON.stringify({
-              error: "Troppe richieste. Riprova tra qualche secondo.",
-              code: "RATE_LIMITED",
-            }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({
+            error: "Troppe richieste. Riprova tra qualche secondo.",
+            code: "RATE_LIMITED",
+          }, 429);
         }
         if (status === 402) {
-          return new Response(
-            JSON.stringify({
-              error: "Servizio AI temporaneamente non disponibile. Riprova più tardi.",
-              code: "PAYMENT_REQUIRED",
-            }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return jsonResponse({
+            error: "Servizio AI temporaneamente non disponibile. Riprova più tardi.",
+            code: "PAYMENT_REQUIRED",
+          }, 402);
         }
         const errorText = await aiResponse.text();
         console.error("[AI-LOOK] AI error:", status, errorText);

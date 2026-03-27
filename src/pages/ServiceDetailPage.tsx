@@ -14,6 +14,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (id) fetchService();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchService = async () => {
@@ -21,7 +22,7 @@ export default function ServiceDetailPage() {
       .from("services")
       .select("*, professionals(business_name, city, rating)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     setService(data);
     setLoading(false);
   };

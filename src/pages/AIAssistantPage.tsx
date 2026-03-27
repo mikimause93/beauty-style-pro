@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Bot, User, Loader2, Mic as MicIcon } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic as MicIcon, Volume2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { streamChat } from "@/lib/streamChat";
 import AIQuickActions from "@/components/ai/AIQuickActions";
 import AIChatMessages from "@/components/ai/AIChatMessages";
-import AIVoiceControls from "@/components/ai/AIVoiceControls";
 
 interface ChatMsg {
   id: string;
@@ -141,19 +140,69 @@ export default function AIAssistantPage() {
 
   return (
     <MobileLayout>
-      <header className="sticky top-0 z-40 glass px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
+      {/* Header */}
+      <header className="sticky top-0 z-40 glass px-4 py-3">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          {/* Animated AI avatar */}
+          <div className={`relative w-11 h-11 rounded-full gradient-primary flex items-center justify-center shrink-0 ${isListening ? "shadow-glow" : ""}`}>
+            <Sparkles className={`w-5 h-5 text-primary-foreground ${isListening ? "animate-pulse" : ""}`} />
+            {(isWakeWordListening || isListening) && (
+              <span className="absolute -inset-1 rounded-full border-2 border-primary/50 animate-ping" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-bold tracking-tight text-gradient-primary">Stella AI</h1>
+            <p className="text-xs text-muted-foreground truncate">
+              {isListening ? "🔴 Sto ascoltando..." : isWakeWordListening ? "🎤 Dì 'Stella' per attivare" : "Assistente STYLE · Voce + AI"}
+            </p>
+          </div>
+          {/* Voice toggle */}
+          <button
+            onClick={() => {
+              setWakeWordEnabled(!wakeWordEnabled);
+              if (!wakeWordEnabled) {
+                startWakeWordListening();
+                toast.success("Attivazione vocale abilitata");
+              } else {
+                stopWakeWordListening();
+                toast.success("Attivazione vocale disabilitata");
+              }
+            }}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+              wakeWordEnabled ? "bg-primary text-primary-foreground shadow-glow" : "bg-muted text-muted-foreground"
+            }`}
+            title={wakeWordEnabled ? "Disabilita wake word" : "Abilita wake word"}
+          >
+            <MicIcon className="w-4 h-4" />
+          </button>
+          {/* TTS toggle */}
+          <button
+            onClick={() => {
+              setIsTTSEnabled(!isTTSEnabled);
+              if (!isTTSEnabled) speak("Sintesi vocale attivata!");
+              else cancelTTS();
+            }}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+              isTTSEnabled ? "bg-primary text-primary-foreground shadow-glow" : "bg-muted text-muted-foreground"
+            }`}
+            title={isTTSEnabled ? "Disabilita voce" : "Abilita voce"}
+          >
+            <Volume2 className="w-4 h-4" />
+          </button>
         </div>
-        <div className="flex-1">
-          <h1 className="text-sm font-bold">Stella AI</h1>
-          <p className="text-[10px] text-muted-foreground">
-            {isWakeWordListening ? "🎤 Ascolto per 'Stella'..." : "Assistente STYLE con streaming AI"}
-          </p>
-        </div>
+
+        {/* Hands-free active banner */}
+        {(isWakeWordListening || isListening) && (
+          <div className="mt-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shrink-0" />
+            <p className="text-[11px] text-primary font-medium flex-1">
+              {isListening ? "🎤 Ti sto ascoltando — parla ora!" : "🤖 Modalità Mani Libere attiva · Dì \"Stella\" per iniziare"}
+            </p>
+          </div>
+        )}
       </header>
 
       <AIQuickActions onCommand={(cmd) => {
@@ -173,41 +222,33 @@ export default function AIAssistantPage() {
         messagesEndRef={messagesEndRef}
       />
 
-      <AIVoiceControls
-        wakeWordEnabled={wakeWordEnabled}
-        isTTSEnabled={isTTSEnabled}
-        onToggleWakeWord={() => {
-          setWakeWordEnabled(!wakeWordEnabled);
-          if (!wakeWordEnabled) { startWakeWordListening(); toast.success("Attivazione vocale abilitata"); }
-          else { stopWakeWordListening(); toast.success("Attivazione vocale disabilitata"); }
-        }}
-        onToggleTTS={() => {
-          setIsTTSEnabled(!isTTSEnabled);
-          if (!isTTSEnabled) speak("Sintesi vocale attivata!");
-          else cancelTTS();
-        }}
-      />
-
-      {/* Input */}
+      {/* Input bar */}
       <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2">
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          placeholder="Chiedi qualsiasi cosa..."
-          className="flex-1 h-11 rounded-full bg-muted px-4 text-sm focus:outline-none"
+          placeholder="Chiedi qualsiasi cosa a Stella..."
+          className="flex-1 h-11 rounded-full bg-muted px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
           disabled={isLoading}
         />
         <button
-          onClick={() => { if (isListening) stopListening(); else startListening(); }}
+          onClick={() => {
+            if (isListening) {
+              stopListening();
+            } else {
+              if (!isTTSEnabled) setIsTTSEnabled(true);
+              startListening();
+            }
+          }}
           className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-            isListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
+            isListening ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30" : "bg-muted text-foreground/70 hover:bg-muted/80"
           }`}
         >
           <MicIcon className="w-5 h-5" />
         </button>
         <button onClick={sendMessage} disabled={!input.trim() || isLoading} data-send-btn
-          className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50">
+          className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 active:scale-95 transition-transform">
           <Send className="w-5 h-5 text-primary-foreground" />
         </button>
       </div>

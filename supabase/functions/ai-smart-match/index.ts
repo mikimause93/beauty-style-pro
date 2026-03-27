@@ -252,9 +252,9 @@ Genera matching personalizzato.`
     }
 
     return jsonResponse({ error: "Unknown action" }, 400);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("AI smart-match error:", error);
-    return jsonResponse({ error: error.message }, 500);
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
 

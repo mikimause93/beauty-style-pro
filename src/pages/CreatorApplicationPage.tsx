@@ -131,7 +131,7 @@ export default function CreatorApplicationPage() {
                         specialty === cat.id ? "gradient-primary text-primary-foreground" : "bg-card border border-border/50"
                       }`}>
                       <cat.Icon className="w-5 h-5" />
-                      <span className="text-[10px] font-medium">{cat.label}</span>
+                      <span className="text-xs font-medium">{cat.label}</span>
                     </button>
                   ))}
                 </div>

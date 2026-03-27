@@ -1,12 +1,12 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Bell, Heart, MessageCircle, Calendar, Gift, Coins, Trash2, Users, Loader2, BellRing, Check, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications, AppNotification } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import logo from "@/assets/logo.png";
 
-const typeIcons: Record<string, any> = {
+const typeIcons: Record<string, typeof Heart> = {
   like: Heart,
   comment: MessageCircle,
   booking: Calendar,
@@ -52,11 +52,11 @@ function formatTimeAgo(date: string) {
   return new Date(date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
 }
 
-function groupNotifications(notifications: any[]) {
-  const today: any[] = [];
-  const yesterday: any[] = [];
-  const thisWeek: any[] = [];
-  const older: any[] = [];
+function groupNotifications(notifications: AppNotification[]) {
+  const today: AppNotification[] = [];
+  const yesterday: AppNotification[] = [];
+  const thisWeek: AppNotification[] = [];
+  const older: AppNotification[] = [];
   const now = Date.now();
 
   for (const n of notifications) {
@@ -84,7 +84,7 @@ export default function NotificationsPage() {
   const filtered = filter === "unread" ? notifications.filter(n => !n.read) : notifications;
   const groups = groupNotifications(filtered);
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: AppNotification) => {
     if (!notification.read) markRead(notification.id);
     const type = notification.type || "info";
     const data = notification.data || {};
@@ -120,7 +120,7 @@ export default function NotificationsPage() {
           </div>
           <h2 className="text-xl font-display font-bold mb-2">Accedi per le notifiche</h2>
           <p className="text-sm text-muted-foreground mb-6">Ricevi aggiornamenti su like, commenti, prenotazioni e altro</p>
-          <button onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+          <button type="button" onClick={() => navigate("/auth")} className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm">
             Accedi
           </button>
         </div>
@@ -134,13 +134,13 @@ export default function NotificationsPage() {
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+            <button type="button" onClick={() => navigate(-1)} aria-label="Indietro" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-display font-bold">Notifiche</h1>
               {unreadCount > 0 && (
-                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
@@ -148,7 +148,7 @@ export default function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-               <button onClick={markAllRead} className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+               <button type="button" onClick={markAllRead} aria-label="Segna tutto come letto" className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1">
                  <CheckCheck className="w-3 h-3" /> Letto
                </button>
             )}
@@ -158,7 +158,8 @@ export default function NotificationsPage() {
 
         {/* Filter tabs */}
         <div className="flex gap-2 mt-3">
-          <button
+           <button
+            type="button"
             onClick={() => setFilter("all")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                filter === "all" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
@@ -166,7 +167,8 @@ export default function NotificationsPage() {
           >
             Tutte
           </button>
-          <button
+           <button
+            type="button"
             onClick={() => setFilter("unread")}
              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                filter === "unread" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary/60"
@@ -195,7 +197,7 @@ export default function NotificationsPage() {
         ) : (
           groups.map(group => (
             <div key={group.label}>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">
                 {group.label}
               </p>
               <div className="space-y-2">
@@ -234,7 +236,7 @@ export default function NotificationsPage() {
                             <p className={`text-sm font-semibold leading-tight ${!notification.read ? "text-foreground" : "text-foreground/70"}`}>
                               {notification.title}
                             </p>
-                            <span className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap mt-0.5">
                               {formatTimeAgo(notification.created_at)}
                             </span>
                           </div>
@@ -245,22 +247,26 @@ export default function NotificationsPage() {
 
                           {/* Action buttons - white style */}
                           <div className="flex items-center gap-2 mt-2.5">
-                            <button
+                             <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); handleNotificationClick(notification); }}
-                              className="px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold"
+                              className="px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold"
                             >
                               {getActionLabel(type)}
                             </button>
                             {!notification.read && (
                               <button
+                                type="button"
                                 onClick={(e) => { e.stopPropagation(); markRead(notification.id); }}
-                                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary/70 text-[10px] font-semibold flex items-center gap-1"
+                                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary/70 text-xs font-semibold flex items-center gap-1"
                               >
                                 <Check className="w-3 h-3" /> Letto
                               </button>
                             )}
                             <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                              aria-label="Elimina notifica"
                               className="ml-auto p-1.5 rounded-full hover:bg-destructive/10 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />

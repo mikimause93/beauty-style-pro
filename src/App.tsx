@@ -3,15 +3,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 initGlobalErrorHandler();
 
@@ -88,6 +90,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const AIPreviewPage = lazy(() => import("./pages/AIPreviewPage"));
 
 const queryClient = new QueryClient();
 
@@ -100,22 +103,19 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    const shown = sessionStorage.getItem("style_splash_shown");
-    return !shown;
-  });
+  const [showSplash, setShowSplash] = useState(false);
   const handleSplashComplete = useCallback(() => {
-    sessionStorage.setItem("style_splash_shown", "1");
     setShowSplash(false);
   }, []);
   return (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <PWAInstallPrompt />
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
         <RadioProvider>
           <PageTracker />
@@ -123,6 +123,7 @@ const App = () => {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
@@ -201,6 +202,8 @@ const App = () => {
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
+            <Route path="/ai-preview" element={<P><AIPreviewPage /></P>} />
+            <Route path="/ai-preview/:sector" element={<P><AIPreviewPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -210,6 +213,8 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  <SpeedInsights />
+  </ErrorBoundary>
   );
 };
 

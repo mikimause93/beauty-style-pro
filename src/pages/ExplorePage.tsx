@@ -28,7 +28,7 @@ export default function ExplorePage() {
 
   const loadData = async () => {
     const [postsRes, creatorsRes, prosRes] = await Promise.all([
-      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type)").order("like_count", { ascending: false }).limit(20),
+      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type, verification_status)").order("like_count", { ascending: false }).limit(20),
       supabase.from("profiles").select("*").in("user_type", ["professional", "business"]).order("follower_count", { ascending: false }).limit(10),
       supabase.from("professionals").select("*, profiles:user_id(display_name, avatar_url, city)").order("rating", { ascending: false }).limit(10),
     ]);
@@ -97,7 +97,7 @@ export default function ExplorePage() {
                   <img src={post.image_url || beauty3} alt="" className="w-full h-full object-cover" />
                   <div className="absolute bottom-1 left-1 flex items-center gap-0.5 bg-black/50 rounded-full px-1.5 py-0.5">
                     <Star className="w-2.5 h-2.5 text-white" />
-                    <span className="text-[9px] text-white font-bold">{post.like_count}</span>
+                    <span className="text-xs text-white font-bold">{post.like_count}</span>
                   </div>
                 </button>
               ))}
@@ -116,7 +116,7 @@ export default function ExplorePage() {
                     <img src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`}
                       alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
                     <p className="text-[11px] font-semibold truncate max-w-[80px]">{c.display_name}</p>
-                    <span className="text-[9px] text-muted-foreground">{(c.follower_count / 1000).toFixed(1)}K</span>
+                    <span className="text-xs text-muted-foreground">{(c.follower_count / 1000).toFixed(1)}K</span>
                   </button>
                 ))}
               </div>
@@ -191,7 +191,7 @@ export default function ExplorePage() {
                   <p className="text-sm font-semibold">{service}</p>
                   <p className="text-[11px] text-muted-foreground">Tendenza in crescita</p>
                 </div>
-                <span className="text-[10px] text-primary font-bold">+{Math.floor(Math.random() * 40 + 10)}%</span>
+                <span className="text-xs text-primary font-bold">+{Math.floor(Math.random() * 40 + 10)}%</span>
               </button>
             ))}
           </div>

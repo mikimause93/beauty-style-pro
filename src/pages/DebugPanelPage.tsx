@@ -162,19 +162,19 @@ export default function DebugPanelPage() {
         <div className="grid grid-cols-4 gap-2">
           <Card className="p-3 text-center">
             <p className="text-lg font-bold text-green-400">{passed}</p>
-            <p className="text-[10px] text-muted-foreground">Passed</p>
+            <p className="text-xs text-muted-foreground">Passed</p>
           </Card>
           <Card className="p-3 text-center">
             <p className="text-lg font-bold text-red-400">{failed}</p>
-            <p className="text-[10px] text-muted-foreground">Failed</p>
+            <p className="text-xs text-muted-foreground">Failed</p>
           </Card>
           <Card className="p-3 text-center">
             <p className="text-lg font-bold">{avgTime}ms</p>
-            <p className="text-[10px] text-muted-foreground">Avg Time</p>
+            <p className="text-xs text-muted-foreground">Avg Time</p>
           </Card>
           <Card className="p-3 text-center">
             <p className="text-lg font-bold text-orange-400">{errors.length}</p>
-            <p className="text-[10px] text-muted-foreground">Errors</p>
+            <p className="text-xs text-muted-foreground">Errors</p>
           </Card>
         </div>
 
@@ -211,7 +211,7 @@ export default function DebugPanelPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{r.test_name}</p>
                         {r.error_message && (
-                          <p className="text-[10px] text-red-400 truncate">{r.error_message}</p>
+                          <p className="text-xs text-red-400 truncate">{r.error_message}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -243,17 +243,17 @@ export default function DebugPanelPage() {
                 {errors.map((e) => (
                   <Card key={e.id} className="p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge className={`text-[10px] ${severityColor[e.severity] || ""}`}>
+                      <Badge className={`text-xs ${severityColor[e.severity] || ""}`}>
                         {e.severity}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px]">{e.error_type}</Badge>
-                      <span className="text-[10px] text-muted-foreground ml-auto">
+                      <Badge variant="outline" className="text-xs">{e.error_type}</Badge>
+                      <span className="text-xs text-muted-foreground ml-auto">
                         {new Date(e.created_at).toLocaleTimeString()}
                       </span>
                     </div>
                     <p className="text-xs truncate">{e.message}</p>
                     {e.page_path && (
-                      <p className="text-[10px] text-muted-foreground">{e.page_path}</p>
+                      <p className="text-xs text-muted-foreground">{e.page_path}</p>
                     )}
                   </Card>
                 ))}

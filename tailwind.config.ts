@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -14,8 +15,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Outfit", "sans-serif"],
-        body: ["Space Grotesk", "sans-serif"],
+        display: ["Space Grotesk", "Sora", "system-ui", "sans-serif"],
+        body: ["DM Sans", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -54,6 +55,11 @@ export default {
         gold: {
           DEFAULT: "hsl(var(--gold))",
           foreground: "hsl(var(--gold-foreground))",
+        },
+        chrome: {
+          DEFAULT: "hsl(var(--chrome))",
+          dark: "hsl(var(--chrome-dark))",
+          foreground: "hsl(var(--chrome-foreground))",
         },
         success: "hsl(var(--success))",
         live: "hsl(var(--live))",
@@ -94,5 +100,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

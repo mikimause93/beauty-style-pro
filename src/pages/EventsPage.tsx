@@ -55,6 +55,7 @@ export default function EventsPage() {
   useEffect(() => {
     loadEvents();
     if (user) loadMyParticipations();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadEvents = async () => {
@@ -127,18 +128,18 @@ export default function EventsPage() {
               <img src={typeof event.cover_image === "string" && event.cover_image.startsWith("http") ? event.cover_image : coverFallbacks[i % 3]}
                 alt={event.title} className="w-full h-full object-cover" />
               <div className="absolute top-3 left-3">
-                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${typeColors[event.event_type] || "bg-muted text-muted-foreground"}`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-bold ${typeColors[event.event_type] || "bg-muted text-muted-foreground"}`}>
                   {typeLabels[event.event_type] || event.event_type}
                 </span>
               </div>
               {event.is_online && (
                 <div className="absolute top-3 right-3 flex items-center gap-1 glass px-2 py-1 rounded-full">
                   <Video className="w-3 h-3 text-primary" />
-                  <span className="text-[10px] font-medium">Online</span>
+                  <span className="text-xs font-medium">Online</span>
                 </div>
               )}
               {Number(event.price) === 0 && (
-                <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-success text-primary-foreground text-[10px] font-bold">GRATIS</div>
+                <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-success text-primary-foreground text-xs font-bold">GRATIS</div>
               )}
             </div>
             <div className="p-4">

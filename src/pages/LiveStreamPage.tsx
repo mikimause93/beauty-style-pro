@@ -96,6 +96,7 @@ export default function LiveStreamPage() {
   const { claps, triggerApplause } = useApplause();
   const [showReport, setShowReport] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { pauseRadio(); fetchStreams(); }, []);
 
   // Auto-select stream from URL param
@@ -105,6 +106,7 @@ export default function LiveStreamPage() {
       const found = streams.find(s => s.id === streamId);
       if (found) setSelectedStream(found);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streams, searchParams]);
 
   useEffect(() => {
@@ -133,7 +135,7 @@ export default function LiveStreamPage() {
         const comment = payload.new as any;
         // Don't add own messages (already added locally)
         if (comment.user_id === user?.id) return;
-        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).single();
+        const { data: prof } = await supabase.from("profiles").select("display_name").eq("user_id", comment.user_id).maybeSingle();
         setChatMessages(prev => [...prev, {
           id: comment.id,
           user: prof?.display_name || "Utente",
@@ -143,6 +145,7 @@ export default function LiveStreamPage() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStream?.id]);
 
   // Auto-earn + badge checks
@@ -178,6 +181,7 @@ export default function LiveStreamPage() {
       }
     }
     return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedStream]);
 
   // Moderator promotion at high interaction
@@ -195,6 +199,7 @@ export default function LiveStreamPage() {
       awardCoins("complete_mission");
       toast.success("Sei stato promosso Moderatore!", { duration: 4000 });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactionScore]);
 
   const checkBadges = () => {
@@ -323,7 +328,7 @@ export default function LiveStreamPage() {
                 <Eye className="w-4 h-4" /> {selectedStream.viewer_count.toLocaleString()}
               </span>
               {isModerator && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-bold">
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold">
                   <Shield className="w-3 h-3" /> MOD
                 </span>
               )}
@@ -346,7 +351,7 @@ export default function LiveStreamPage() {
                 <p className="font-bold text-lg">{selectedStream.professional?.business_name || 'Beauty Streamer'}</p>
                 <p className="text-sm text-muted-foreground">{selectedStream.title}</p>
                 {selectedStream.category && (
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">{selectedStream.category}</span>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold capitalize">{selectedStream.category}</span>
                 )}
               </div>
               <button className="px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold">Segui</button>
@@ -359,14 +364,14 @@ export default function LiveStreamPage() {
               <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center"><Coins className="w-4 h-4 text-gold-foreground" /></div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">QRC Pool</p>
+                  <p className="text-xs text-muted-foreground">QRC Pool</p>
                   <p className="text-sm font-bold text-gold">{(selectedStream.qr_coin_pool || 0).toLocaleString()}</p>
                 </div>
               </div>
               <div className="flex-1 glass rounded-xl p-3 flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center"><Trophy className="w-4 h-4 text-accent" /></div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">Il tuo Score</p>
+                  <p className="text-xs text-muted-foreground">Il tuo Score</p>
                   <p className="text-sm font-bold text-accent">{interactionScore}</p>
                 </div>
               </div>
@@ -376,8 +381,8 @@ export default function LiveStreamPage() {
             {(selectedStream.interaction_goal || 0) > 0 && (
               <div className="mt-2 glass rounded-xl p-3">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-muted-foreground">Obiettivo community</span>
-                  <span className="text-[10px] font-bold text-primary">
+                  <span className="text-xs text-muted-foreground">Obiettivo community</span>
+                  <span className="text-xs font-bold text-primary">
                     {Math.min(100, Math.round((interactionScore / (selectedStream.interaction_goal || 1)) * 100))}%
                   </span>
                 </div>
@@ -432,7 +437,7 @@ export default function LiveStreamPage() {
               </button>
               <button onClick={() => setShowMusic(true)} className="flex items-center gap-1.5 px-3 h-10 rounded-full glass">
                 <Music className="w-4 h-4 text-primary" />
-                <span className="text-[10px] font-semibold text-primary">Sottofondo</span>
+                <span className="text-xs font-semibold text-primary">Sottofondo</span>
               </button>
               <BattleChallengeButton
                 streamId={selectedStream.id}
@@ -521,7 +526,7 @@ export default function LiveStreamPage() {
                         selectedTip === amt ? "gradient-gold text-gold-foreground scale-105 shadow-lg" : "bg-card border border-border hover:border-gold/50"
                       }`}>
                       <p className="text-lg font-bold">{amt}</p>
-                      <p className="text-[10px] opacity-70">QRC</p>
+                      <p className="text-xs opacity-70">QRC</p>
                     </button>
                   ))}
                 </div>

@@ -4,9 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRadio } from "@/contexts/RadioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
+// Real data only — no static asset fallbacks for stories
 
 interface Story {
   id: string;
@@ -26,10 +24,7 @@ interface GroupedStory {
   isOwn: boolean;
 }
 
-const fallbackStories: GroupedStory[] = [
-  { user_id: "1", display_name: "Martina", avatar_url: stylist2, stories: [{ id: "s1", user_id: "1", media_url: beauty1, media_type: "image", caption: "New look today! ✨", view_count: 45, created_at: new Date().toISOString() }], isOwn: false },
-  { user_id: "2", display_name: "Sylvie", avatar_url: stylist1, stories: [{ id: "s2", user_id: "2", media_url: stylist1, media_type: "image", caption: "Work in progress 💇‍♀️", view_count: 32, created_at: new Date().toISOString() }], isOwn: false },
-];
+// No fallback/mock stories — only real DB content
 
 export default function StoriesBar() {
   const { user } = useAuth();
@@ -41,6 +36,7 @@ export default function StoriesBar() {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadStories(); }, [user]);
 
   const loadStories = async () => {
@@ -53,7 +49,7 @@ export default function StoriesBar() {
 
     if (error) {
       console.error("Stories load error:", error);
-      setGroups(fallbackStories);
+      setGroups([]);
       return;
     }
 
@@ -85,7 +81,7 @@ export default function StoriesBar() {
       arr.sort((a, b) => (a.isOwn ? -1 : b.isOwn ? 1 : 0));
       setGroups(arr);
     } else {
-      setGroups(fallbackStories);
+      setGroups([]);
     }
   };
 
@@ -180,22 +176,22 @@ export default function StoriesBar() {
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {/* Add Story */}
         <button onClick={handleAddStory} disabled={uploading} className="flex flex-col items-center gap-1 flex-shrink-0">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-primary/40">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed border-primary/50 bg-primary/8">
             {uploading ? (
               <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             ) : (
               <Plus className="w-5 h-5 text-primary" />
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground">{uploading ? "..." : "La tua"}</span>
+          <span className="text-xs text-muted-foreground font-medium">{uploading ? "..." : "La tua"}</span>
         </button>
 
         {groups.map((group) => (
           <button key={group.user_id} onClick={() => openStory(group)} className="flex flex-col items-center gap-1 flex-shrink-0">
-            <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary to-yellow-500">
+            <div className="w-16 h-16 rounded-full p-[2.5px]" style={{ background: "linear-gradient(135deg, hsl(262 88% 63%), hsl(302 78% 56%), hsl(42 98% 62%))" }}>
               <img src={group.avatar_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-background" />
             </div>
-            <span className="text-[10px] text-muted-foreground truncate max-w-[64px]">{group.display_name}</span>
+            <span className="text-xs text-muted-foreground font-medium truncate max-w-[64px]">{group.display_name}</span>
           </button>
         ))}
       </div>
@@ -239,7 +235,7 @@ export default function StoriesBar() {
           <div className="absolute bottom-8 left-0 right-0 flex justify-center">
             <div className="flex items-center gap-1 bg-white/10 rounded-full px-3 py-1">
               <Eye className="w-3 h-3 text-white/70" />
-              <span className="text-[10px] text-white/70">{viewingGroup.stories[currentIndex]?.view_count}</span>
+              <span className="text-xs text-white/70">{viewingGroup.stories[currentIndex]?.view_count}</span>
             </div>
           </div>
         </div>

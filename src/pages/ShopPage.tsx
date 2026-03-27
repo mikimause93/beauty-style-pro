@@ -161,7 +161,7 @@ export default function ShopPage() {
             <button className="relative w-9 h-9 rounded-full bg-muted flex items-center justify-center">
               <ShoppingCart className="w-4 h-4 text-muted-foreground" />
               {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">{cart.length}</span>
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">{cart.length}</span>
               )}
             </button>
             <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10">
@@ -245,7 +245,7 @@ export default function ShopPage() {
                   <img src={beauty2} alt="Prodotto in evidenza" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent flex items-center px-5">
                     <div>
-                      <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">Prodotto Top</span>
+                      <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-bold">Prodotto Top</span>
                       <h3 className="text-lg font-display font-bold mt-2">Cosmohairr Beam</h3>
                       <p className="text-xs text-muted-foreground">Max Mascolini</p>
                       <p className="text-lg font-bold text-primary mt-1">€39.99</p>
@@ -280,7 +280,7 @@ export default function ShopPage() {
                           </div>
                           <div className="p-3">
                             <p className="text-sm font-medium truncate">{product.name}</p>
-                            {product.description && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{product.description}</p>}
+                            {product.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{product.description}</p>}
                             <div className="flex items-center justify-between mt-1.5">
                               <span className="text-sm font-bold text-primary">€{product.price}</span>
                               <span className="text-xs text-accent flex items-center gap-0.5">
@@ -288,19 +288,19 @@ export default function ShopPage() {
                               </span>
                             </div>
                             <div className="flex gap-1.5 mt-2">
-                              <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-[10px] font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
+                              <button onClick={() => addToCart(product.id)} className="flex-1 py-1.5 rounded-lg bg-muted text-xs font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1">
                                 <ShoppingCart className="w-3 h-3" /> Carrello
                               </button>
-                              <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                              <button onClick={() => buyNow(product)} className="flex-1 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold">
                                 Acquista
                               </button>
                             </div>
                             <button onClick={() => navigate("/ai-look")}
-                              className="w-full mt-1.5 py-1.5 rounded-lg bg-primary/10 text-[10px] font-semibold text-primary flex items-center justify-center gap-1 hover:bg-primary/20 transition-all">
+                              className="w-full mt-1.5 py-1.5 rounded-lg bg-primary/10 text-xs font-semibold text-primary flex items-center justify-center gap-1 hover:bg-primary/20 transition-all">
                               <Wand2 className="w-3 h-3" /> Prova Look AI
                             </button>
                             <button onClick={() => setSelectedProduct(product)}
-                              className="w-full mt-1 py-1.5 rounded-lg border border-border/50 text-[10px] font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
+                              className="w-full mt-1 py-1.5 rounded-lg border border-border/50 text-xs font-medium text-muted-foreground flex items-center justify-center gap-1 hover:bg-muted/50 transition-all">
                               <MessageCircle className="w-3 h-3" /> Recensione
                             </button>
                           </div>
@@ -333,7 +333,7 @@ export default function ShopPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{svc.name}</p>
                         <p className="text-[11px] text-muted-foreground">{svc.professional_name}</p>
-                        {svc.duration && <p className="text-[10px] text-muted-foreground">{svc.duration} min</p>}
+                        {svc.duration && <p className="text-xs text-muted-foreground">{svc.duration} min</p>}
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-bold text-primary">€{svc.price}</p>
@@ -370,18 +370,18 @@ export default function ShopPage() {
                         {pro.city && (
                           <div className="flex items-center gap-1 mt-0.5">
                             <MapPin className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-[10px] text-muted-foreground">{pro.city}</span>
+                            <span className="text-xs text-muted-foreground">{pro.city}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1 mt-0.5">
                           <Star className="w-3 h-3 text-accent fill-accent" />
-                          <span className="text-[10px] font-semibold">{pro.rating || 0}</span>
-                          <span className="text-[10px] text-muted-foreground">({pro.review_count || 0})</span>
+                          <span className="text-xs font-semibold">{pro.rating || 0}</span>
+                          <span className="text-xs text-muted-foreground">({pro.review_count || 0})</span>
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5 shrink-0">
                         <button onClick={e => { e.stopPropagation(); navigate(`/booking/${pro.id}`); }}
-                          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-semibold">
+                          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold">
                           Prenota
                         </button>
                       </div>
@@ -405,11 +405,11 @@ export default function ShopPage() {
                     <div key={product.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50">
                       <div className="relative">
                         <img src={getImage(product, idx)} alt="" className="w-20 h-20 rounded-xl object-cover" />
-                        <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">#{idx + 1}</span>
+                        <span className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-accent text-accent-foreground text-xs font-bold flex items-center justify-center">#{idx + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm truncate">{product.name}</p>
-                        {product.description && <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>}
+                        {product.description && <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>}
                         <div className="flex items-center gap-1 mt-1">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star key={i} className={`w-3 h-3 ${i < Math.round(product.rating || 4.5) ? "text-accent fill-accent" : "text-muted"}`} />
