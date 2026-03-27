@@ -74,7 +74,7 @@ export default function OnboardingPage() {
       } as any).eq("user_id", user!.id);
 
       setOtpSent(true);
-      toast.success(`Codice OTP inviato! (Demo: ${code})`);
+      toast.success("Codice OTP inviato! Controlla il tuo telefono.");
     } catch {
       toast.error("Errore nell'invio OTP");
     } finally {

@@ -4,9 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRadio } from "@/contexts/RadioContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, X, Eye, ChevronLeft, ChevronRight } from "lucide-react";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
+// Real data only — no static asset fallbacks for stories
 
 interface Story {
   id: string;
