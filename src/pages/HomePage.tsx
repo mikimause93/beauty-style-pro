@@ -96,10 +96,10 @@ export default function HomePage() {
 
       if (streamsData) setLiveStreams(streamsData.map(s => ({ ...s, professional: Array.isArray(s.professional) ? s.professional[0] : s.professional })));
       if (profilesData) {
-        setStories(profilesData.map((p, i) => ({
-          id: p.user_id, name: p.display_name || 'User',
-          avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
-          isLive: i < 2, hasStory: true,
+        setStories(profilesData.filter(p => p.avatar_url).map((p) => ({
+          id: p.user_id, name: p.display_name || 'Utente',
+          avatar: p.avatar_url!,
+          isLive: false, hasStory: true,
         })));
       }
 
