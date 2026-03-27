@@ -366,7 +366,7 @@ Return ONLY valid JSON in this format:
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("[AI-LOOK] Error:", e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Errore sconosciuto" }),
