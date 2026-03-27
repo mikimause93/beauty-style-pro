@@ -51,7 +51,7 @@ export default function StoriesBar() {
 
     if (error) {
       console.error("Stories load error:", error);
-      setGroups(fallbackStories);
+      setGroups([]);
       return;
     }
 
