@@ -148,6 +148,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_credit_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          transaction_type: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_credits: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          id: string
+          monthly_quota: number | null
+          plan: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          monthly_quota?: number | null
+          plan?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          monthly_quota?: number | null
+          plan?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_module_configs: {
         Row: {
           active: boolean
@@ -202,6 +265,90 @@ export type Database = {
           roles?: string[]
           triggers?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_proactive_suggestions: {
+        Row: {
+          action_url: string | null
+          clicked_at: string | null
+          created_at: string | null
+          dismissed_at: string | null
+          expires_at: string | null
+          id: string
+          priority: number | null
+          shown_at: string | null
+          suggestion_data: Json | null
+          suggestion_text: string | null
+          suggestion_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          shown_at?: string | null
+          suggestion_data?: Json | null
+          suggestion_text?: string | null
+          suggestion_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          shown_at?: string | null
+          suggestion_data?: Json | null
+          suggestion_text?: string | null
+          suggestion_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_voice_sessions: {
+        Row: {
+          action_taken: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          entities: Json | null
+          id: string
+          intent: string | null
+          response: string | null
+          session_type: string | null
+          transcription: string | null
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          entities?: Json | null
+          id?: string
+          intent?: string | null
+          response?: string | null
+          session_type?: string | null
+          transcription?: string | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          entities?: Json | null
+          id?: string
+          intent?: string | null
+          response?: string | null
+          session_type?: string | null
+          transcription?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2208,6 +2355,57 @@ export type Database = {
           },
         ]
       }
+      preview_sessions: {
+        Row: {
+          ai_model_used: string | null
+          ai_prompt: string | null
+          confidence_score: number | null
+          created_at: string | null
+          generated_image_url: string | null
+          id: string
+          is_favorite: boolean | null
+          original_image_url: string
+          processing_time_seconds: number | null
+          sector: string
+          session_type: string | null
+          status: string | null
+          style_name: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          ai_prompt?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          generated_image_url?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url: string
+          processing_time_seconds?: number | null
+          sector?: string
+          session_type?: string | null
+          status?: string | null
+          style_name?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          ai_prompt?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          generated_image_url?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url?: string
+          processing_time_seconds?: number | null
+          sector?: string
+          session_type?: string | null
+          status?: string | null
+          style_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_purchases: {
         Row: {
           buyer_id: string
@@ -2458,6 +2656,54 @@ export type Database = {
           id?: string
           price_paid?: number
           started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profile_shops: {
+        Row: {
+          avg_rating: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          shop_banner_url: string | null
+          shop_description: string | null
+          shop_logo_url: string | null
+          shop_name: string
+          total_products: number | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avg_rating?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          shop_banner_url?: string | null
+          shop_description?: string | null
+          shop_logo_url?: string | null
+          shop_name: string
+          total_products?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avg_rating?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          shop_banner_url?: string | null
+          shop_description?: string | null
+          shop_logo_url?: string | null
+          shop_name?: string
+          total_products?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -3313,6 +3559,171 @@ export type Database = {
           prize_type?: string
           prize_value?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      stella_action_log: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_commands: {
+        Row: {
+          command_text: string
+          command_type: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          intent: Json | null
+          requires_confirmation: boolean | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          command_text: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          command_text?: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_scheduled_actions: {
+        Row: {
+          action_params: Json | null
+          action_type: string
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          scheduled_for: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_params?: Json | null
+          action_type: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_params?: Json | null
+          action_type?: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_user_settings: {
+        Row: {
+          auto_actions_enabled: boolean | null
+          can_book: boolean | null
+          can_follow: boolean | null
+          can_like_comment: boolean | null
+          can_send_messages: boolean | null
+          can_spend_coins: boolean | null
+          max_comments_per_hour: number | null
+          max_likes_per_hour: number | null
+          max_messages_per_hour: number | null
+          require_confirmation_for: string[] | null
+          scheduling_enabled: boolean | null
+          total_actions_executed: number | null
+          total_commands_issued: number | null
+          updated_at: string | null
+          user_id: string
+          voice_enabled: boolean | null
+        }
+        Insert: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id: string
+          voice_enabled?: boolean | null
+        }
+        Update: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id?: string
+          voice_enabled?: boolean | null
         }
         Relationships: []
       }
@@ -4428,6 +4839,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      stella_check_rate_limit: {
+        Args: { _action_type: string; _user_id: string }
+        Returns: Json
       }
       track_user_action: {
         Args: {

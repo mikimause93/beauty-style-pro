@@ -178,16 +178,16 @@ export default function SearchPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{u.display_name || "Utente"}</p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
                         {userTypeLabel(u.user_type)}
                       </span>
                       {u.city && (
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                           <MapPin className="w-2.5 h-2.5" />{u.city}
                         </span>
                       )}
                       {dist !== null && (
-                        <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5">
+                        <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
                           <Navigation className="w-2.5 h-2.5" />{dist} km
                         </span>
                       )}
@@ -214,8 +214,8 @@ export default function SearchPage() {
                     <p className="text-xs text-muted-foreground">{s.specialty || "Beauty Pro"}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Star className="w-3 h-3 text-accent fill-accent" />
-                      <span className="text-[10px]">{s.rating || "4.5"}</span>
-                      {s.city && <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{s.city}</span>}
+                      <span className="text-xs">{s.rating || "4.5"}</span>
+                      {s.city && <span className="text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{s.city}</span>}
                     </div>
                   </div>
                   <span className="text-sm font-bold">€{s.hourly_rate || 40}/h</span>
@@ -276,7 +276,7 @@ export default function SearchPage() {
                   className="w-full text-left p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all">
                   <p className="text-sm font-semibold truncate">{j.title}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{j.location} · {j.employment_type}</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium">{j.category}</span>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">{j.category}</span>
                 </button>
               ))}
             </div>

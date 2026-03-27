@@ -13,6 +13,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 initGlobalErrorHandler();
 
@@ -89,6 +90,7 @@ const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const AIPreviewPage = lazy(() => import("./pages/AIPreviewPage"));
 
 const queryClient = new QueryClient();
 
@@ -101,18 +103,8 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    try {
-      const shown = sessionStorage.getItem("style_splash_shown");
-      return !shown;
-    } catch {
-      return false;
-    }
-  });
+  const [showSplash, setShowSplash] = useState(false);
   const handleSplashComplete = useCallback(() => {
-    try {
-      sessionStorage.setItem("style_splash_shown", "1");
-    } catch { /* intentionally empty */ }
     setShowSplash(false);
   }, []);
   return (
@@ -210,6 +202,8 @@ const App = () => {
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
+            <Route path="/ai-preview" element={<P><AIPreviewPage /></P>} />
+            <Route path="/ai-preview/:sector" element={<P><AIPreviewPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -219,6 +213,7 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  <SpeedInsights />
   </ErrorBoundary>
   );
 };

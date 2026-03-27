@@ -37,7 +37,7 @@ export default function BusinessTeamPage() {
     queryKey: ["my_business", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase.from("businesses").select("*").eq("user_id", user.id).single();
+      const { data } = await supabase.from("businesses").select("*").eq("user_id", user.id).maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -160,7 +160,7 @@ export default function BusinessTeamPage() {
           ].map(s => (
             <div key={s.label} className="p-3 rounded-xl bg-card border border-border text-center">
               <p className="text-xl font-display font-bold">{s.value}</p>
-              <p className="text-[10px] text-muted-foreground">{s.label}</p>
+              <p className="text-xs text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
@@ -183,17 +183,17 @@ export default function BusinessTeamPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-sm truncate">{emp.first_name} {emp.last_name}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${st.color}`}>{st.label}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${st.color}`}>{st.label}</span>
                       </div>
                       <p className="text-xs text-muted-foreground capitalize">{emp.role === "manager" ? "Manager" : "Staff"}</p>
                       <div className="flex items-center gap-3 mt-1">
-                        {emp.email && <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Mail className="w-3 h-3" />{emp.email}</span>}
-                        {emp.phone && <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Phone className="w-3 h-3" />{emp.phone}</span>}
+                        {emp.email && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Mail className="w-3 h-3" />{emp.email}</span>}
+                        {emp.phone && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{emp.phone}</span>}
                       </div>
                       {emp.permissions && emp.permissions.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {emp.permissions.map((p: string) => (
-                            <span key={p} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-medium">
+                            <span key={p} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-xs font-medium">
                               {PERMISSIONS_OPTIONS.find(o => o.key === p)?.label || p}
                             </span>
                           ))}
@@ -313,7 +313,7 @@ export default function BusinessTeamPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{editEmployee.first_name} {editEmployee.last_name}</p>
-                  <p className="text-[10px] text-muted-foreground">{editEmployee.email || editEmployee.phone}</p>
+                  <p className="text-xs text-muted-foreground">{editEmployee.email || editEmployee.phone}</p>
                 </div>
               </div>
 

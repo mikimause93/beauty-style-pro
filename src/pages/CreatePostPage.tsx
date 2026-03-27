@@ -224,8 +224,8 @@ export default function CreatePostPage() {
                     <ChevronRight className="w-3 h-3 text-primary-foreground" />
                   </div>
                 </div>
-                <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
-                <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+                <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-xs font-bold">Prima</div>
+                <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-xs font-bold">Dopo</div>
                 <input type="range" min={10} max={90} value={sliderPos}
                   onChange={e => setSliderPos(Number(e.target.value))}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
@@ -249,7 +249,7 @@ export default function CreatePostPage() {
                   <button onClick={() => beforeInputRef.current?.click()}
                     className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-all">
                     <Upload className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground">Carica foto</span>
+                    <span className="text-xs text-muted-foreground">Carica foto</span>
                   </button>
                 )}
               </div>
@@ -269,7 +269,7 @@ export default function CreatePostPage() {
                   <button onClick={() => afterInputRef.current?.click()}
                     className="w-full aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-all">
                     <Upload className="w-6 h-6 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground">Carica foto</span>
+                    <span className="text-xs text-muted-foreground">Carica foto</span>
                   </button>
                 )}
               </div>

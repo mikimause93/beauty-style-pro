@@ -116,10 +116,10 @@ export default function ProfessionalDashboardPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "confirmed": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold">Confermato</span>;
-      case "pending": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 font-semibold">In Attesa</span>;
-      case "cancelled": return <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-semibold">Annullato</span>;
-      default: return <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">{status}</span>;
+      case "confirmed": return <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 font-semibold">Confermato</span>;
+      case "pending": return <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 font-semibold">In Attesa</span>;
+      case "cancelled": return <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 font-semibold">Annullato</span>;
+      default: return <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">{status}</span>;
     }
   };
 
@@ -150,7 +150,7 @@ export default function ProfessionalDashboardPage() {
             <XCircle className="w-5 h-5 text-yellow-500 shrink-0" />
             <div className="text-left flex-1">
               <p className="text-xs font-semibold text-yellow-600">Account non verificato</p>
-              <p className="text-[10px] text-muted-foreground">Verifica il tuo account per sbloccare tutte le funzioni</p>
+              <p className="text-xs text-muted-foreground">Verifica il tuo account per sbloccare tutte le funzioni</p>
             </div>
           </button>
         )}
@@ -184,9 +184,9 @@ export default function ProfessionalDashboardPage() {
               <button key={action.label} onClick={() => navigate(action.path)}
                 className="flex flex-col items-center gap-1.5 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all">
                 <action.icon className="w-5 h-5 text-muted-foreground" />
-                <span className="text-[10px] font-medium text-muted-foreground">{action.label}</span>
+                <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
                 {action.count !== null && (
-                  <span className="text-[10px] font-bold text-primary">{action.count}</span>
+                  <span className="text-xs font-bold text-primary">{action.count}</span>
                 )}
               </button>
             ))}

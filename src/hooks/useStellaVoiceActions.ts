@@ -153,6 +153,34 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Apro il programma referral!" };
     }
 
+    // AI Preview commands
+    if (text.includes("anteprima") || text.includes("preview") || text.includes("prova look")) {
+      const sectorMatch = text.match(/(?:capelli|hair)/i) ? "hair"
+        : text.match(/(?:barba|barber)/i) ? "barber"
+        : text.match(/(?:tattoo|tatuaggio)/i) ? "tattoo"
+        : text.match(/(?:makeup|trucco)/i) ? "makeup"
+        : text.match(/(?:unghie|nails)/i) ? "nails"
+        : null;
+      navigate(sectorMatch ? `/ai-preview/${sectorMatch}` : "/ai-preview");
+      return { matched: true, response: `Apro l'anteprima AI${sectorMatch ? ` per ${sectorMatch}` : ""}!` };
+    }
+
+    // AI Look
+    if (text.includes("genera look") || text.includes("ai look") || text.includes("nuovo look")) {
+      navigate("/ai-look");
+      return { matched: true, response: "Apro il generatore di look AI!" };
+    }
+
+    // Promemoria / scheduling
+    const reminderMatch = text.match(/(?:ricordami|promemoria|ricorda)\s+(?:di\s+)?(.+?)(?:\s+(?:tra|per|domani|alle)\s+(.+))?$/);
+    if (reminderMatch) {
+      const what = reminderMatch[1];
+      const when = reminderMatch[2] || "più tardi";
+      navigate("/reminders");
+      toast.info(`Promemoria: "${what}" per ${when}`);
+      return { matched: true, response: `Creo un promemoria: "${what}" per ${when}!` };
+    }
+
     // Call commands
     const callMatch = text.match(/(?:chiama|telefona|videochiama)\s+(.+)/);
     if (callMatch) {
@@ -219,7 +247,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Attivo il tema scuro!", action: "theme:dark" };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova a dire 'apri chat', 'prenota', 'vai alla home', 'torna indietro', 'invia messaggio a...', 'cerca [termine]', 'cerca match a 10 km', o 'dimmi le notifiche'." };
+    return { matched: false, response: "Non ho capito il comando. Prova: 'apri chat', 'prenota', 'anteprima capelli', 'genera look', 'ricordami di...', 'cerca match a 10 km', 'invia messaggio a...', o 'dimmi le notifiche'." };
   }, [navigate]);
 
   return { processVoiceCommand };

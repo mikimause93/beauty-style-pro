@@ -256,12 +256,14 @@ serve(async (req) => {
     // Log conversation
     if (user_id) {
       const userMsg = chatMessages.slice(-1)[0]?.content || '';
-      await supabase.from("chatbot_messages").insert({
-        user_id,
-        message_type: role || "chat",
-        content: `User: ${userMsg}\nBot: ${reply}`,
-        status: "completed"
-      }).then(() => {}).catch(() => { /* Intentionally ignored: chat log persistence is non-critical */ });
+      try {
+        await supabase.from("chatbot_messages").insert({
+          user_id,
+          message_type: role || "chat",
+          content: `User: ${userMsg}\nBot: ${reply}`,
+          status: "completed"
+        });
+      } catch { /* chat log persistence is non-critical */ }
     }
 
     return jsonResponse({ reply, role: role || "auto" });

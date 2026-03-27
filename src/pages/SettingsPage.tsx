@@ -119,7 +119,7 @@ export default function SettingsPage() {
       <div className="px-5 py-6 space-y-6">
         {/* Account */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Account</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Account</p>
           <div className="space-y-1.5">
             <SettingRow icon={User} label="Modifica Profilo" onClick={() => navigate("/profile/edit")} />
             <SettingRow icon={Lock} label="Cambia Password" />
@@ -128,14 +128,14 @@ export default function SettingsPage() {
 
         {/* Location & Search */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Navigation className="w-4 h-4 text-primary" />
               <div className="flex-1">
                 <span className="text-sm">Condividi posizione</span>
                 {currentCoords && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}
                   </p>
                 )}
@@ -159,8 +159,8 @@ export default function SettingsPage() {
                 className="w-full accent-primary h-1"
               />
               <div className="flex justify-between mt-1">
-                <span className="text-[10px] text-muted-foreground">5 km</span>
-                <span className="text-[10px] text-muted-foreground">200 km</span>
+                <span className="text-xs text-muted-foreground">5 km</span>
+                <span className="text-xs text-muted-foreground">200 km</span>
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export default function SettingsPage() {
 
         {/* Notifications */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Notifiche</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Notifiche</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Bell className="w-4 h-4 text-primary" />
@@ -187,7 +187,7 @@ export default function SettingsPage() {
 
         {/* Preferences */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Preferenze</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Preferenze</p>
           <div className="space-y-1.5">
             {/* Theme Picker */}
             <div className="p-4 rounded-2xl bg-card border border-border/50">
@@ -261,7 +261,7 @@ export default function SettingsPage() {
 
         {/* Support */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Supporto</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Supporto</p>
           <div className="space-y-1.5">
             <SettingRow icon={Shield} label="Verifica Account" onClick={() => navigate("/verify-account")} />
             <SettingRow icon={HelpCircle} label="Centro Assistenza" />
@@ -276,7 +276,7 @@ export default function SettingsPage() {
           Logout
         </button>
 
-        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v1.0.0</p>
+        <p className="text-center text-xs text-muted-foreground pb-4">STYLE v1.0.0</p>
       </div>
     </MobileLayout>
   );

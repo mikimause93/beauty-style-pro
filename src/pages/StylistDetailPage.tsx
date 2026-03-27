@@ -46,7 +46,7 @@ export default function StylistDetailPage() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).single();
+      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).maybeSingle();
       if (pro) {
         // Fetch verification status from profile (authoritative source)
         const { data: profProfile } = await supabase.from("profiles").select("verification_status, user_type").eq("user_id", pro.user_id).maybeSingle();
@@ -118,18 +118,18 @@ export default function StylistDetailPage() {
           <div className="flex items-center gap-6 mt-4">
             <div className="text-center">
               <p className="font-bold">{followerCount > 999 ? `${(followerCount / 1000).toFixed(1)}K` : followerCount}</p>
-              <p className="text-[10px] text-muted-foreground">Followers</p>
+              <p className="text-xs text-muted-foreground">Followers</p>
             </div>
             <div className="text-center">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <p className="font-bold">{stylist.rating}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground">{stylist.reviewCount} reviews</p>
+              <p className="text-xs text-muted-foreground">{stylist.reviewCount} reviews</p>
             </div>
             <div className="text-center">
               <p className="font-bold">{services.length}</p>
-              <p className="text-[10px] text-muted-foreground">Servizi</p>
+              <p className="text-xs text-muted-foreground">Servizi</p>
             </div>
           </div>
 
@@ -184,7 +184,7 @@ export default function StylistDetailPage() {
                 <div className="text-right">
                   <p className="text-sm font-bold text-primary">€{service.price}</p>
                   <button onClick={() => navigate(`/booking/${id}?service=${service.id}`)}
-                    className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
+                    className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
                     Prenota
                   </button>
                 </div>
@@ -206,7 +206,7 @@ export default function StylistDetailPage() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{review.comment}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">{review.date}</p>
+                <p className="text-xs text-muted-foreground mt-1">{review.date}</p>
               </div>
             ))}
           </div>
