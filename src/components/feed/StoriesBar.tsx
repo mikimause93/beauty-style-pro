@@ -83,7 +83,7 @@ export default function StoriesBar() {
       arr.sort((a, b) => (a.isOwn ? -1 : b.isOwn ? 1 : 0));
       setGroups(arr);
     } else {
-      setGroups(fallbackStories);
+      setGroups([]);
     }
   };
 
