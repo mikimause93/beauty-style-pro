@@ -26,10 +26,7 @@ interface GroupedStory {
   isOwn: boolean;
 }
 
-const fallbackStories: GroupedStory[] = [
-  { user_id: "1", display_name: "Martina", avatar_url: stylist2, stories: [{ id: "s1", user_id: "1", media_url: beauty1, media_type: "image", caption: "New look today! ✨", view_count: 45, created_at: new Date().toISOString() }], isOwn: false },
-  { user_id: "2", display_name: "Sylvie", avatar_url: stylist1, stories: [{ id: "s2", user_id: "2", media_url: stylist1, media_type: "image", caption: "Work in progress 💇‍♀️", view_count: 32, created_at: new Date().toISOString() }], isOwn: false },
-];
+// No fallback/mock stories — only real DB content
 
 export default function StoriesBar() {
   const { user } = useAuth();
