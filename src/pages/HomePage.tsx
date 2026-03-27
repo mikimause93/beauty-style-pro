@@ -19,7 +19,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
-import logo from "@/assets/logo.png";
+
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
