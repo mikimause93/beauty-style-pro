@@ -2,12 +2,31 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface SignUpExtra {
+  phone?: string;
+  city?: string;
+  country?: string;
+  birth_date?: string;
+  bio?: string;
+  interests?: string[];
+  username?: string;
+  instagram?: string;
+  tiktok?: string;
+  facebook?: string;
+  iban?: string;
+  bank_holder_name?: string;
+  surname?: string;
+  whatsapp?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName: string, userType?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, userType?: string, extra?: SignUpExtra) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -82,12 +101,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string, userType: string = "client") => {
+  const signUp = async (email: string, password: string, displayName: string, userType: string = "client", extra?: SignUpExtra) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, user_type: userType },
+        data: {
+          display_name: displayName,
+          user_type: userType,
+          ...(extra ?? {}),
+        },
         emailRedirectTo: window.location.origin,
       },
     });
