@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Share2, Users, Gift, Coins, Check } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Users, Gift, Coins, Check, Link } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import MobileLayout from "@/components/layout/MobileLayout";
@@ -47,6 +47,10 @@ export default function ReferralPage() {
     setLoading(false);
   };
 
+  const referralLink = referralCode
+    ? `${window.location.origin}/auth?ref=${referralCode}`
+    : "";
+
   const copyCode = () => {
     navigator.clipboard.writeText(referralCode);
     setCopied(true);
@@ -54,21 +58,30 @@ export default function ReferralPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const [copiedLink, setCopiedLink] = useState(false);
+  const copyLink = () => {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink);
+    setCopiedLink(true);
+    toast.success("Link copiato!");
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   const shareCode = async () => {
     const shareData = {
       title: "Unisciti a STYLE Beauty!",
       text: `Unisciti a STYLE Beauty con il mio codice ${referralCode} e ricevi 20 QR Coin bonus! 🎁`,
-      url: window.location.origin,
+      url: referralLink || window.location.origin,
     };
     try {
       if (navigator.share && navigator.canShare?.(shareData)) {
         await navigator.share(shareData);
       } else {
-        copyCode();
+        copyLink();
       }
     } catch (err: any) {
       if (err?.name !== "AbortError") {
-        copyCode();
+        copyLink();
       }
     }
   };
@@ -122,6 +135,15 @@ export default function ReferralPage() {
             </button>
             <button onClick={shareCode} className="flex items-center justify-center gap-2 py-3 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm">
               <Share2 className="w-4 h-4" /> Condividi
+            </button>
+          </div>
+          {/* Referral deep link */}
+          <div className="mt-3 p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-2">
+            <Link className="w-4 h-4 text-muted-foreground shrink-0" />
+            <p className="flex-1 text-[11px] font-mono text-muted-foreground truncate">{referralLink || "..."}</p>
+            <button onClick={copyLink} className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold">
+              {copiedLink ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copiedLink ? "Copiato!" : "Copia link"}
             </button>
           </div>
         </div>
