@@ -12,6 +12,7 @@ export function useTheme() {
   useEffect(() => {
     const root = document.documentElement;
     if (theme === "light") {
+      root.classList.add("light");
       root.style.setProperty("--background", "0 0% 97%");
       root.style.setProperty("--foreground", "0 0% 8%");
       root.style.setProperty("--card", "0 0% 100%");
@@ -33,6 +34,7 @@ export function useTheme() {
       root.style.setProperty("--shadow-card", "0 4px 24px hsl(0 0% 0% / 0.08)");
       root.style.setProperty("--gold-foreground", "0 0% 8%");
     } else {
+      root.classList.remove("light");
       root.style.setProperty("--background", "0 0% 3%");
       root.style.setProperty("--foreground", "0 0% 95%");
       root.style.setProperty("--card", "0 0% 7%");

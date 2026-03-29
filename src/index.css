@@ -71,6 +71,39 @@
     --sidebar-accent-foreground: 220 15% 95%;
     --sidebar-border: 240 5% 14%;
     --sidebar-ring: 262 80% 62%;
+
+    --font-display: 'Sora', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  .light {
+    --background: 0 0% 97%;
+    --foreground: 0 0% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 0 0% 8%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 88%;
+
+    --gradient-card: linear-gradient(160deg, hsl(0 0% 100%), hsl(0 0% 97%));
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.08);
+    --gold-foreground: 0 0% 8%;
   }
 }
 
@@ -160,11 +193,17 @@
     backdrop-filter: blur(32px) saturate(1.4);
     -webkit-backdrop-filter: blur(32px) saturate(1.4);
     border-bottom: 1px solid hsl(0 0% 100% / 0.06);
+    @supports not (backdrop-filter: blur(1px)) {
+      background: hsl(var(--background) / 0.95);
+    }
   }
   .glass-light {
     background: hsl(0 0% 100% / 0.04);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    @supports not (backdrop-filter: blur(1px)) {
+      background: hsl(0 0% 100% / 0.14);
+    }
   }
   .glass-nav {
     background: hsl(var(--background) / 0.9);
@@ -172,6 +211,9 @@
     -webkit-backdrop-filter: blur(40px) saturate(1.5);
     border-top: 1px solid hsl(0 0% 100% / 0.06);
     overflow: visible;
+    @supports not (backdrop-filter: blur(1px)) {
+      background: hsl(var(--background) / 0.97);
+    }
   }
 
   /* Chrome card & borders */
