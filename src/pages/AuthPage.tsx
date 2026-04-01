@@ -119,13 +119,39 @@ export default function AuthPage() {
     setLocating(false);
   };
 
+  // ─── Auth error → Italian message ────────────────────
+  const translateAuthError = (msg: string): string => {
+    if (!msg) return "Errore sconosciuto. Riprova.";
+    const m = msg.toLowerCase();
+    if (m.includes("invalid login credentials") || m.includes("invalid credentials"))
+      return "Credenziali non valide. Controlla email e password.";
+    if (m.includes("email not confirmed"))
+      return "Email non ancora confermata. Clicca il link ricevuto per posta.";
+    if (m.includes("user already registered") || m.includes("already been registered"))
+      return "Utente già registrato con questa email.";
+    if (m.includes("password should be") || m.includes("password must be"))
+      return "La password deve essere di almeno 6 caratteri.";
+    if (m.includes("weak password"))
+      return "Password troppo debole. Usa almeno 6 caratteri.";
+    if (m.includes("rate limit") || m.includes("too many requests"))
+      return "Troppe richieste. Attendi qualche minuto e riprova.";
+    if (m.includes("network") || m.includes("fetch"))
+      return "Errore di connessione. Verifica la tua rete e riprova.";
+    return msg;
+  };
+
   // ─── Login ───────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    try {
+      const { error } = await signIn(email, password);
+      if (error) toast.error(translateAuthError(error.message));
+      else { toast.success("Benvenuto!"); navigate("/"); }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Errore di connessione. Verifica la tua rete e riprova.");
+    }
     setLoading(false);
   };
 
@@ -136,7 +162,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.signInWithOtp({ phone: normalized });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(translateAuthError(error.message)); }
     else { setOtpSent(true); toast.success("Codice OTP inviato via SMS!"); }
     setLoading(false);
   };
@@ -147,7 +173,7 @@ export default function AuthPage() {
     setLoading(true);
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
-    if (error) { toast.error(error.message); }
+    if (error) { toast.error(translateAuthError(error.message)); }
     else { toast.success("Accesso effettuato!"); navigate("/"); }
     setLoading(false);
   };
@@ -161,31 +187,40 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
-    
-    if (error) { 
-      toast.error(error.message); 
-      setLoading(false); 
-      return; 
+    // Build profile data to be saved via the DB trigger on user creation
+    const profileData = {
+      phone: phone || undefined,
+      surname: surname || undefined,
+      username: username || undefined,
+      city: city || undefined,
+      country: country || undefined,
+      birth_date: birthDate || undefined,
+      bio: bio || undefined,
+      interests: interests.length > 0 ? interests : undefined,
+      instagram: instagram || undefined,
+      tiktok: tiktok || undefined,
+      facebook: facebook || undefined,
+      whatsapp: whatsapp || undefined,
+      latitude: latitude ?? undefined,
+      longitude: longitude ?? undefined,
+    };
+
+    try {
+      const { error } = await signUp(email, password, displayName, accountType, profileData);
+
+      if (error) {
+        toast.error(translateAuthError(error.message));
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error("Errore di connessione. Verifica la tua rete e riprova.");
+      setLoading(false);
+      return;
     }
 
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
-    }
-
-    // Since email verification is now enabled, show verification screen
+    // Show email verification screen
     setRegistrationResult({
       success: true,
       email: email,
