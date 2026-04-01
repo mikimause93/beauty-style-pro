@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.publish_flag.outputs.should_publish }}
 
     steps:
       - name: Checkout repository
@@ -70,12 +72,23 @@ jobs:
           path: android/app/build/outputs/bundle/release/*.aab
           retention-days: 30
 
+      - name: Set publish flag
+        id: publish_flag
+        run: |
+          if [ -n "$GOOGLE_PLAY_SECRET" ]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GOOGLE_PLAY_SECRET: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
   publish:
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    if: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' }}
+    if: needs.build.outputs.should_publish == 'true'
 
     steps:
       - name: Download AAB artifact
