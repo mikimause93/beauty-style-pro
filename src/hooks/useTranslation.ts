@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { azureTranslate, isAzureTranslatorEnabled } from "@/lib/azureAI";
 
 export function useTranslation() {
   const [translating, setTranslating] = useState(false);
@@ -17,24 +18,32 @@ export function useTranslation() {
     const target = targetOverride || getUserLanguage();
     const cacheKey = `${text.slice(0, 80)}__${target}`;
     if (cacheRef.current.has(cacheKey)) return cacheRef.current.get(cacheKey)!;
-    
+
     setTranslating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("ai-translate", {
-        body: { 
-          text, 
-          sourceLang: "auto-detect",
-          targetLang: target 
-        },
-      });
-      if (error) throw error;
-      const result = data?.translated || text;
-      
+      let result: string;
+
+      if (isAzureTranslatorEnabled()) {
+        // Use Azure Translator when configured
+        result = await azureTranslate(text, target, "auto-detect");
+      } else {
+        // Fall back to Supabase Edge Function
+        const { data, error } = await supabase.functions.invoke("ai-translate", {
+          body: {
+            text,
+            sourceLang: "auto-detect",
+            targetLang: target,
+          },
+        });
+        if (error) throw error;
+        result = data?.translated || text;
+      }
+
       // Don't cache if translation is same as original (same language)
       if (result.trim().toLowerCase() === text.trim().toLowerCase()) {
         return text;
       }
-      
+
       cacheRef.current.set(cacheKey, result);
       return result;
     } catch {
