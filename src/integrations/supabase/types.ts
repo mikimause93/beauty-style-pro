@@ -5145,7 +5145,6 @@ export type Database = {
           active: boolean | null
           address: string | null
           bio: string | null
-          branding_theme: Json | null
           business_name: string | null
           business_type: string | null
           categories: string[] | null
@@ -5154,7 +5153,6 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string | null
-          employee_count: number | null
           facebook: string | null
           featured: boolean | null
           id: string | null
@@ -5177,7 +5175,6 @@ export type Database = {
           active?: boolean | null
           address?: string | null
           bio?: string | null
-          branding_theme?: Json | null
           business_name?: string | null
           business_type?: string | null
           categories?: string[] | null
@@ -5186,7 +5183,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
-          employee_count?: number | null
           facebook?: string | null
           featured?: boolean | null
           id?: string | null
@@ -5209,7 +5205,6 @@ export type Database = {
           active?: boolean | null
           address?: string | null
           bio?: string | null
-          branding_theme?: Json | null
           business_name?: string | null
           business_type?: string | null
           categories?: string[] | null
@@ -5218,7 +5213,6 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
-          employee_count?: number | null
           facebook?: string | null
           featured?: boolean | null
           id?: string | null
