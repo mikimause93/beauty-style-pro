@@ -171,6 +171,14 @@ export const useVoiceRecognition = (
 
       recognition.onend = () => {
         setIsWakeWordListening(false);
+        // Auto-restart wake word listening if it wasn't manually stopped
+        if (wakeWordRecognitionRef.current) {
+          setTimeout(() => {
+            if (!isListening) {
+              try { recognition.start(); setIsWakeWordListening(true); } catch {}
+            }
+          }, 1000);
+        }
       };
 
       recognition.start();

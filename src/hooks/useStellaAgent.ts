@@ -77,13 +77,14 @@ export function useStellaAgent() {
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
     onWakeWordDetected: () => {
+      setIsOpen(true);
       speak('Ciao! Come posso aiutarti?');
     },
   });
 
   const [messages, setMessages] = useState<StellaMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [wakeWordActive, setWakeWordActive] = useState(false);
+  const [wakeWordActive, setWakeWordActive] = useState(true);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
