@@ -65,7 +65,9 @@ export const useVoiceRecognition = (
 
   const stopWakeWordListening = useCallback(() => {
     if (wakeWordRecognitionRef.current) {
-      wakeWordRecognitionRef.current.stop();
+      const ref = wakeWordRecognitionRef.current;
+      wakeWordRecognitionRef.current = null; // prevent auto-restart
+      ref.stop();
       setIsWakeWordListening(false);
     }
   }, []);
@@ -171,6 +173,14 @@ export const useVoiceRecognition = (
 
       recognition.onend = () => {
         setIsWakeWordListening(false);
+        // Auto-restart wake word listening if it wasn't manually stopped
+        if (wakeWordRecognitionRef.current) {
+          setTimeout(() => {
+            if (!isListening) {
+              try { recognition.start(); setIsWakeWordListening(true); } catch {}
+            }
+          }, 1000);
+        }
       };
 
       recognition.start();
