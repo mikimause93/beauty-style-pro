@@ -95,7 +95,7 @@ export default function WalletPage() {
     if (cleanIban.length < 15 || cleanIban.length > 34) { toast.error("IBAN non valido"); return; }
     if (!ibanForm.holder.trim()) { toast.error("Inserisci l'intestatario"); return; }
 
-    const { data: existing } = await supabase.from("profiles_private").select("id").eq("user_id", user!.id).maybeSingle();
+    const { data: existingPrivate } = await supabase.from("profiles_private").select("id").eq("user_id", user!.id).maybeSingle();
     if (existing) {
       await supabase.from("profiles_private").update({
         iban: cleanIban,
