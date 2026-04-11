@@ -18,7 +18,6 @@ const LIMITS = {
   search: { perHour: 999, cooldownMs: 0 },
 } as const;
 
-// Actions that ALWAYS require voice confirmation before executing
 const CONFIRMATION_REQUIRED = new Set([
   'book', 'payment', 'follow', 'message', 'delete', 'spend_coins',
 ]);
@@ -40,20 +39,17 @@ interface StellaMessage {
   pending?: StellaCommand;
 }
 
-// In-memory rate-limit tracker
 const actionCounts = new Map<string, { count: number; resetAt: number }>();
 
 function checkLimit(actionType: string): { allowed: boolean; remaining: number } {
   const limit = LIMITS[actionType as keyof typeof LIMITS] ?? { perHour: 30 };
-  const key = actionType;
   const now = Date.now();
-  let entry = actionCounts.get(key);
+  let entry = actionCounts.get(actionType);
   if (!entry || now > entry.resetAt) {
     entry = { count: 0, resetAt: now + 3600000 };
-    actionCounts.set(key, entry);
+    actionCounts.set(actionType, entry);
   }
-  const remaining = limit.perHour - entry.count;
-  return { allowed: remaining > 0, remaining };
+  return { allowed: limit.perHour - entry.count > 0, remaining: limit.perHour - entry.count };
 }
 
 function recordAction(actionType: string) {
@@ -90,8 +86,8 @@ export function useStellaAgent() {
   const [wakeWordActive, setWakeWordActive] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
+  const [isAIThinking, setIsAIThinking] = useState(false);
 
-  // Process transcript when listening stops
   useEffect(() => {
     if (transcript && !isListening) {
       handleCommand(transcript);
@@ -108,48 +104,86 @@ export function useStellaAgent() {
     if (ttsEnabled) speak(text);
   }, [ttsEnabled, speak]);
 
-  // ── Command parser ──────────────────────────────────────────────────────
+  // ── FULL NAVIGATION MAP (all app routes) ─────────────────────────────────
   const parseCommand = useCallback((text: string): StellaCommand | null => {
     const t = text.toLowerCase().trim();
 
-    // ── NAVIGATION (free, no confirmation) ────────────────────────────────
     const navRoutes: Array<{ patterns: string[]; route: string; response: string }> = [
-      { patterns: ['vai alla home', 'apri home', 'torna alla home'], route: '/', response: 'Ti porto alla home!' },
-      { patterns: ['apri chat', 'vai alla chat', 'messaggi'], route: '/chat', response: 'Apro la chat!' },
-      { patterns: ['apri notifiche', 'le notifiche', 'dimmi le notifiche'], route: '/notifications', response: 'Ecco le tue notifiche!' },
-      { patterns: ['apri profilo', 'vai al profilo', 'il mio profilo'], route: '/profile', response: 'Ecco il tuo profilo!' },
-      { patterns: ['apri wallet', 'vai al wallet', 'portafoglio'], route: '/wallet', response: 'Apro il tuo wallet!' },
-      { patterns: ['apri mappa', 'cerca sulla mappa', 'mappa'], route: '/map-search', response: 'Apro la mappa!' },
-      { patterns: ['vai allo shop', 'apri shop', 'negozio'], route: '/shop', response: 'Apro lo shop!' },
-      { patterns: ['vai alle missioni', 'apri missioni'], route: '/missions', response: 'Ecco le tue missioni!' },
-      { patterns: ['gira la ruota', 'ruota della fortuna'], route: '/spin', response: 'Apro la ruota della fortuna!' },
-      { patterns: ['vai in live', 'apri live'], route: '/live', response: 'Ti porto nella sezione live!' },
-      { patterns: ['apri radio', 'musica'], route: '/radio', response: 'Apro la radio!' },
-      { patterns: ['impostazioni', 'apri impostazioni'], route: '/settings', response: 'Apro le impostazioni!' },
-      { patterns: ['esplora', 'apri esplora'], route: '/explore', response: 'Apro la sezione esplora!' },
-      { patterns: ['crea post', 'pubblica'], route: '/create-post', response: 'Apro la creazione di un nuovo post!' },
-      { patterns: ['le mie prenotazioni', 'mostra prenotazioni'], route: '/my-bookings', response: 'Ecco le tue prenotazioni!' },
+      // Core
+      { patterns: ['vai alla home', 'apri home', 'torna alla home', 'home page'], route: '/', response: 'Ti porto alla home!' },
+      { patterns: ['apri chat', 'vai alla chat', 'messaggi', 'apri messaggi'], route: '/chat', response: 'Apro la chat!' },
+      { patterns: ['apri notifiche', 'le notifiche', 'dimmi le notifiche', 'vedi notifiche'], route: '/notifications', response: 'Ecco le tue notifiche!' },
+      { patterns: ['apri profilo', 'vai al profilo', 'il mio profilo', 'modifica profilo'], route: '/profile', response: 'Ecco il tuo profilo!' },
+      { patterns: ['modifica profilo', 'edit profilo', 'cambia profilo'], route: '/profile/edit', response: 'Apro la modifica del profilo!' },
+      { patterns: ['apri wallet', 'vai al wallet', 'portafoglio', 'i miei soldi'], route: '/wallet', response: 'Apro il tuo wallet!' },
+      { patterns: ['apri mappa', 'cerca sulla mappa', 'mappa', 'professionisti vicini'], route: '/map-search', response: 'Apro la mappa!' },
+      { patterns: ['vai allo shop', 'apri shop', 'negozio', 'prodotti'], route: '/shop', response: 'Apro lo shop!' },
+      { patterns: ['vai alle missioni', 'apri missioni', 'missioni'], route: '/missions', response: 'Ecco le tue missioni!' },
+      { patterns: ['gira la ruota', 'ruota della fortuna', 'spin'], route: '/spin', response: 'Apro la ruota della fortuna!' },
+      { patterns: ['vai in live', 'apri live', 'streaming'], route: '/live', response: 'Ti porto nella sezione live!' },
+      { patterns: ['apri radio', 'musica', 'radio'], route: '/radio', response: 'Apro la radio!' },
+      { patterns: ['impostazioni', 'apri impostazioni', 'settings'], route: '/settings', response: 'Apro le impostazioni!' },
+      { patterns: ['esplora', 'apri esplora', 'scopri'], route: '/explore', response: 'Apro la sezione esplora!' },
+      { patterns: ['crea post', 'pubblica', 'nuovo post', 'scrivi post'], route: '/create-post', response: 'Apro la creazione di un nuovo post!' },
+      { patterns: ['le mie prenotazioni', 'mostra prenotazioni', 'i miei appuntamenti'], route: '/my-bookings', response: 'Ecco le tue prenotazioni!' },
       { patterns: ['classifica', 'leaderboard'], route: '/leaderboard', response: 'Apro la classifica!' },
-      { patterns: ['sfide', 'challenge'], route: '/challenges', response: 'Ecco le sfide attive!' },
-      { patterns: ['shorts', 'video brevi'], route: '/shorts', response: 'Apro i video shorts!' },
+      { patterns: ['sfide', 'challenge', 'sfida'], route: '/challenges', response: 'Ecco le sfide attive!' },
+      { patterns: ['shorts', 'video brevi', 'reels'], route: '/shorts', response: 'Apro i video shorts!' },
       { patterns: ['eventi', 'apri eventi'], route: '/events', response: 'Ecco gli eventi!' },
-      { patterns: ['marketplace', 'apri marketplace'], route: '/marketplace', response: 'Apro il marketplace!' },
+      { patterns: ['marketplace', 'apri marketplace', 'mercato'], route: '/marketplace', response: 'Apro il marketplace!' },
       { patterns: ['spa', 'terme', 'benessere'], route: '/spa-terme', response: 'Ecco le Spa e Terme!' },
-      { patterns: ['quiz', 'gioca al quiz'], route: '/quiz-live', response: 'Apro il Quiz Live!' },
-      { patterns: ['talent', 'gioco talent'], route: '/talent-game', response: 'Apro il Talent Game!' },
-      { patterns: ['referral', 'invita amici'], route: '/referral', response: 'Apro il programma referral!' },
-      { patterns: ['abbonamento', 'abbonamenti', 'subscription'], route: '/subscriptions', response: 'Ecco i piani di abbonamento!' },
-      { patterns: ['promemoria', 'reminder'], route: '/reminders', response: 'Ecco i tuoi promemoria!' },
+      { patterns: ['quiz', 'gioca al quiz', 'quiz live'], route: '/quiz-live', response: 'Apro il Quiz Live!' },
+      { patterns: ['talent', 'gioco talent', 'talent game'], route: '/talent-game', response: 'Apro il Talent Game!' },
+      { patterns: ['referral', 'invita amici', 'programma inviti'], route: '/referral', response: 'Apro il programma referral!' },
+      { patterns: ['abbonamento', 'abbonamenti', 'subscription', 'piano'], route: '/subscriptions', response: 'Ecco i piani di abbonamento!' },
+      { patterns: ['promemoria', 'reminder', 'ricordami'], route: '/reminders', response: 'Ecco i tuoi promemoria!' },
+      { patterns: ['stilisti', 'parrucchieri', 'professionisti', 'trova stilista'], route: '/stylists', response: 'Ecco i professionisti!' },
+      { patterns: ['qr coin', 'le mie monete', 'coins', 'qr coins'], route: '/qr-coins', response: 'Ecco i tuoi QR Coins!' },
+      { patterns: ['prima dopo', 'before after', 'trasformazioni'], route: '/before-after', response: 'Apro le trasformazioni!' },
+      { patterns: ['offerte', 'promozioni', 'sconti'], route: '/offers', response: 'Ecco le offerte!' },
+      { patterns: ['aste', 'asta', 'auction'], route: '/auctions', response: 'Apro le aste!' },
+      { patterns: ['ricevute', 'scontrini', 'receipts'], route: '/receipts', response: 'Ecco le tue ricevute!' },
+      { patterns: ['verifica account', 'verifica profilo', 'verificami'], route: '/verify-account', response: 'Apro la verifica account!' },
+      // Business & HR
+      { patterns: ['dashboard business', 'pannello business', 'gestione attività'], route: '/business', response: 'Apro la dashboard business!' },
+      { patterns: ['gestisci team', 'team dipendenti', 'i miei dipendenti'], route: '/business/team', response: 'Apro la gestione del team!' },
+      { patterns: ['turni dipendenti', 'gestisci turni', 'orari lavoro'], route: '/business/team/shifts', response: 'Apro la gestione turni!' },
+      { patterns: ['risorse umane', 'hr', 'assunzioni', 'lavoro'], route: '/hr', response: 'Apro la sezione HR!' },
+      { patterns: ['crea annuncio lavoro', 'pubblica offerta lavoro'], route: '/hr/create-job', response: 'Creo un nuovo annuncio di lavoro!' },
+      { patterns: ['gestisci prodotti', 'i miei prodotti', 'catalogo'], route: '/manage-products', response: 'Apro la gestione prodotti!' },
+      { patterns: ['analytics', 'statistiche', 'dati'], route: '/analytics', response: 'Apro le statistiche!' },
+      { patterns: ['affiliato', 'affiliate', 'programma affiliazione'], route: '/affiliate', response: 'Apro il programma affiliazione!' },
+      { patterns: ['dashboard professionale', 'pannello pro'], route: '/professional-dashboard', response: 'Apro la dashboard professionale!' },
+      { patterns: ['boost profilo', 'promuovi profilo', 'sponsorizza'], route: '/boost', response: 'Apro il boost profilo!' },
+      { patterns: ['diventa creator', 'creator', 'applicazione creator'], route: '/become-creator', response: 'Apro l\'applicazione creator!' },
+      // AI features
+      { patterns: ['assistente ai', 'stella', 'ai assistant', 'assistente'], route: '/ai-assistant', response: 'Apro l\'assistente AI!' },
+      { patterns: ['ai look', 'prova look', 'genera look', 'cambio look', 'prova taglio', 'prova colore'], route: '/ai-look', response: 'Apro il generatore di look AI!' },
+      { patterns: ['anteprima ai', 'ai preview', 'prova stile'], route: '/ai-preview', response: 'Apro l\'anteprima AI!' },
+      // V7 modules
+      { patterns: ['calendario contenuti', 'content calendar', 'pianifica contenuti', 'piano editoriale'], route: '/content-calendar', response: 'Apro il calendario contenuti!' },
+      { patterns: ['analisi predittiva', 'predictive', 'previsioni', 'forecasting', 'predittiva'], route: '/predictive-analytics', response: 'Apro l\'analisi predittiva!' },
+      { patterns: ['automazione social', 'social automation', 'gestisci social', 'social media'], route: '/social-automation', response: 'Apro l\'automazione social!' },
+      { patterns: ['genera sito', 'website generator', 'crea sito', 'landing page'], route: '/website-generator', response: 'Apro il generatore di siti web!' },
+      { patterns: ['white label', 'agenzia', 'rivendita', 'reseller'], route: '/white-label', response: 'Apro il pannello White Label!' },
+      { patterns: ['impostazioni globali', 'multi lingua', 'multi country', 'lingue e valute'], route: '/global-settings', response: 'Apro le impostazioni globali!' },
+      { patterns: ['enterprise api', 'api key', 'webhook', 'chiavi api', 'api'], route: '/enterprise-api', response: 'Apro la dashboard Enterprise API!' },
+      { patterns: ['tenant', 'pannello tenant', 'multi tenant'], route: '/tenant', response: 'Apro il pannello tenant!' },
+      // Live features
+      { patterns: ['vai live', 'go live', 'inizia streaming', 'avvia diretta'], route: '/go-live', response: 'Ti preparo per andare in diretta!' },
+      { patterns: ['battle live', 'sfida live', 'live battle'], route: '/live-battle', response: 'Apro le Live Battle!' },
+      { patterns: ['trasformazione', 'challenge trasformazione'], route: '/transformation-challenge', response: 'Apro le sfide di trasformazione!' },
+      // Payments
+      { patterns: ['checkout', 'paga', 'procedi al pagamento'], route: '/checkout', response: 'Apro il checkout!' },
+      { patterns: ['rate', 'pagamento rateale', 'finanziamento'], route: '/installments', response: 'Apro i pagamenti rateali!' },
+      { patterns: ['acquisti', 'storico acquisti', 'cronologia acquisti'], route: '/purchases', response: 'Ecco lo storico acquisti!' },
     ];
 
     for (const nav of navRoutes) {
       if (nav.patterns.some(p => t.includes(p))) {
         return {
-          id: Date.now().toString(),
-          type: 'navigate',
-          text,
-          response: nav.response,
-          requiresConfirmation: false,
+          id: Date.now().toString(), type: 'navigate', text,
+          response: nav.response, requiresConfirmation: false,
           execute: () => navigate(nav.route),
         };
       }
@@ -162,8 +196,33 @@ export function useStellaAgent() {
     if (t.includes('scorri su') || t.includes('vai su')) {
       return { id: Date.now().toString(), type: 'navigate', text, response: 'Scorro verso l\'alto!', requiresConfirmation: false, execute: () => window.scrollBy({ top: -400, behavior: 'smooth' }) };
     }
-    if (t.includes('scorri giù') || t.includes('vai giù')) {
+    if (t.includes('scorri giù') || t.includes('vai giù') || t.includes('scorri in basso')) {
       return { id: Date.now().toString(), type: 'navigate', text, response: 'Scorro verso il basso!', requiresConfirmation: false, execute: () => window.scrollBy({ top: 400, behavior: 'smooth' }) };
+    }
+    if (t.includes('vai in cima') || t.includes('torna su') || t.includes('inizio pagina')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Torno all\'inizio!', requiresConfirmation: false, execute: () => window.scrollTo({ top: 0, behavior: 'smooth' }) };
+    }
+    if (t.includes('vai in fondo') || t.includes('fine pagina')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Scorro in fondo!', requiresConfirmation: false, execute: () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }) };
+    }
+    if (t.includes('ricarica') || t.includes('aggiorna pagina') || t.includes('refresh')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Ricarico la pagina!', requiresConfirmation: false, execute: () => window.location.reload() };
+    }
+
+    // ── THEME ─────────────────────────────────────────────────────────────
+    if (t.includes('tema chiaro') || t.includes('light mode') || t.includes('modalità chiara')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema chiaro! ☀️', requiresConfirmation: false, execute: () => {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        toast.success('Tema chiaro attivato');
+      }};
+    }
+    if (t.includes('tema scuro') || t.includes('dark mode') || t.includes('modalità scura')) {
+      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema scuro! 🌙', requiresConfirmation: false, execute: () => {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        toast.success('Tema scuro attivato');
+      }};
     }
 
     // ── MESSAGE (requires confirmation) ───────────────────────────────────
@@ -175,10 +234,7 @@ export function useStellaAgent() {
         id: Date.now().toString(), type: 'message', text,
         response: `Vuoi che invii a ${recipient}: "${content}"? Confermi?`,
         requiresConfirmation: true,
-        execute: () => {
-          navigate('/chat');
-          toast.info(`Cerco "${recipient}" per inviare: "${content}"`);
-        },
+        execute: () => { navigate('/chat'); toast.info(`Cerco "${recipient}" per inviare: "${content}"`); },
       };
     }
     const msgSimple = t.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
@@ -191,12 +247,11 @@ export function useStellaAgent() {
       };
     }
 
-    // ── LIKE (limited to 20/hour, no confirmation) ────────────────────────
+    // ── LIKE (rate limited, no confirmation) ──────────────────────────────
     if (t.match(/metti\s+like|dai\s+like|mi\s+piace/)) {
       return {
         id: Date.now().toString(), type: 'like', text,
-        response: 'Like aggiunto! ❤️',
-        requiresConfirmation: false,
+        response: 'Like aggiunto! ❤️', requiresConfirmation: false,
         execute: () => { toast.success('Like aggiunto!'); recordAction('like'); },
       };
     }
@@ -240,19 +295,17 @@ export function useStellaAgent() {
       const q = searchMatch[1].trim();
       return {
         id: Date.now().toString(), type: 'search', text,
-        response: `Cerco "${q}"!`,
-        requiresConfirmation: false,
+        response: `Cerco "${q}"!`, requiresConfirmation: false,
         execute: () => navigate(`/search?q=${encodeURIComponent(q)}`),
       };
     }
 
-    // ── MAP SEARCH with distance ──────────────────────────────────────────
+    // ── MAP SEARCH ────────────────────────────────────────────────────────
     const mapMatch = t.match(/cerca\s+(?:match|amici|persone|stilisti)\s+(?:a|entro|vicino|nel\s+raggio\s+di)\s*(\d+)\s*km/);
     if (mapMatch) {
       return {
         id: Date.now().toString(), type: 'search', text,
-        response: `Cerco match entro ${mapMatch[1]} km!`,
-        requiresConfirmation: false,
+        response: `Cerco match entro ${mapMatch[1]} km!`, requiresConfirmation: false,
         execute: () => navigate(`/map-search?radius=${mapMatch[1]}`),
       };
     }
@@ -269,40 +322,20 @@ export function useStellaAgent() {
       return { id: Date.now().toString(), type: 'info', text, response: 'Apro le tue prenotazioni per verificare!', requiresConfirmation: false, execute: () => navigate('/my-bookings') };
     }
 
-    // ── THEME ─────────────────────────────────────────────────────────────
-    if (t.includes('tema chiaro') || t.includes('light mode') || t.includes('modalità chiara')) {
-      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema chiaro! ☀️', requiresConfirmation: false, execute: () => {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-        toast.success('Tema chiaro attivato');
-      }};
-    }
-    if (t.includes('tema scuro') || t.includes('dark mode') || t.includes('modalità scura')) {
-      return { id: Date.now().toString(), type: 'navigate', text, response: 'Attivo il tema scuro! 🌙', requiresConfirmation: false, execute: () => {
-        document.documentElement.classList.remove('light');
-        document.documentElement.classList.add('dark');
-        toast.success('Tema scuro attivato');
-      }};
-    }
-
     // ── SCHEDULING (requires confirmation) ────────────────────────────────
     const scheduleMatch = t.match(/(?:ricordami|promemoria|schedula|programma)\s+(?:di\s+)?(.+?)(?:\s+(?:tra|fra|per|il|domani|dopodomani)\s+(.+))?$/);
     if (scheduleMatch && user) {
       const actionDesc = scheduleMatch[1]?.trim() || 'azione programmata';
       const timeDesc = scheduleMatch[2]?.trim() || 'domani';
-      // Simple time parsing
-      let scheduledDate = new Date();
+      const scheduledDate = new Date();
       if (timeDesc.includes('domani')) scheduledDate.setDate(scheduledDate.getDate() + 1);
       else if (timeDesc.includes('dopodomani')) scheduledDate.setDate(scheduledDate.getDate() + 2);
       else if (timeDesc.match(/(\d+)\s*(?:ore|ora|h)/)) {
-        const hours = parseInt(timeDesc.match(/(\d+)\s*(?:ore|ora|h)/)![1]);
-        scheduledDate.setHours(scheduledDate.getHours() + hours);
+        scheduledDate.setHours(scheduledDate.getHours() + parseInt(timeDesc.match(/(\d+)\s*(?:ore|ora|h)/)![1]));
       } else if (timeDesc.match(/(\d+)\s*(?:minuti|min)/)) {
-        const mins = parseInt(timeDesc.match(/(\d+)\s*(?:minuti|min)/)![1]);
-        scheduledDate.setMinutes(scheduledDate.getMinutes() + mins);
+        scheduledDate.setMinutes(scheduledDate.getMinutes() + parseInt(timeDesc.match(/(\d+)\s*(?:minuti|min)/)![1]));
       } else if (timeDesc.match(/(\d+)\s*(?:giorni|giorno|gg)/)) {
-        const days = parseInt(timeDesc.match(/(\d+)\s*(?:giorni|giorno|gg)/)![1]);
-        scheduledDate.setDate(scheduledDate.getDate() + days);
+        scheduledDate.setDate(scheduledDate.getDate() + parseInt(timeDesc.match(/(\d+)\s*(?:giorni|giorno|gg)/)![1]));
       }
 
       return {
@@ -323,8 +356,53 @@ export function useStellaAgent() {
       };
     }
 
+    // ── HELP ──────────────────────────────────────────────────────────────
+    if (t.includes('aiuto') || t.includes('help') || t.includes('cosa puoi fare') || t.includes('comandi')) {
+      return {
+        id: Date.now().toString(), type: 'info', text,
+        response: '🌟 Posso fare tutto! Ecco alcuni comandi:\n' +
+          '📱 Navigazione: "apri home", "vai allo shop", "apri chat"\n' +
+          '✂️ Prenotazioni: "prenota", "le mie prenotazioni"\n' +
+          '💬 Messaggi: "invia messaggio a Mario"\n' +
+          '🔍 Ricerca: "cerca parrucchiere"\n' +
+          '🎨 AI: "prova look", "genera sito", "analisi predittiva"\n' +
+          '📊 Business: "dashboard business", "calendario contenuti"\n' +
+          '⚙️ Sistema: "tema scuro", "scorri giù", "ricarica"\n' +
+          'Oppure chiedimi qualsiasi cosa!',
+        requiresConfirmation: false,
+        execute: () => {},
+      };
+    }
+
     return null;
-  }, [navigate, profile]);
+  }, [navigate, profile, user]);
+
+  // ── AI Fallback (when no command matched) ──────────────────────────────
+  const askAI = useCallback(async (text: string) => {
+    setIsAIThinking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-beauty-assistant', {
+        body: {
+          message: text,
+          context: {
+            user_type: profile?.user_type || 'client',
+            user_name: profile?.display_name || 'Utente',
+            qr_coins: profile?.qr_coins || 0,
+          },
+        },
+      });
+      if (error) throw error;
+      const aiResponse = data?.response || data?.message || 'Mi dispiace, non sono riuscita a elaborare la risposta. Riprova!';
+      addMessage({ role: 'stella', content: aiResponse, type: 'text' });
+      stellaSpeak(aiResponse.length > 200 ? aiResponse.substring(0, 200) + '...' : aiResponse);
+    } catch {
+      const fallback = 'Stella AI è temporaneamente offline. Posso aiutarti con navigazione e comandi: dì "aiuto" per la lista!';
+      addMessage({ role: 'stella', content: fallback, type: 'text' });
+      stellaSpeak(fallback);
+    } finally {
+      setIsAIThinking(false);
+    }
+  }, [addMessage, stellaSpeak, profile]);
 
   // ── Handle command ──────────────────────────────────────────────────────
   const handleCommand = useCallback((text: string) => {
@@ -332,13 +410,11 @@ export function useStellaAgent() {
 
     const cmd = parseCommand(text);
     if (!cmd) {
-      const fallback = 'Non ho capito. Prova: "apri chat", "prenota", "cerca [termine]", "invia messaggio a...", "torna indietro".';
-      addMessage({ role: 'stella', content: fallback });
-      stellaSpeak(fallback);
+      // No match → ask AI
+      askAI(text);
       return;
     }
 
-    // Rate limit check
     const limit = checkLimit(cmd.type);
     if (!limit.allowed) {
       const msg = `Hai raggiunto il limite di ${cmd.type} per quest'ora. Rimanenti: ${limit.remaining}`;
@@ -357,18 +433,14 @@ export function useStellaAgent() {
       addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
       stellaSpeak(cmd.response);
 
-      // Log to DB
       if (user) {
         supabase.from('stella_commands').insert({
-          user_id: user.id,
-          command_text: text,
-          command_type: cmd.type,
-          status: 'completed',
-          executed_at: new Date().toISOString(),
+          user_id: user.id, command_text: text, command_type: cmd.type,
+          status: 'completed', executed_at: new Date().toISOString(),
         }).then(() => {});
       }
     }
-  }, [addMessage, parseCommand, stellaSpeak, user]);
+  }, [addMessage, parseCommand, stellaSpeak, askAI, user]);
 
   // ── Confirm / Cancel pending action ─────────────────────────────────────
   const confirmAction = useCallback(() => {
@@ -380,16 +452,11 @@ export function useStellaAgent() {
 
     if (user) {
       supabase.from('stella_commands').insert({
-        user_id: user.id,
-        command_text: pendingCommand.text,
-        command_type: pendingCommand.type,
-        status: 'completed',
-        requires_confirmation: true,
-        confirmed_at: new Date().toISOString(),
-        executed_at: new Date().toISOString(),
+        user_id: user.id, command_text: pendingCommand.text, command_type: pendingCommand.type,
+        status: 'completed', requires_confirmation: true,
+        confirmed_at: new Date().toISOString(), executed_at: new Date().toISOString(),
       }).then(() => {});
     }
-
     setPendingCommand(null);
   }, [pendingCommand, addMessage, stellaSpeak, user]);
 
@@ -399,53 +466,28 @@ export function useStellaAgent() {
     stellaSpeak('Annullato.');
   }, [addMessage, stellaSpeak]);
 
-  // ── Text input handler ──────────────────────────────────────────────────
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
     handleCommand(text.trim());
   }, [handleCommand]);
 
-  // ── Wake word toggle ────────────────────────────────────────────────────
   const toggleWakeWord = useCallback(() => {
-    if (wakeWordActive) {
-      stopWakeWordListening();
-      setWakeWordActive(false);
-    } else {
-      startWakeWordListening();
-      setWakeWordActive(true);
-    }
+    if (wakeWordActive) { stopWakeWordListening(); setWakeWordActive(false); }
+    else { startWakeWordListening(); setWakeWordActive(true); }
   }, [wakeWordActive, startWakeWordListening, stopWakeWordListening]);
 
-  const toggleTTS = useCallback(() => {
-    setTtsEnabled(prev => !prev);
-  }, []);
+  const toggleTTS = useCallback(() => setTtsEnabled(prev => !prev), []);
 
   const toggleListening = useCallback(() => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+    if (isListening) stopListening(); else startListening();
   }, [isListening, startListening, stopListening]);
 
   return {
-    messages,
-    isOpen,
-    setIsOpen,
-    wakeWordActive,
-    ttsEnabled,
-    isListening,
-    isWakeWordListening,
-    interimTranscript,
-    speaking,
-    pendingCommand,
-    isSupported,
-    toggleWakeWord,
-    toggleTTS,
-    toggleListening,
-    sendTextCommand,
-    confirmAction,
-    cancelAction,
+    messages, isOpen, setIsOpen, wakeWordActive, ttsEnabled,
+    isListening, isWakeWordListening, interimTranscript, speaking,
+    pendingCommand, isSupported, isAIThinking,
+    toggleWakeWord, toggleTTS, toggleListening,
+    sendTextCommand, confirmAction, cancelAction,
     clearMessages: useCallback(() => setMessages([]), []),
   };
 }
