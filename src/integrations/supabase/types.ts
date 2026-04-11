@@ -4138,6 +4138,157 @@ export type Database = {
           },
         ]
       }
+      tenant_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: string
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: string
+          tenant_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: string
+          tenant_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_members: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string
+          permissions: string[] | null
+          role: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          permissions?: string[] | null
+          role?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          permissions?: string[] | null
+          role?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          brand_colors: Json | null
+          country: string | null
+          cover_url: string | null
+          created_at: string
+          currency: string | null
+          custom_domain: string | null
+          description: string | null
+          features_enabled: string[] | null
+          id: string
+          language: string | null
+          logo_url: string | null
+          max_members: number | null
+          name: string
+          owner_id: string
+          plan: string
+          settings: Json | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_colors?: Json | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          language?: string | null
+          logo_url?: string | null
+          max_members?: number | null
+          name: string
+          owner_id: string
+          plan?: string
+          settings?: Json | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_colors?: Json | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          language?: string | null
+          logo_url?: string | null
+          max_members?: number | null
+          name?: string
+          owner_id?: string
+          plan?: string
+          settings?: Json | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tracks: {
         Row: {
           artist: string
