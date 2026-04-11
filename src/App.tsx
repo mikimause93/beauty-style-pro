@@ -217,6 +217,8 @@ const App = () => {
             <Route path="/content-calendar" element={<P><ContentCalendarPage /></P>} />
             <Route path="/predictive-analytics" element={<P><PredictiveAnalyticsPage /></P>} />
             <Route path="/social-automation" element={<P><SocialAutomationPage /></P>} />
+            <Route path="/website-generator" element={<P><WebsiteGeneratorPage /></P>} />
+            <Route path="/white-label" element={<P><WhiteLabelPage /></P>} />
             <Route path="/tenant" element={<P><TenantDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />

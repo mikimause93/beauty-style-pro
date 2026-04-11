@@ -154,6 +154,8 @@ export function useStellaVoiceActions() {
       { patterns: ["calendario contenuti", "content calendar", "pianifica social", "piano editoriale"], path: "/content-calendar", response: "Apro il calendario contenuti!" },
       { patterns: ["previsioni", "predictive", "analisi predittiva", "ai predittiva", "previsione revenue"], path: "/predictive-analytics", response: "Apro le analisi predittive AI!" },
       { patterns: ["social automation", "automazione social", "gestisci social", "automatizza social"], path: "/social-automation", response: "Apro la gestione social automation!" },
+      { patterns: ["genera sito", "website generator", "crea sito", "il mio sito", "landing page"], path: "/website-generator", response: "Apro il generatore di siti web!" },
+      { patterns: ["white label", "whitelabel", "rivendi", "agenzia", "reseller"], path: "/white-label", response: "Apro il pannello white-label!" },
     ];
 
     for (const cmd of navCommands) {
