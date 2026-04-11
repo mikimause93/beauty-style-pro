@@ -33,6 +33,18 @@ interface ErrorLog {
 }
 
 export default function DebugPanelPage() {
+  // Block debug panel in production
+  if (import.meta.env.PROD) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+          <ShieldCheck className="w-16 h-16 text-muted-foreground" />
+          <h1 className="text-xl font-bold">Non disponibile</h1>
+          <p className="text-sm text-muted-foreground">Il Debug Panel non è disponibile in produzione.</p>
+        </div>
+      </MobileLayout>
+    );
+  }
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);

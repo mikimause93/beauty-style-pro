@@ -10,6 +10,13 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Server-to-server auth: require INTERNAL_SECRET
+    const secret = req.headers.get('x-internal-secret');
+    const expected = Deno.env.get('INTERNAL_SECRET');
+    if (!expected || secret !== expected) {
+      return jsonResponse({ error: "Forbidden" }, 403);
+    }
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
