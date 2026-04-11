@@ -96,7 +96,7 @@ export default function WalletPage() {
     if (!ibanForm.holder.trim()) { toast.error("Inserisci l'intestatario"); return; }
 
     const { data: existingPrivate } = await supabase.from("profiles_private").select("id").eq("user_id", user!.id).maybeSingle();
-    if (existing) {
+    if (existingPrivate) {
       await supabase.from("profiles_private").update({
         iban: cleanIban,
         bank_holder_name: ibanForm.holder.trim(),
