@@ -89,10 +89,23 @@ export function useStellaAgent() {
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
 
+  // Auto-start wake word listening on mount
+  useEffect(() => {
+    if (isSupported && wakeWordActive && !isWakeWordListening && !isListening) {
+      startWakeWordListening();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-restart wake word after command processing
   useEffect(() => {
     if (transcript && !isListening) {
       handleCommand(transcript);
       resetTranscript();
+      // Restart wake word listening after processing
+      if (wakeWordActive && !isWakeWordListening) {
+        setTimeout(() => startWakeWordListening(), 1500);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript, isListening]);
