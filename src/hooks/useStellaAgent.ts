@@ -171,8 +171,8 @@ export function useStellaAgent() {
     if (error?.code === '23505') return 'Hai già messo like a questo post! ❤️';
     if (error) return 'Errore nel mettere like. Riprova!';
     
-    // Increment like count
-    await supabase.rpc('increment_like_count' as any, { post_id: postId }).catch(() => {});
+    // Increment like count (best effort)
+    try { await supabase.rpc('increment_like_count' as any, { post_id: postId }); } catch {}
     return 'Like aggiunto! ❤️';
   }, [user, findProfileByName]);
 
@@ -533,7 +533,7 @@ export function useStellaAgent() {
       const coins = profile?.qr_coins ?? 0;
       const msg = `Hai ${coins} QR Coins nel tuo wallet!`;
       return { id: Date.now().toString(), type: 'info', text, response: msg, requiresConfirmation: false, silent: true,
-        execute: () => toast.success(`🌟 Stella: ${msg}`) };
+        execute: () => { toast.success(`🌟 Stella: ${msg}`); } };
     }
     if (stripped.includes('prossimo appuntamento') || stripped.includes('prossima prenotazione')) {
       return { id: Date.now().toString(), type: 'info', text, response: 'Verifico le tue prenotazioni!', requiresConfirmation: false, silent: true,
