@@ -65,7 +65,9 @@ export const useVoiceRecognition = (
 
   const stopWakeWordListening = useCallback(() => {
     if (wakeWordRecognitionRef.current) {
-      wakeWordRecognitionRef.current.stop();
+      const ref = wakeWordRecognitionRef.current;
+      wakeWordRecognitionRef.current = null; // prevent auto-restart
+      ref.stop();
       setIsWakeWordListening(false);
     }
   }, []);
