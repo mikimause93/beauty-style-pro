@@ -450,10 +450,25 @@ export default function ChatPage() {
     }
   };
 
-  // Real-time call translation state
+  // Real-time call translation state with ElevenLabs
   const [callTranslation, setCallTranslation] = useState<string>("");
   const [callTranslating, setCallTranslating] = useState(false);
+  const [callTargetLang, setCallTargetLang] = useState(getUserLanguage());
   const speechRecRef = useRef<any>(null);
+  const translationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isProcessingRef = useRef(false);
+
+  const playTranslationAudio = (audioBase64: string) => {
+    try {
+      if (translationAudioRef.current) {
+        translationAudioRef.current.pause();
+      }
+      const audioUrl = `data:audio/mpeg;base64,${audioBase64}`;
+      const audio = new Audio(audioUrl);
+      translationAudioRef.current = audio;
+      audio.play().catch(() => {});
+    } catch {}
+  };
 
   const startCallTranslation = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -470,29 +485,59 @@ export default function ChatPage() {
       const lastResult = event.results[event.results.length - 1];
       if (lastResult.isFinal) {
         const spokenText = lastResult[0].transcript;
+        if (isProcessingRef.current || spokenText.trim().length < 3) return;
+        isProcessingRef.current = true;
         setCallTranslating(true);
         try {
-          const translated = await translate(spokenText);
-          setCallTranslation(translated || spokenText);
+          // Call ElevenLabs translate+speak edge function
+          const resp = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-translate-speak`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ spokenText, targetLanguage: callTargetLang }),
+            }
+          );
+          if (resp.ok) {
+            const data = await resp.json();
+            setCallTranslation(data.translatedText || spokenText);
+            // Play the translated audio automatically
+            if (data.audioAvailable && data.audioBase64) {
+              playTranslationAudio(data.audioBase64);
+            }
+          } else {
+            // Fallback to text-only translation
+            const translated = await translate(spokenText);
+            setCallTranslation(translated || spokenText);
+          }
         } catch {
           setCallTranslation(spokenText);
         } finally {
           setCallTranslating(false);
+          isProcessingRef.current = false;
         }
       } else {
         setCallTranslation(lastResult[0].transcript + "...");
       }
     };
     
-    recognition.onerror = () => { /* silent */ };
+    recognition.onerror = () => {};
     recognition.start();
     speechRecRef.current = recognition;
-    toast.success("Traduzione chiamata attiva");
+    toast.success("🎤 Traduzione vocale ElevenLabs attiva");
   };
 
   const stopCallTranslation = () => {
     speechRecRef.current?.stop();
     speechRecRef.current = null;
+    if (translationAudioRef.current) {
+      translationAudioRef.current.pause();
+      translationAudioRef.current = null;
+    }
     setCallTranslation("");
   };
 
@@ -600,15 +645,40 @@ export default function ChatPage() {
               </div>
             )}
             
-            {/* Live translation subtitles */}
+            {/* Live translation subtitles + audio indicator */}
             {callTranslation && (
-              <div className="absolute bottom-36 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
+              <div className="absolute bottom-44 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs font-bold text-primary">Traduzione Live</span>
+                  <span className="text-xs font-bold text-primary">🔊 Traduzione Vocale Live</span>
                   {callTranslating && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </div>
                 <p className="text-sm">{callTranslation}</p>
+              </div>
+            )}
+
+            {/* Language selector for translation */}
+            {speechRecRef.current && (
+              <div className="absolute top-16 left-4 right-4 flex justify-center">
+                <select
+                  value={callTargetLang}
+                  onChange={e => setCallTargetLang(e.target.value)}
+                  className="px-3 py-1.5 rounded-full bg-card/80 backdrop-blur border border-primary/30 text-xs font-medium text-foreground"
+                >
+                  <option value="it">🇮🇹 Italiano</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="es">🇪🇸 Español</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="de">🇩🇪 Deutsch</option>
+                  <option value="pt">🇧🇷 Português</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                  <option value="zh">🇨🇳 中文</option>
+                  <option value="ja">🇯🇵 日本語</option>
+                  <option value="ko">🇰🇷 한국어</option>
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="hi">🇮🇳 हिन्दी</option>
+                  <option value="tr">🇹🇷 Türkçe</option>
+                </select>
               </div>
             )}
             
