@@ -2834,28 +2834,22 @@ export type Database = {
           account_type: string
           availability: Json | null
           avatar_url: string | null
-          bank_holder_name: string | null
           bio: string | null
-          birth_date: string | null
           city: string | null
           country: string | null
           created_at: string
           cv_url: string | null
           desired_categories: string[] | null
           display_name: string | null
-          document_urls: string[] | null
           experience_years: number | null
           facebook: string | null
           follower_count: number
           following_count: number
-          iban: string | null
           id: string
           instagram: string | null
           interests: string[] | null
           latitude: number | null
           longitude: number | null
-          otp_code: string | null
-          otp_expires_at: string | null
           phone: string | null
           phone_verified: boolean
           portfolio_urls: string[] | null
@@ -2869,7 +2863,6 @@ export type Database = {
           user_type: string
           username: string | null
           verification_level: string
-          verification_notes: string | null
           verification_status: string
           whatsapp: string | null
         }
@@ -2877,28 +2870,22 @@ export type Database = {
           account_type?: string
           availability?: Json | null
           avatar_url?: string | null
-          bank_holder_name?: string | null
           bio?: string | null
-          birth_date?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
-          document_urls?: string[] | null
           experience_years?: number | null
           facebook?: string | null
           follower_count?: number
           following_count?: number
-          iban?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
           latitude?: number | null
           longitude?: number | null
-          otp_code?: string | null
-          otp_expires_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           portfolio_urls?: string[] | null
@@ -2912,7 +2899,6 @@ export type Database = {
           user_type?: string
           username?: string | null
           verification_level?: string
-          verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
         }
@@ -2920,28 +2906,22 @@ export type Database = {
           account_type?: string
           availability?: Json | null
           avatar_url?: string | null
-          bank_holder_name?: string | null
           bio?: string | null
-          birth_date?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
-          document_urls?: string[] | null
           experience_years?: number | null
           facebook?: string | null
           follower_count?: number
           following_count?: number
-          iban?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
           latitude?: number | null
           longitude?: number | null
-          otp_code?: string | null
-          otp_expires_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           portfolio_urls?: string[] | null
@@ -2955,9 +2935,50 @@ export type Database = {
           user_type?: string
           username?: string | null
           verification_level?: string
-          verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      profiles_private: {
+        Row: {
+          bank_holder_name: string | null
+          birth_date: string | null
+          created_at: string | null
+          document_urls: string[] | null
+          iban: string | null
+          id: string
+          otp_code: string | null
+          otp_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+          verification_notes: string | null
+        }
+        Insert: {
+          bank_holder_name?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          document_urls?: string[] | null
+          iban?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          verification_notes?: string | null
+        }
+        Update: {
+          bank_holder_name?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          document_urls?: string[] | null
+          iban?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verification_notes?: string | null
         }
         Relationships: []
       }
