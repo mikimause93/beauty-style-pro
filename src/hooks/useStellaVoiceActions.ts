@@ -246,6 +246,16 @@ export function useStellaVoiceActions() {
       return { matched: true, response: "Per sicurezza, vai nelle impostazioni per uscire.", action: "navigate:/settings" };
     }
 
+    // V7 PHASE 3 — Global & Enterprise
+    if (text.includes("impostazioni globali") || text.includes("multi lingua") || text.includes("multi country") || text.includes("lingue e valute")) {
+      navigate("/global-settings");
+      return { matched: true, response: "Apro le impostazioni globali!" };
+    }
+    if (text.includes("enterprise api") || text.includes("api key") || text.includes("webhook") || text.includes("chiavi api")) {
+      navigate("/enterprise-api");
+      return { matched: true, response: "Apro la dashboard Enterprise API!" };
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // 6. THEME CONTROLS
     // ═══════════════════════════════════════════════════════════════
