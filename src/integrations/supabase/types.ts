@@ -1935,7 +1935,6 @@ export type Database = {
           scheduled_at: string | null
           started_at: string | null
           status: string
-          stream_key: string | null
           stream_url: string | null
           thumbnail_url: string | null
           title: string
@@ -1961,7 +1960,6 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
-          stream_key?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title: string
@@ -1987,7 +1985,6 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
-          stream_key?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -5249,18 +5246,12 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string | null
-          desired_categories: string[] | null
           display_name: string | null
-          experience_years: number | null
           facebook: string | null
           follower_count: number | null
           following_count: number | null
-          id: string | null
           instagram: string | null
-          phone_verified: boolean | null
-          portfolio_urls: string[] | null
-          qr_coins: number | null
-          skills: string[] | null
+          sector: string | null
           tiktok: string | null
           user_id: string | null
           user_type: string | null
@@ -5273,18 +5264,12 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
-          desired_categories?: string[] | null
           display_name?: string | null
-          experience_years?: number | null
           facebook?: string | null
           follower_count?: number | null
           following_count?: number | null
-          id?: string | null
           instagram?: string | null
-          phone_verified?: boolean | null
-          portfolio_urls?: string[] | null
-          qr_coins?: number | null
-          skills?: string[] | null
+          sector?: string | null
           tiktok?: string | null
           user_id?: string | null
           user_type?: string | null
@@ -5297,18 +5282,12 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string | null
-          desired_categories?: string[] | null
           display_name?: string | null
-          experience_years?: number | null
           facebook?: string | null
           follower_count?: number | null
           following_count?: number | null
-          id?: string | null
           instagram?: string | null
-          phone_verified?: boolean | null
-          portfolio_urls?: string[] | null
-          qr_coins?: number | null
-          skills?: string[] | null
+          sector?: string | null
           tiktok?: string | null
           user_id?: string | null
           user_type?: string | null
