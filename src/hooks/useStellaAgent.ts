@@ -66,6 +66,17 @@ export function useStellaAgent() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { speak, cancel: cancelTTS, speaking } = useVoiceSynthesis();
+
+  const [messages, setMessages] = useState<StellaMessage[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [wakeWordActive, setWakeWordActive] = useState(true);
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
+  const [isAIThinking, setIsAIThinking] = useState(false);
+
+  const isOpenRef = useRef(false);
+  useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+
   const {
     isListening, transcript, interimTranscript,
     startListening, stopListening, resetTranscript,
@@ -81,13 +92,6 @@ export function useStellaAgent() {
       speak('Ciao! Come posso aiutarti?');
     },
   });
-
-  const [messages, setMessages] = useState<StellaMessage[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [wakeWordActive, setWakeWordActive] = useState(true);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
-  const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
-  const [isAIThinking, setIsAIThinking] = useState(false);
 
   // Auto-start wake word listening on mount
   useEffect(() => {
