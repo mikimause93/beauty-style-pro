@@ -203,7 +203,29 @@ export function useStellaAgent() {
       }
     }
 
-    // ── BACK / SCROLL ─────────────────────────────────────────────────────
+    // ── SHOW PROFILE by name ──────────────────────────────────────────────
+    const profileMatch = t.match(/(?:mostrami|mostra|apri|vedi)\s+(?:il\s+)?profilo\s+(?:di\s+)?(.+)/);
+    if (profileMatch) {
+      const name = profileMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'search', text,
+        response: `Cerco il profilo di ${name}!`, requiresConfirmation: false,
+        execute: () => navigate(`/search?q=${encodeURIComponent(name)}`),
+      };
+    }
+
+    // ── NEARBY PROFESSIONALS ──────────────────────────────────────────────
+    if (t.includes('professionisti in zona') || t.includes('professionisti disponibili') || 
+        t.includes('professionisti vicini') || t.includes('chi è disponibile') ||
+        t.includes('saloni vicini') || t.includes('stilisti vicini') ||
+        t.includes('parrucchieri vicini') || t.includes('chi c\'è in zona')) {
+      return {
+        id: Date.now().toString(), type: 'search', text,
+        response: 'Cerco i professionisti disponibili nella tua zona!', requiresConfirmation: false,
+        execute: () => navigate('/map-search'),
+      };
+    }
+
     if (t.includes('torna indietro') || t.includes('vai indietro') || t === 'indietro') {
       return { id: Date.now().toString(), type: 'navigate', text, response: 'Torno indietro!', requiresConfirmation: false, execute: () => window.history.back() };
     }
