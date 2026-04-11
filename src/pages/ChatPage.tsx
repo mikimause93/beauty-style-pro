@@ -645,15 +645,40 @@ export default function ChatPage() {
               </div>
             )}
             
-            {/* Live translation subtitles */}
+            {/* Live translation subtitles + audio indicator */}
             {callTranslation && (
-              <div className="absolute bottom-36 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
+              <div className="absolute bottom-44 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs font-bold text-primary">Traduzione Live</span>
+                  <span className="text-xs font-bold text-primary">🔊 Traduzione Vocale Live</span>
                   {callTranslating && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </div>
                 <p className="text-sm">{callTranslation}</p>
+              </div>
+            )}
+
+            {/* Language selector for translation */}
+            {speechRecRef.current && (
+              <div className="absolute top-16 left-4 right-4 flex justify-center">
+                <select
+                  value={callTargetLang}
+                  onChange={e => setCallTargetLang(e.target.value)}
+                  className="px-3 py-1.5 rounded-full bg-card/80 backdrop-blur border border-primary/30 text-xs font-medium text-foreground"
+                >
+                  <option value="it">🇮🇹 Italiano</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="es">🇪🇸 Español</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="de">🇩🇪 Deutsch</option>
+                  <option value="pt">🇧🇷 Português</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                  <option value="zh">🇨🇳 中文</option>
+                  <option value="ja">🇯🇵 日本語</option>
+                  <option value="ko">🇰🇷 한국어</option>
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="hi">🇮🇳 हिन्दी</option>
+                  <option value="tr">🇹🇷 Türkçe</option>
+                </select>
               </div>
             )}
             
