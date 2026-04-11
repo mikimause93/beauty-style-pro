@@ -99,6 +99,8 @@ const PredictiveAnalyticsPage = lazy(() => import("./pages/PredictiveAnalyticsPa
 const SocialAutomationPage = lazy(() => import("./pages/SocialAutomationPage"));
 const WebsiteGeneratorPage = lazy(() => import("./pages/WebsiteGeneratorPage"));
 const WhiteLabelPage = lazy(() => import("./pages/WhiteLabelPage"));
+const GlobalSettingsPage = lazy(() => import("./pages/GlobalSettingsPage"));
+const EnterpriseAPIPage = lazy(() => import("./pages/EnterpriseAPIPage"));
 
 const queryClient = new QueryClient();
 
@@ -219,6 +221,8 @@ const App = () => {
             <Route path="/social-automation" element={<P><SocialAutomationPage /></P>} />
             <Route path="/website-generator" element={<P><WebsiteGeneratorPage /></P>} />
             <Route path="/white-label" element={<P><WhiteLabelPage /></P>} />
+            <Route path="/global-settings" element={<P><GlobalSettingsPage /></P>} />
+            <Route path="/enterprise-api" element={<P><EnterpriseAPIPage /></P>} />
             <Route path="/tenant" element={<P><TenantDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
