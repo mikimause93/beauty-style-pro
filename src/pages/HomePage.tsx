@@ -1,4 +1,4 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon, Globe, BarChart3, Layout } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
@@ -207,6 +207,11 @@ export default function HomePage() {
             { Icon: Trophy, label: "Challenge", path: "/transformation-challenge" },
             { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
             { Icon: Radio, label: "Radio", path: "/radio" },
+            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+            { Icon: CalendarDays, label: "Contenuti", path: "/content-calendar" },
+            { Icon: BarChart3, label: "Predittiva", path: "/predictive-analytics" },
+            { Icon: Globe, label: "Social AI", path: "/social-automation" },
+            { Icon: Layout, label: "Sito Web", path: "/website-generator" },
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
