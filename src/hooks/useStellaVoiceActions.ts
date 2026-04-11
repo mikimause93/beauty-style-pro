@@ -149,6 +149,11 @@ export function useStellaVoiceActions() {
 
       // Tenant / Platform V6
       { patterns: ["tenant", "gestione tenant", "apri tenant", "il mio tenant", "piattaforma"], path: "/tenant", response: "Apro la dashboard tenant!" },
+
+      // V7 Modules
+      { patterns: ["calendario contenuti", "content calendar", "pianifica social", "piano editoriale"], path: "/content-calendar", response: "Apro il calendario contenuti!" },
+      { patterns: ["previsioni", "predictive", "analisi predittiva", "ai predittiva", "previsione revenue"], path: "/predictive-analytics", response: "Apro le analisi predittive AI!" },
+      { patterns: ["social automation", "automazione social", "gestisci social", "automatizza social"], path: "/social-automation", response: "Apro la gestione social automation!" },
     ];
 
     for (const cmd of navCommands) {

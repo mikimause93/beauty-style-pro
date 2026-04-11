@@ -1192,6 +1192,74 @@ export type Database = {
           },
         ]
       }
+      content_calendar: {
+        Row: {
+          ai_generated: boolean | null
+          ai_prompt: string | null
+          content_text: string | null
+          created_at: string
+          engagement_score: number | null
+          hashtags: string[] | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          metadata: Json | null
+          platform: string
+          published_at: string | null
+          scheduled_at: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content_text?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content_text?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
@@ -2355,6 +2423,62 @@ export type Database = {
           },
         ]
       }
+      predictive_insights: {
+        Row: {
+          action_taken: boolean | null
+          confidence_score: number | null
+          created_at: string
+          description: string | null
+          id: string
+          insight_type: string
+          prediction_data: Json | null
+          status: string | null
+          tenant_id: string | null
+          timeframe: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_taken?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type: string
+          prediction_data?: Json | null
+          status?: string | null
+          tenant_id?: string | null
+          timeframe?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_taken?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type?: string
+          prediction_data?: Json | null
+          status?: string | null
+          tenant_id?: string | null
+          timeframe?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictive_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preview_sessions: {
         Row: {
           ai_model_used: string | null
@@ -3453,6 +3577,106 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      social_accounts: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          follower_count: number | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          metadata: Json | null
+          platform: string
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_analytics: {
+        Row: {
+          clicks: number | null
+          comments: number | null
+          content_id: string | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          reach: number | null
+          recorded_at: string
+          saves: number | null
+          shares: number | null
+        }
+        Insert: {
+          clicks?: number | null
+          comments?: number | null
+          content_id?: string | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          reach?: number | null
+          recorded_at?: string
+          saves?: number | null
+          shares?: number | null
+        }
+        Update: {
+          clicks?: number | null
+          comments?: number | null
+          content_id?: string | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          reach?: number | null
+          recorded_at?: string
+          saves?: number | null
+          shares?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_analytics_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_calendar"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       special_offers: {
         Row: {
@@ -4772,6 +4996,125 @@ export type Database = {
           status?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      website_pages: {
+        Row: {
+          content_html: string | null
+          created_at: string
+          custom_domain: string | null
+          id: string
+          og_image: string | null
+          page_type: string
+          published: boolean | null
+          seo_description: string | null
+          seo_keywords: string[] | null
+          seo_title: string | null
+          slug: string
+          styles: Json | null
+          template: string | null
+          tenant_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_html?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          og_image?: string | null
+          page_type?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string[] | null
+          seo_title?: string | null
+          slug: string
+          styles?: Json | null
+          template?: string | null
+          tenant_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_html?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          og_image?: string | null
+          page_type?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string[] | null
+          seo_title?: string | null
+          slug?: string
+          styles?: Json | null
+          template?: string | null
+          tenant_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whitelabel_configs: {
+        Row: {
+          agency_id: string
+          brand_name: string
+          created_at: string
+          custom_domain: string | null
+          features_enabled: string[] | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          max_tenants: number | null
+          metadata: Json | null
+          primary_color: string | null
+          reseller_commission: number | null
+          secondary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          brand_name: string
+          created_at?: string
+          custom_domain?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_tenants?: number | null
+          metadata?: Json | null
+          primary_color?: string | null
+          reseller_commission?: number | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          brand_name?: string
+          created_at?: string
+          custom_domain?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_tenants?: number | null
+          metadata?: Json | null
+          primary_color?: string | null
+          reseller_commission?: number | null
+          secondary_color?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
