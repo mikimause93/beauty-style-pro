@@ -97,6 +97,8 @@ const TenantDashboardPage = lazy(() => import("./pages/TenantDashboardPage"));
 const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
 const PredictiveAnalyticsPage = lazy(() => import("./pages/PredictiveAnalyticsPage"));
 const SocialAutomationPage = lazy(() => import("./pages/SocialAutomationPage"));
+const WebsiteGeneratorPage = lazy(() => import("./pages/WebsiteGeneratorPage"));
+const WhiteLabelPage = lazy(() => import("./pages/WhiteLabelPage"));
 
 const queryClient = new QueryClient();
 
@@ -215,6 +217,8 @@ const App = () => {
             <Route path="/content-calendar" element={<P><ContentCalendarPage /></P>} />
             <Route path="/predictive-analytics" element={<P><PredictiveAnalyticsPage /></P>} />
             <Route path="/social-automation" element={<P><SocialAutomationPage /></P>} />
+            <Route path="/website-generator" element={<P><WebsiteGeneratorPage /></P>} />
+            <Route path="/white-label" element={<P><WhiteLabelPage /></P>} />
             <Route path="/tenant" element={<P><TenantDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
