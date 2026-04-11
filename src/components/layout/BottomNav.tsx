@@ -29,7 +29,7 @@ export default function BottomNav() {
 
             if (isCenter) {
               return (
-                <div key={tab.path} className="flex flex-col items-center justify-center flex-1 relative">
+                <div key={tab.path} className="flex flex-col items-center justify-end flex-1 relative h-full pb-1.5">
                   <button
                     type="button"
                     onClick={() => navigate(tab.path)}
@@ -50,7 +50,7 @@ export default function BottomNav() {
                   </button>
                   <span
                     className={cn(
-                      "text-xs font-semibold tracking-wide mt-2 transition-all duration-300",
+                      "text-xs font-medium tracking-wide transition-all duration-300",
                       isActive ? "text-primary" : "text-foreground/40"
                     )}
                   >

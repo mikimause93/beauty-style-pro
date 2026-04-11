@@ -562,16 +562,21 @@ export default function ChatbotWidget({ className = "" }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Single Stella AI Floating Button */}
+      {/* Single Stella AI Floating Button — Draggable */}
       {isMinimized && (
         <motion.button
           ref={fabRef}
           type="button"
           aria-label="Apri Stella AI"
+          drag
+          dragConstraints={{ left: -300, right: 0, top: -500, bottom: 0 }}
+          dragElastic={0.1}
+          whileDrag={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           onClick={() => setIsMinimized(false)}
-          className="fixed z-[9999] right-4 bottom-[88px] w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-glow"
+          className="fixed z-[9999] right-4 bottom-[88px] w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-glow cursor-grab active:cursor-grabbing"
         >
           {/* Rotating sparkle animation */}
           <motion.div
