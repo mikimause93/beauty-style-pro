@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
@@ -92,6 +93,7 @@ const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
 const AIPreviewPage = lazy(() => import("./pages/AIPreviewPage"));
+const TenantDashboardPage = lazy(() => import("./pages/TenantDashboardPage"));
 
 const queryClient = new QueryClient();
 
@@ -118,6 +120,7 @@ const App = () => {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
+        <TenantProvider>
         <RadioProvider>
           <PageTracker />
           <Suspense fallback={<PageLoader />}>
@@ -206,11 +209,13 @@ const App = () => {
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
             <Route path="/ai-preview" element={<P><AIPreviewPage /></P>} />
             <Route path="/ai-preview/:sector" element={<P><AIPreviewPage /></P>} />
+            <Route path="/tenant" element={<P><TenantDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
         </RadioProvider>
+        </TenantProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
