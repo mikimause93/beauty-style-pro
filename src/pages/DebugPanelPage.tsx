@@ -33,8 +33,17 @@ interface ErrorLog {
 }
 
 export default function DebugPanelPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [results, setResults] = useState<TestResult[]>([]);
+  const [errors, setErrors] = useState<ErrorLog[]>([]);
+  const [running, setRunning] = useState(false);
+  const [tab, setTab] = useState("tests");
+  const isProduction = import.meta.env.PROD;
+
   // Block debug panel in production
-  if (import.meta.env.PROD) {
+  if (isProduction) {
     return (
       <MobileLayout>
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
@@ -45,13 +54,6 @@ export default function DebugPanelPage() {
       </MobileLayout>
     );
   }
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [results, setResults] = useState<TestResult[]>([]);
-  const [errors, setErrors] = useState<ErrorLog[]>([]);
-  const [running, setRunning] = useState(false);
-  const [tab, setTab] = useState("tests");
 
   // Check admin role
   useEffect(() => {
