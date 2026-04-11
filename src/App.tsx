@@ -97,6 +97,8 @@ const TenantDashboardPage = lazy(() => import("./pages/TenantDashboardPage"));
 const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
 const PredictiveAnalyticsPage = lazy(() => import("./pages/PredictiveAnalyticsPage"));
 const SocialAutomationPage = lazy(() => import("./pages/SocialAutomationPage"));
+const WebsiteGeneratorPage = lazy(() => import("./pages/WebsiteGeneratorPage"));
+const WhiteLabelPage = lazy(() => import("./pages/WhiteLabelPage"));
 
 const queryClient = new QueryClient();
 
