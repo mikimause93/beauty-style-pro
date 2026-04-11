@@ -4065,6 +4065,29 @@ export type Database = {
           },
         ]
       }
+      stream_credentials: {
+        Row: {
+          stream_id: string
+          stream_key: string
+        }
+        Insert: {
+          stream_id: string
+          stream_key: string
+        }
+        Update: {
+          stream_id?: string
+          stream_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_credentials_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: true
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stream_reactions: {
         Row: {
           created_at: string
