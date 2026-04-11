@@ -84,6 +84,7 @@ const BusinessTeamPage = lazy(() => import("./pages/BusinessTeamPage"));
 const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
 const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
@@ -125,6 +126,7 @@ const App = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/search" element={<SearchPage />} />
