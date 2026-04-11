@@ -2,176 +2,181 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-interface VoiceAction {
-  patterns: string[];
-  action: (params: string) => void;
-  description: string;
-}
-
 export function useStellaVoiceActions() {
   const navigate = useNavigate();
 
   const processVoiceCommand = useCallback((transcript: string): { matched: boolean; response: string; action?: string } => {
     const text = transcript.toLowerCase().trim();
 
-    // ─── Back navigation (hands-free essential) ────────────────────────────
+    // ═══════════════════════════════════════════════════════════════
+    // 1. BACK / SCROLL — hands-free essentials
+    // ═══════════════════════════════════════════════════════════════
     if (text.includes("torna indietro") || text.includes("vai indietro") || text.includes("pagina precedente") || text === "indietro") {
       window.history.back();
       return { matched: true, response: "Torno alla pagina precedente!" };
     }
-
-    // ─── Scroll commands ────────────────────────────────────────────────────
     if (text.includes("scorri su") || text.includes("vai su") || text.includes("scroll su")) {
-      window.scrollBy({ top: -300, behavior: "smooth" });
+      window.scrollBy({ top: -400, behavior: "smooth" });
       return { matched: true, response: "Scorro verso l'alto!" };
     }
     if (text.includes("scorri giù") || text.includes("vai giù") || text.includes("scroll giù") || text.includes("scorri in basso")) {
-      window.scrollBy({ top: 300, behavior: "smooth" });
+      window.scrollBy({ top: 400, behavior: "smooth" });
       return { matched: true, response: "Scorro verso il basso!" };
     }
+    if (text.includes("vai in cima") || text.includes("torna su") || text.includes("inizio pagina")) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return { matched: true, response: "Torno all'inizio della pagina!" };
+    }
+    if (text.includes("vai in fondo") || text.includes("fine pagina")) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      return { matched: true, response: "Scorro fino in fondo!" };
+    }
+    if (text.includes("ricarica") || text.includes("aggiorna pagina") || text.includes("refresh")) {
+      window.location.reload();
+      return { matched: true, response: "Ricarico la pagina!" };
+    }
 
-    // Message commands must be checked first (before navigation) because "messaggio" contains "messaggi"
+    // ═══════════════════════════════════════════════════════════════
+    // 2. MESSAGING — must be checked before nav (contains "messaggi")
+    // ═══════════════════════════════════════════════════════════════
     const messageMatch = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo)\s+)(.+)/);
     if (messageMatch) {
-      const recipient = messageMatch[1].trim();
-      const content = messageMatch[2].trim();
       navigate("/chat");
-      toast.info(`Cerco "${recipient}" e preparo il messaggio: "${content}"`);
-      return { matched: true, response: `Cerco ${recipient} per inviare: "${content}"!` };
+      toast.info(`Cerco "${messageMatch[1].trim()}" e preparo: "${messageMatch[2].trim()}"`);
+      return { matched: true, response: `Cerco ${messageMatch[1].trim()} per inviare il messaggio!` };
     }
     const messageMatchSimple = text.match(/(?:invia|scrivi|manda)\s+(?:un\s+)?messaggio\s+a\s+(.+)/);
     if (messageMatchSimple) {
-      const recipient = messageMatchSimple[1];
       navigate("/chat");
-      toast.info(`Cerco "${recipient}" nella chat...`);
-      return { matched: true, response: `Cerco ${recipient} per inviargli un messaggio!` };
+      return { matched: true, response: `Cerco ${messageMatchSimple[1]} per inviargli un messaggio!` };
     }
 
-    // Navigation commands
-    if (text.includes("vai alla home") || text.includes("apri home")) {
-      navigate("/");
-      return { matched: true, response: "Ti porto alla home!" };
-    }
-    if (text.includes("apri chat") || text.includes("vai alla chat") || text.includes("messaggi")) {
-      navigate("/chat");
-      return { matched: true, response: "Apro la chat!" };
-    }
-    if (text.includes("apri notifiche") || text.includes("dimmi le notifiche") || text.includes("tutte le notifiche")) {
-      navigate("/notifications");
-      return { matched: true, response: "Ecco le tue notifiche!" };
-    }
-    if (text.includes("apri profilo") || text.includes("vai al profilo")) {
-      navigate("/profile");
-      return { matched: true, response: "Ecco il tuo profilo!" };
-    }
-    if (text.includes("apri wallet") || text.includes("vai al wallet") || text.includes("portafoglio")) {
-      navigate("/wallet");
-      return { matched: true, response: "Apro il tuo wallet!" };
-    }
-    if (text.includes("prenota") || text.includes("prenotazione")) {
-      navigate("/stylists");
-      return { matched: true, response: "Ti mostro i professionisti disponibili per prenotare!" };
-    }
-    if (text.includes("apri mappa") || text.includes("cerca sulla mappa")) {
-      navigate("/map-search");
-      return { matched: true, response: "Apro la mappa!" };
-    }
-    if (text.includes("vai allo shop") || text.includes("apri shop") || text.includes("negozio")) {
-      navigate("/shop");
-      return { matched: true, response: "Apro lo shop!" };
-    }
-    if (text.includes("vai alle missioni") || text.includes("apri missioni")) {
-      navigate("/missions");
-      return { matched: true, response: "Ecco le tue missioni!" };
-    }
-    if (text.includes("gira la ruota") || text.includes("ruota della fortuna")) {
-      navigate("/spin");
-      return { matched: true, response: "Apro la ruota della fortuna!" };
-    }
-    if (text.includes("vai in live") || text.includes("apri live")) {
-      navigate("/live");
-      return { matched: true, response: "Ti porto nella sezione live!" };
-    }
-    if (text.includes("apri radio") || text.includes("musica")) {
-      navigate("/radio");
-      return { matched: true, response: "Apro la radio!" };
-    }
-    if (text.includes("impostazioni") || text.includes("apri impostazioni")) {
-      navigate("/settings");
-      return { matched: true, response: "Apro le impostazioni!" };
-    }
-    if (text.includes("esplora")) {
-      navigate("/explore");
-      return { matched: true, response: "Apro la sezione esplora!" };
-    }
-    if (text.includes("crea post") || text.includes("pubblica")) {
-      navigate("/create-post");
-      return { matched: true, response: "Apro la creazione di un nuovo post!" };
-    }
-    if (text.includes("le mie prenotazioni") || text.includes("mostra prenotazioni")) {
-      navigate("/my-bookings");
-      return { matched: true, response: "Ecco le tue prenotazioni!" };
-    }
-    if (text.includes("classifica") || text.includes("leaderboard")) {
-      navigate("/leaderboard");
-      return { matched: true, response: "Apro la classifica!" };
-    }
-    if (text.includes("sfide") || text.includes("challenge")) {
-      navigate("/challenges");
-      return { matched: true, response: "Ecco le sfide attive!" };
-    }
-    if (text.includes("shorts") || text.includes("video brevi")) {
-      navigate("/shorts");
-      return { matched: true, response: "Apro i video shorts!" };
-    }
-    if (text.includes("eventi") || text.includes("apri eventi")) {
-      navigate("/events");
-      return { matched: true, response: "Ecco gli eventi!" };
-    }
-    if (text.includes("marketplace") || text.includes("apri marketplace")) {
-      navigate("/marketplace");
-      return { matched: true, response: "Apro il marketplace!" };
-    }
-    if (text.includes("apri tema") || text.includes("cambia tema") || text.includes("tema chiaro") || text.includes("tema scuro")) {
-      navigate("/settings");
-      return { matched: true, response: "Apro le impostazioni per cambiare tema!" };
-    }
-    if (text.includes("spa") || text.includes("terme") || text.includes("benessere")) {
-      navigate("/spa-terme");
-      return { matched: true, response: "Ecco le Spa e Terme!" };
-    }
-    if (text.includes("quiz") || text.includes("gioca al quiz")) {
-      navigate("/quiz-live");
-      return { matched: true, response: "Apro il Quiz Live!" };
-    }
-    if (text.includes("talent") || text.includes("gioco talent")) {
-      navigate("/talent-game");
-      return { matched: true, response: "Apro il Talent Game!" };
-    }
-    if (text.includes("referral") || text.includes("invita amici")) {
-      navigate("/referral");
-      return { matched: true, response: "Apro il programma referral!" };
+    // ═══════════════════════════════════════════════════════════════
+    // 3. CORE NAVIGATION
+    // ═══════════════════════════════════════════════════════════════
+    const navCommands: Array<{ patterns: string[]; path: string; response: string }> = [
+      // Main tabs
+      { patterns: ["vai alla home", "apri home", "torna alla home", "pagina principale"], path: "/", response: "Ti porto alla home!" },
+      { patterns: ["apri chat", "vai alla chat", "messaggi", "conversazioni"], path: "/chat", response: "Apro la chat!" },
+      { patterns: ["apri notifiche", "vai alle notifiche", "le notifiche"], path: "/notifications", response: "Ecco le tue notifiche!" },
+      { patterns: ["apri profilo", "vai al profilo", "il mio profilo", "mostra profilo"], path: "/profile", response: "Ecco il tuo profilo!" },
+      { patterns: ["modifica profilo", "cambia profilo", "edit profile", "aggiorna profilo"], path: "/profile/edit", response: "Apro la modifica del profilo!" },
+      { patterns: ["apri esplora", "esplora", "scopri"], path: "/explore", response: "Apro la sezione esplora!" },
+      { patterns: ["vai allo shop", "apri shop", "negozio", "prodotti"], path: "/shop", response: "Apro lo shop!" },
+      { patterns: ["vai in live", "apri live", "streaming", "dirette"], path: "/live", response: "Ti porto nella sezione live!" },
+      { patterns: ["apri radio", "musica", "ascolta musica"], path: "/radio", response: "Apro la radio!" },
+      { patterns: ["apri shorts", "shorts", "video brevi", "reel"], path: "/shorts", response: "Apro i video shorts!" },
+
+      // Booking & Services
+      { patterns: ["prenota", "prenotazione", "fissa appuntamento", "prenota servizio"], path: "/stylists", response: "Ti mostro i professionisti disponibili!" },
+      { patterns: ["le mie prenotazioni", "mostra prenotazioni", "miei appuntamenti", "appuntamenti"], path: "/my-bookings", response: "Ecco le tue prenotazioni!" },
+      { patterns: ["conferma prenotazione", "conferma appuntamento"], path: "/my-bookings", response: "Ti mostro le prenotazioni da confermare!" },
+      { patterns: ["cerca stilista", "trova parrucchiere", "cerca professionista"], path: "/stylists", response: "Cerco professionisti per te!" },
+
+      // Map & Location
+      { patterns: ["apri mappa", "cerca sulla mappa", "mappa", "dove sono"], path: "/map-search", response: "Apro la mappa!" },
+
+      // Wallet & Payments
+      { patterns: ["apri wallet", "vai al wallet", "portafoglio", "saldo", "il mio saldo"], path: "/wallet", response: "Apro il tuo wallet!" },
+      { patterns: ["qr coin", "i miei coin", "coin", "monete"], path: "/qr-coins", response: "Ecco i tuoi QR Coins!" },
+      { patterns: ["ricevute", "le mie ricevute", "fatture", "storico pagamenti"], path: "/receipts", response: "Ecco le tue ricevute!" },
+      { patterns: ["acquisti", "storico acquisti", "i miei acquisti", "ordini"], path: "/purchases", response: "Ecco il tuo storico acquisti!" },
+      { patterns: ["rate", "pagamenti rateali", "installments", "rateizzazione"], path: "/installments", response: "Ecco i tuoi pagamenti rateali!" },
+      { patterns: ["checkout", "paga", "procedi al pagamento"], path: "/checkout", response: "Apro il checkout!" },
+
+      // Social
+      { patterns: ["crea post", "pubblica", "nuovo post", "scrivi post"], path: "/create-post", response: "Apro la creazione di un nuovo post!" },
+      { patterns: ["before after", "prima e dopo", "trasformazioni"], path: "/before-after", response: "Apro le trasformazioni Prima & Dopo!" },
+
+      // Gamification
+      { patterns: ["missioni", "apri missioni", "le missioni"], path: "/missions", response: "Ecco le tue missioni!" },
+      { patterns: ["sfide", "challenge", "le sfide"], path: "/challenges", response: "Ecco le sfide attive!" },
+      { patterns: ["gira la ruota", "ruota della fortuna", "spin"], path: "/spin", response: "Apro la ruota della fortuna!" },
+      { patterns: ["classifica", "leaderboard", "graduatoria"], path: "/leaderboard", response: "Apro la classifica!" },
+      { patterns: ["promemoria", "i miei promemoria", "reminders"], path: "/reminders", response: "Ecco i tuoi promemoria!" },
+
+      // Live & Entertainment
+      { patterns: ["vai in diretta", "inizia live", "go live", "avvia live"], path: "/go-live", response: "Ti preparo per la diretta!" },
+      { patterns: ["battle live", "sfida live", "live battle"], path: "/live-battle", response: "Apro le battle live!" },
+      { patterns: ["quiz live", "gioca al quiz"], path: "/quiz-live", response: "Apro il Quiz Live!" },
+      { patterns: ["talent game", "gioco talent"], path: "/talent-game", response: "Apro il Talent Game!" },
+
+      // Business & Professional
+      { patterns: ["dashboard business", "apri business", "gestione business", "il mio business"], path: "/business", response: "Apro la dashboard business!" },
+      { patterns: ["gestisci team", "team", "dipendenti", "staff"], path: "/business/team", response: "Apro la gestione del team!" },
+      { patterns: ["turni", "gestisci turni", "orari staff"], path: "/business/team/shifts", response: "Apro la gestione turni!" },
+      { patterns: ["attività dipendenti", "log attività", "activity log"], path: "/business/team/activity", response: "Apro il log attività!" },
+      { patterns: ["dashboard professionale", "pannello pro", "i miei guadagni"], path: "/professional-dashboard", response: "Apro la tua dashboard professionale!" },
+      { patterns: ["gestisci prodotti", "i miei prodotti", "inventario"], path: "/manage-products", response: "Apro la gestione prodotti!" },
+
+      // HR & Jobs
+      { patterns: ["risorse umane", "apri hr", "lavoro", "offerte lavoro"], path: "/hr", response: "Apro la sezione lavoro!" },
+      { patterns: ["crea annuncio lavoro", "pubblica offerta lavoro", "nuovo lavoro"], path: "/hr/create-job", response: "Creo un nuovo annuncio di lavoro!" },
+
+      // Marketplace
+      { patterns: ["marketplace", "apri marketplace"], path: "/marketplace", response: "Apro il marketplace!" },
+      { patterns: ["crea richiesta servizio", "richiesta servizio"], path: "/marketplace/create-request", response: "Creo una richiesta di servizio!" },
+      { patterns: ["crea casting", "nuovo casting", "pubblica casting"], path: "/marketplace/create-casting", response: "Creo un nuovo casting!" },
+
+      // AI Features
+      { patterns: ["assistente", "apri assistente", "ai assistant", "stella assistente"], path: "/ai-assistant", response: "Apro l'assistente AI!" },
+      { patterns: ["genera look", "ai look", "nuovo look", "crea look"], path: "/ai-look", response: "Apro il generatore di look AI!" },
+
+      // Subscriptions & Premium
+      { patterns: ["abbonamento", "abbonamenti", "piano premium", "vai premium", "sottoscrizione"], path: "/subscriptions", response: "Ti mostro i piani disponibili!" },
+      { patterns: ["boost profilo", "potenzia profilo", "promuovi profilo"], path: "/boost", response: "Apro il boost del profilo!" },
+      { patterns: ["diventa creator", "programma creator", "candidatura creator"], path: "/become-creator", response: "Apro la candidatura creator!" },
+
+      // Referral & Affiliate
+      { patterns: ["referral", "invita amici", "invita un amico", "programma inviti"], path: "/referral", response: "Apro il programma referral!" },
+      { patterns: ["affiliato", "affiliazione", "programma affiliati"], path: "/affiliate", response: "Apro il programma affiliati!" },
+
+      // Analytics & Admin
+      { patterns: ["analytics", "statistiche", "apri analytics"], path: "/analytics", response: "Apro le statistiche!" },
+      { patterns: ["admin", "pannello admin", "amministrazione"], path: "/admin", response: "Apro il pannello admin!" },
+
+      // Account & Settings
+      { patterns: ["impostazioni", "apri impostazioni", "settings"], path: "/settings", response: "Apro le impostazioni!" },
+      { patterns: ["verifica account", "verificami", "verifica identità"], path: "/verify-account", response: "Apro la verifica dell'account!" },
+
+      // Events & Spa
+      { patterns: ["eventi", "apri eventi", "prossimi eventi"], path: "/events", response: "Ecco gli eventi!" },
+      { patterns: ["spa", "terme", "benessere", "centri spa"], path: "/spa-terme", response: "Ecco le Spa e Terme!" },
+
+      // Offers & Auctions
+      { patterns: ["offerte", "promozioni", "sconti"], path: "/offers", response: "Ecco le offerte!" },
+      { patterns: ["aste", "asta", "auction"], path: "/auctions", response: "Apro le aste!" },
+
+      // Tenant / Platform V6
+      { patterns: ["tenant", "gestione tenant", "apri tenant", "il mio tenant", "piattaforma"], path: "/tenant", response: "Apro la dashboard tenant!" },
+    ];
+
+    for (const cmd of navCommands) {
+      if (cmd.patterns.some(p => text.includes(p))) {
+        navigate(cmd.path);
+        return { matched: true, response: cmd.response };
+      }
     }
 
-    // AI Preview commands
-    if (text.includes("anteprima") || text.includes("preview") || text.includes("prova look")) {
-      const sectorMatch = text.match(/(?:capelli|hair)/i) ? "hair"
+    // ═══════════════════════════════════════════════════════════════
+    // 4. AI PREVIEW — sector detection
+    // ═══════════════════════════════════════════════════════════════
+    if (text.includes("anteprima") || text.includes("preview") || text.includes("prova look") || text.includes("provare")) {
+      const sector = text.match(/(?:capelli|hair)/i) ? "hair"
         : text.match(/(?:barba|barber)/i) ? "barber"
         : text.match(/(?:tattoo|tatuaggio)/i) ? "tattoo"
         : text.match(/(?:makeup|trucco)/i) ? "makeup"
         : text.match(/(?:unghie|nails)/i) ? "nails"
         : null;
-      navigate(sectorMatch ? `/ai-preview/${sectorMatch}` : "/ai-preview");
-      return { matched: true, response: `Apro l'anteprima AI${sectorMatch ? ` per ${sectorMatch}` : ""}!` };
+      navigate(sector ? `/ai-preview/${sector}` : "/ai-preview");
+      return { matched: true, response: `Apro l'anteprima AI${sector ? ` per ${sector}` : ""}!` };
     }
 
-    // AI Look
-    if (text.includes("genera look") || text.includes("ai look") || text.includes("nuovo look")) {
-      navigate("/ai-look");
-      return { matched: true, response: "Apro il generatore di look AI!" };
-    }
+    // ═══════════════════════════════════════════════════════════════
+    // 5. SMART ACTIONS (non-navigation)
+    // ═══════════════════════════════════════════════════════════════
 
-    // Promemoria / scheduling
+    // Reminder creation
     const reminderMatch = text.match(/(?:ricordami|promemoria|ricorda)\s+(?:di\s+)?(.+?)(?:\s+(?:tra|per|domani|alle)\s+(.+))?$/);
     if (reminderMatch) {
       const what = reminderMatch[1];
@@ -189,19 +194,7 @@ export function useStellaVoiceActions() {
       return { matched: true, response: `Cerco ${callMatch[1]} per la chiamata!` };
     }
 
-    // Booking confirmation
-    if (text.includes("conferma prenotazione") || text.includes("conferma appuntamento")) {
-      navigate("/my-bookings");
-      return { matched: true, response: "Ti mostro le prenotazioni da confermare!" };
-    }
-
-    // Read notifications
-    if (text.includes("leggi notifiche") || text.includes("dimmi le notifiche") || text.includes("tutte le notifiche")) {
-      navigate("/notifications");
-      return { matched: true, response: "Ecco le tue notifiche! Le leggo per te." };
-    }
-
-    // Add friend / search
+    // Follow/Add friend
     const addMatch = text.match(/(?:aggiungi|segui)\s+(.+)/);
     if (addMatch) {
       navigate("/search");
@@ -209,45 +202,75 @@ export function useStellaVoiceActions() {
       return { matched: true, response: `Cerco ${addMatch[1]} per seguirlo!` };
     }
 
-    // Generic search — navigate to search page with query
+    // Search
     const searchMatch = text.match(/^cerca\s+(.+)$/);
     if (searchMatch) {
-      const query = searchMatch[1].trim();
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-      return { matched: true, response: `Cerco "${query}"!` };
+      navigate(`/search?q=${encodeURIComponent(searchMatch[1].trim())}`);
+      return { matched: true, response: `Cerco "${searchMatch[1].trim()}"!` };
     }
 
-    // Like commands
-    if (text.match(/metti\s+like|dai\s+like|aggiungi\s+like|mi\s+piace/)) {
-      navigate("/");
-      toast.success("Like aggiunto!");
-      return { matched: true, response: "Ho messo like al post!" };
-    }
-
-    // Search match on map
-    const matchDistanceMatch = text.match(/cerca\s+(?:match|amici|persone|stilisti)\s+(?:a|entro|vicino|nel\s+raggio\s+di)\s*(\d+)\s*km/);
+    // Map search with distance
+    const matchDistanceMatch = text.match(/cerca\s+(?:match|amici|persone|stilisti|saloni)\s+(?:a|entro|vicino|nel\s+raggio\s+di)\s*(\d+)\s*km/);
     if (matchDistanceMatch) {
-      const km = matchDistanceMatch[1];
-      navigate(`/map-search?radius=${km}`);
-      toast.info(`Cerco match entro ${km} km sulla mappa...`);
-      return { matched: true, response: `Cerco match entro ${km} km sulla mappa intelligente!` };
+      navigate(`/map-search?radius=${matchDistanceMatch[1]}`);
+      return { matched: true, response: `Cerco risultati entro ${matchDistanceMatch[1]} km!` };
     }
-    if (text.includes("cerca match") || text.includes("trova match") || text.includes("match vicini")) {
+    if (text.includes("cerca match") || text.includes("trova match") || text.includes("match vicini") || text.includes("chi c'è vicino")) {
       navigate("/map-search");
-      return { matched: true, response: "Apro la mappa dei match vicino a te!" };
+      return { matched: true, response: "Apro la mappa dei risultati vicino a te!" };
     }
 
-    // Theme voice commands - direct toggle
+    // Like
+    if (text.match(/metti\s+like|dai\s+like|mi\s+piace/)) {
+      toast.success("❤️ Like aggiunto!");
+      return { matched: true, response: "Ho messo like!" };
+    }
+
+    // Share
+    if (text.includes("condividi") || text.includes("share")) {
+      if (navigator.share) {
+        navigator.share({ title: "STYLE", url: window.location.href }).catch(() => {});
+      }
+      return { matched: true, response: "Apro la condivisione!" };
+    }
+
+    // Logout
+    if (text.includes("esci") || text.includes("logout") || text.includes("disconnetti")) {
+      return { matched: true, response: "Per sicurezza, vai nelle impostazioni per uscire.", action: "navigate:/settings" };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 6. THEME CONTROLS
+    // ═══════════════════════════════════════════════════════════════
     if (text.includes("tema chiaro") || text.includes("modalità chiara") || text.includes("light mode")) {
-      toast.info("Cambio al tema chiaro!");
       return { matched: true, response: "Attivo il tema chiaro!", action: "theme:light" };
     }
     if (text.includes("tema scuro") || text.includes("modalità scura") || text.includes("dark mode")) {
-      toast.info("Cambio al tema scuro!");
       return { matched: true, response: "Attivo il tema scuro!", action: "theme:dark" };
     }
 
-    return { matched: false, response: "Non ho capito il comando. Prova: 'apri chat', 'prenota', 'anteprima capelli', 'genera look', 'ricordami di...', 'cerca match a 10 km', 'invia messaggio a...', o 'dimmi le notifiche'." };
+    // ═══════════════════════════════════════════════════════════════
+    // 7. HELP — list available commands
+    // ═══════════════════════════════════════════════════════════════
+    if (text.includes("aiuto") || text.includes("help") || text.includes("cosa puoi fare") || text.includes("comandi")) {
+      return {
+        matched: true,
+        response: "Posso fare tutto! Navigazione: 'apri home', 'vai allo shop', 'apri chat'. " +
+          "Azioni: 'prenota', 'crea post', 'cerca sulla mappa'. " +
+          "Messaggi: 'invia messaggio a Mario'. " +
+          "AI: 'prova look capelli', 'genera look'. " +
+          "Business: 'dashboard business', 'gestisci team'. " +
+          "E molto altro! Prova a chiedere qualsiasi cosa."
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NOT MATCHED — fallback to AI
+    // ═══════════════════════════════════════════════════════════════
+    return {
+      matched: false,
+      response: "Non ho riconosciuto un comando diretto. Lascio che Stella AI ti risponda con intelligenza artificiale..."
+    };
   }, [navigate]);
 
   return { processVoiceCommand };
