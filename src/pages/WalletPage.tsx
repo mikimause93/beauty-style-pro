@@ -95,10 +95,19 @@ export default function WalletPage() {
     if (cleanIban.length < 15 || cleanIban.length > 34) { toast.error("IBAN non valido"); return; }
     if (!ibanForm.holder.trim()) { toast.error("Inserisci l'intestatario"); return; }
 
-    await supabase.from("profiles").update({
-      iban: cleanIban,
-      bank_holder_name: ibanForm.holder.trim(),
-    }).eq("user_id", user!.id);
+    const { data: existing } = await supabase.from("profiles_private").select("id").eq("user_id", user!.id).maybeSingle();
+    if (existing) {
+      await supabase.from("profiles_private").update({
+        iban: cleanIban,
+        bank_holder_name: ibanForm.holder.trim(),
+      }).eq("user_id", user!.id);
+    } else {
+      await supabase.from("profiles_private").insert({
+        user_id: user!.id,
+        iban: cleanIban,
+        bank_holder_name: ibanForm.holder.trim(),
+      });
+    }
 
     // Also save as payment method
     const existing = paymentMethods.find(m => m.method_type === "bank_transfer");
@@ -127,7 +136,7 @@ export default function WalletPage() {
   const removeMethod = async (id: string) => {
     const method = paymentMethods.find(m => m.id === id);
     if (method?.method_type === "bank_transfer") {
-      await supabase.from("profiles").update({ iban: null, bank_holder_name: null }).eq("user_id", user!.id);
+      await supabase.from("profiles_private").update({ iban: null, bank_holder_name: null }).eq("user_id", user!.id);
       await refreshProfile();
     }
     await supabase.from("payment_methods").delete().eq("id", id);

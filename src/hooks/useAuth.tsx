@@ -22,12 +22,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-    setProfile(data);
+    const [profileRes, privateRes] = await Promise.all([
+      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles_private").select("*").eq("user_id", userId).maybeSingle(),
+    ]);
+    setProfile({
+      ...profileRes.data,
+      ...(privateRes.data ? {
+        iban: privateRes.data.iban,
+        bank_holder_name: privateRes.data.bank_holder_name,
+        birth_date: privateRes.data.birth_date,
+        document_urls: privateRes.data.document_urls,
+        verification_notes: privateRes.data.verification_notes,
+      } : {}),
+    });
   };
 
   useEffect(() => {

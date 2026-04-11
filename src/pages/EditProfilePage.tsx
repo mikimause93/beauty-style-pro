@@ -109,9 +109,19 @@ export default function EditProfilePage() {
       display_name: displayName, bio, city, phone,
       user_type: userType, avatar_url: avatarUrl, skills,
       desired_categories: desiredCategories,
+    }).eq("user_id", user.id);
+
+    // Save IBAN to profiles_private
+    const ibanData = {
       iban: enableWithdrawals ? (iban || null) : null,
       bank_holder_name: enableWithdrawals ? (bankHolderName || null) : null,
-    }).eq("user_id", user.id);
+    };
+    const { data: existingPrivate } = await supabase.from("profiles_private").select("id").eq("user_id", user.id).maybeSingle();
+    if (existingPrivate) {
+      await supabase.from("profiles_private").update(ibanData).eq("user_id", user.id);
+    } else if (enableWithdrawals && iban) {
+      await supabase.from("profiles_private").insert({ user_id: user.id, ...ibanData });
+    }
     if (error) {
       toast.error("Errore nel salvataggio");
     } else {
