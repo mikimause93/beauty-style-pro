@@ -166,6 +166,27 @@ export function useStellaVoiceActions() {
     }
 
     // ═══════════════════════════════════════════════════════════════
+    // 3b. SHOW PROFILE by name
+    // ═══════════════════════════════════════════════════════════════
+    const profileMatch = text.match(/(?:mostrami|mostra|apri|vedi)\s+(?:il\s+)?profilo\s+(?:di\s+)?(.+)/);
+    if (profileMatch) {
+      const name = profileMatch[1].trim();
+      navigate(`/search?q=${encodeURIComponent(name)}`);
+      return { matched: true, response: `Cerco il profilo di ${name}!` };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 3c. NEARBY PROFESSIONALS
+    // ═══════════════════════════════════════════════════════════════
+    if (text.includes("professionisti in zona") || text.includes("professionisti disponibili") || 
+        text.includes("professionisti vicini") || text.includes("chi è disponibile") ||
+        text.includes("saloni vicini") || text.includes("stilisti vicini") ||
+        text.includes("parrucchieri vicini") || text.includes("chi c'è in zona")) {
+      navigate("/map-search");
+      return { matched: true, response: "Cerco i professionisti disponibili nella tua zona!" };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // 4. AI PREVIEW — sector detection
     // ═══════════════════════════════════════════════════════════════
     if (text.includes("anteprima") || text.includes("preview") || text.includes("prova look") || text.includes("provare")) {
