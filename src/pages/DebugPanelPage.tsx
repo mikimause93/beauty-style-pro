@@ -40,6 +40,20 @@ export default function DebugPanelPage() {
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [running, setRunning] = useState(false);
   const [tab, setTab] = useState("tests");
+  const isProduction = import.meta.env.PROD;
+
+  // Block debug panel in production
+  if (isProduction) {
+    return (
+      <MobileLayout>
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+          <ShieldCheck className="w-16 h-16 text-muted-foreground" />
+          <h1 className="text-xl font-bold">Non disponibile</h1>
+          <p className="text-sm text-muted-foreground">Il Debug Panel non è disponibile in produzione.</p>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   // Check admin role
   useEffect(() => {
