@@ -825,7 +825,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName, stellaSpeak]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
