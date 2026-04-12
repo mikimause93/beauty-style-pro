@@ -273,7 +273,7 @@ export function useStellaAgent() {
       const targetUserId = profiles[0].user_id;
       const [{ data: profilePhone }, { data: professionalPhone }, { data: businessPhone }] = await Promise.all([
         supabase.from('profiles').select('display_name, phone').eq('user_id', targetUserId).maybeSingle(),
-        supabase.from('professionals').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
+        supabase.from('professionals').select('business_name, whatsapp').eq('user_id', targetUserId).maybeSingle(),
         supabase.from('businesses').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
       ]);
 
