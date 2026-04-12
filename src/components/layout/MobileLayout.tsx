@@ -2,7 +2,6 @@ import { ReactNode, useState } from "react";
 import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
-import StellaVoiceAgent from "@/components/stella/StellaVoiceAgent";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface MobileLayoutProps {
@@ -23,7 +22,6 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
         {children}
       </main>
       <ChatbotWidget />
-      <StellaVoiceAgent />
       <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
       <BottomNav />
     </div>

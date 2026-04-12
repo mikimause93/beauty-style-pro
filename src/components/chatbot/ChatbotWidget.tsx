@@ -88,7 +88,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     startWakeWordListening,
     stopWakeWordListening,
   } = useVoiceRecognition({
-    continuous: true,
+    continuous: false,
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
     onWakeWordDetected: () => {
@@ -99,14 +99,19 @@ export default function ChatbotWidget({ className = "" }: Props) {
   });
 
   const startListening = useCallback(() => {
+    if (!voiceSupported) {
+      toast.error("Il riconoscimento vocale non è disponibile su questo dispositivo.");
+      return;
+    }
+
     setIsVoiceCallActive(true);
     setVoicePhase("listening");
     resetTranscript();
     stopWakeWordListening();
-    setTimeout(() => {
+    window.setTimeout(() => {
       beginVoiceListening();
     }, 250);
-  }, [beginVoiceListening, resetTranscript, stopWakeWordListening]);
+  }, [voiceSupported, beginVoiceListening, resetTranscript, stopWakeWordListening]);
 
   useEffect(() => {
     if (!voiceSupported) return;
