@@ -88,7 +88,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
     startWakeWordListening,
     stopWakeWordListening,
   } = useVoiceRecognition({
-    continuous: true,
+    continuous: false,
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
     onWakeWordDetected: () => {
@@ -99,33 +99,38 @@ export default function ChatbotWidget({ className = "" }: Props) {
   });
 
   const startListening = useCallback(() => {
+    if (!voiceSupported) {
+      toast.error("Il riconoscimento vocale non è disponibile su questo dispositivo.");
+      return;
+    }
+
     setIsVoiceCallActive(true);
     setVoicePhase("listening");
     resetTranscript();
     stopWakeWordListening();
-    setTimeout(() => {
+    window.setTimeout(() => {
       beginVoiceListening();
     }, 250);
-  }, [beginVoiceListening, resetTranscript, stopWakeWordListening]);
+  }, [voiceSupported, beginVoiceListening, resetTranscript, stopWakeWordListening]);
 
   useEffect(() => {
     if (!voiceSupported) return;
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       try { startWakeWordListening(); } catch { /* ignore */ }
     }, 3000);
-    return () => clearTimeout(timer);
+    return () => window.clearTimeout(timer);
   }, [voiceSupported, startWakeWordListening]);
 
   useEffect(() => {
-    if (isVoiceCallActive || !voiceSupported) return;
-    const timer = setTimeout(() => {
+    if (isVoiceCallActive || !voiceSupported || isWakeWordListening) return;
+    const timer = window.setTimeout(() => {
       try { startWakeWordListening(); } catch { /* ignore */ }
     }, 1500);
-    return () => clearTimeout(timer);
-  }, [isVoiceCallActive, voiceSupported, startWakeWordListening]);
+    return () => window.clearTimeout(timer);
+  }, [isVoiceCallActive, voiceSupported, isWakeWordListening, startWakeWordListening]);
 
   useEffect(() => {
-    if (isVoiceCallActive && voiceTranscript && !isVoiceListening) {
+    if (isVoiceCallActive && voiceTranscript.trim() && !isVoiceListening) {
       processVoiceCommand(voiceTranscript.trim());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,7 +212,10 @@ export default function ChatbotWidget({ className = "" }: Props) {
     resetTranscript();
     setIsVoiceCallActive(false);
     setVoicePhase("listening");
-  }, [stopListening, resetTranscript]);
+    window.setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 700);
+  }, [stopListening, resetTranscript, startWakeWordListening]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
