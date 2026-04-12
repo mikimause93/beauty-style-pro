@@ -94,6 +94,9 @@ export default function ProfilePage() {
 
   const displayProfile = isOwnProfile ? profile : viewProfile;
 
+  // Apply the visited profile's color theme temporarily
+  useTemporaryTheme(!isOwnProfile ? displayProfile?.color_theme : null);
+
   if (authLoading && isOwnProfile) {
     return (
       <MobileLayout>
