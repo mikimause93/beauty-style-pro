@@ -102,21 +102,32 @@ export function useStellaAgent() {
     },
   });
 
+  const wakeWordActiveRef = useRef(wakeWordActive);
+  useEffect(() => { wakeWordActiveRef.current = wakeWordActive; }, [wakeWordActive]);
+
   // Auto-start wake word listening on mount
   useEffect(() => {
     if (isSupported && wakeWordActive && !isWakeWordListening && !isListening) {
-      startWakeWordListening();
+      const timer = setTimeout(() => startWakeWordListening(), 500);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isSupported]);
 
-  // Auto-restart wake word after command processing
+  // Process transcript when command listening ends
+  const lastTranscriptRef = useRef('');
   useEffect(() => {
-    if (transcript && !isListening) {
+    if (transcript && !isListening && transcript !== lastTranscriptRef.current) {
+      lastTranscriptRef.current = transcript;
       handleCommand(transcript);
       resetTranscript();
-      if (wakeWordActive && !isWakeWordListening) {
-        setTimeout(() => startWakeWordListening(), 1500);
+      // Re-enable wake word after processing command
+      if (wakeWordActiveRef.current) {
+        setTimeout(() => {
+          if (wakeWordActiveRef.current && !isWakeWordListening) {
+            startWakeWordListening();
+          }
+        }, 2000);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
