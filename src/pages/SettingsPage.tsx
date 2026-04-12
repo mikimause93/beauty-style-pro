@@ -1,9 +1,10 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useColorTheme, type ColorTheme } from "@/hooks/useColorTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -11,6 +12,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, profile, signOut, refreshProfile } = useAuth();
   const { theme, setTheme, toggleTheme } = useTheme();
+  const { colorTheme, setColorTheme } = useColorTheme();
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [shareLocation, setShareLocation] = useState(false);
@@ -251,6 +253,63 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
+            {/* Color Theme Picker */}
+            <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="flex items-center gap-2 mb-3">
+                <Palette className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Tema Colori</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Female / Viola */}
+                <button
+                  onClick={() => setColorTheme("female")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    colorTheme === "female"
+                      ? "border-primary shadow-[0_0_12px_hsl(262_80%_62%/0.4)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg flex gap-1.5 items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, hsl(262 80% 62%), hsl(290 70% 58%))" }}>
+                    <div className="h-5 w-5 rounded-full bg-white/20" />
+                    <div className="h-5 w-5 rounded-full bg-white/30" />
+                    <div className="h-5 w-5 rounded-full bg-white/15" />
+                  </div>
+                  <span className="text-xs font-semibold">💜 Viola</span>
+                  {colorTheme === "female" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "hsl(262 80% 62%)" }}>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Male / Verde Petrolio */}
+                <button
+                  onClick={() => setColorTheme("male")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    colorTheme === "male"
+                      ? "border-primary shadow-[0_0_12px_hsl(173_82%_32%/0.4)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg flex gap-1.5 items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, hsl(173 82% 32%), hsl(174 70% 42%))" }}>
+                    <div className="h-5 w-5 rounded-full bg-white/20" />
+                    <div className="h-5 w-5 rounded-full bg-white/30" />
+                    <div className="h-5 w-5 rounded-full bg-white/15" />
+                  </div>
+                  <span className="text-xs font-semibold">🌲 Verde Petrolio</span>
+                  {colorTheme === "male" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "hsl(173 82% 32%)" }}>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Globe className="w-4 h-4 text-primary" />
               <span className="flex-1 text-sm">Lingua</span>
