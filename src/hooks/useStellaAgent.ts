@@ -170,7 +170,6 @@ export function useStellaAgent() {
         postId = posts?.[0]?.id || null;
       }
     } else {
-      // Like the most recent post in feed
       const { data: posts } = await supabase
         .from('posts')
         .select('id')
@@ -188,11 +187,104 @@ export function useStellaAgent() {
     
     if (error?.code === '23505') return 'Hai già messo like a questo post! ❤️';
     if (error) return 'Errore nel mettere like. Riprova!';
-    
-    // Increment like count (best effort)
-    try { await supabase.rpc('increment_like_count' as any, { post_id: postId }); } catch {}
     return 'Like aggiunto! ❤️';
   }, [user, findProfileByName]);
+
+  // ── Helper: comment on a post ─────────────────────────────────────────────
+  const commentOnPost = useCallback(async (comment: string, targetName?: string) => {
+    if (!user) return 'Devi effettuare il login per commentare!';
+    
+    let postId: string | null = null;
+    
+    if (targetName) {
+      const profiles = await findProfileByName(targetName);
+      if (profiles.length > 0) {
+        const { data: posts } = await supabase
+          .from('posts')
+          .select('id')
+          .eq('user_id', profiles[0].user_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        postId = posts?.[0]?.id || null;
+      }
+    } else {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      postId = posts?.[0]?.id || null;
+    }
+    
+    if (!postId) return 'Non ho trovato post da commentare.';
+    
+    const { error } = await supabase.from('comments').insert({
+      post_id: postId,
+      user_id: user.id,
+      message: comment,
+    });
+    
+    if (error) return 'Errore nel commentare. Riprova!';
+    return `Commento aggiunto: "${comment}" 💬`;
+  }, [user, findProfileByName]);
+
+  // ── Helper: create a post ─────────────────────────────────────────────────
+  const createPost = useCallback(async (content: string) => {
+    if (!user) return 'Devi effettuare il login per pubblicare!';
+    
+    const { error } = await supabase.from('posts').insert({
+      user_id: user.id,
+      content,
+      post_type: 'text',
+    });
+    
+    if (error) return 'Errore nella pubblicazione. Riprova!';
+    return `Post pubblicato: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}" ✅`;
+  }, [user]);
+
+  // ── Helper: unfollow a user ───────────────────────────────────────────────
+  const unfollowUser = useCallback(async (targetName: string) => {
+    if (!user) return 'Devi effettuare il login!';
+    
+    const profiles = await findProfileByName(targetName);
+    if (profiles.length === 0) return `Non ho trovato "${targetName}".`;
+    
+    const target = profiles[0];
+    const { error } = await supabase.from('follows')
+      .delete()
+      .eq('follower_id', user.id)
+      .eq('following_id', target.user_id);
+    
+    if (error) return 'Errore. Riprova!';
+    return `Hai smesso di seguire ${target.display_name || target.username}! ✅`;
+  }, [user, findProfileByName]);
+
+  // ── Helper: confirm/cancel booking ────────────────────────────────────────
+  const manageBooking = useCallback(async (action: 'confirm' | 'cancel') => {
+    if (!user) return 'Devi effettuare il login!';
+    
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('id, booking_date, status')
+      .eq('client_id', user.id)
+      .eq('status', 'pending')
+      .order('booking_date', { ascending: true })
+      .limit(1);
+    
+    if (!bookings?.length) return 'Non hai prenotazioni in sospeso!';
+    
+    const booking = bookings[0];
+    const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+    
+    const { error } = await supabase.from('bookings')
+      .update({ status: newStatus })
+      .eq('id', booking.id);
+    
+    if (error) return `Errore nel ${action === 'confirm' ? 'confermare' : 'cancellare'} la prenotazione.`;
+    return action === 'confirm' 
+      ? `Prenotazione del ${booking.booking_date} confermata! ✅`
+      : `Prenotazione del ${booking.booking_date} cancellata! ❌`;
+  }, [user]);
 
   // ── Helper: follow a user ─────────────────────────────────────────────────
   const followUser = useCallback(async (targetName: string) => {
