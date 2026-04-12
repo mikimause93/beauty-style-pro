@@ -53,18 +53,14 @@
 
   <body>
     <div id="root"></div>
-    <!-- Force unregister stale service workers and clear all caches -->
     <script>
+      // Register service worker for PWA install — skip in iframes and preview
       (function() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          });
-        }
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            names.forEach(function(n) { caches.delete(n); });
-          });
+        var isIframe = false;
+        try { isIframe = window.self !== window.top; } catch(e) { isIframe = true; }
+        var isPreview = location.hostname.includes('lovableproject.com') || location.hostname.includes('id-preview--');
+        if ('serviceWorker' in navigator && !isIframe && !isPreview) {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
         }
       })();
     </script>
