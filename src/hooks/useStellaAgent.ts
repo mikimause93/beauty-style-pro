@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useVoiceSynthesis } from '@/hooks/useVoiceSynthesis';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { haversineDistance } from '@/hooks/useGeolocation';
+import { useStellaLearning } from '@/hooks/useStellaLearning';
 
 // ── Rate limits ──────────────────────────────────────────────────────────────
 const LIMITS = {
