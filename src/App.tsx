@@ -12,6 +12,7 @@ import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import PresenceTracker from "@/components/PresenceTracker";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -230,6 +231,7 @@ const App = () => {
           </Suspense>
         </RadioProvider>
         </TenantProvider>
+        <PresenceTracker />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

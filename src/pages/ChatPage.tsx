@@ -1,7 +1,8 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck, Clock } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePresenceTracker, isUserOnline, formatLastSeen } from "@/hooks/usePresence";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +20,7 @@ interface Conversation {
   time: string;
   unread: number;
   online: boolean;
+  lastSeen: string | null;
   otherUserId: string;
 }
 
@@ -75,6 +77,7 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  usePresenceTracker();
 
   useEffect(() => {
     if (user) loadConversations();
@@ -178,22 +181,36 @@ export default function ChatPage() {
       const otherUserIds = data.map(c => c.participant_1 === user.id ? c.participant_2 : c.participant_1);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url")
+        .select("user_id, display_name, avatar_url, last_seen")
         .in("user_id", otherUserIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
+      // Count unread messages per conversation
+      const unreadCounts = new Map<string, number>();
+      for (const c of data) {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", c.id)
+          .neq("sender_id", user.id)
+          .eq("read", false);
+        unreadCounts.set(c.id, count || 0);
+      }
+
       setConversations(data.map((c, i) => {
         const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
         const profile = profileMap.get(otherId);
+        const lastSeenVal = profile?.last_seen || null;
         return {
           id: c.id,
           name: profile?.display_name || "Utente",
           avatar: profile?.avatar_url || fallbackAvatars[i % fallbackAvatars.length],
           lastMessage: c.last_message || "Nessun messaggio",
           time: c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "",
-          unread: 0,
-          online: false,
+          unread: unreadCounts.get(c.id) || 0,
+          online: isUserOnline(lastSeenVal),
+          lastSeen: lastSeenVal,
           otherUserId: otherId,
         };
       }));
@@ -250,6 +267,7 @@ export default function ChatPage() {
         time: "",
         unread: 0,
         online: false,
+        lastSeen: null,
         otherUserId: otherUser.user_id,
       };
       setConversations(prev => [newConv, ...prev]);
@@ -274,6 +292,11 @@ export default function ChatPage() {
       content,
       message_type: "text",
     });
+    // Update conversation last_message
+    await supabase.from("conversations").update({
+      last_message: content,
+      last_message_at: new Date().toISOString(),
+    }).eq("id", selectedChat.id);
   };
 
   const uploadFile = async (file: File, type: MessageType) => {
@@ -386,6 +409,26 @@ export default function ChatPage() {
       setInCall(type);
       setCallTimer(0);
       callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+
+      // Send call notification message to the other user
+      if (selectedChat && user) {
+        const callLabel = type === "voice" ? "📞 Chiamata vocale" : "📹 Videochiamata";
+        await supabase.from("messages").insert({
+          conversation_id: selectedChat.id,
+          sender_id: user.id,
+          content: `${callLabel} avviata`,
+          message_type: "text",
+        });
+        // Also send a notification
+        await supabase.from("notifications").insert({
+          user_id: selectedChat.otherUserId,
+          title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
+          message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
+          type: "call",
+          data: { caller_id: user.id, call_type: type },
+        });
+      }
+      
       toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
     } catch (err) {
       toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
@@ -591,11 +634,15 @@ export default function ChatPage() {
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
             <div className="relative">
               <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              {selectedChat.online && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              )}
             </div>
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-xs text-green-500 font-medium">● Online</p>
+              <p className={`text-xs font-medium ${selectedChat.online ? "text-green-500" : "text-muted-foreground"}`}>
+                {selectedChat.online ? "● Online" : `Ultimo accesso ${formatLastSeen(selectedChat.lastSeen)}`}
+              </p>
             </div>
           </button>
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
@@ -910,7 +957,12 @@ export default function ChatPage() {
             >
               <div className="relative">
                 <img src={conv.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                {conv.online && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                )}
+                {!conv.online && conv.lastSeen && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-muted-foreground/40 border-2 border-background" />
+                )}
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between">
