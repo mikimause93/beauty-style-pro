@@ -1140,11 +1140,11 @@ export function useStellaAgent() {
         break;
       case 'refresh':
         actionFeedback(response, '🔄');
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(() => window.location.reload(), 1500);
         break;
       case 'back':
-        window.history.back();
         actionFeedback(response, '⬅️');
+        setTimeout(() => window.history.back(), 800);
         break;
       case 'info':
         if (params?.info_type === 'coins') {
