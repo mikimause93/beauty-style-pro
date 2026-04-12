@@ -708,21 +708,105 @@ export function useStellaAgent() {
       };
     }
 
+    // ── COMMENT ─────────────────────────────────────────────────────────
+    const commentMatch = stripped.match(/(?:commenta|scrivi un commento|lascia un commento)\s+(?:a|al post di|sulla foto di|su)\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo|con)\s+)(.+)/);
+    if (commentMatch) {
+      const target = commentMatch[1].trim();
+      const comment = commentMatch[2].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Commento sul post di ${target}...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await commentOnPost(comment, target);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+    const commentSimple = stripped.match(/(?:commenta|scrivi)\s+["']?(.+?)["']?\s+(?:sull'ultimo|sul primo|sul post)/);
+    if (commentSimple) {
+      const comment = commentSimple[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Commento: "${comment}"`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await commentOnPost(comment);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── CREATE POST ───────────────────────────────────────────────────────
+    const postMatch = stripped.match(/(?:pubblica|posta|scrivi un post|crea un post)\s+(?:che\s+)?(?:dice\s+)?["']?(.+?)["']?$/);
+    if (postMatch) {
+      const content = postMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Pubblico il post...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await createPost(content);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── UNFOLLOW ──────────────────────────────────────────────────────────
+    const unfollowMatch = stripped.match(/(?:smetti di seguire|non seguire più|unfollow)\s+(.+)/);
+    if (unfollowMatch) {
+      const target = unfollowMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Smetto di seguire ${target}...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await unfollowUser(target);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── CONFIRM / CANCEL BOOKING ─────────────────────────────────────────
+    if (stripped.includes('conferma prenotazione') || stripped.includes('conferma appuntamento') || stripped.includes('conferma il mio appuntamento')) {
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: 'Confermo la prenotazione...', requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await manageBooking('confirm');
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+    if (stripped.includes('cancella prenotazione') || stripped.includes('annulla prenotazione') || stripped.includes('annulla appuntamento') || stripped.includes('disdici')) {
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: 'Annullo la prenotazione...', requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await manageBooking('cancel');
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
     // ── HELP ──────────────────────────────────────────────────────────────
     if (stripped.includes('aiuto') || stripped.includes('help') || stripped.includes('cosa puoi fare') || stripped.includes('comandi')) {
       return {
         id: Date.now().toString(), type: 'info', text,
-        response: '🌟 Sono Stella, il cuore dell\'app! Posso fare TUTTO per te:\n\n' +
-          '👤 Profili: "mostrami profilo Mario Rossi"\n' +
-          '📍 Mappa: "professionisti in zona disponibili"\n' +
-          '❤️ Social: "metti like a Anna", "segui Marco"\n' +
-          '💬 Chat: "invia messaggio a Sara: ciao!"\n' +
-          '✂️ Booking: "prenota con Studio Bella"\n' +
-          '📱 Navigazione: "apri shop", "vai alla home"\n' +
-          '🎨 AI: "prova look", "genera sito"\n' +
-          '🔍 Ricerca: "cerca parrucchiere"\n' +
-          '⚙️ Sistema: "tema scuro", "scorri giù"\n\n' +
-          'Dì "Stella" e poi il comando — agisco senza aprire niente! 🚀',
+        response: '🌟 Sono Stella, faccio TUTTO per te come Alexa & Siri!\n\n' +
+          '👤 "mostrami profilo Mario Rossi"\n' +
+          '📍 "professionisti vicini" · "cerca sulla mappa"\n' +
+          '❤️ "metti like a Anna" · "segui Marco" · "smetti di seguire"\n' +
+          '💬 "invia messaggio a Sara: ciao!" · "commenta bello su post di Anna"\n' +
+          '📝 "pubblica: sono dal parrucchiere!" · "crea post"\n' +
+          '✂️ "prenota con Studio Bella" · "conferma prenotazione" · "annulla appuntamento"\n' +
+          '📱 "apri shop" · "vai alla home" · "apri wallet"\n' +
+          '🎨 "prova look" · "genera sito" · "tema scuro"\n' +
+          '🔍 "cerca parrucchiere" · "scorri giù" · "condividi"\n' +
+          '⏰ "ricordami taglio domani" · "quanti coin ho?"\n\n' +
+          'Dì "Stella" + comando — agisco SUBITO senza aprire niente! 🚀',
         requiresConfirmation: false,
         execute: () => {},
       };
