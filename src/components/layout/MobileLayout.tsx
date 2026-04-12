@@ -1,7 +1,6 @@
 import { ReactNode, useState } from "react";
 import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
-import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface MobileLayoutProps {
@@ -21,7 +20,6 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
       <main className={showRadio ? "pb-32" : "pb-20"}>
         {children}
       </main>
-      <ChatbotWidget />
       <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
       <BottomNav />
     </div>
