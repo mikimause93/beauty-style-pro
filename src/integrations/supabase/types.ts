@@ -2848,6 +2848,7 @@ export type Database = {
           id: string
           instagram: string | null
           interests: string[] | null
+          last_seen: string | null
           latitude: number | null
           longitude: number | null
           phone: string | null
@@ -2884,6 +2885,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           interests?: string[] | null
+          last_seen?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
@@ -2920,6 +2922,7 @@ export type Database = {
           id?: string
           instagram?: string | null
           interests?: string[] | null
+          last_seen?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
