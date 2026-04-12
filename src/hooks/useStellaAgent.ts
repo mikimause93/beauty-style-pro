@@ -460,16 +460,32 @@ export function useStellaAgent() {
       }
     }
 
-    // ── NEARBY PROFESSIONALS ──────────────────────────────────────────────
-    if (stripped.includes('professionisti in zona') || stripped.includes('professionisti disponibili') ||
-        stripped.includes('professionisti vicini') || stripped.includes('chi è disponibile') ||
-        stripped.includes('saloni vicini') || stripped.includes('stilisti vicini') ||
-        stripped.includes('parrucchieri vicini') || stripped.includes('chi c\'è in zona') ||
-        stripped.includes('trova professionisti') || stripped.includes('cerca professionisti vicino')) {
+    // ── NEARBY PROFESSIONALS (with real DB results) ─────────────────────
+    const nearbyPatterns = ['professionisti in zona', 'professionisti disponibili', 'professionisti vicini',
+      'chi è disponibile', 'saloni vicini', 'stilisti vicini', 'parrucchieri vicini', 'chi c\'è in zona',
+      'trova professionisti', 'cerca professionisti vicino', 'saloni a', 'parrucchieri a', 'professionisti a',
+      'stilisti a', 'chi c\'è a', 'trova saloni', 'cerca saloni'];
+    const cityExtract = stripped.match(/(?:professionisti|saloni|stilisti|parrucchieri|chi c'è)\s+(?:a|in|di|near|vicino a|nella città di)\s+(.+)/);
+    const requestedCity = cityExtract?.[1]?.trim();
+    
+    if (nearbyPatterns.some(p => stripped.includes(p)) || requestedCity) {
       return {
-        id: Date.now().toString(), type: 'navigate', text,
-        response: 'Cerco i professionisti disponibili nella tua zona!', requiresConfirmation: false, silent: true,
-        execute: () => { navigate('/map-search'); toast.success('🌟 Stella: Apro la mappa dei professionisti!'); },
+        id: Date.now().toString(), type: 'search', text,
+        response: requestedCity ? `Cerco professionisti a ${requestedCity}...` : 'Cerco professionisti vicino a te...', 
+        requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await findNearbyProfessionals(requestedCity || profile?.city || undefined);
+          if (result.found) {
+            toast.success(`🌟 Stella: ${result.summary}`, { duration: 6000 });
+            stellaSpeak(result.summary!);
+            // Also navigate to stylists page for full list
+            navigate('/stylists');
+          } else {
+            toast.info(`🌟 Stella: ${result.message}`, { duration: 5000 });
+            stellaSpeak(result.message);
+            navigate('/map-search');
+          }
+        },
       };
     }
 
