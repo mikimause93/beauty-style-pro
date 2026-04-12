@@ -105,7 +105,7 @@ IMPORTANT RULES:
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "chat"],
+                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "find_nearby", "chat"],
                   },
                   params: {
                     type: "object",
