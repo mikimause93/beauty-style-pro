@@ -63,7 +63,17 @@ export function useColorTheme() {
     safeStorage.setItem("style-color-theme", colorTheme);
   }, [colorTheme]);
 
-  const setColorTheme = (t: ColorTheme) => setColorThemeState(t);
+  const setColorTheme = async (t: ColorTheme) => {
+    setColorThemeState(t);
+    // Persist to DB
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ color_theme: t }).eq("user_id", user.id);
+      }
+    } catch { /* ignore if not logged in */ }
+  };
 
   return { colorTheme, setColorTheme };
 }
