@@ -80,6 +80,8 @@ export function useStellaAgent() {
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
+  const [inlineStatus, setInlineStatus] = useState<string | null>(null);
+  const clearInlineStatus = useCallback(() => setInlineStatus(null), []);
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
@@ -1208,7 +1210,7 @@ export function useStellaAgent() {
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
-    setIsOpen(true); // Always show panel so user sees the response
+    setInlineStatus('Sto pensando...');
     try {
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
@@ -1240,6 +1242,8 @@ export function useStellaAgent() {
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
       if (intent && intent !== 'chat') {
+        // Siri-like: show inline status, don't open panel
+        setInlineStatus(displayResponse.substring(0, 100));
         await executeAIIntent(intent, params || {}, displayResponse);
         if (user) {
           supabase.from('stella_commands').insert({
@@ -1247,6 +1251,10 @@ export function useStellaAgent() {
             status: 'completed', executed_at: new Date().toISOString(),
           }).then(() => {});
         }
+      } else {
+        // Chat response: show in panel
+        setIsOpen(true);
+        setInlineStatus(null);
       }
     } catch (err) {
       console.error('Stella AI error:', err);
@@ -1287,10 +1295,11 @@ export function useStellaAgent() {
       // Open panel for confirmations
       setIsOpen(true);
     } else {
-      // Execute silently — no need to open panel
+      // Siri-like: execute silently with inline status, no panel
       cmd.execute();
       recordAction(cmd.type);
       addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
+      setInlineStatus(cmd.response);
       stellaSpeak(cmd.response);
 
       if (user) {
@@ -1347,6 +1356,7 @@ export function useStellaAgent() {
     messages, isOpen, setIsOpen, wakeWordActive, ttsEnabled,
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
+    inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
     clearMessages: useCallback(() => setMessages([]), []),

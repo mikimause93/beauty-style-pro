@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, X, Mic, MicOff, Volume2, VolumeX, Send, Check, XCircle, Radio, Loader2 } from 'lucide-react';
+import { Sparkles, X, Mic, MicOff, Volume2, VolumeX, Send, Check, XCircle, Radio, Loader2, ChevronUp } from 'lucide-react';
 import { useStellaAgent } from '@/hooks/useStellaAgent';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,6 +9,7 @@ export default function StellaVoiceAgent() {
     wakeWordActive, ttsEnabled,
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
+    inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction, clearMessages,
   } = useStellaAgent();
@@ -27,8 +28,16 @@ export default function StellaVoiceAgent() {
     setInput('');
   }, [input, sendTextCommand]);
 
+  // Auto-dismiss inline status after 4s
+  useEffect(() => {
+    if (inlineStatus && !isAIThinking) {
+      const timer = setTimeout(clearInlineStatus, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [inlineStatus, isAIThinking, clearInlineStatus]);
+
   const statusText = !isSupported
-    ? '⌨️ Scrivimi qui sotto: la voce non è disponibile qui'
+    ? '⌨️ Scrivimi qui sotto'
     : isAIThinking
       ? '🧠 Sto pensando...'
       : isListening
@@ -43,6 +52,65 @@ export default function StellaVoiceAgent() {
     <>
       <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[9998]" />
 
+      {/* ═══ SIRI-LIKE INLINE STATUS BAR ═══ */}
+      <AnimatePresence>
+        {!isOpen && (inlineStatus || isAIThinking || isListening) && (
+          <motion.div
+            initial={{ y: 60, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 60, opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="fixed bottom-24 left-4 right-20 z-[9999] pointer-events-auto"
+          >
+            <div
+              className="bg-background/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3 cursor-pointer"
+              onClick={() => clearInlineStatus()}
+            >
+              <div className={`w-9 h-9 rounded-full gradient-primary flex items-center justify-center shrink-0 ${isListening || isAIThinking ? 'shadow-glow' : ''}`}>
+                {isAIThinking ? (
+                  <Loader2 className="w-4.5 h-4.5 text-primary-foreground animate-spin" />
+                ) : isListening ? (
+                  <Mic className="w-4.5 h-4.5 text-primary-foreground animate-pulse" />
+                ) : (
+                  <Sparkles className="w-4.5 h-4.5 text-primary-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-primary">Stella</p>
+                <p className="text-xs text-foreground truncate">
+                  {isAIThinking
+                    ? 'Sto pensando...'
+                    : isListening
+                      ? (interimTranscript || 'Ti ascolto...')
+                      : inlineStatus || ''}
+                </p>
+              </div>
+              {isListening && (
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-primary rounded-full"
+                      animate={{ height: [8, 16, 8] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }}
+                    />
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                aria-label="Apri pannello"
+                onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
+                className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0"
+              >
+                <ChevronUp className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══ FLOATING BUTTON ═══ */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -70,6 +138,7 @@ export default function StellaVoiceAgent() {
         )}
       </AnimatePresence>
 
+      {/* ═══ FULL CHAT PANEL ═══ */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -120,7 +189,7 @@ export default function StellaVoiceAgent() {
                 <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-muted border border-border/60 flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
                   <p className="text-xs text-muted-foreground flex-1">
-                    Il microfono non è supportato in questo ambiente, ma Stella continua a funzionare se le scrivi qui sotto.
+                    Il microfono non è supportato qui, ma Stella funziona se le scrivi.
                   </p>
                 </div>
               ) : (isWakeWordListening || isListening) && (
@@ -138,9 +207,10 @@ export default function StellaVoiceAgent() {
                     <Sparkles className="w-10 h-10 text-primary mx-auto mb-3 opacity-50" />
                     <p className="text-sm text-muted-foreground">Ciao! Sono Stella 🌟</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {isSupported
-                        ? 'Il cervello dell\'app — comando vocale, scritto e autonomo!'
-                        : 'Il cervello dell\'app — scrivimi e agisco subito!'}
+                      Dì "Stella" + un comando e agisco subito come Siri!
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Esempio: "Stella metti like" · "Stella apri profilo" · "Stella prenota"
                     </p>
 
                     {proactiveSuggestions.length > 0 && (
@@ -167,7 +237,6 @@ export default function StellaVoiceAgent() {
                         '💬 Invia messaggio',
                         '❤️ Metti like',
                         '🔍 Cerca',
-                        '📅 Calendario contenuti',
                         '❓ Aiuto',
                       ].map(cmd => (
                         <button
@@ -245,7 +314,7 @@ export default function StellaVoiceAgent() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
-                  placeholder="Scrivi un comando o una domanda..."
+                  placeholder="Scrivi un comando..."
                   className="flex-1 h-10 rounded-full bg-muted px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   disabled={isAIThinking}
                 />
