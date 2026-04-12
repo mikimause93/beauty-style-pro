@@ -1083,8 +1083,8 @@ export function useStellaAgent() {
           actionFeedback(msgResult, '💬');
         } else if (params?.recipient) {
           await findProfileByName(params.recipient);
-          navigate('/chat');
           actionFeedback(response, '💬');
+          delayedNavigate('/chat');
         }
         break;
       case 'create_post': {
@@ -1092,20 +1092,21 @@ export function useStellaAgent() {
           const postResult = await createPost(params.content);
           actionFeedback(postResult, '📝');
         } else {
-          navigate('/create-post');
           actionFeedback(response, '📝');
+          delayedNavigate('/create-post');
         }
         break;
       }
       case 'book':
         if (params?.target_name) {
           const profiles = await findProfileByName(params.target_name);
-          if (profiles.length > 0) navigate(`/stylist/${profiles[0].user_id}`);
-          else navigate('/stylists');
+          actionFeedback(response, '✂️');
+          if (profiles.length > 0) delayedNavigate(`/stylist/${profiles[0].user_id}`);
+          else delayedNavigate('/stylists');
         } else {
-          navigate('/stylists');
+          actionFeedback(response, '✂️');
+          delayedNavigate('/stylists');
         }
-        actionFeedback(response, '✂️');
         break;
       case 'confirm_booking': {
         const confirmResult = await manageBooking('confirm');
