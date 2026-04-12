@@ -45,6 +45,16 @@ interface StellaMessage {
 
 const actionCounts = new Map<string, { count: number; resetAt: number }>();
 
+function normalizeActionLabel(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function checkLimit(actionType: string): { allowed: boolean; remaining: number } {
   const limit = LIMITS[actionType as keyof typeof LIMITS] ?? { perHour: 30 };
   const now = Date.now();
@@ -81,7 +91,15 @@ export function useStellaAgent() {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
+  const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
+  const restartWakeWordTimeoutRef = useRef<number | null>(null);
   const clearInlineStatus = useCallback(() => setInlineStatus(null), []);
+  const clearWakeWordResumeTimeout = useCallback(() => {
+    if (restartWakeWordTimeoutRef.current !== null) {
+      window.clearTimeout(restartWakeWordTimeoutRef.current);
+      restartWakeWordTimeoutRef.current = null;
+    }
+  }, []);
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
@@ -114,47 +132,70 @@ export function useStellaAgent() {
     continuous: false,
     interimResults: true,
     language: browserLang,
-    wakeWordEnabled: true,
+    wakeWordEnabled: wakeWordActive,
     wakeWords: [
       // Multilingual wake words
       'stella', 'hey stella', 'ehi stella', 'ciao stella',
       'hi stella', 'ok stella', 'hola stella', 'oi stella',
       'hé stella', 'hallo stella', 'привет стелла',
     ],
-    onWakeWordDetected: () => {
-      speak('Sono qui! Dimmi cosa fare.');
+    onWakeWordDetected: (command?: string) => {
+      const trimmedCommand = command?.trim();
+
+      if (trimmedCommand) {
+        setInlineStatus(`Eseguo: ${trimmedCommand}`);
+        void Promise.resolve(handleCommandRef.current(trimmedCommand));
+        return;
+      }
+
+      setInlineStatus('Sono qui! Dimmi cosa fare.');
+      if (ttsEnabled) {
+        speak('Sono qui! Dimmi cosa fare.');
+      }
     },
   });
 
   const wakeWordActiveRef = useRef(wakeWordActive);
   useEffect(() => { wakeWordActiveRef.current = wakeWordActive; }, [wakeWordActive]);
+  const isListeningRef = useRef(isListening);
+  const isWakeWordListeningRef = useRef(isWakeWordListening);
+
+  useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+  useEffect(() => { isWakeWordListeningRef.current = isWakeWordListening; }, [isWakeWordListening]);
+
+  const scheduleWakeWordResume = useCallback((delayMs = 1400) => {
+    if (!wakeWordActiveRef.current) return;
+
+    clearWakeWordResumeTimeout();
+    restartWakeWordTimeoutRef.current = window.setTimeout(() => {
+      if (
+        wakeWordActiveRef.current &&
+        !isListeningRef.current &&
+        !isWakeWordListeningRef.current
+      ) {
+        startWakeWordListening();
+      }
+    }, delayMs);
+  }, [clearWakeWordResumeTimeout, startWakeWordListening]);
+
+  useEffect(() => () => clearWakeWordResumeTimeout(), [clearWakeWordResumeTimeout]);
 
   // Auto-start wake word listening on mount
   useEffect(() => {
-    if (isSupported && wakeWordActive && !isWakeWordListening && !isListening) {
-      const timer = setTimeout(() => startWakeWordListening(), 500);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSupported]);
+    if (!isSupported || !wakeWordActive || isWakeWordListening || isListening) return;
+
+    const timer = window.setTimeout(() => startWakeWordListening(), 500);
+    return () => window.clearTimeout(timer);
+  }, [isSupported, wakeWordActive, isWakeWordListening, isListening, startWakeWordListening]);
 
   // Process transcript when command listening ends
   const lastTranscriptRef = useRef('');
   useEffect(() => {
-    if (transcript && !isListening && transcript !== lastTranscriptRef.current) {
-      lastTranscriptRef.current = transcript;
-      handleCommand(transcript);
-      resetTranscript();
-      // Re-enable wake word after processing command
-      if (wakeWordActiveRef.current) {
-        setTimeout(() => {
-          if (wakeWordActiveRef.current && !isWakeWordListening) {
-            startWakeWordListening();
-          }
-        }, 2000);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!transcript || isListening || transcript === lastTranscriptRef.current) return;
+
+    lastTranscriptRef.current = transcript;
+    void Promise.resolve(handleCommandRef.current(transcript));
+    resetTranscript();
   }, [transcript, isListening]);
 
   const addMessage = useCallback((msg: Omit<StellaMessage, 'id'>) => {
@@ -164,6 +205,55 @@ export function useStellaAgent() {
   const stellaSpeak = useCallback((text: string) => {
     if (ttsEnabled) speak(text);
   }, [ttsEnabled, speak]);
+
+  const logStellaCommand = useCallback((commandText: string, commandType: string, extra: Record<string, any> = {}) => {
+    if (!user) return;
+
+    void supabase.from('stella_commands').insert({
+      user_id: user.id,
+      command_text: commandText,
+      command_type: commandType,
+      status: 'completed',
+      executed_at: new Date().toISOString(),
+      ...extra,
+    }).then(({ error }) => {
+      if (error) {
+        console.warn('Stella command log error:', error);
+      }
+    });
+  }, [user]);
+
+  const clickVisibleAction = useCallback((labels: string[]) => {
+    const normalizedLabels = labels.map(normalizeActionLabel).filter(Boolean);
+    if (normalizedLabels.length === 0) return false;
+
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(
+      'button, a, [role="button"], input[type="button"], input[type="submit"], [data-stella-action]'
+    ));
+
+    const target = elements.find((element) => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      if (style.display === 'none' || style.visibility === 'hidden' || rect.width === 0 || rect.height === 0) {
+        return false;
+      }
+
+      const text = normalizeActionLabel([
+        element.textContent || '',
+        element.getAttribute('aria-label') || '',
+        element.getAttribute('title') || '',
+        element.getAttribute('value') || '',
+        element.dataset?.stellaAction || '',
+      ].join(' '));
+
+      return normalizedLabels.some((label) => text.includes(label));
+    });
+
+    if (!target) return false;
+
+    target.click();
+    return true;
+  }, []);
 
   // ── Helper: search profile by name in DB ──────────────────────────────────
   const findProfileByName = useCallback(async (name: string) => {
@@ -175,6 +265,46 @@ export function useStellaAgent() {
       .limit(5);
     return data || [];
   }, []);
+
+  const callContact = useCallback(async (targetName: string) => {
+    const profiles = await findProfileByName(targetName);
+
+    if (profiles.length > 0) {
+      const targetUserId = profiles[0].user_id;
+      const [{ data: profilePhone }, { data: professionalPhone }, { data: businessPhone }] = await Promise.all([
+        supabase.from('profiles').select('display_name, phone').eq('user_id', targetUserId).maybeSingle(),
+        supabase.from('professionals').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
+        supabase.from('businesses').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
+      ]);
+
+      const label = businessPhone?.business_name || professionalPhone?.business_name || profilePhone?.display_name || profiles[0].display_name || profiles[0].username || targetName;
+      const phone = profilePhone?.phone || professionalPhone?.phone || businessPhone?.phone;
+
+      if (phone) {
+        window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
+        return `Sto chiamando ${label}.`;
+      }
+
+      navigate('/chat');
+      return `Non ho trovato un numero per ${label}, quindi apro la chat.`;
+    }
+
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('business_name, phone')
+      .ilike('business_name', `%${targetName}%`)
+      .eq('active', true)
+      .limit(1)
+      .maybeSingle();
+
+    if (business?.phone) {
+      window.location.href = `tel:${business.phone.replace(/[^\d+]/g, '')}`;
+      return `Sto chiamando ${business.business_name}.`;
+    }
+
+    navigate('/chat');
+    return `Non ho trovato ${targetName}, quindi apro la chat.`;
+  }, [findProfileByName, navigate]);
 
   // ── Helper: like a post ───────────────────────────────────────────────────
   const likeLatestPost = useCallback(async (targetName?: string) => {
@@ -525,6 +655,24 @@ export function useStellaAgent() {
     // ── Strip "stella" prefix if present ──────────────────────────────────
     const stripped = t.replace(/^(?:stella|hey stella|ehi stella|ciao stella)\s*[,.]?\s*/i, '');
 
+    // ── SHOW LATEST PHOTOS / POSTS ────────────────────────────────────────
+    const latestPhotosMatch = stripped.match(/(?:mostrami|mostra|vedi|apri)\s+(?:le\s+)?ultim(?:e|a)\s+foto(?:\s+pubblicat[ae])?\s+(?:di|del|della|de|da)\s+(.+)/);
+    if (latestPhotosMatch) {
+      const target = latestPhotosMatch[1]?.trim() ? latestPhotosMatch[1].trim() : latestPhotosMatch[2].trim();
+      return {
+        id: Date.now().toString(), type: 'action', text,
+        response: `Ti mostro le ultime foto di ${target}...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await goToProfile(target);
+          const spokenResult = result.includes('Non ho trovato')
+            ? result
+            : `Ti mostro le ultime foto di ${target}.`;
+          toast.success(`🌟 Stella: ${spokenResult}`);
+          stellaSpeak(spokenResult);
+        },
+      };
+    }
+
     // ── SHOW / OPEN PROFILE by name (direct DB lookup) ────────────────────
     const profileMatch = stripped.match(/(?:mostrami|mostra|apri|vedi|fammi vedere|portami a|portami al|vai al|chi è)\s+(?:il\s+)?(?:profilo\s+)?(?:di\s+)?(.+)/);
     if (profileMatch && !stripped.includes('profilo mio') && !stripped.includes('mio profilo')) {
@@ -761,6 +909,52 @@ export function useStellaAgent() {
       };
     }
 
+    // ── CLICK / PRESS CURRENT UI ACTIONS ──────────────────────────────────
+    const quickActionButtons: Record<string, string[]> = {
+      prenota: ['prenota', 'book', 'book now'],
+      conferma: ['conferma', 'confirm'],
+      continua: ['continua', 'continue', 'prosegui'],
+      salva: ['salva', 'save'],
+      invia: ['invia', 'send'],
+    };
+
+    if (quickActionButtons[stripped]) {
+      const targetLabel = stripped;
+      return {
+        id: Date.now().toString(), type: 'action', text,
+        response: `Eseguo "${targetLabel}" qui nella pagina...`, requiresConfirmation: false, silent: true,
+        execute: () => {
+          const clicked = clickVisibleAction(quickActionButtons[targetLabel]);
+          const result = clicked
+            ? `Ho premuto "${targetLabel}".`
+            : `Qui non vedo un pulsante "${targetLabel}".`;
+
+          if (clicked) toast.success(`🌟 Stella: ${result}`);
+          else toast.info(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    const clickActionMatch = stripped.match(/(?:clicca|premi|tocca|seleziona)\s+(.+)/);
+    if (clickActionMatch) {
+      const targetLabel = clickActionMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action', text,
+        response: `Cerco il pulsante "${targetLabel}"...`, requiresConfirmation: false, silent: true,
+        execute: () => {
+          const clicked = clickVisibleAction([targetLabel]);
+          const result = clicked
+            ? `Ho premuto "${targetLabel}".`
+            : `Qui non vedo un pulsante "${targetLabel}".`;
+
+          if (clicked) toast.success(`🌟 Stella: ${result}`);
+          else toast.info(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
     // ── BOOKING ────────────────────────────────────────────────────────────
     const bookMatch = stripped.match(/(?:prenota|prenotazione|appuntamento)\s+(?:con|da|per)\s+(.+)/);
     if (bookMatch) {
@@ -853,9 +1047,9 @@ export function useStellaAgent() {
         id: Date.now().toString(), type: 'call', text,
         response: `Cerco ${callMatch[1]} per la chiamata!`, requiresConfirmation: false, silent: true,
         execute: async () => {
-          const profiles = await findProfileByName(callMatch[1]);
-          navigate('/chat');
-          toast.success(`🌟 Stella: Cerco ${callMatch[1]} per la chiamata!`);
+          const result = await callContact(callMatch[1].trim());
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
         },
       };
     }
@@ -1021,7 +1215,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals, addMessage, getUserStats, getNotificationsSummary, getUpcomingBookings]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals, addMessage, getUserStats, getNotificationsSummary, getUpcomingBookings, clickVisibleAction, callContact]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
@@ -1245,12 +1439,7 @@ export function useStellaAgent() {
         // Siri-like: show inline status, don't open panel
         setInlineStatus(displayResponse.substring(0, 100));
         await executeAIIntent(intent, params || {}, displayResponse);
-        if (user) {
-          supabase.from('stella_commands').insert({
-            user_id: user.id, command_text: text, command_type: intent,
-            status: 'completed', executed_at: new Date().toISOString(),
-          }).then(() => {});
-        }
+        logStellaCommand(text, intent);
       } else {
         // Chat response: show in panel
         setIsOpen(true);
@@ -1264,18 +1453,22 @@ export function useStellaAgent() {
       toast.info(`🌟 ${fallback}`);
     } finally {
       setIsAIThinking(false);
+      scheduleWakeWordResume(1800);
     }
-  }, [addMessage, stellaSpeak, profile, user, executeAIIntent, analyzePatterns, getTopPages]);
+  }, [addMessage, stellaSpeak, profile, executeAIIntent, analyzePatterns, getTopPages, logStellaCommand, scheduleWakeWordResume]);
 
 
 
   // ── Handle command (works in background or with panel open) ────────────
-  const handleCommand = useCallback((text: string) => {
+  const handleCommand = useCallback(async (rawText: string) => {
+    const text = rawText.trim();
+    if (!text) return;
+
     addMessage({ role: 'user', content: text });
 
     const cmd = parseCommand(text);
     if (!cmd) {
-      askAI(text);
+      await askAI(text);
       return;
     }
 
@@ -1285,6 +1478,7 @@ export function useStellaAgent() {
       addMessage({ role: 'stella', content: msg });
       stellaSpeak(msg);
       toast.warning(`🌟 Stella: ${msg}`);
+      scheduleWakeWordResume();
       return;
     }
 
@@ -1295,62 +1489,87 @@ export function useStellaAgent() {
       // Open panel for confirmations
       setIsOpen(true);
     } else {
-      // Siri-like: execute silently with inline status, no panel
-      cmd.execute();
-      recordAction(cmd.type);
-      addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
-      setInlineStatus(cmd.response);
-      stellaSpeak(cmd.response);
-
-      if (user) {
-        supabase.from('stella_commands').insert({
-          user_id: user.id, command_text: text, command_type: cmd.type,
-          status: 'completed', executed_at: new Date().toISOString(),
-        }).then(() => {});
+      try {
+        // Siri-like: execute silently with inline status, no panel
+        await Promise.resolve(cmd.execute());
+        recordAction(cmd.type);
+        addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
+        setInlineStatus(cmd.response);
+        stellaSpeak(cmd.response);
+        logStellaCommand(text, cmd.type);
+      } catch (error) {
+        console.error('Stella direct command error:', error);
+        const failureMessage = 'Non sono riuscita a completare l’azione richiesta.';
+        addMessage({ role: 'stella', content: failureMessage, type: 'text' });
+        setInlineStatus(failureMessage);
+        stellaSpeak(failureMessage);
+        toast.error(`🌟 Stella: ${failureMessage}`);
+      } finally {
+        scheduleWakeWordResume();
       }
     }
-  }, [addMessage, parseCommand, stellaSpeak, askAI, user]);
+  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume]);
+
+  handleCommandRef.current = handleCommand;
 
   // ── Confirm / Cancel pending action ─────────────────────────────────────
-  const confirmAction = useCallback(() => {
+  const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
-    pendingCommand.execute();
-    recordAction(pendingCommand.type);
-    addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result' });
-    stellaSpeak('Fatto!');
-    toast.success('🌟 Stella: Fatto! ✅');
-
-    if (user) {
-      supabase.from('stella_commands').insert({
-        user_id: user.id, command_text: pendingCommand.text, command_type: pendingCommand.type,
-        status: 'completed', requires_confirmation: true,
-        confirmed_at: new Date().toISOString(), executed_at: new Date().toISOString(),
-      }).then(() => {});
+    try {
+      await Promise.resolve(pendingCommand.execute());
+      recordAction(pendingCommand.type);
+      addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result' });
+      stellaSpeak('Fatto!');
+      toast.success('🌟 Stella: Fatto! ✅');
+      logStellaCommand(pendingCommand.text, pendingCommand.type, {
+        requires_confirmation: true,
+        confirmed_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Stella confirmation error:', error);
+      const failureMessage = 'Non sono riuscita a completare l’azione confermata.';
+      addMessage({ role: 'stella', content: failureMessage, type: 'text' });
+      stellaSpeak(failureMessage);
+      toast.error(`🌟 Stella: ${failureMessage}`);
+    } finally {
+      setPendingCommand(null);
+      scheduleWakeWordResume();
     }
-    setPendingCommand(null);
-  }, [pendingCommand, addMessage, stellaSpeak, user]);
+  }, [pendingCommand, addMessage, stellaSpeak, logStellaCommand, scheduleWakeWordResume]);
 
   const cancelAction = useCallback(() => {
     setPendingCommand(null);
     addMessage({ role: 'stella', content: 'Azione annullata.' });
     stellaSpeak('Annullato.');
-  }, [addMessage, stellaSpeak]);
+    scheduleWakeWordResume(800);
+  }, [addMessage, stellaSpeak, scheduleWakeWordResume]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
-    handleCommand(text.trim());
+    void handleCommand(text.trim());
   }, [handleCommand]);
 
   const toggleWakeWord = useCallback(() => {
-    if (wakeWordActive) { stopWakeWordListening(); setWakeWordActive(false); }
-    else { startWakeWordListening(); setWakeWordActive(true); }
-  }, [wakeWordActive, startWakeWordListening, stopWakeWordListening]);
+    clearWakeWordResumeTimeout();
+
+    if (wakeWordActive) {
+      stopWakeWordListening();
+      setWakeWordActive(false);
+      setInlineStatus('Attivazione vocale disattivata.');
+      return;
+    }
+
+    setWakeWordActive(true);
+    setInlineStatus('Attivazione vocale attivata.');
+  }, [wakeWordActive, clearWakeWordResumeTimeout, stopWakeWordListening]);
 
   const toggleTTS = useCallback(() => setTtsEnabled(prev => !prev), []);
 
   const toggleListening = useCallback(() => {
     if (isListening) stopListening(); else startListening();
   }, [isListening, startListening, stopListening]);
+
+  const clearMessages = useCallback(() => setMessages([]), []);
 
   return {
     messages, isOpen, setIsOpen, wakeWordActive, ttsEnabled,
@@ -1359,6 +1578,6 @@ export function useStellaAgent() {
     inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
-    clearMessages: useCallback(() => setMessages([]), []),
+    clearMessages,
   };
 }
