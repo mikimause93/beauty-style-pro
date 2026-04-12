@@ -267,6 +267,7 @@ export default function ChatPage() {
         time: "",
         unread: 0,
         online: false,
+        lastSeen: null,
         otherUserId: otherUser.user_id,
       };
       setConversations(prev => [newConv, ...prev]);
