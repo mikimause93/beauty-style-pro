@@ -290,7 +290,7 @@ export function useStellaAgent() {
   // ── Helper: find nearby professionals/salons by city or GPS ─────────────
   const findNearbyProfessionals = useCallback(async (city?: string, specialty?: string) => {
     // Try professionals table
-    let query = supabase.from('professionals').select('id, business_name, specialty, city, rating, latitude, longitude, phone');
+    let query = supabase.from('professionals').select('id, business_name, specialty, city, rating, latitude, longitude');
     if (city) query = query.ilike('city', `%${city}%`);
     if (specialty) query = query.ilike('specialty', `%${specialty}%`);
     const { data: pros } = await query.order('rating', { ascending: false }).limit(10);
