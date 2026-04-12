@@ -5183,6 +5183,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string | null
+          employee_count: number | null
           facebook: string | null
           featured: boolean | null
           id: string | null
@@ -5196,10 +5197,10 @@ export type Database = {
           slug: string | null
           updated_at: string | null
           user_id: string | null
+          verification_status: string | null
           verified: boolean | null
           website: string | null
           working_hours: Json | null
-          zip_code: string | null
         }
         Insert: {
           active?: boolean | null
@@ -5213,6 +5214,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          employee_count?: number | null
           facebook?: string | null
           featured?: boolean | null
           id?: string | null
@@ -5226,10 +5228,10 @@ export type Database = {
           slug?: string | null
           updated_at?: string | null
           user_id?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           website?: string | null
           working_hours?: Json | null
-          zip_code?: string | null
         }
         Update: {
           active?: boolean | null
@@ -5243,6 +5245,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          employee_count?: number | null
           facebook?: string | null
           featured?: boolean | null
           id?: string | null
@@ -5256,10 +5259,10 @@ export type Database = {
           slug?: string | null
           updated_at?: string | null
           user_id?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           website?: string | null
           working_hours?: Json | null
-          zip_code?: string | null
         }
         Relationships: []
       }
