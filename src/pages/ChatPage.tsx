@@ -937,7 +937,12 @@ export default function ChatPage() {
             >
               <div className="relative">
                 <img src={conv.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                {conv.online && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                )}
+                {!conv.online && conv.lastSeen && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-muted-foreground/40 border-2 border-background" />
+                )}
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between">
