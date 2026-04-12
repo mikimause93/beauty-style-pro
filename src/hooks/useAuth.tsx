@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // trigger CSS variable update by dispatching a custom event
         const r = document.documentElement;
         if (ct === "male") {
-          r.style.setProperty("--primary", "170 100% 20%");
-          r.style.setProperty("--ring", "170 100% 20%");
-          r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))");
-          r.style.setProperty("--shadow-glow", "0 0 40px hsl(170 100% 20% / 0.3)");
+          r.style.setProperty("--primary", "32 80% 48%");
+          r.style.setProperty("--ring", "32 80% 48%");
+          r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(32 80% 48%), hsl(38 90% 55%))");
+          r.style.setProperty("--shadow-glow", "0 0 40px hsl(32 80% 48% / 0.3)");
         } else {
           r.style.setProperty("--primary", "262 80% 62%");
           r.style.setProperty("--ring", "262 80% 62%");

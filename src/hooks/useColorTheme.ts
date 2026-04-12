@@ -19,18 +19,18 @@ const FEMALE = {
 };
 
 const MALE = {
-  primary: "170 100% 20%",          // Verde vernice petrolio profondo #006B5E
-  ring: "170 100% 20%",
-  sidebarPrimary: "170 100% 20%",
-  sidebarRing: "170 100% 20%",
-  gradientPrimary: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))",
-  gradientLuxury: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%), hsl(180 70% 28%))",
-  gradientChrome: "linear-gradient(135deg, hsl(240 6% 88%), hsl(170 30% 72%), hsl(240 6% 60%))",
-  gradientChromeDark: "linear-gradient(135deg, hsl(240 5% 18%), hsl(170 20% 22%), hsl(240 5% 12%))",
-  gradientChromeText: "linear-gradient(135deg, hsl(0 0% 95%), hsl(170 30% 82%), hsl(0 0% 70%))",
-  gradientChromeBorder: "linear-gradient(135deg, hsl(0 0% 30%), hsl(170 20% 40%), hsl(0 0% 20%))",
-  shadowGlow: "0 0 40px hsl(170 100% 20% / 0.3)",
-  shadowLuxury: "0 8px 32px hsl(170 100% 20% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5)",
+  primary: "32 80% 48%",             // Oro bronzo caldo #D4882A
+  ring: "32 80% 48%",
+  sidebarPrimary: "32 80% 48%",
+  sidebarRing: "32 80% 48%",
+  gradientPrimary: "linear-gradient(135deg, hsl(32 80% 48%), hsl(38 90% 55%))",
+  gradientLuxury: "linear-gradient(135deg, hsl(32 80% 48%), hsl(38 90% 55%), hsl(25 70% 42%))",
+  gradientChrome: "linear-gradient(135deg, hsl(240 6% 88%), hsl(38 40% 72%), hsl(240 6% 60%))",
+  gradientChromeDark: "linear-gradient(135deg, hsl(240 5% 18%), hsl(32 25% 22%), hsl(240 5% 12%))",
+  gradientChromeText: "linear-gradient(135deg, hsl(0 0% 95%), hsl(38 40% 82%), hsl(0 0% 70%))",
+  gradientChromeBorder: "linear-gradient(135deg, hsl(0 0% 30%), hsl(32 25% 40%), hsl(0 0% 20%))",
+  shadowGlow: "0 0 40px hsl(32 80% 48% / 0.3)",
+  shadowLuxury: "0 8px 32px hsl(32 80% 48% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5)",
 };
 
 const THEMES: Record<ColorTheme, typeof FEMALE> = { female: FEMALE, male: MALE };
