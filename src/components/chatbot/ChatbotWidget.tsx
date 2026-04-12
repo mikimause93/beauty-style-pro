@@ -76,14 +76,13 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
   const { speak, speaking: isSpeaking } = useVoiceSynthesis({ rate: 1.05, pitch: 1.05 });
 
-  // Wake word detection
   const {
     isListening: isVoiceListening,
     transcript: voiceTranscript,
     interimTranscript,
     isSupported: voiceSupported,
     isWakeWordListening,
-    startListening,
+    startListening: beginVoiceListening,
     stopListening,
     resetTranscript,
     startWakeWordListening,
@@ -93,36 +92,38 @@ export default function ChatbotWidget({ className = "" }: Props) {
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
     onWakeWordDetected: () => {
-      // Wake word detected — activate voice call UI
       setIsVoiceCallActive(true);
       setVoicePhase("listening");
       toast("🎙️ Stella ti ascolta...", { duration: 2000 });
     },
   });
 
-  // Auto-start wake word listening when component mounts
-  useEffect(() => {
-    if (voiceSupported && user) {
-      const timer = setTimeout(() => {
-        try { startWakeWordListening(); } catch(e) { console.log('Wake word not available'); }
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceSupported, user]);
+  const startListening = useCallback(() => {
+    setIsVoiceCallActive(true);
+    setVoicePhase("listening");
+    resetTranscript();
+    stopWakeWordListening();
+    setTimeout(() => {
+      beginVoiceListening();
+    }, 250);
+  }, [beginVoiceListening, resetTranscript, stopWakeWordListening]);
 
-  // Re-start wake word listening after voice call ends
   useEffect(() => {
-    if (!isVoiceCallActive && voiceSupported && user) {
-      const timer = setTimeout(() => {
-        try { startWakeWordListening(); } catch(e) { /* ignore */ }
-      }, 2500);
-      return () => clearTimeout(timer);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVoiceCallActive, voiceSupported, user]);
+    if (!voiceSupported) return;
+    const timer = setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [voiceSupported, startWakeWordListening]);
 
-  // Process voice command when transcript changes during call
+  useEffect(() => {
+    if (isVoiceCallActive || !voiceSupported) return;
+    const timer = setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [isVoiceCallActive, voiceSupported, startWakeWordListening]);
+
   useEffect(() => {
     if (isVoiceCallActive && voiceTranscript && !isVoiceListening) {
       processVoiceCommand(voiceTranscript.trim());
@@ -133,26 +134,21 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const processVoiceCommand = async (command: string) => {
     if (!command) return;
     setVoicePhase("processing");
-    
-    // Try voice action first (navigation, messages, etc.)
+
     const result = executeVoiceCommand(command);
-    
+
     if (result.matched) {
-      // Handle optional action field (e.g., theme change)
       if (result.action === "theme:light") setTheme("light");
       else if (result.action === "theme:dark") setTheme("dark");
       setVoicePhase("speaking");
-      // Speak the response aloud — hands-free
       speak(result.response);
       toast.success(result.response);
-      // Auto-close after TTS completes (roughly 1.5s per 100 chars)
       setTimeout(() => {
         endVoiceCall();
       }, Math.max(800, result.response.length * 15));
       return;
     }
 
-    // If not a navigation command, send to AI
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
     setChatMessages(prev => [...prev, userMsg]);
     setIsMinimized(false);
@@ -168,7 +164,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
     try {
       await streamChat({
-        userId: user!.id,
+        userId: user?.id,
         messages: history as any,
         onDelta: (chunk) => {
           assistantSoFar += chunk;
@@ -185,9 +181,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
           setChatMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
-          // Speak the full AI response aloud
           if (assistantSoFar) {
-            // Truncate for TTS if very long
             const ttsText = assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar;
             speak(ttsText);
           }
@@ -208,12 +202,12 @@ export default function ChatbotWidget({ className = "" }: Props) {
     }
   };
 
-  const endVoiceCall = () => {
+  const endVoiceCall = useCallback(() => {
     stopListening();
     resetTranscript();
     setIsVoiceCallActive(false);
     setVoicePhase("listening");
-  };
+  }, [stopListening, resetTranscript]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -222,7 +216,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   useEffect(() => {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
-        m.id === "welcome" 
+        m.id === "welcome"
           ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!` }
           : m
       ));
@@ -231,7 +225,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
   const sendMessage = useCallback(async () => {
     const text = chatInput.trim();
-    if (!text || isAILoading || !user) return;
+    if (!text || isAILoading) return;
 
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
     setChatMessages(prev => [...prev, userMsg]);
@@ -259,11 +253,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
     try {
       await streamChat({
-        userId: user.id,
+        userId: user?.id,
         messages: history as any,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => {
-          setChatMessages(prev => prev.map(m => 
+          setChatMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
           setIsAILoading(false);

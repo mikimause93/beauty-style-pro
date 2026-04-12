@@ -39,45 +39,46 @@ export default function AIAssistantPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const [isTTSEnabled, setIsTTSEnabled] = useState(false);
   const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
-  
+
   const { speak, cancel: cancelTTS } = useVoiceSynthesis();
   const { processVoiceCommand } = useStellaVoiceActions();
-  
+
   const {
-    isListening, transcript, startListening, stopListening, resetTranscript,
-    isWakeWordListening, startWakeWordListening, stopWakeWordListening
+    isListening,
+    transcript,
+    startListening: beginListening,
+    stopListening,
+    resetTranscript,
+    isWakeWordListening,
+    startWakeWordListening,
+    stopWakeWordListening,
   } = useVoiceRecognition({
-    continuous: false, interimResults: true, language: 'it-IT',
+    continuous: false,
+    interimResults: true,
+    language: 'it-IT',
     wakeWordEnabled,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
     onWakeWordDetected: () => { if (isTTSEnabled) speak("Ciao! Come posso aiutarti?"); }
   });
 
+  const startListening = useCallback(() => {
+    resetTranscript();
+    stopWakeWordListening();
+    setTimeout(() => {
+      beginListening();
+    }, 250);
+  }, [beginListening, resetTranscript, stopWakeWordListening]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    if (transcript && !isListening) {
-      // Try voice command first
-      const { matched, response } = processVoiceCommand(transcript);
-      if (matched) {
-        if (isTTSEnabled) speak(response);
-        toast.success(response);
-        resetTranscript();
-        return;
-      }
-      setInput(transcript);
-      resetTranscript();
-    }
-  }, [transcript, isListening, resetTranscript, processVoiceCommand, isTTSEnabled, speak]);
-
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
-    if (!text || isLoading || !user) return;
+  const sendMessage = useCallback(async (forcedText?: string) => {
+    const text = (forcedText ?? input).trim();
+    if (!text || isLoading) return;
 
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
@@ -105,12 +106,11 @@ export default function AIAssistantPage() {
 
     try {
       await streamChat({
-        userId: user.id,
+        userId: user?.id,
         messages: history as any,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => {
-          // Finalize the streaming message with a stable ID
-          setMessages(prev => prev.map(m => 
+          setMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
           setIsLoading(false);
@@ -138,15 +138,38 @@ export default function AIAssistantPage() {
     }
   }, [input, isLoading, user, messages, isTTSEnabled, speak]);
 
+  useEffect(() => {
+    if (transcript && !isListening) {
+      const spokenText = transcript.trim();
+      const { matched, response } = processVoiceCommand(spokenText);
+      if (matched) {
+        if (isTTSEnabled) speak(response);
+        toast.success(response);
+        resetTranscript();
+        return;
+      }
+      sendMessage(spokenText);
+      resetTranscript();
+    }
+  }, [transcript, isListening, resetTranscript, processVoiceCommand, isTTSEnabled, speak, sendMessage]);
+
+  useEffect(() => {
+    if (profile?.display_name) {
+      setMessages(prev => prev.map(m =>
+        m.id === "welcome"
+          ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI, il tuo assistente STYLE. Chiedimi consigli beauty, come usare l'app, prenotare servizi o qualsiasi altra cosa!` }
+          : m
+      ));
+    }
+  }, [profile?.display_name]);
+
   return (
     <MobileLayout>
-      {/* Header */}
       <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          {/* Animated AI avatar */}
           <div className={`relative w-11 h-11 rounded-full gradient-primary flex items-center justify-center shrink-0 ${isListening ? "shadow-glow" : ""}`}>
             <Sparkles className={`w-5 h-5 text-primary-foreground ${isListening ? "animate-pulse" : ""}`} />
             {(isWakeWordListening || isListening) && (
@@ -159,7 +182,6 @@ export default function AIAssistantPage() {
               {isListening ? "🔴 Sto ascoltando..." : isWakeWordListening ? "🎤 Dì 'Stella' per attivare" : "Assistente STYLE · Voce + AI"}
             </p>
           </div>
-          {/* Voice toggle */}
           <button
             onClick={() => {
               setWakeWordEnabled(!wakeWordEnabled);
@@ -178,7 +200,6 @@ export default function AIAssistantPage() {
           >
             <MicIcon className="w-4 h-4" />
           </button>
-          {/* TTS toggle */}
           <button
             onClick={() => {
               setIsTTSEnabled(!isTTSEnabled);
@@ -194,7 +215,6 @@ export default function AIAssistantPage() {
           </button>
         </div>
 
-        {/* Hands-free active banner */}
         {(isWakeWordListening || isListening) && (
           <div className="mt-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shrink-0" />
@@ -207,7 +227,6 @@ export default function AIAssistantPage() {
 
       <AIQuickActions onCommand={(cmd) => {
         setInput(cmd);
-        // Auto-send slash commands
         setTimeout(() => {
           const btn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
           btn?.click();
@@ -222,7 +241,6 @@ export default function AIAssistantPage() {
         messagesEndRef={messagesEndRef}
       />
 
-      {/* Input bar */}
       <div className="sticky bottom-16 glass px-4 py-3 flex items-center gap-2">
         <input
           value={input}
@@ -247,7 +265,7 @@ export default function AIAssistantPage() {
         >
           <MicIcon className="w-5 h-5" />
         </button>
-        <button onClick={sendMessage} disabled={!input.trim() || isLoading} data-send-btn
+        <button onClick={() => sendMessage()} disabled={!input.trim() || isLoading} data-send-btn
           className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 active:scale-95 transition-transform">
           <Send className="w-5 h-5 text-primary-foreground" />
         </button>
