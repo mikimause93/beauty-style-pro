@@ -19,18 +19,18 @@ const FEMALE = {
 };
 
 const MALE = {
-  primary: "173 82% 32%",         // #0D9488 teal-600
-  ring: "173 82% 32%",
-  sidebarPrimary: "173 82% 32%",
-  sidebarRing: "173 82% 32%",
-  gradientPrimary: "linear-gradient(135deg, hsl(173 82% 32%), hsl(174 70% 42%))",
-  gradientLuxury: "linear-gradient(135deg, hsl(173 82% 32%), hsl(174 70% 42%), hsl(187 80% 42%))",
-  gradientChrome: "linear-gradient(135deg, hsl(240 6% 88%), hsl(173 30% 72%), hsl(240 6% 60%))",
-  gradientChromeDark: "linear-gradient(135deg, hsl(240 5% 18%), hsl(173 20% 22%), hsl(240 5% 12%))",
-  gradientChromeText: "linear-gradient(135deg, hsl(0 0% 95%), hsl(173 30% 82%), hsl(0 0% 70%))",
-  gradientChromeBorder: "linear-gradient(135deg, hsl(0 0% 30%), hsl(173 20% 40%), hsl(0 0% 20%))",
-  shadowGlow: "0 0 40px hsl(173 82% 32% / 0.3)",
-  shadowLuxury: "0 8px 32px hsl(173 82% 32% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5)",
+  primary: "170 100% 20%",          // Verde vernice petrolio profondo #006B5E
+  ring: "170 100% 20%",
+  sidebarPrimary: "170 100% 20%",
+  sidebarRing: "170 100% 20%",
+  gradientPrimary: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))",
+  gradientLuxury: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%), hsl(180 70% 28%))",
+  gradientChrome: "linear-gradient(135deg, hsl(240 6% 88%), hsl(170 30% 72%), hsl(240 6% 60%))",
+  gradientChromeDark: "linear-gradient(135deg, hsl(240 5% 18%), hsl(170 20% 22%), hsl(240 5% 12%))",
+  gradientChromeText: "linear-gradient(135deg, hsl(0 0% 95%), hsl(170 30% 82%), hsl(0 0% 70%))",
+  gradientChromeBorder: "linear-gradient(135deg, hsl(0 0% 30%), hsl(170 20% 40%), hsl(0 0% 20%))",
+  shadowGlow: "0 0 40px hsl(170 100% 20% / 0.3)",
+  shadowLuxury: "0 8px 32px hsl(170 100% 20% / 0.15), 0 2px 8px hsl(0 0% 0% / 0.5)",
 };
 
 const THEMES: Record<ColorTheme, typeof FEMALE> = { female: FEMALE, male: MALE };

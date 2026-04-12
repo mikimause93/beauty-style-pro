@@ -202,40 +202,40 @@
   }
   .chrome-icon-active {
     background: var(--gradient-primary);
-    border: 1px solid hsl(262 80% 72% / 0.4);
-    box-shadow: 0 4px 20px hsl(262 80% 62% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.15);
+    border: 1px solid hsl(var(--primary) / 0.4);
+    box-shadow: 0 4px 20px hsl(var(--primary) / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.15);
   }
 
-  /* Neon LED icon — transparent bg with purple neon border glow */
+  /* Neon LED icon — transparent bg with primary neon border glow */
   .neon-icon {
     background: transparent;
-    border: 2px solid hsl(262 80% 62% / 0.7);
+    border: 2px solid hsl(var(--primary) / 0.7);
     box-shadow:
-      0 0 8px hsl(262 80% 62% / 0.4),
-      0 0 20px hsl(262 80% 62% / 0.15),
-      inset 0 0 8px hsl(262 80% 62% / 0.1);
+      0 0 8px hsl(var(--primary) / 0.4),
+      0 0 20px hsl(var(--primary) / 0.15),
+      inset 0 0 8px hsl(var(--primary) / 0.1);
     transition: all 0.3s ease;
   }
   .neon-icon:hover,
   .neon-icon:active {
-    border-color: hsl(262 80% 72% / 0.9);
+    border-color: hsl(var(--primary) / 0.9);
     box-shadow:
-      0 0 12px hsl(262 80% 62% / 0.6),
-      0 0 30px hsl(262 80% 62% / 0.25),
-      inset 0 0 12px hsl(262 80% 62% / 0.15);
+      0 0 12px hsl(var(--primary) / 0.6),
+      0 0 30px hsl(var(--primary) / 0.25),
+      inset 0 0 12px hsl(var(--primary) / 0.15);
   }
   .neon-icon-active {
-    border-color: hsl(262 80% 72%);
+    border-color: hsl(var(--primary));
     box-shadow:
-      0 0 14px hsl(262 80% 62% / 0.7),
-      0 0 40px hsl(262 80% 62% / 0.3),
-      inset 0 0 14px hsl(262 80% 62% / 0.2);
+      0 0 14px hsl(var(--primary) / 0.7),
+      0 0 40px hsl(var(--primary) / 0.3),
+      inset 0 0 14px hsl(var(--primary) / 0.2);
   }
 
   /* Neon text glow */
   .text-neon {
-    color: hsl(262 80% 72%);
-    text-shadow: 0 0 6px hsl(262 80% 62% / 0.5), 0 0 20px hsl(262 80% 62% / 0.2);
+    color: hsl(var(--primary));
+    text-shadow: 0 0 6px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.2);
   }
 
   /* Hide scrollbar */
@@ -295,8 +295,8 @@
   }
 
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsl(262 80% 62% / 0.35), 0 4px 20px hsl(0 0% 0% / 0.3); }
-    50% { box-shadow: 0 0 32px hsl(262 80% 62% / 0.5), 0 4px 28px hsl(0 0% 0% / 0.3); }
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.35), 0 4px 20px hsl(0 0% 0% / 0.3); }
+    50% { box-shadow: 0 0 32px hsl(var(--primary) / 0.5), 0 4px 28px hsl(0 0% 0% / 0.3); }
   }
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
