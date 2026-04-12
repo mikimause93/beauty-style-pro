@@ -73,6 +73,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   // Voice call state
   const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
+  const processedVoiceCommandRef = useRef<string | null>(null);
   
   const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
   const { speak, speaking: isSpeaking } = useVoiceSynthesis({ rate: 1.05, pitch: 1.05 });
@@ -92,8 +93,15 @@ export default function ChatbotWidget({ className = "" }: Props) {
     continuous: false,
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
-    onWakeWordDetected: () => {
+    onWakeWordDetected: (command) => {
       setIsVoiceCallActive(true);
+      if (command?.trim()) {
+        processedVoiceCommandRef.current = command.trim();
+        setVoicePhase("processing");
+        toast(`🎙️ Stella: "${command.trim()}"`, { duration: 2000 });
+        return;
+      }
+
       setVoicePhase("listening");
       toast("🎙️ Stella ti ascolta...", { duration: 2000 });
     },
@@ -131,6 +139,14 @@ export default function ChatbotWidget({ className = "" }: Props) {
   }, [isVoiceCallActive, voiceSupported, isWakeWordListening, startWakeWordListening]);
 
   useEffect(() => {
+    const directWakeWordCommand = processedVoiceCommandRef.current;
+
+    if (directWakeWordCommand) {
+      processedVoiceCommandRef.current = null;
+      processVoiceCommand(directWakeWordCommand);
+      return;
+    }
+
     if (isVoiceCallActive && voiceTranscript.trim() && !isVoiceListening) {
       processVoiceCommand(voiceTranscript.trim());
     }
@@ -296,6 +312,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   };
 
   const endVoiceCall = useCallback(() => {
+    processedVoiceCommandRef.current = null;
     stopListening();
     resetTranscript();
     setIsVoiceCallActive(false);

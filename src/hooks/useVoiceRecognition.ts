@@ -13,7 +13,7 @@ interface VoiceRecognitionOptions {
   language?: string;
   wakeWordEnabled?: boolean;
   wakeWords?: string[];
-  onWakeWordDetected?: () => void;
+  onWakeWordDetected?: (command?: string) => void;
 }
 
 interface VoiceRecognitionHook {
@@ -57,6 +57,8 @@ export const useVoiceRecognition = (
   const onWakeWordRef = useRef(onWakeWordDetected);
   const wakeWordsRef = useRef(wakeWords);
   const handoffToCommandRef = useRef(false);
+  const wakeWordCommandTimeoutRef = useRef<number | null>(null);
+  const pendingWakeWordCommandRef = useRef('');
 
   useEffect(() => { onWakeWordRef.current = onWakeWordDetected; }, [onWakeWordDetected]);
   useEffect(() => { wakeWordsRef.current = wakeWords; }, [wakeWords]);
@@ -64,6 +66,41 @@ export const useVoiceRecognition = (
 
   const isSupported = typeof window !== 'undefined' &&
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+
+  const clearWakeWordCommandTimeout = useCallback(() => {
+    if (wakeWordCommandTimeoutRef.current !== null) {
+      window.clearTimeout(wakeWordCommandTimeoutRef.current);
+      wakeWordCommandTimeoutRef.current = null;
+    }
+  }, []);
+
+  const extractCommandAfterWakeWord = useCallback((sourceTranscript: string) => {
+    const normalizedTranscript = sourceTranscript.toLowerCase().trim().replace(/\s+/g, ' ');
+    if (!normalizedTranscript) return null;
+
+    const matchedWakeWord = [...wakeWordsRef.current]
+      .sort((a, b) => b.length - a.length)
+      .find((word) => normalizedTranscript.includes(word.toLowerCase()));
+
+    if (!matchedWakeWord) return null;
+
+    const wakeWordIndex = normalizedTranscript.indexOf(matchedWakeWord.toLowerCase());
+    const commandStartIndex = wakeWordIndex + matchedWakeWord.length;
+
+    return normalizedTranscript
+      .slice(commandStartIndex)
+      .replace(/^[\s,.:;!?-]+/, '')
+      .trim();
+  }, []);
+
+  const stopWakeWordRecognitionInstance = useCallback(() => {
+    const ref = wakeWordRecognitionRef.current;
+    wakeWordRecognitionRef.current = null;
+    if (ref) {
+      try { ref.stop(); } catch {}
+    }
+    setIsWakeWordListening(false);
+  }, []);
 
   const stopListening = useCallback(() => {
     handoffToCommandRef.current = false;
@@ -79,13 +116,10 @@ export const useVoiceRecognition = (
   const stopWakeWordListening = useCallback(() => {
     wakeWordActiveRef.current = false;
     handoffToCommandRef.current = false;
-    if (wakeWordRecognitionRef.current) {
-      const ref = wakeWordRecognitionRef.current;
-      wakeWordRecognitionRef.current = null;
-      try { ref.stop(); } catch {}
-      setIsWakeWordListening(false);
-    }
-  }, []);
+    pendingWakeWordCommandRef.current = '';
+    clearWakeWordCommandTimeout();
+    stopWakeWordRecognitionInstance();
+  }, [clearWakeWordCommandTimeout, stopWakeWordRecognitionInstance]);
 
   const startListening = useCallback(() => {
     if (!isSupported) return;
@@ -205,21 +239,54 @@ export const useVoiceRecognition = (
             .map((result: any) => result[0].transcript)
             .join('').toLowerCase();
 
+          const finalTranscript = Array.from(event.results)
+            .filter((result: any) => result.isFinal)
+            .map((result: any) => result[0].transcript)
+            .join(' ').toLowerCase();
+
+          const finalCommand = extractCommandAfterWakeWord(finalTranscript);
+          const liveCommand = extractCommandAfterWakeWord(currentTranscript);
+
           const wakeWordFound = wakeWordsRef.current.some(word =>
             currentTranscript.includes(word.toLowerCase())
           );
 
+          if (typeof finalCommand === 'string' && finalCommand.length > 0) {
+            clearWakeWordCommandTimeout();
+            pendingWakeWordCommandRef.current = '';
+            setWakeWordDetected(true);
+            onWakeWordRef.current?.(finalCommand);
+            handoffToCommandRef.current = false;
+            wakeWordActiveRef.current = false;
+            stopWakeWordRecognitionInstance();
+            return;
+          }
+
+          if (typeof liveCommand === 'string' && liveCommand.length > 0) {
+            pendingWakeWordCommandRef.current = liveCommand;
+            clearWakeWordCommandTimeout();
+            wakeWordCommandTimeoutRef.current = window.setTimeout(() => {
+              const command = pendingWakeWordCommandRef.current.trim();
+              if (!command) return;
+
+              pendingWakeWordCommandRef.current = '';
+              setWakeWordDetected(true);
+              onWakeWordRef.current?.(command);
+              handoffToCommandRef.current = false;
+              wakeWordActiveRef.current = false;
+              stopWakeWordRecognitionInstance();
+            }, 850);
+            return;
+          }
+
           if (wakeWordFound) {
+            clearWakeWordCommandTimeout();
+            pendingWakeWordCommandRef.current = '';
             setWakeWordDetected(true);
             onWakeWordRef.current?.();
             handoffToCommandRef.current = true;
             wakeWordActiveRef.current = false;
-            if (wakeWordRecognitionRef.current) {
-              const ref = wakeWordRecognitionRef.current;
-              wakeWordRecognitionRef.current = null;
-              try { ref.stop(); } catch {}
-            }
-            setIsWakeWordListening(false);
+            stopWakeWordRecognitionInstance();
             setTimeout(() => {
               startListening();
             }, 600);
@@ -258,6 +325,8 @@ export const useVoiceRecognition = (
     return () => {
       wakeWordActiveRef.current = false;
       handoffToCommandRef.current = false;
+      pendingWakeWordCommandRef.current = '';
+      clearWakeWordCommandTimeout();
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch {}
       }
@@ -265,7 +334,7 @@ export const useVoiceRecognition = (
         try { wakeWordRecognitionRef.current.stop(); } catch {}
       }
     };
-  }, []);
+  }, [clearWakeWordCommandTimeout]);
 
   return {
     isListening,
