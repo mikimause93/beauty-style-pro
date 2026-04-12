@@ -1073,6 +1073,17 @@ export function useStellaAgent() {
         actionFeedback(s.msg, '💡');
         break;
       }
+      case 'find_nearby': {
+        const nearbyResult = await findNearbyProfessionals(params?.city, params?.specialty);
+        if (nearbyResult.found) {
+          actionFeedback(nearbyResult.summary!, '📍');
+          navigate('/stylists');
+        } else {
+          actionFeedback(nearbyResult.message, '📍');
+          navigate('/map-search');
+        }
+        break;
+      }
       default:
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
