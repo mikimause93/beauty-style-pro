@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
+import { supabase } from "@/integrations/supabase/client";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
@@ -140,70 +141,157 @@ export default function ChatbotWidget({ className = "" }: Props) {
     if (!command) return;
     setVoicePhase("processing");
 
+    // 1. Try local pattern matching first (instant)
     const result = executeVoiceCommand(command);
-
     if (result.matched) {
       if (result.action === "theme:light") setTheme("light");
       else if (result.action === "theme:dark") setTheme("dark");
       setVoicePhase("speaking");
       speak(result.response);
-      toast.success(result.response);
-      setTimeout(() => {
-        endVoiceCall();
-      }, Math.max(800, result.response.length * 15));
+      toast.success(`🌟 Stella: ${result.response}`);
+      setTimeout(() => endVoiceCall(), Math.max(800, result.response.length * 15));
       return;
     }
 
-    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
-    setChatMessages(prev => [...prev, userMsg]);
-    setIsMinimized(false);
-    setIsAILoading(true);
-    setVoicePhase("speaking");
-
-    const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    let assistantSoFar = "";
-
+    // 2. Call stella-intent AI for smart action parsing
     try {
-      await streamChat({
-        userId: user?.id,
-        messages: history as any,
-        onDelta: (chunk) => {
-          assistantSoFar += chunk;
-          const currentContent = assistantSoFar;
-          setChatMessages(prev => {
-            const last = prev[prev.length - 1];
-            if (last?.role === "assistant" && last.id === "streaming") {
-              return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
-            }
-            return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
-          });
-        },
-        onDone: () => {
-          setChatMessages(prev => prev.map(m =>
-            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
-          ));
-          if (assistantSoFar) {
-            const ttsText = assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar;
-            speak(ttsText);
-          }
-          setIsAILoading(false);
-          endVoiceCall();
-        },
-        onError: (error) => {
-          speak("Mi dispiace, riprova tra poco!");
-          toast.error(error);
-          setIsAILoading(false);
-          endVoiceCall();
+      const { data, error } = await supabase.functions.invoke('stella-intent', {
+        body: {
+          text: command,
+          context: {
+            user_type: profile?.user_type || 'client',
+            user_name: profile?.display_name || 'User',
+            gender: (profile as any)?.gender || 'unknown',
+            color_theme: (profile as any)?.color_theme || 'female',
+            qr_coins: profile?.qr_coins || 0,
+            current_page: window.location.pathname,
+          },
         },
       });
+
+      if (error) throw error;
+
+      const { intent, params, response: aiResponse } = data || {};
+      const displayResponse = aiResponse || 'Sono qui per aiutarti!';
+
+      // Execute the AI-parsed intent
+      if (intent && intent !== 'chat') {
+        setVoicePhase("speaking");
+        speak(displayResponse.length > 200 ? displayResponse.substring(0, 200) : displayResponse);
+        toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}`);
+
+        switch (intent) {
+          case 'navigate':
+            if (params?.route) navigate(params.route);
+            break;
+          case 'search':
+            navigate(`/search?q=${encodeURIComponent(params?.query || command)}`);
+            break;
+          case 'show_profile':
+            if (params?.name) navigate(`/search?q=${encodeURIComponent(params.name)}`);
+            else navigate('/profile');
+            break;
+          case 'like':
+            toast.success('❤️ Like aggiunto!');
+            break;
+          case 'follow':
+            if (params?.target_name) navigate(`/search?q=${encodeURIComponent(params.target_name)}`);
+            break;
+          case 'send_message':
+            navigate('/chat');
+            break;
+          case 'book':
+            if (params?.target_name) navigate(`/search?q=${encodeURIComponent(params.target_name)}`);
+            else navigate('/stylists');
+            break;
+          case 'scroll':
+            if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
+            else if (params?.direction === 'down') window.scrollBy({ top: 400, behavior: 'smooth' });
+            else if (params?.direction === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
+            else if (params?.direction === 'bottom') window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            break;
+          case 'theme':
+            if (params?.mode === 'dark') setTheme('dark');
+            else setTheme('light');
+            break;
+          case 'share':
+            if (navigator.share) navigator.share({ title: 'STYLE', url: window.location.href }).catch(() => {});
+            else navigator.clipboard.writeText(window.location.href);
+            break;
+          case 'refresh':
+            setTimeout(() => window.location.reload(), 500);
+            break;
+          case 'back':
+            window.history.back();
+            break;
+          case 'info':
+            if (params?.info_type === 'coins') toast.success(`💰 Hai ${profile?.qr_coins ?? 0} QR Coins`);
+            else if (params?.info_type === 'bookings') navigate('/my-bookings');
+            break;
+          default:
+            break;
+        }
+
+        // Add to chat for context
+        setChatMessages(prev => [
+          ...prev,
+          { id: Date.now().toString(), role: "user" as const, content: command },
+          { id: (Date.now() + 1).toString(), role: "assistant" as const, content: displayResponse },
+        ]);
+
+        setTimeout(() => endVoiceCall(), Math.max(800, displayResponse.length * 15));
+        return;
+      }
+
+      // 3. Pure chat intent — show in panel with streaming
+      setChatMessages(prev => [...prev, { id: Date.now().toString(), role: "user" as const, content: command }]);
+      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: "assistant" as const, content: displayResponse }]);
+      setVoicePhase("speaking");
+      speak(displayResponse.length > 300 ? displayResponse.slice(0, 300) + "..." : displayResponse);
+      setIsMinimized(false);
+      setTimeout(() => endVoiceCall(), Math.max(800, displayResponse.length * 15));
+
     } catch {
-      speak("Errore nella risposta. Riprova.");
-      setIsAILoading(false);
-      endVoiceCall();
+      // Fallback: stream chat if stella-intent fails
+      const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
+      setChatMessages(prev => [...prev, userMsg]);
+      setIsMinimized(false);
+      setIsAILoading(true);
+      setVoicePhase("speaking");
+
+      const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+        role: m.role, content: m.content,
+      }));
+
+      let assistantSoFar = "";
+      try {
+        await streamChat({
+          userId: user?.id,
+          messages: history as any,
+          onDelta: (chunk) => {
+            assistantSoFar += chunk;
+            const currentContent = assistantSoFar;
+            setChatMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant" && last.id === "streaming") {
+                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+              }
+              return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
+            });
+          },
+          onDone: () => {
+            setChatMessages(prev => prev.map(m => m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m));
+            if (assistantSoFar) speak(assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar);
+            setIsAILoading(false);
+            endVoiceCall();
+          },
+          onError: () => { speak("Mi dispiace, riprova tra poco!"); setIsAILoading(false); endVoiceCall(); },
+        });
+      } catch {
+        speak("Errore nella risposta. Riprova.");
+        setIsAILoading(false);
+        endVoiceCall();
+      }
     }
   };
 
