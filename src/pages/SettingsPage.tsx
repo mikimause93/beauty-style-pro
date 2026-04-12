@@ -289,12 +289,12 @@ export default function SettingsPage() {
                   onClick={() => setColorTheme("male")}
                   className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
                     colorTheme === "male"
-                      ? "border-primary shadow-[0_0_12px_hsl(173_82%_32%/0.4)]"
+                      ? "border-primary shadow-[0_0_12px_hsl(170_100%_20%/0.4)]"
                       : "border-border/40 opacity-70 hover:opacity-100"
                   }`}
                 >
                   <div className="w-full h-10 rounded-lg flex gap-1.5 items-center justify-center"
-                    style={{ background: "linear-gradient(135deg, hsl(173 82% 32%), hsl(174 70% 42%))" }}>
+                    style={{ background: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))" }}>
                     <div className="h-5 w-5 rounded-full bg-white/20" />
                     <div className="h-5 w-5 rounded-full bg-white/30" />
                     <div className="h-5 w-5 rounded-full bg-white/15" />
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                   <span className="text-xs font-semibold">🌲 Verde Petrolio</span>
                   {colorTheme === "male" && (
                     <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: "hsl(173 82% 32%)" }}>
+                      style={{ backgroundColor: "hsl(170 100% 20%)" }}>
                       <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
                     </div>
                   )}
