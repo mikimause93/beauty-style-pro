@@ -170,7 +170,6 @@ export function useStellaAgent() {
         postId = posts?.[0]?.id || null;
       }
     } else {
-      // Like the most recent post in feed
       const { data: posts } = await supabase
         .from('posts')
         .select('id')
@@ -188,11 +187,104 @@ export function useStellaAgent() {
     
     if (error?.code === '23505') return 'Hai già messo like a questo post! ❤️';
     if (error) return 'Errore nel mettere like. Riprova!';
-    
-    // Increment like count (best effort)
-    try { await supabase.rpc('increment_like_count' as any, { post_id: postId }); } catch {}
     return 'Like aggiunto! ❤️';
   }, [user, findProfileByName]);
+
+  // ── Helper: comment on a post ─────────────────────────────────────────────
+  const commentOnPost = useCallback(async (comment: string, targetName?: string) => {
+    if (!user) return 'Devi effettuare il login per commentare!';
+    
+    let postId: string | null = null;
+    
+    if (targetName) {
+      const profiles = await findProfileByName(targetName);
+      if (profiles.length > 0) {
+        const { data: posts } = await supabase
+          .from('posts')
+          .select('id')
+          .eq('user_id', profiles[0].user_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        postId = posts?.[0]?.id || null;
+      }
+    } else {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      postId = posts?.[0]?.id || null;
+    }
+    
+    if (!postId) return 'Non ho trovato post da commentare.';
+    
+    const { error } = await supabase.from('comments').insert({
+      post_id: postId,
+      user_id: user.id,
+      message: comment,
+    });
+    
+    if (error) return 'Errore nel commentare. Riprova!';
+    return `Commento aggiunto: "${comment}" 💬`;
+  }, [user, findProfileByName]);
+
+  // ── Helper: create a post ─────────────────────────────────────────────────
+  const createPost = useCallback(async (content: string) => {
+    if (!user) return 'Devi effettuare il login per pubblicare!';
+    
+    const { error } = await supabase.from('posts').insert({
+      user_id: user.id,
+      content,
+      post_type: 'text',
+    });
+    
+    if (error) return 'Errore nella pubblicazione. Riprova!';
+    return `Post pubblicato: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}" ✅`;
+  }, [user]);
+
+  // ── Helper: unfollow a user ───────────────────────────────────────────────
+  const unfollowUser = useCallback(async (targetName: string) => {
+    if (!user) return 'Devi effettuare il login!';
+    
+    const profiles = await findProfileByName(targetName);
+    if (profiles.length === 0) return `Non ho trovato "${targetName}".`;
+    
+    const target = profiles[0];
+    const { error } = await supabase.from('follows')
+      .delete()
+      .eq('follower_id', user.id)
+      .eq('following_id', target.user_id);
+    
+    if (error) return 'Errore. Riprova!';
+    return `Hai smesso di seguire ${target.display_name || target.username}! ✅`;
+  }, [user, findProfileByName]);
+
+  // ── Helper: confirm/cancel booking ────────────────────────────────────────
+  const manageBooking = useCallback(async (action: 'confirm' | 'cancel') => {
+    if (!user) return 'Devi effettuare il login!';
+    
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('id, booking_date, status')
+      .eq('client_id', user.id)
+      .eq('status', 'pending')
+      .order('booking_date', { ascending: true })
+      .limit(1);
+    
+    if (!bookings?.length) return 'Non hai prenotazioni in sospeso!';
+    
+    const booking = bookings[0];
+    const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+    
+    const { error } = await supabase.from('bookings')
+      .update({ status: newStatus })
+      .eq('id', booking.id);
+    
+    if (error) return `Errore nel ${action === 'confirm' ? 'confermare' : 'cancellare'} la prenotazione.`;
+    return action === 'confirm' 
+      ? `Prenotazione del ${booking.booking_date} confermata! ✅`
+      : `Prenotazione del ${booking.booking_date} cancellata! ❌`;
+  }, [user]);
 
   // ── Helper: follow a user ─────────────────────────────────────────────────
   const followUser = useCallback(async (targetName: string) => {
@@ -616,21 +708,105 @@ export function useStellaAgent() {
       };
     }
 
+    // ── COMMENT ─────────────────────────────────────────────────────────
+    const commentMatch = stripped.match(/(?:commenta|scrivi un commento|lascia un commento)\s+(?:a|al post di|sulla foto di|su)\s+([^:,]+?)(?:\s*[,:]\s*|\s+(?:che|dicendo|scrivendo|con)\s+)(.+)/);
+    if (commentMatch) {
+      const target = commentMatch[1].trim();
+      const comment = commentMatch[2].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Commento sul post di ${target}...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await commentOnPost(comment, target);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+    const commentSimple = stripped.match(/(?:commenta|scrivi)\s+["']?(.+?)["']?\s+(?:sull'ultimo|sul primo|sul post)/);
+    if (commentSimple) {
+      const comment = commentSimple[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Commento: "${comment}"`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await commentOnPost(comment);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── CREATE POST ───────────────────────────────────────────────────────
+    const postMatch = stripped.match(/(?:pubblica|posta|scrivi un post|crea un post)\s+(?:che\s+)?(?:dice\s+)?["']?(.+?)["']?$/);
+    if (postMatch) {
+      const content = postMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Pubblico il post...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await createPost(content);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── UNFOLLOW ──────────────────────────────────────────────────────────
+    const unfollowMatch = stripped.match(/(?:smetti di seguire|non seguire più|unfollow)\s+(.+)/);
+    if (unfollowMatch) {
+      const target = unfollowMatch[1].trim();
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: `Smetto di seguire ${target}...`, requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await unfollowUser(target);
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
+    // ── CONFIRM / CANCEL BOOKING ─────────────────────────────────────────
+    if (stripped.includes('conferma prenotazione') || stripped.includes('conferma appuntamento') || stripped.includes('conferma il mio appuntamento')) {
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: 'Confermo la prenotazione...', requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await manageBooking('confirm');
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+    if (stripped.includes('cancella prenotazione') || stripped.includes('annulla prenotazione') || stripped.includes('annulla appuntamento') || stripped.includes('disdici')) {
+      return {
+        id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
+        response: 'Annullo la prenotazione...', requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await manageBooking('cancel');
+          toast.success(`🌟 Stella: ${result}`);
+          stellaSpeak(result);
+        },
+      };
+    }
+
     // ── HELP ──────────────────────────────────────────────────────────────
     if (stripped.includes('aiuto') || stripped.includes('help') || stripped.includes('cosa puoi fare') || stripped.includes('comandi')) {
       return {
         id: Date.now().toString(), type: 'info', text,
-        response: '🌟 Sono Stella, il cuore dell\'app! Posso fare TUTTO per te:\n\n' +
-          '👤 Profili: "mostrami profilo Mario Rossi"\n' +
-          '📍 Mappa: "professionisti in zona disponibili"\n' +
-          '❤️ Social: "metti like a Anna", "segui Marco"\n' +
-          '💬 Chat: "invia messaggio a Sara: ciao!"\n' +
-          '✂️ Booking: "prenota con Studio Bella"\n' +
-          '📱 Navigazione: "apri shop", "vai alla home"\n' +
-          '🎨 AI: "prova look", "genera sito"\n' +
-          '🔍 Ricerca: "cerca parrucchiere"\n' +
-          '⚙️ Sistema: "tema scuro", "scorri giù"\n\n' +
-          'Dì "Stella" e poi il comando — agisco senza aprire niente! 🚀',
+        response: '🌟 Sono Stella, faccio TUTTO per te come Alexa & Siri!\n\n' +
+          '👤 "mostrami profilo Mario Rossi"\n' +
+          '📍 "professionisti vicini" · "cerca sulla mappa"\n' +
+          '❤️ "metti like a Anna" · "segui Marco" · "smetti di seguire"\n' +
+          '💬 "invia messaggio a Sara: ciao!" · "commenta bello su post di Anna"\n' +
+          '📝 "pubblica: sono dal parrucchiere!" · "crea post"\n' +
+          '✂️ "prenota con Studio Bella" · "conferma prenotazione" · "annulla appuntamento"\n' +
+          '📱 "apri shop" · "vai alla home" · "apri wallet"\n' +
+          '🎨 "prova look" · "genera sito" · "tema scuro"\n' +
+          '🔍 "cerca parrucchiere" · "scorri giù" · "condividi"\n' +
+          '⏰ "ricordami taglio domani" · "quanti coin ho?"\n\n' +
+          'Dì "Stella" + comando — agisco SUBITO senza aprire niente! 🚀',
         requiresConfirmation: false,
         execute: () => {},
       };
@@ -649,7 +825,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName, stellaSpeak]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
@@ -683,10 +859,22 @@ export function useStellaAgent() {
         actionFeedback(likeResult, '❤️');
         break;
       }
+      case 'comment': {
+        const commentResult = await commentOnPost(params?.comment_text || params?.content || 'Bellissimo! 🔥', params?.target_name);
+        actionFeedback(commentResult, '💬');
+        break;
+      }
       case 'follow': {
         if (params?.target_name) {
           const followResult = await followUser(params.target_name);
           actionFeedback(followResult, '✅');
+        }
+        break;
+      }
+      case 'unfollow': {
+        if (params?.target_name) {
+          const unfollowResult = await unfollowUser(params.target_name);
+          actionFeedback(unfollowResult, '🚫');
         }
         break;
       }
@@ -700,6 +888,16 @@ export function useStellaAgent() {
           actionFeedback(response, '💬');
         }
         break;
+      case 'create_post': {
+        if (params?.content) {
+          const postResult = await createPost(params.content);
+          actionFeedback(postResult, '📝');
+        } else {
+          navigate('/create-post');
+          actionFeedback(response, '📝');
+        }
+        break;
+      }
       case 'book':
         if (params?.target_name) {
           const profiles = await findProfileByName(params.target_name);
@@ -710,6 +908,16 @@ export function useStellaAgent() {
         }
         actionFeedback(response, '✂️');
         break;
+      case 'confirm_booking': {
+        const confirmResult = await manageBooking('confirm');
+        actionFeedback(confirmResult, '✅');
+        break;
+      }
+      case 'cancel_booking': {
+        const cancelResult = await manageBooking('cancel');
+        actionFeedback(cancelResult, '❌');
+        break;
+      }
       case 'call':
         navigate('/chat');
         actionFeedback(response, '📞');
@@ -761,12 +969,24 @@ export function useStellaAgent() {
           actionFeedback(response, '⏰');
         }
         break;
+      case 'suggest': {
+        // Proactive suggestion based on type
+        const suggestions: Record<string, { route: string; msg: string }> = {
+          beauty: { route: '/ai-look', msg: 'Prova un nuovo look con l\'AI! 🎨' },
+          social: { route: '/explore', msg: 'Scopri cosa c\'è di nuovo! 🔥' },
+          business: { route: '/analytics', msg: 'Controlla le tue statistiche! 📊' },
+          fun: { route: '/spin', msg: 'Gira la ruota della fortuna! 🎰' },
+        };
+        const s = suggestions[params?.suggestion_type || 'beauty'] || suggestions.beauty;
+        navigate(s.route);
+        actionFeedback(s.msg, '💡');
+        break;
+      }
       default:
-        // chat — just show the response
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);

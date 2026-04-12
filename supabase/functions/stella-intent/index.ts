@@ -41,9 +41,14 @@ Available actions and their parameters:
 - search: Search for something. params: { query: string }
 - show_profile: Show a user's profile. params: { name: string }
 - like: Like a post. params: { target_name?: string }
+- comment: Comment on a post. params: { comment_text: string, target_name?: string }
 - follow: Follow a user. params: { target_name: string }
+- unfollow: Unfollow a user. params: { target_name: string }
 - send_message: Send a message. params: { recipient: string, content?: string }
+- create_post: Create a new post. params: { content: string }
 - book: Book an appointment. params: { target_name?: string }
+- confirm_booking: Confirm a pending booking. params: {}
+- cancel_booking: Cancel a pending booking. params: {}
 - call: Call someone. params: { target_name: string }
 - scroll: Scroll the page. params: { direction: "up" | "down" | "top" | "bottom" }
 - theme: Change theme. params: { mode: "dark" | "light" }
@@ -52,6 +57,7 @@ Available actions and their parameters:
 - back: Go back. params: {}
 - info: Get info (coins, bookings). params: { info_type: "coins" | "bookings" | "general" }
 - reminder: Set a reminder. params: { description: string, when?: string }
+- suggest: Proactively suggest what the user can do. params: { suggestion_type: "beauty" | "social" | "business" | "fun" }
 - chat: General conversation (no app action needed). params: {}
 
 IMPORTANT RULES:
@@ -59,12 +65,19 @@ IMPORTANT RULES:
 - Be PROACTIVE: "I want something new" → navigate to /ai-look
 - Be SMART: "show me hairdressers nearby" → navigate to /map-search
 - "book with Maria" → book with target_name "Maria"
-- Understand slang, informal speech, dialects, abbreviations
+- "comment beautiful on Anna's post" → comment with comment_text and target_name
+- "publish/post that I'm at the salon" → create_post with content
+- "confirm my booking" → confirm_booking
+- "cancel my appointment" → cancel_booking
+- "unfollow Marco" → unfollow with target_name
+- Understand slang, informal speech, dialects, abbreviations in ANY language
 - If the user asks about their coins → info with info_type "coins"
 - If the user seems bored → suggest navigating to /explore or /shorts
+- If the user says "what can I do" or seems lost → suggest based on their profile
 - Personalize based on gender: suggest beauty/wellness content appropriately
 - Keep responses SHORT (max 2 sentences), energetic, and action-oriented
 - Use emoji in responses to feel modern and alive
+- Act like a best friend / personal assistant / beauty consultant
 - ONLY use "chat" intent if the user is genuinely asking a question with no possible app action`;
 
 
@@ -91,22 +104,24 @@ IMPORTANT RULES:
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "search", "show_profile", "like", "follow", "send_message", "book", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "chat"],
+                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "chat"],
                   },
                   params: {
                     type: "object",
-                    description: "Action parameters. For 'navigate' intent, ALWAYS include 'route' (e.g. '/map-search'). For 'search' include 'query'. For 'like' optionally include 'target_name'. For 'follow'/'send_message'/'book'/'call' include 'target_name'. For 'scroll' include 'direction'. For 'theme' include 'mode'.",
+                    description: "Action parameters. For 'navigate' include 'route'. For 'search' include 'query'. For 'comment' include 'comment_text' and optionally 'target_name'. For 'create_post' include 'content'. For 'follow'/'unfollow' include 'target_name'. For 'send_message' include 'recipient' and optionally 'content'. For 'scroll' include 'direction'. For 'theme' include 'mode'. For 'suggest' include 'suggestion_type'.",
                     properties: {
                       route: { type: "string", description: "App route path for navigate intent" },
                       query: { type: "string" },
                       target_name: { type: "string" },
                       name: { type: "string" },
                       recipient: { type: "string" },
-                      content: { type: "string" },
+                      content: { type: "string", description: "Message content or post content" },
+                      comment_text: { type: "string", description: "Comment text for comment intent" },
                       direction: { type: "string", enum: ["up", "down", "top", "bottom"] },
                       mode: { type: "string", enum: ["dark", "light"] },
                       info_type: { type: "string", enum: ["coins", "bookings", "general"] },
                       description: { type: "string" },
+                      suggestion_type: { type: "string", enum: ["beauty", "social", "business", "fun"] },
                     },
                   },
                   response: {
