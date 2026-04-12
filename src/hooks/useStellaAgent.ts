@@ -1183,18 +1183,20 @@ export function useStellaAgent() {
           fun: { route: '/spin', msg: 'Gira la ruota della fortuna! 🎰' },
         };
         const s = suggestions[params?.suggestion_type || 'beauty'] || suggestions.beauty;
-        navigate(s.route);
         actionFeedback(s.msg, '💡');
+        delayedNavigate(s.route);
         break;
       }
       case 'find_nearby': {
         const nearbyResult = await findNearbyProfessionals(params?.city, params?.specialty);
         if (nearbyResult.found) {
+          addMessage({ role: 'stella', content: nearbyResult.message, type: 'action_result' });
           actionFeedback(nearbyResult.summary!, '📍');
-          navigate('/stylists');
+          delayedNavigate('/stylists', 2500);
         } else {
+          addMessage({ role: 'stella', content: nearbyResult.message, type: 'action_result' });
           actionFeedback(nearbyResult.message, '📍');
-          navigate('/map-search');
+          delayedNavigate('/map-search', 2500);
         }
         break;
       }
