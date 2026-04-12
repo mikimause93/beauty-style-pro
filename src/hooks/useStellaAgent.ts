@@ -811,18 +811,8 @@ export function useStellaAgent() {
       setIsAIThinking(false);
     }
   }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
-      } else {
-        toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}${displayResponse.length > 100 ? '...' : ''}`);
-      }
-    } catch {
-      const fallback = 'Stella AI is temporarily offline. Say "help" for available commands!';
-      addMessage({ role: 'stella', content: fallback, type: 'text' });
-      stellaSpeak(fallback);
-      toast.info(`🌟 ${fallback}`);
-    } finally {
-      setIsAIThinking(false);
-    }
-  }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
+
+
 
   // ── Handle command (works in background or with panel open) ────────────
   const handleCommand = useCallback((text: string) => {
