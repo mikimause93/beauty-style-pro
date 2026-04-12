@@ -1,7 +1,8 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck, Clock } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePresenceTracker, isUserOnline, formatLastSeen } from "@/hooks/usePresence";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +20,7 @@ interface Conversation {
   time: string;
   unread: number;
   online: boolean;
+  lastSeen: string | null;
   otherUserId: string;
 }
 
