@@ -467,6 +467,43 @@ export function useStellaAgent() {
     return `Messaggio inviato a ${target.display_name || target.username}! 💬`;
   }, [user, findProfileByName]);
 
+  // ── Helper: get user stats summary ─────────────────────────────────────────
+  const getUserStats = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const [{ count: postCount }, { count: bookingCount }, { count: followerCount }] = await Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('client_id', user.id),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id),
+    ]);
+    const coins = profile?.qr_coins ?? 0;
+    return `📊 Le tue stats:\n• ${postCount || 0} post pubblicati\n• ${bookingCount || 0} prenotazioni\n• ${followerCount || 0} follower\n• ${coins} QR Coins`;
+  }, [user, profile]);
+
+  // ── Helper: get notifications summary ─────────────────────────────────────
+  const getNotificationsSummary = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const { count } = await supabase.from('notifications').select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id).eq('read', false);
+    if (!count || count === 0) return 'Non hai notifiche non lette! ✅';
+    return `Hai ${count} notifiche non lette! 🔔`;
+  }, [user]);
+
+  // ── Helper: get upcoming bookings ─────────────────────────────────────────
+  const getUpcomingBookings = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await supabase.from('bookings')
+      .select('booking_date, start_time, status')
+      .eq('client_id', user.id)
+      .gte('booking_date', today)
+      .in('status', ['confirmed', 'pending'])
+      .order('booking_date', { ascending: true })
+      .limit(3);
+    if (!data?.length) return 'Non hai appuntamenti in programma! 📅';
+    const lines = data.map((b, i) => `${i + 1}. ${b.booking_date} alle ${b.start_time} (${b.status === 'confirmed' ? '✅' : '⏳'})`);
+    return `📅 Prossimi appuntamenti:\n${lines.join('\n')}`;
+  }, [user]);
+
   // ── Helper: navigate to specific profile ──────────────────────────────────
   const goToProfile = useCallback(async (name: string) => {
     const profiles = await findProfileByName(name);
