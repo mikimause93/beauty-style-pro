@@ -1210,7 +1210,7 @@ export function useStellaAgent() {
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
-    setIsOpen(true); // Always show panel so user sees the response
+    setInlineStatus('Sto pensando...');
     try {
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
@@ -1242,7 +1242,14 @@ export function useStellaAgent() {
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
       if (intent && intent !== 'chat') {
+        // Siri-like: show inline status, don't open panel
+        setInlineStatus(displayResponse.substring(0, 100));
         await executeAIIntent(intent, params || {}, displayResponse);
+      } else {
+        // Chat response: show in panel
+        setIsOpen(true);
+        setInlineStatus(null);
+      }
         if (user) {
           supabase.from('stella_commands').insert({
             user_id: user.id, command_text: text, command_type: intent,
