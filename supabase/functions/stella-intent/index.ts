@@ -35,6 +35,8 @@ User profile context:
 - Theme: ${context?.color_theme || 'female'}
 - QR Coins: ${context?.qr_coins || 0}
 - Current page: ${context?.current_page || '/'}
+- Frequent actions: ${context?.frequent_actions || 'none'} (use this to personalize — suggest what the user does most!)
+- Favorite pages: ${context?.favorite_pages || 'none'} (pages they visit most often)
 
 Available actions and their parameters:
 - navigate: Go to a page. params: { route: string } — You MUST always include the route. Routes: /, /chat, /notifications, /profile, /wallet, /map-search, /shop, /missions, /spin, /live, /radio, /settings, /explore, /create-post, /my-bookings, /leaderboard, /challenges, /shorts, /events, /marketplace, /spa-terme, /quiz-live, /talent-game, /referral, /subscriptions, /reminders, /stylists, /qr-coins, /before-after, /offers, /auctions, /receipts, /verify-account, /business, /business/team, /hr, /manage-products, /analytics, /affiliate, /professional-dashboard, /boost, /become-creator, /ai-look, /ai-preview, /content-calendar, /predictive-analytics, /social-automation, /website-generator, /white-label, /global-settings, /enterprise-api, /tenant, /go-live, /live-battle, /transformation-challenge, /checkout, /installments, /purchases, /search, /admin, /home-service, /profile/edit, /ai-assistant
