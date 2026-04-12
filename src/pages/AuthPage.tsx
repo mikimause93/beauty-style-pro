@@ -540,6 +540,20 @@ export default function AuthPage() {
       {step === 1 && accountType === "professional" && (
         <div className="space-y-4 fade-in">
           <h2 className="text-lg font-display font-bold">I tuoi dati</h2>
+          {/* Gender selector */}
+          <div>
+            <p className="text-xs font-semibold mb-2 text-muted-foreground">Genere *</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setGender("female")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "female" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>👩 Donna</button>
+              <button type="button" onClick={() => setGender("male")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "male" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>👨 Uomo</button>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <InputField icon={<User className="w-4 h-4" />} placeholder="Nome *" value={name} onChange={setName} />
             <InputField placeholder="Cognome" value={surname} onChange={setSurname} />
