@@ -455,117 +455,126 @@ export const useVoiceRecognition = (
       return;
     }
 
-    wakeWordActiveRef.current = true;
+    void (async () => {
+      const hasMicAccess = await primeBrowserMicrophone();
+      if (!hasMicAccess) {
+        setError(permissionDeniedMessage);
+        setIsWakeWordListening(false);
+        return;
+      }
 
-    if (wakeWordRecognitionRef.current) {
-      try { wakeWordRecognitionRef.current.stop(); } catch {}
-      wakeWordRecognitionRef.current = null;
-    }
+      wakeWordActiveRef.current = true;
 
-    const createWakeWordRecognition = () => {
-      if (!wakeWordActiveRef.current) return;
+      if (wakeWordRecognitionRef.current) {
+        try { wakeWordRecognitionRef.current.stop(); } catch {}
+        wakeWordRecognitionRef.current = null;
+      }
 
-      try {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        wakeWordRecognitionRef.current = recognition;
+      const createWakeWordRecognition = () => {
+        if (!wakeWordActiveRef.current) return;
 
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = language;
+        try {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          const recognition = new SpeechRecognition();
+          wakeWordRecognitionRef.current = recognition;
 
-        recognition.onstart = () => {
-          setIsWakeWordListening(true);
-          setError(null);
-        };
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = language;
 
-        recognition.onresult = (event: any) => {
-          const currentTranscript = Array.from(event.results)
-            .map((result: any) => result[0].transcript)
-            .join('').toLowerCase();
+          recognition.onstart = () => {
+            setIsWakeWordListening(true);
+            setError(null);
+          };
 
-          const finalTranscript = Array.from(event.results)
-            .filter((result: any) => result.isFinal)
-            .map((result: any) => result[0].transcript)
-            .join(' ').toLowerCase();
+          recognition.onresult = (event: any) => {
+            const currentTranscript = Array.from(event.results)
+              .map((result: any) => result[0].transcript)
+              .join('').toLowerCase();
 
-          const finalCommand = extractCommandAfterWakeWord(finalTranscript);
-          const liveCommand = extractCommandAfterWakeWord(currentTranscript);
+            const finalTranscript = Array.from(event.results)
+              .filter((result: any) => result.isFinal)
+              .map((result: any) => result[0].transcript)
+              .join(' ').toLowerCase();
 
-          const wakeWordFound = wakeWordsRef.current.some(word =>
-            currentTranscript.includes(word.toLowerCase())
-          );
+            const finalCommand = extractCommandAfterWakeWord(finalTranscript);
+            const liveCommand = extractCommandAfterWakeWord(currentTranscript);
 
-          if (typeof finalCommand === 'string' && finalCommand.length > 0) {
-            clearWakeWordCommandTimeout();
-            pendingWakeWordCommandRef.current = '';
-            setWakeWordDetected(true);
-            onWakeWordRef.current?.(finalCommand);
-            handoffToCommandRef.current = false;
-            wakeWordActiveRef.current = false;
-            stopWakeWordRecognitionInstance();
-            return;
-          }
+            const wakeWordFound = wakeWordsRef.current.some(word =>
+              currentTranscript.includes(word.toLowerCase())
+            );
 
-          if (typeof liveCommand === 'string' && liveCommand.length > 0) {
-            pendingWakeWordCommandRef.current = liveCommand;
-            clearWakeWordCommandTimeout();
-            wakeWordCommandTimeoutRef.current = window.setTimeout(() => {
-              const command = pendingWakeWordCommandRef.current.trim();
-              if (!command) return;
-
+            if (typeof finalCommand === 'string' && finalCommand.length > 0) {
+              clearWakeWordCommandTimeout();
               pendingWakeWordCommandRef.current = '';
               setWakeWordDetected(true);
-              onWakeWordRef.current?.(command);
+              onWakeWordRef.current?.(finalCommand);
               handoffToCommandRef.current = false;
               wakeWordActiveRef.current = false;
               stopWakeWordRecognitionInstance();
-            }, 850);
-            return;
-          }
+              return;
+            }
 
-          if (wakeWordFound) {
-            clearWakeWordCommandTimeout();
-            pendingWakeWordCommandRef.current = '';
-            setWakeWordDetected(true);
-            onWakeWordRef.current?.();
-            handoffToCommandRef.current = true;
-            wakeWordActiveRef.current = false;
-            stopWakeWordRecognitionInstance();
-            setTimeout(() => {
-              startListening();
-            }, 600);
-          }
-        };
+            if (typeof liveCommand === 'string' && liveCommand.length > 0) {
+              pendingWakeWordCommandRef.current = liveCommand;
+              clearWakeWordCommandTimeout();
+              wakeWordCommandTimeoutRef.current = window.setTimeout(() => {
+                const command = pendingWakeWordCommandRef.current.trim();
+                if (!command) return;
 
-        recognition.onerror = (event: any) => {
-          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-            setError(permissionDeniedMessage);
-          } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
-            setError(`Wake word detection error: ${event.error}`);
-          }
+                pendingWakeWordCommandRef.current = '';
+                setWakeWordDetected(true);
+                onWakeWordRef.current?.(command);
+                handoffToCommandRef.current = false;
+                wakeWordActiveRef.current = false;
+                stopWakeWordRecognitionInstance();
+              }, 850);
+              return;
+            }
+
+            if (wakeWordFound) {
+              clearWakeWordCommandTimeout();
+              pendingWakeWordCommandRef.current = '';
+              setWakeWordDetected(true);
+              onWakeWordRef.current?.();
+              handoffToCommandRef.current = true;
+              wakeWordActiveRef.current = false;
+              stopWakeWordRecognitionInstance();
+              setTimeout(() => {
+                startListening();
+              }, 600);
+            }
+          };
+
+          recognition.onerror = (event: any) => {
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+              setError(permissionDeniedMessage);
+            } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
+              setError(`Wake word detection error: ${event.error}`);
+            }
+            setIsWakeWordListening(false);
+          };
+
+          recognition.onend = () => {
+            setIsWakeWordListening(false);
+            if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
+              setTimeout(() => {
+                if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
+                  createWakeWordRecognition();
+                }
+              }, 1000);
+            }
+          };
+
+          recognition.start();
+        } catch {
+          setError('Wake word recognition not supported');
           setIsWakeWordListening(false);
-        };
+        }
+      };
 
-        recognition.onend = () => {
-          setIsWakeWordListening(false);
-          if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
-            setTimeout(() => {
-              if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
-                createWakeWordRecognition();
-              }
-            }, 1000);
-          }
-        };
-
-        recognition.start();
-      } catch {
-        setError('Wake word recognition not supported');
-        setIsWakeWordListening(false);
-      }
-    };
-
-    createWakeWordRecognition();
+      createWakeWordRecognition();
+    })();
   }, [
     clearWakeWordCommandTimeout,
     ensureNativePermissions,
@@ -574,6 +583,7 @@ export const useVoiceRecognition = (
     isSupported,
     language,
     permissionDeniedMessage,
+    primeBrowserMicrophone,
     startListening,
     stopNativeRecognition,
     wakeWordEnabled,
