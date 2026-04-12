@@ -235,8 +235,8 @@ export function useStellaAgent() {
     
     const { error } = await supabase.from('posts').insert({
       user_id: user.id,
-      content,
-      post_type: 'text',
+      caption: content,
+      post_type: 'image',
     });
     
     if (error) return 'Errore nella pubblicazione. Riprova!';
@@ -301,6 +301,12 @@ export function useStellaAgent() {
     bizQuery = bizQuery.eq('active', true);
     const { data: biz } = await bizQuery.order('rating', { ascending: false }).limit(10);
 
+    // Also try profiles table (professional users registered here)
+    let profileQuery = supabase.from('profiles').select('user_id, display_name, user_type, city, latitude, longitude')
+      .in('user_type', ['professional', 'business']);
+    if (city) profileQuery = profileQuery.ilike('city', `%${city}%`);
+    const { data: profilePros } = await profileQuery.limit(20);
+
     const results: Array<{ name: string; type: string; city: string; rating: number | null; distance?: number }> = [];
 
     // Get user position for distance calc
@@ -319,16 +325,32 @@ export function useStellaAgent() {
       } catch { /* ignore */ }
     }
 
+    // Collect unique names to avoid duplicates
+    const seenNames = new Set<string>();
+
     if (pros?.length) {
       for (const p of pros) {
+        if (seenNames.has(p.business_name)) continue;
+        seenNames.add(p.business_name);
         const dist = userLat && p.latitude ? haversineDistance(userLat, userLng!, p.latitude, p.longitude!) : undefined;
         results.push({ name: p.business_name, type: p.specialty || 'Professionista', city: p.city || '', rating: p.rating, distance: dist });
       }
     }
     if (biz?.length) {
       for (const b of biz) {
+        if (seenNames.has(b.business_name)) continue;
+        seenNames.add(b.business_name);
         const dist = userLat && b.latitude ? haversineDistance(userLat, userLng!, b.latitude, b.longitude!) : undefined;
         results.push({ name: b.business_name, type: b.business_type || 'Salone', city: b.city || '', rating: b.rating, distance: dist });
+      }
+    }
+    if (profilePros?.length) {
+      for (const p of profilePros) {
+        const name = p.display_name || 'Professionista';
+        if (seenNames.has(name)) continue;
+        seenNames.add(name);
+        const dist = userLat && p.latitude ? haversineDistance(userLat, userLng!, p.latitude, p.longitude!) : undefined;
+        results.push({ name, type: p.user_type === 'business' ? 'Attività' : 'Professionista', city: p.city || '', rating: null, distance: dist });
       }
     }
 
