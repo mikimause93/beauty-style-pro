@@ -104,22 +104,24 @@ IMPORTANT RULES:
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "search", "show_profile", "like", "follow", "send_message", "book", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "chat"],
+                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "chat"],
                   },
                   params: {
                     type: "object",
-                    description: "Action parameters. For 'navigate' intent, ALWAYS include 'route' (e.g. '/map-search'). For 'search' include 'query'. For 'like' optionally include 'target_name'. For 'follow'/'send_message'/'book'/'call' include 'target_name'. For 'scroll' include 'direction'. For 'theme' include 'mode'.",
+                    description: "Action parameters. For 'navigate' include 'route'. For 'search' include 'query'. For 'comment' include 'comment_text' and optionally 'target_name'. For 'create_post' include 'content'. For 'follow'/'unfollow' include 'target_name'. For 'send_message' include 'recipient' and optionally 'content'. For 'scroll' include 'direction'. For 'theme' include 'mode'. For 'suggest' include 'suggestion_type'.",
                     properties: {
                       route: { type: "string", description: "App route path for navigate intent" },
                       query: { type: "string" },
                       target_name: { type: "string" },
                       name: { type: "string" },
                       recipient: { type: "string" },
-                      content: { type: "string" },
+                      content: { type: "string", description: "Message content or post content" },
+                      comment_text: { type: "string", description: "Comment text for comment intent" },
                       direction: { type: "string", enum: ["up", "down", "top", "bottom"] },
                       mode: { type: "string", enum: ["dark", "light"] },
                       info_type: { type: "string", enum: ["coins", "bookings", "general"] },
                       description: { type: "string" },
+                      suggestion_type: { type: "string", enum: ["beauty", "social", "business", "fun"] },
                     },
                   },
                   response: {
