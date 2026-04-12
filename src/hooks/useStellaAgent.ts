@@ -473,7 +473,7 @@ export function useStellaAgent() {
     const { data: pros } = await query.order('rating', { ascending: false }).limit(10);
 
     // Try businesses table
-    let bizQuery = supabase.from('businesses').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
+    let bizQuery = supabase.from('businesses_public').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
     if (city) bizQuery = bizQuery.ilike('city', `%${city}%`);
     bizQuery = bizQuery.eq('active', true);
     const { data: biz } = await bizQuery.order('rating', { ascending: false }).limit(10);
