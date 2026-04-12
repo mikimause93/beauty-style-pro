@@ -859,10 +859,22 @@ export function useStellaAgent() {
         actionFeedback(likeResult, '❤️');
         break;
       }
+      case 'comment': {
+        const commentResult = await commentOnPost(params?.comment_text || params?.content || 'Bellissimo! 🔥', params?.target_name);
+        actionFeedback(commentResult, '💬');
+        break;
+      }
       case 'follow': {
         if (params?.target_name) {
           const followResult = await followUser(params.target_name);
           actionFeedback(followResult, '✅');
+        }
+        break;
+      }
+      case 'unfollow': {
+        if (params?.target_name) {
+          const unfollowResult = await unfollowUser(params.target_name);
+          actionFeedback(unfollowResult, '🚫');
         }
         break;
       }
@@ -876,6 +888,16 @@ export function useStellaAgent() {
           actionFeedback(response, '💬');
         }
         break;
+      case 'create_post': {
+        if (params?.content) {
+          const postResult = await createPost(params.content);
+          actionFeedback(postResult, '📝');
+        } else {
+          navigate('/create-post');
+          actionFeedback(response, '📝');
+        }
+        break;
+      }
       case 'book':
         if (params?.target_name) {
           const profiles = await findProfileByName(params.target_name);
@@ -886,6 +908,16 @@ export function useStellaAgent() {
         }
         actionFeedback(response, '✂️');
         break;
+      case 'confirm_booking': {
+        const confirmResult = await manageBooking('confirm');
+        actionFeedback(confirmResult, '✅');
+        break;
+      }
+      case 'cancel_booking': {
+        const cancelResult = await manageBooking('cancel');
+        actionFeedback(cancelResult, '❌');
+        break;
+      }
       case 'call':
         navigate('/chat');
         actionFeedback(response, '📞');
@@ -937,12 +969,24 @@ export function useStellaAgent() {
           actionFeedback(response, '⏰');
         }
         break;
+      case 'suggest': {
+        // Proactive suggestion based on type
+        const suggestions: Record<string, { route: string; msg: string }> = {
+          beauty: { route: '/ai-look', msg: 'Prova un nuovo look con l\'AI! 🎨' },
+          social: { route: '/explore', msg: 'Scopri cosa c\'è di nuovo! 🔥' },
+          business: { route: '/analytics', msg: 'Controlla le tue statistiche! 📊' },
+          fun: { route: '/spin', msg: 'Gira la ruota della fortuna! 🎰' },
+        };
+        const s = suggestions[params?.suggestion_type || 'beauty'] || suggestions.beauty;
+        navigate(s.route);
+        actionFeedback(s.msg, '💡');
+        break;
+      }
       default:
-        // chat — just show the response
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
