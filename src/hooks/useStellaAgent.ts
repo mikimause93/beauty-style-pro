@@ -79,6 +79,9 @@ export function useStellaAgent() {
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
 
+  // Detect browser language for voice recognition
+  const browserLang = typeof navigator !== 'undefined' ? navigator.language || 'it-IT' : 'it-IT';
+
   const {
     isListening, transcript, interimTranscript,
     startListening, stopListening, resetTranscript,
@@ -86,11 +89,15 @@ export function useStellaAgent() {
   } = useVoiceRecognition({
     continuous: false,
     interimResults: true,
-    language: 'it-IT',
+    language: browserLang,
     wakeWordEnabled: true,
-    wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella'],
+    wakeWords: [
+      // Multilingual wake words
+      'stella', 'hey stella', 'ehi stella', 'ciao stella',
+      'hi stella', 'ok stella', 'hola stella', 'oi stella',
+      'hé stella', 'hallo stella', 'привет стелла',
+    ],
     onWakeWordDetected: () => {
-      // Don't open panel — Stella works in background. Just acknowledge.
       speak('Sono qui! Dimmi cosa fare.');
     },
   });
@@ -633,35 +640,154 @@ export function useStellaAgent() {
     return null;
   }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName, stellaSpeak]);
 
-  // ── AI Fallback (when no command matched) ──────────────────────────────
+  // ── AI Intent Parsing (multilingual — understands every language) ──────
+  const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
+    switch (intent) {
+      case 'navigate':
+        if (params?.route) { navigate(params.route); toast.success(`🌟 Stella: ${response}`); }
+        else { navigate('/map-search'); toast.success(`🌟 Stella: ${response}`); }
+        break;
+      case 'search':
+        navigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'show_profile':
+        if (params?.name) {
+          const result = await goToProfile(params.name);
+          toast.success(`🌟 Stella: ${result}`);
+        }
+        break;
+      case 'like':
+        const likeResult = await likeLatestPost(params?.target_name);
+        toast.success(`🌟 Stella: ${likeResult}`);
+        break;
+      case 'follow':
+        if (params?.target_name) {
+          const followResult = await followUser(params.target_name);
+          toast.success(`🌟 Stella: ${followResult}`);
+        }
+        break;
+      case 'send_message':
+        if (params?.recipient && params?.content) {
+          const msgResult = await sendMessageTo(params.recipient, params.content);
+          toast.success(`🌟 Stella: ${msgResult}`);
+        } else if (params?.recipient) {
+          const profiles = await findProfileByName(params.recipient);
+          navigate('/chat');
+          toast.success(`🌟 Stella: ${response}`);
+        }
+        break;
+      case 'book':
+        if (params?.target_name) {
+          const profiles = await findProfileByName(params.target_name);
+          if (profiles.length > 0) navigate(`/stylist/${profiles[0].user_id}`);
+          else navigate('/stylists');
+        } else {
+          navigate('/stylists');
+        }
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'call':
+        navigate('/chat');
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'scroll':
+        if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
+        else if (params?.direction === 'down') window.scrollBy({ top: 400, behavior: 'smooth' });
+        else if (params?.direction === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
+        else if (params?.direction === 'bottom') window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        break;
+      case 'theme':
+        if (params?.mode === 'dark') { document.documentElement.classList.remove('light'); document.documentElement.classList.add('dark'); }
+        else { document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light'); }
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'share':
+        if (navigator.share) navigator.share({ title: 'STYLE', url: window.location.href }).catch(() => {});
+        else navigator.clipboard.writeText(window.location.href);
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'refresh':
+        toast.success(`🌟 Stella: ${response}`);
+        setTimeout(() => window.location.reload(), 500);
+        break;
+      case 'back':
+        window.history.back();
+        toast.success(`🌟 Stella: ${response}`);
+        break;
+      case 'info':
+        if (params?.info_type === 'coins') {
+          const coins = profile?.qr_coins ?? 0;
+          toast.success(`🌟 Stella: ${coins} QR Coins`);
+        } else if (params?.info_type === 'bookings') {
+          navigate('/my-bookings');
+          toast.success(`🌟 Stella: ${response}`);
+        } else {
+          toast.success(`🌟 Stella: ${response}`);
+        }
+        break;
+      case 'reminder':
+        if (user && params?.description) {
+          const scheduledDate = new Date();
+          scheduledDate.setDate(scheduledDate.getDate() + 1);
+          await supabase.from('stella_scheduled_actions').insert({
+            user_id: user.id, action_type: 'booking_reminder',
+            action_params: { message: params.description },
+            scheduled_for: scheduledDate.toISOString(),
+          });
+          toast.success(`🌟 Stella: ${response}`);
+        }
+        break;
+      default:
+        // chat — just show the response
+        toast.success(`🌟 Stella: ${response.substring(0, 120)}${response.length > 120 ? '...' : ''}`);
+        break;
+    }
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName]);
+
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-beauty-assistant', {
+      const { data, error } = await supabase.functions.invoke('stella-intent', {
         body: {
-          message: text,
+          text,
           context: {
             user_type: profile?.user_type || 'client',
-            user_name: profile?.display_name || 'Utente',
+            user_name: profile?.display_name || 'User',
             qr_coins: profile?.qr_coins || 0,
+            current_page: window.location.pathname,
           },
         },
       });
       if (error) throw error;
-      const aiResponse = data?.response || data?.message || 'Mi dispiace, non sono riuscita a elaborare la risposta. Riprova!';
-      addMessage({ role: 'stella', content: aiResponse, type: 'text' });
-      stellaSpeak(aiResponse.length > 200 ? aiResponse.substring(0, 200) + '...' : aiResponse);
-      // Show in toast too for background mode
-      toast.success(`🌟 Stella: ${aiResponse.substring(0, 100)}${aiResponse.length > 100 ? '...' : ''}`);
+
+      const { intent, params, response: aiResponse, detected_language } = data || {};
+      const displayResponse = aiResponse || 'I\'m here to help!';
+
+      addMessage({ role: 'stella', content: displayResponse, type: 'text' });
+      stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
+
+      // Execute the parsed intent
+      if (intent && intent !== 'chat') {
+        await executeAIIntent(intent, params || {}, displayResponse);
+        if (user) {
+          supabase.from('stella_commands').insert({
+            user_id: user.id, command_text: text, command_type: intent,
+            status: 'completed', executed_at: new Date().toISOString(),
+          }).then(() => {});
+        }
+      } else {
+        toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}${displayResponse.length > 100 ? '...' : ''}`);
+      }
     } catch {
-      const fallback = 'Stella AI è temporaneamente offline. Posso aiutarti con navigazione e comandi: dì "aiuto" per la lista!';
+      const fallback = 'Stella AI is temporarily offline. Say "help" for available commands!';
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
       toast.info(`🌟 ${fallback}`);
     } finally {
       setIsAIThinking(false);
     }
-  }, [addMessage, stellaSpeak, profile]);
+  }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
 
   // ── Handle command (works in background or with panel open) ────────────
   const handleCommand = useCallback((text: string) => {
