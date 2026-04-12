@@ -58,6 +58,7 @@ Available actions and their parameters:
 - info: Get info (coins, bookings). params: { info_type: "coins" | "bookings" | "general" }
 - reminder: Set a reminder. params: { description: string, when?: string }
 - suggest: Proactively suggest what the user can do. params: { suggestion_type: "beauty" | "social" | "business" | "fun" }
+- find_nearby: Search for professionals/salons nearby or in a specific city. params: { city?: string, specialty?: string }. Use this when the user asks about professionals, salons, hairdressers, stylists in a city or nearby. ALWAYS prefer this over navigate when the user asks to FIND/SEARCH for professionals.
 - chat: General conversation (no app action needed). params: {}
 
 IMPORTANT RULES:
