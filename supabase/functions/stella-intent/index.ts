@@ -58,6 +58,7 @@ Available actions and their parameters:
 - info: Get info (coins, bookings). params: { info_type: "coins" | "bookings" | "general" }
 - reminder: Set a reminder. params: { description: string, when?: string }
 - suggest: Proactively suggest what the user can do. params: { suggestion_type: "beauty" | "social" | "business" | "fun" }
+- find_nearby: Search for professionals/salons nearby or in a specific city. params: { city?: string, specialty?: string }. Use this when the user asks about professionals, salons, hairdressers, stylists in a city or nearby. ALWAYS prefer this over navigate when the user asks to FIND/SEARCH for professionals.
 - chat: General conversation (no app action needed). params: {}
 
 IMPORTANT RULES:
@@ -72,6 +73,10 @@ IMPORTANT RULES:
 - "unfollow Marco" → unfollow with target_name
 - Understand slang, informal speech, dialects, abbreviations in ANY language
 - If the user asks about their coins → info with info_type "coins"
+- "find hairdressers in Milan" or "saloni a Roma" or "professionisti vicini" → find_nearby with city and/or specialty
+- "parrucchieri a Napoli" → find_nearby with city "Napoli" and specialty "parrucchiere"
+- "chi c'è vicino" or "professionals nearby" → find_nearby (no city = uses GPS)
+- ALWAYS use find_nearby instead of navigate when the user wants to SEARCH/FIND professionals, salons, stylists, hairdressers
 - If the user seems bored → suggest navigating to /explore or /shorts
 - If the user says "what can I do" or seems lost → suggest based on their profile
 - Personalize based on gender: suggest beauty/wellness content appropriately
@@ -104,7 +109,7 @@ IMPORTANT RULES:
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "chat"],
+                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "find_nearby", "chat"],
                   },
                   params: {
                     type: "object",
@@ -121,6 +126,8 @@ IMPORTANT RULES:
                       mode: { type: "string", enum: ["dark", "light"] },
                       info_type: { type: "string", enum: ["coins", "bookings", "general"] },
                       description: { type: "string" },
+                      city: { type: "string", description: "City name for find_nearby intent" },
+                      specialty: { type: "string", description: "Specialty filter for find_nearby (e.g. hairstylist, colorist, barber)" },
                       suggestion_type: { type: "string", enum: ["beauty", "social", "business", "fun"] },
                     },
                   },

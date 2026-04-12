@@ -5,6 +5,7 @@ import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useVoiceSynthesis } from '@/hooks/useVoiceSynthesis';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { haversineDistance } from '@/hooks/useGeolocation';
 
 // ── Rate limits ──────────────────────────────────────────────────────────────
 const LIMITS = {
@@ -286,6 +287,80 @@ export function useStellaAgent() {
       : `Prenotazione del ${booking.booking_date} cancellata! ❌`;
   }, [user]);
 
+  // ── Helper: find nearby professionals/salons by city or GPS ─────────────
+  const findNearbyProfessionals = useCallback(async (city?: string, specialty?: string) => {
+    // Try professionals table
+    let query = supabase.from('professionals').select('id, business_name, specialty, city, rating, latitude, longitude');
+    if (city) query = query.ilike('city', `%${city}%`);
+    if (specialty) query = query.ilike('specialty', `%${specialty}%`);
+    const { data: pros } = await query.order('rating', { ascending: false }).limit(10);
+
+    // Try businesses table
+    let bizQuery = supabase.from('businesses').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
+    if (city) bizQuery = bizQuery.ilike('city', `%${city}%`);
+    bizQuery = bizQuery.eq('active', true);
+    const { data: biz } = await bizQuery.order('rating', { ascending: false }).limit(10);
+
+    const results: Array<{ name: string; type: string; city: string; rating: number | null; distance?: number }> = [];
+
+    // Get user position for distance calc
+    let userLat: number | null = null;
+    let userLng: number | null = null;
+    if (profile && (profile as any).latitude) {
+      userLat = (profile as any).latitude;
+      userLng = (profile as any).longitude;
+    } else if (navigator.geolocation) {
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+      } catch { /* ignore */ }
+    }
+
+    if (pros?.length) {
+      for (const p of pros) {
+        const dist = userLat && p.latitude ? haversineDistance(userLat, userLng!, p.latitude, p.longitude!) : undefined;
+        results.push({ name: p.business_name, type: p.specialty || 'Professionista', city: p.city || '', rating: p.rating, distance: dist });
+      }
+    }
+    if (biz?.length) {
+      for (const b of biz) {
+        const dist = userLat && b.latitude ? haversineDistance(userLat, userLng!, b.latitude, b.longitude!) : undefined;
+        results.push({ name: b.business_name, type: b.business_type || 'Salone', city: b.city || '', rating: b.rating, distance: dist });
+      }
+    }
+
+    // Sort by distance if available, then by rating
+    results.sort((a, b) => {
+      if (a.distance != null && b.distance != null) return a.distance - b.distance;
+      if (a.distance != null) return -1;
+      if (b.distance != null) return 1;
+      return (b.rating || 0) - (a.rating || 0);
+    });
+
+    if (results.length === 0) {
+      return { found: false, message: city 
+        ? `Non ho trovato professionisti o saloni a ${city}. Prova a cercare in un'altra città!`
+        : 'Non ho trovato professionisti nelle vicinanze. Prova a specificare una città!' };
+    }
+
+    const top = results.slice(0, 5);
+    const lines = top.map((r, i) => {
+      const dist = r.distance != null ? ` (${r.distance.toFixed(1)} km)` : '';
+      const stars = r.rating ? ` ⭐${r.rating}` : '';
+      return `${i + 1}. ${r.name} — ${r.type}${r.city ? ', ' + r.city : ''}${stars}${dist}`;
+    });
+
+    return {
+      found: true,
+      count: results.length,
+      message: `Ho trovato ${results.length} risultat${results.length === 1 ? 'o' : 'i'}${city ? ' a ' + city : ' vicino a te'}:\n${lines.join('\n')}`,
+      summary: `Ho trovato ${results.length} professionisti${city ? ' a ' + city : ''}! I migliori: ${top.slice(0, 3).map(r => r.name).join(', ')}`,
+    };
+  }, [profile]);
+
   // ── Helper: follow a user ─────────────────────────────────────────────────
   const followUser = useCallback(async (targetName: string) => {
     if (!user) return 'Devi effettuare il login per seguire qualcuno!';
@@ -385,16 +460,32 @@ export function useStellaAgent() {
       }
     }
 
-    // ── NEARBY PROFESSIONALS ──────────────────────────────────────────────
-    if (stripped.includes('professionisti in zona') || stripped.includes('professionisti disponibili') ||
-        stripped.includes('professionisti vicini') || stripped.includes('chi è disponibile') ||
-        stripped.includes('saloni vicini') || stripped.includes('stilisti vicini') ||
-        stripped.includes('parrucchieri vicini') || stripped.includes('chi c\'è in zona') ||
-        stripped.includes('trova professionisti') || stripped.includes('cerca professionisti vicino')) {
+    // ── NEARBY PROFESSIONALS (with real DB results) ─────────────────────
+    const nearbyPatterns = ['professionisti in zona', 'professionisti disponibili', 'professionisti vicini',
+      'chi è disponibile', 'saloni vicini', 'stilisti vicini', 'parrucchieri vicini', 'chi c\'è in zona',
+      'trova professionisti', 'cerca professionisti vicino', 'saloni a', 'parrucchieri a', 'professionisti a',
+      'stilisti a', 'chi c\'è a', 'trova saloni', 'cerca saloni'];
+    const cityExtract = stripped.match(/(?:professionisti|saloni|stilisti|parrucchieri|chi c'è)\s+(?:a|in|di|near|vicino a|nella città di)\s+(.+)/);
+    const requestedCity = cityExtract?.[1]?.trim();
+    
+    if (nearbyPatterns.some(p => stripped.includes(p)) || requestedCity) {
       return {
-        id: Date.now().toString(), type: 'navigate', text,
-        response: 'Cerco i professionisti disponibili nella tua zona!', requiresConfirmation: false, silent: true,
-        execute: () => { navigate('/map-search'); toast.success('🌟 Stella: Apro la mappa dei professionisti!'); },
+        id: Date.now().toString(), type: 'search', text,
+        response: requestedCity ? `Cerco professionisti a ${requestedCity}...` : 'Cerco professionisti vicino a te...', 
+        requiresConfirmation: false, silent: true,
+        execute: async () => {
+          const result = await findNearbyProfessionals(requestedCity || profile?.city || undefined);
+          if (result.found) {
+            toast.success(`🌟 Stella: ${result.summary}`, { duration: 6000 });
+            stellaSpeak(result.summary!);
+            // Also navigate to stylists page for full list
+            navigate('/stylists');
+          } else {
+            toast.info(`🌟 Stella: ${result.message}`, { duration: 5000 });
+            stellaSpeak(result.message);
+            navigate('/map-search');
+          }
+        },
       };
     }
 
@@ -825,7 +916,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
@@ -982,11 +1073,22 @@ export function useStellaAgent() {
         actionFeedback(s.msg, '💡');
         break;
       }
+      case 'find_nearby': {
+        const nearbyResult = await findNearbyProfessionals(params?.city, params?.specialty);
+        if (nearbyResult.found) {
+          actionFeedback(nearbyResult.summary!, '📍');
+          navigate('/stylists');
+        } else {
+          actionFeedback(nearbyResult.message, '📍');
+          navigate('/map-search');
+        }
+        break;
+      }
       default:
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
