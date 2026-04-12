@@ -181,22 +181,36 @@ export default function ChatPage() {
       const otherUserIds = data.map(c => c.participant_1 === user.id ? c.participant_2 : c.participant_1);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url")
+        .select("user_id, display_name, avatar_url, last_seen")
         .in("user_id", otherUserIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
+      // Count unread messages per conversation
+      const unreadCounts = new Map<string, number>();
+      for (const c of data) {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", c.id)
+          .neq("sender_id", user.id)
+          .eq("read", false);
+        unreadCounts.set(c.id, count || 0);
+      }
+
       setConversations(data.map((c, i) => {
         const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
         const profile = profileMap.get(otherId);
+        const lastSeenVal = profile?.last_seen || null;
         return {
           id: c.id,
           name: profile?.display_name || "Utente",
           avatar: profile?.avatar_url || fallbackAvatars[i % fallbackAvatars.length],
           lastMessage: c.last_message || "Nessun messaggio",
           time: c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "",
-          unread: 0,
-          online: false,
+          unread: unreadCounts.get(c.id) || 0,
+          online: isUserOnline(lastSeenVal),
+          lastSeen: lastSeenVal,
           otherUserId: otherId,
         };
       }));
