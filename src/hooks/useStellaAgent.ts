@@ -287,6 +287,80 @@ export function useStellaAgent() {
       : `Prenotazione del ${booking.booking_date} cancellata! ❌`;
   }, [user]);
 
+  // ── Helper: find nearby professionals/salons by city or GPS ─────────────
+  const findNearbyProfessionals = useCallback(async (city?: string, specialty?: string) => {
+    // Try professionals table
+    let query = supabase.from('professionals').select('id, business_name, specialty, city, rating, latitude, longitude, phone');
+    if (city) query = query.ilike('city', `%${city}%`);
+    if (specialty) query = query.ilike('specialty', `%${specialty}%`);
+    const { data: pros } = await query.order('rating', { ascending: false }).limit(10);
+
+    // Try businesses table
+    let bizQuery = supabase.from('businesses').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
+    if (city) bizQuery = bizQuery.ilike('city', `%${city}%`);
+    bizQuery = bizQuery.eq('active', true);
+    const { data: biz } = await bizQuery.order('rating', { ascending: false }).limit(10);
+
+    const results: Array<{ name: string; type: string; city: string; rating: number | null; distance?: number }> = [];
+
+    // Get user position for distance calc
+    let userLat: number | null = null;
+    let userLng: number | null = null;
+    if (profile && (profile as any).latitude) {
+      userLat = (profile as any).latitude;
+      userLng = (profile as any).longitude;
+    } else if (navigator.geolocation) {
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+      } catch { /* ignore */ }
+    }
+
+    if (pros?.length) {
+      for (const p of pros) {
+        const dist = userLat && p.latitude ? haversineDistance(userLat, userLng!, p.latitude, p.longitude!) : undefined;
+        results.push({ name: p.business_name, type: p.specialty || 'Professionista', city: p.city || '', rating: p.rating, distance: dist });
+      }
+    }
+    if (biz?.length) {
+      for (const b of biz) {
+        const dist = userLat && b.latitude ? haversineDistance(userLat, userLng!, b.latitude, b.longitude!) : undefined;
+        results.push({ name: b.business_name, type: b.business_type || 'Salone', city: b.city || '', rating: b.rating, distance: dist });
+      }
+    }
+
+    // Sort by distance if available, then by rating
+    results.sort((a, b) => {
+      if (a.distance != null && b.distance != null) return a.distance - b.distance;
+      if (a.distance != null) return -1;
+      if (b.distance != null) return 1;
+      return (b.rating || 0) - (a.rating || 0);
+    });
+
+    if (results.length === 0) {
+      return { found: false, message: city 
+        ? `Non ho trovato professionisti o saloni a ${city}. Prova a cercare in un'altra città!`
+        : 'Non ho trovato professionisti nelle vicinanze. Prova a specificare una città!' };
+    }
+
+    const top = results.slice(0, 5);
+    const lines = top.map((r, i) => {
+      const dist = r.distance != null ? ` (${r.distance.toFixed(1)} km)` : '';
+      const stars = r.rating ? ` ⭐${r.rating}` : '';
+      return `${i + 1}. ${r.name} — ${r.type}${r.city ? ', ' + r.city : ''}${stars}${dist}`;
+    });
+
+    return {
+      found: true,
+      count: results.length,
+      message: `Ho trovato ${results.length} risultat${results.length === 1 ? 'o' : 'i'}${city ? ' a ' + city : ' vicino a te'}:\n${lines.join('\n')}`,
+      summary: `Ho trovato ${results.length} professionisti${city ? ' a ' + city : ''}! I migliori: ${top.slice(0, 3).map(r => r.name).join(', ')}`,
+    };
+  }, [profile]);
+
   // ── Helper: follow a user ─────────────────────────────────────────────────
   const followUser = useCallback(async (targetName: string) => {
     if (!user) return 'Devi effettuare il login per seguire qualcuno!';
