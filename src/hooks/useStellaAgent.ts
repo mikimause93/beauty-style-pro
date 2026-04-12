@@ -1208,8 +1208,8 @@ export function useStellaAgent() {
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
+    setIsOpen(true); // Always show panel so user sees the response
     try {
-      // Get user patterns for AI context
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
       const topPages = getTopPages().slice(0, 3).join(', ');
@@ -1229,15 +1229,16 @@ export function useStellaAgent() {
           },
         },
       });
-      if (error) throw error;
 
-      const { intent, params, response: aiResponse, detected_language } = data || {};
+      if (error) { console.error('Stella AI invoke error:', error); throw error; }
+      if (!data) { console.error('Stella AI: empty response'); throw new Error('Empty AI response'); }
+
+      const { intent, params, response: aiResponse } = data;
       const displayResponse = aiResponse || 'Sono qui per aiutarti!';
 
       addMessage({ role: 'stella', content: displayResponse, type: intent && intent !== 'chat' ? 'action_result' : 'text' });
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
-      // Execute the parsed intent immediately
       if (intent && intent !== 'chat') {
         await executeAIIntent(intent, params || {}, displayResponse);
         if (user) {
@@ -1247,7 +1248,8 @@ export function useStellaAgent() {
           }).then(() => {});
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Stella AI error:', err);
       const fallback = 'Stella AI è temporaneamente offline. Dì "aiuto" per i comandi disponibili!';
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
@@ -1255,7 +1257,7 @@ export function useStellaAgent() {
     } finally {
       setIsAIThinking(false);
     }
-  }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
+  }, [addMessage, stellaSpeak, profile, user, executeAIIntent, analyzePatterns, getTopPages]);
 
 
 
