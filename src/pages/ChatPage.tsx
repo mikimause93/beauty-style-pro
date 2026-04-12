@@ -409,6 +409,26 @@ export default function ChatPage() {
       setInCall(type);
       setCallTimer(0);
       callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+
+      // Send call notification message to the other user
+      if (selectedChat && user) {
+        const callLabel = type === "voice" ? "📞 Chiamata vocale" : "📹 Videochiamata";
+        await supabase.from("messages").insert({
+          conversation_id: selectedChat.id,
+          sender_id: user.id,
+          content: `${callLabel} avviata`,
+          message_type: "text",
+        });
+        // Also send a notification
+        await supabase.from("notifications").insert({
+          user_id: selectedChat.otherUserId,
+          title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
+          message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
+          type: "call",
+          data: { caller_id: user.id, call_type: type },
+        });
+      }
+      
       toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
     } catch (err) {
       toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
