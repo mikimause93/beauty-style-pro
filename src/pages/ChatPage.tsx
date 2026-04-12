@@ -77,6 +77,7 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  usePresenceTracker();
 
   useEffect(() => {
     if (user) loadConversations();
