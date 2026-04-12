@@ -93,6 +93,8 @@ export function useStellaAgent() {
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
   const restartWakeWordTimeoutRef = useRef<number | null>(null);
+  const lastHandledTranscriptRef = useRef({ text: '', at: 0 });
+  const speakingRef = useRef(false);
   const clearInlineStatus = useCallback(() => setInlineStatus(null), []);
   const clearWakeWordResumeTimeout = useCallback(() => {
     if (restartWakeWordTimeoutRef.current !== null) {
@@ -103,6 +105,7 @@ export function useStellaAgent() {
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+  useEffect(() => { speakingRef.current = speaking; }, [speaking]);
 
   // Track page visits for learning
   useEffect(() => {
@@ -140,6 +143,7 @@ export function useStellaAgent() {
       'hé stella', 'hallo stella', 'привет стелла',
     ],
     onWakeWordDetected: (command?: string) => {
+      cancelTTS();
       const trimmedCommand = command?.trim();
 
       if (trimmedCommand) {
@@ -148,10 +152,7 @@ export function useStellaAgent() {
         return;
       }
 
-      setInlineStatus('Sono qui! Dimmi cosa fare.');
-      if (ttsEnabled) {
-        speak('Sono qui! Dimmi cosa fare.');
-      }
+      setInlineStatus('Ti ascolto...');
     },
   });
 
@@ -167,15 +168,23 @@ export function useStellaAgent() {
     if (!wakeWordActiveRef.current) return;
 
     clearWakeWordResumeTimeout();
-    restartWakeWordTimeoutRef.current = window.setTimeout(() => {
-      if (
-        wakeWordActiveRef.current &&
-        !isListeningRef.current &&
-        !isWakeWordListeningRef.current
-      ) {
+
+    const resumeWakeWord = () => {
+      const speechStillActive = speakingRef.current || (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking);
+
+      if (!wakeWordActiveRef.current) return;
+
+      if (speechStillActive || isListeningRef.current) {
+        restartWakeWordTimeoutRef.current = window.setTimeout(resumeWakeWord, 600);
+        return;
+      }
+
+      if (!isWakeWordListeningRef.current) {
         startWakeWordListening();
       }
-    }, delayMs);
+    };
+
+    restartWakeWordTimeoutRef.current = window.setTimeout(resumeWakeWord, delayMs);
   }, [clearWakeWordResumeTimeout, startWakeWordListening]);
 
   useEffect(() => () => clearWakeWordResumeTimeout(), [clearWakeWordResumeTimeout]);
@@ -189,14 +198,23 @@ export function useStellaAgent() {
   }, [isSupported, wakeWordActive, isWakeWordListening, isListening, startWakeWordListening]);
 
   // Process transcript when command listening ends
-  const lastTranscriptRef = useRef('');
   useEffect(() => {
-    if (!transcript || isListening || transcript === lastTranscriptRef.current) return;
+    const finalTranscript = transcript.trim();
+    if (!finalTranscript || isListening) return;
 
-    lastTranscriptRef.current = transcript;
-    void Promise.resolve(handleCommandRef.current(transcript));
+    const normalizedTranscript = finalTranscript.replace(/\s+/g, ' ').trim().toLowerCase();
+    const now = Date.now();
+    const lastHandled = lastHandledTranscriptRef.current;
+
+    if (normalizedTranscript === lastHandled.text && now - lastHandled.at < 1800) {
+      resetTranscript();
+      return;
+    }
+
+    lastHandledTranscriptRef.current = { text: normalizedTranscript, at: now };
+    void Promise.resolve(handleCommandRef.current(finalTranscript));
     resetTranscript();
-  }, [transcript, isListening]);
+  }, [transcript, isListening, resetTranscript]);
 
   const addMessage = useCallback((msg: Omit<StellaMessage, 'id'>) => {
     setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random() }]);
