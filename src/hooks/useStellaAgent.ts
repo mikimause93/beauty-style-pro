@@ -80,6 +80,8 @@ export function useStellaAgent() {
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
+  const [inlineStatus, setInlineStatus] = useState<string | null>(null);
+  const clearInlineStatus = useCallback(() => setInlineStatus(null), []);
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
