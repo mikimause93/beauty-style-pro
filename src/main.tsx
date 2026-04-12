@@ -3,6 +3,18 @@ import App from "./App.tsx";
 import "./index.css";
 import safeStorage from "@/lib/safeStorage";
 
+// Apply saved color theme (female/male) immediately to avoid flash
+const savedColorTheme = safeStorage.getItem("style-color-theme");
+if (savedColorTheme === "male") {
+  const r = document.documentElement;
+  r.style.setProperty("--primary", "173 82% 32%");
+  r.style.setProperty("--ring", "173 82% 32%");
+  r.style.setProperty("--sidebar-primary", "173 82% 32%");
+  r.style.setProperty("--sidebar-ring", "173 82% 32%");
+  r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(173 82% 32%), hsl(174 70% 42%))");
+  r.style.setProperty("--shadow-glow", "0 0 40px hsl(173 82% 32% / 0.3)");
+}
+
 const savedTheme = safeStorage.getItem("style-theme");
 
 if (savedTheme === "light") {
