@@ -653,39 +653,51 @@ export function useStellaAgent() {
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
+    const actionFeedback = (msg: string, icon = '🌟') => {
+      toast.success(`${icon} Stella: ${msg}`, { duration: 3000 });
+    };
+
     switch (intent) {
       case 'navigate':
-        if (params?.route) { navigate(params.route); toast.success(`🌟 Stella: ${response}`); }
-        else { navigate('/map-search'); toast.success(`🌟 Stella: ${response}`); }
+        if (params?.route) {
+          navigate(params.route);
+          actionFeedback(response, '🚀');
+        } else {
+          navigate('/map-search');
+          actionFeedback(response, '📍');
+        }
         break;
       case 'search':
         navigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '🔍');
         break;
-      case 'show_profile':
+      case 'show_profile': {
         if (params?.name) {
           const result = await goToProfile(params.name);
-          toast.success(`🌟 Stella: ${result}`);
+          actionFeedback(result, '👤');
         }
         break;
-      case 'like':
+      }
+      case 'like': {
         const likeResult = await likeLatestPost(params?.target_name);
-        toast.success(`🌟 Stella: ${likeResult}`);
+        actionFeedback(likeResult, '❤️');
         break;
-      case 'follow':
+      }
+      case 'follow': {
         if (params?.target_name) {
           const followResult = await followUser(params.target_name);
-          toast.success(`🌟 Stella: ${followResult}`);
+          actionFeedback(followResult, '✅');
         }
         break;
+      }
       case 'send_message':
         if (params?.recipient && params?.content) {
           const msgResult = await sendMessageTo(params.recipient, params.content);
-          toast.success(`🌟 Stella: ${msgResult}`);
+          actionFeedback(msgResult, '💬');
         } else if (params?.recipient) {
-          const profiles = await findProfileByName(params.recipient);
+          await findProfileByName(params.recipient);
           navigate('/chat');
-          toast.success(`🌟 Stella: ${response}`);
+          actionFeedback(response, '💬');
         }
         break;
       case 'book':
@@ -696,11 +708,11 @@ export function useStellaAgent() {
         } else {
           navigate('/stylists');
         }
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '✂️');
         break;
       case 'call':
         navigate('/chat');
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '📞');
         break;
       case 'scroll':
         if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
@@ -711,30 +723,30 @@ export function useStellaAgent() {
       case 'theme':
         if (params?.mode === 'dark') { document.documentElement.classList.remove('light'); document.documentElement.classList.add('dark'); }
         else { document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light'); }
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, params?.mode === 'dark' ? '🌙' : '☀️');
         break;
       case 'share':
         if (navigator.share) navigator.share({ title: 'STYLE', url: window.location.href }).catch(() => {});
         else navigator.clipboard.writeText(window.location.href);
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '🔗');
         break;
       case 'refresh':
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '🔄');
         setTimeout(() => window.location.reload(), 500);
         break;
       case 'back':
         window.history.back();
-        toast.success(`🌟 Stella: ${response}`);
+        actionFeedback(response, '⬅️');
         break;
       case 'info':
         if (params?.info_type === 'coins') {
           const coins = profile?.qr_coins ?? 0;
-          toast.success(`🌟 Stella: ${coins} QR Coins`);
+          actionFeedback(`Hai ${coins} QR Coins`, '💰');
         } else if (params?.info_type === 'bookings') {
           navigate('/my-bookings');
-          toast.success(`🌟 Stella: ${response}`);
+          actionFeedback(response, '📅');
         } else {
-          toast.success(`🌟 Stella: ${response}`);
+          actionFeedback(response, 'ℹ️');
         }
         break;
       case 'reminder':
@@ -746,12 +758,12 @@ export function useStellaAgent() {
             action_params: { message: params.description },
             scheduled_for: scheduledDate.toISOString(),
           });
-          toast.success(`🌟 Stella: ${response}`);
+          actionFeedback(response, '⏰');
         }
         break;
       default:
         // chat — just show the response
-        toast.success(`🌟 Stella: ${response.substring(0, 120)}${response.length > 120 ? '...' : ''}`);
+        actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
   }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, sendMessageTo, findProfileByName]);
@@ -765,6 +777,8 @@ export function useStellaAgent() {
           context: {
             user_type: profile?.user_type || 'client',
             user_name: profile?.display_name || 'User',
+            gender: (profile as any)?.gender || 'unknown',
+            color_theme: (profile as any)?.color_theme || 'female',
             qr_coins: profile?.qr_coins || 0,
             current_page: window.location.pathname,
           },
@@ -773,12 +787,12 @@ export function useStellaAgent() {
       if (error) throw error;
 
       const { intent, params, response: aiResponse, detected_language } = data || {};
-      const displayResponse = aiResponse || 'I\'m here to help!';
+      const displayResponse = aiResponse || 'Sono qui per aiutarti!';
 
-      addMessage({ role: 'stella', content: displayResponse, type: 'text' });
+      addMessage({ role: 'stella', content: displayResponse, type: intent && intent !== 'chat' ? 'action_result' : 'text' });
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
-      // Execute the parsed intent
+      // Execute the parsed intent immediately
       if (intent && intent !== 'chat') {
         await executeAIIntent(intent, params || {}, displayResponse);
         if (user) {
@@ -787,11 +801,9 @@ export function useStellaAgent() {
             status: 'completed', executed_at: new Date().toISOString(),
           }).then(() => {});
         }
-      } else {
-        toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}${displayResponse.length > 100 ? '...' : ''}`);
       }
     } catch {
-      const fallback = 'Stella AI is temporarily offline. Say "help" for available commands!';
+      const fallback = 'Stella AI è temporaneamente offline. Dì "aiuto" per i comandi disponibili!';
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
       toast.info(`🌟 ${fallback}`);
@@ -799,6 +811,8 @@ export function useStellaAgent() {
       setIsAIThinking(false);
     }
   }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
+
+
 
   // ── Handle command (works in background or with panel open) ────────────
   const handleCommand = useCallback((text: string) => {
