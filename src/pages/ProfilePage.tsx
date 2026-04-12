@@ -32,7 +32,7 @@ interface ProfilePost {
 
 export default function ProfilePage() {
   const { id: viewUserId } = useParams();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, loading: authLoading, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   const { data: activeRemindersCount = 0 } = useSmartRemindersCount();
   const navigate = useNavigate();
@@ -92,6 +92,16 @@ export default function ProfilePage() {
   }, [viewProfile]);
 
   const displayProfile = isOwnProfile ? profile : viewProfile;
+
+  if (authLoading && isOwnProfile) {
+    return (
+      <MobileLayout>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   if (!user && isOwnProfile) {
     return (
