@@ -1145,8 +1145,13 @@ export function useStellaAgent() {
           const coins = profile?.qr_coins ?? 0;
           actionFeedback(`Hai ${coins} QR Coins`, '💰');
         } else if (params?.info_type === 'bookings') {
-          navigate('/my-bookings');
-          actionFeedback(response, '📅');
+          const bookingsInfo = await getUpcomingBookings();
+          addMessage({ role: 'stella', content: bookingsInfo, type: 'action_result' });
+          actionFeedback(bookingsInfo.split('\n')[0], '📅');
+        } else if (params?.info_type === 'general') {
+          const stats = await getUserStats();
+          addMessage({ role: 'stella', content: stats, type: 'action_result' });
+          actionFeedback('Ecco le tue statistiche!', '📊');
         } else {
           actionFeedback(response, 'ℹ️');
         }
