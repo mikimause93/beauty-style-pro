@@ -434,7 +434,7 @@ export const useVoiceRecognition = (
                 if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
                   startWakeWordListening();
                 }
-              }, 900);
+              }, 4000);
             }
           });
 
@@ -562,7 +562,7 @@ export const useVoiceRecognition = (
                 if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
                   createWakeWordRecognition();
                 }
-              }, 1000);
+              }, 4000);
             }
           };
 
