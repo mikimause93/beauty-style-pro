@@ -45,6 +45,7 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [username, setUsername] = useState("");
+  const [gender, setGender] = useState<"male" | "female" | "">("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Italia");
@@ -162,7 +163,8 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
+    const colorTheme = gender === "male" ? "male" : "female";
+    const { error } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme);
     
     if (error) { 
       toast.error(error.message); 
@@ -202,7 +204,7 @@ export default function AuthPage() {
   const canProceed = () => {
     if (step === 0) return !!accountType;
     if (step === 1) {
-      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate;
+      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate && !!gender;
       if (accountType === "professional") return !!name && !!email && !!password && !!phone;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
@@ -462,6 +464,26 @@ export default function AuthPage() {
       {step === 1 && accountType === "client" && (
         <div className="space-y-4 fade-in">
           <h2 className="text-lg font-display font-bold">I tuoi dati</h2>
+          
+          {/* Gender selector */}
+          <div>
+            <p className="text-xs font-semibold mb-2 text-muted-foreground">Genere *</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setGender("female")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "female" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>
+                👩 Donna
+              </button>
+              <button type="button" onClick={() => setGender("male")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "male" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>
+                👨 Uomo
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <InputField icon={<User className="w-4 h-4" />} placeholder="Nome *" value={name} onChange={setName} />
             <InputField placeholder="Cognome *" value={surname} onChange={setSurname} />
