@@ -11,6 +11,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
 import PostCard from "@/components/feed/PostCard";
 import ProfileShowcasePanel from "@/components/profile/ProfileShowcasePanel";
+import { useTemporaryTheme } from "@/hooks/useColorTheme";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -92,6 +93,9 @@ export default function ProfilePage() {
   }, [viewProfile]);
 
   const displayProfile = isOwnProfile ? profile : viewProfile;
+
+  // Apply the visited profile's color theme temporarily
+  useTemporaryTheme(!isOwnProfile ? displayProfile?.color_theme : null);
 
   if (authLoading && isOwnProfile) {
     return (
