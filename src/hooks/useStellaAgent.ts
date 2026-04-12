@@ -1119,8 +1119,8 @@ export function useStellaAgent() {
         break;
       }
       case 'call':
-        navigate('/chat');
         actionFeedback(response, '📞');
+        delayedNavigate('/chat');
         break;
       case 'scroll':
         if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
