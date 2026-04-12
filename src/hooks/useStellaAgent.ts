@@ -1355,6 +1355,7 @@ export function useStellaAgent() {
     messages, isOpen, setIsOpen, wakeWordActive, ttsEnabled,
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
+    inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
     clearMessages: useCallback(() => setMessages([]), []),
