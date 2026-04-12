@@ -73,6 +73,10 @@ IMPORTANT RULES:
 - "unfollow Marco" → unfollow with target_name
 - Understand slang, informal speech, dialects, abbreviations in ANY language
 - If the user asks about their coins → info with info_type "coins"
+- "find hairdressers in Milan" or "saloni a Roma" or "professionisti vicini" → find_nearby with city and/or specialty
+- "parrucchieri a Napoli" → find_nearby with city "Napoli" and specialty "parrucchiere"
+- "chi c'è vicino" or "professionals nearby" → find_nearby (no city = uses GPS)
+- ALWAYS use find_nearby instead of navigate when the user wants to SEARCH/FIND professionals, salons, stylists, hairdressers
 - If the user seems bored → suggest navigating to /explore or /shorts
 - If the user says "what can I do" or seems lost → suggest based on their profile
 - Personalize based on gender: suggest beauty/wellness content appropriately
