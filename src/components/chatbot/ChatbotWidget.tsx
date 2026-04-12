@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
+import { supabase } from "@/integrations/supabase/client";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
