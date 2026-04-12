@@ -122,6 +122,8 @@ IMPORTANT RULES:
                       mode: { type: "string", enum: ["dark", "light"] },
                       info_type: { type: "string", enum: ["coins", "bookings", "general"] },
                       description: { type: "string" },
+                      city: { type: "string", description: "City name for find_nearby intent" },
+                      specialty: { type: "string", description: "Specialty filter for find_nearby (e.g. hairstylist, colorist, barber)" },
                       suggestion_type: { type: "string", enum: ["beauty", "social", "business", "fun"] },
                     },
                   },
