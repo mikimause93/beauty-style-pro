@@ -13,6 +13,7 @@ import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PresenceTracker from "@/components/PresenceTracker";
+import StellaVoiceAgent from "@/components/stella/StellaVoiceAgent";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -232,6 +233,7 @@ const App = () => {
         </RadioProvider>
         </TenantProvider>
         <PresenceTracker />
+        <StellaVoiceAgent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
