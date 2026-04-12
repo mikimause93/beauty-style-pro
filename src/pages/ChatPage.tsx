@@ -292,6 +292,11 @@ export default function ChatPage() {
       content,
       message_type: "text",
     });
+    // Update conversation last_message
+    await supabase.from("conversations").update({
+      last_message: content,
+      last_message_at: new Date().toISOString(),
+    }).eq("id", selectedChat.id);
   };
 
   const uploadFile = async (file: File, type: MessageType) => {
