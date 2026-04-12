@@ -1136,6 +1136,11 @@ export function useStellaAgent() {
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
     try {
+      // Get user patterns for AI context
+      const patterns = await analyzePatterns();
+      const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
+      const topPages = getTopPages().slice(0, 3).join(', ');
+
       const { data, error } = await supabase.functions.invoke('stella-intent', {
         body: {
           text,
@@ -1146,6 +1151,8 @@ export function useStellaAgent() {
             color_theme: (profile as any)?.color_theme || 'female',
             qr_coins: profile?.qr_coins || 0,
             current_page: window.location.pathname,
+            frequent_actions: topActions || 'none',
+            favorite_pages: topPages || 'none',
           },
         },
       });
