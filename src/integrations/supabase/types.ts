@@ -2836,6 +2836,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          color_theme: string | null
           country: string | null
           created_at: string
           cv_url: string | null
@@ -2845,6 +2846,7 @@ export type Database = {
           facebook: string | null
           follower_count: number
           following_count: number
+          gender: string | null
           id: string
           instagram: string | null
           interests: string[] | null
@@ -2873,6 +2875,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
@@ -2882,6 +2885,7 @@ export type Database = {
           facebook?: string | null
           follower_count?: number
           following_count?: number
+          gender?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
@@ -2910,6 +2914,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
@@ -2919,6 +2924,7 @@ export type Database = {
           facebook?: string | null
           follower_count?: number
           following_count?: number
+          gender?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null

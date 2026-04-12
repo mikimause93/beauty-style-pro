@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import safeStorage from "@/lib/safeStorage";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName: string, userType?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, userType?: string, gender?: string, colorTheme?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -26,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
       supabase.from("profiles_private").select("*").eq("user_id", userId).maybeSingle(),
     ]);
-    setProfile({
+    const merged = {
       ...profileRes.data,
       ...(privateRes.data ? {
         iban: privateRes.data.iban,
@@ -35,7 +36,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document_urls: privateRes.data.document_urls,
         verification_notes: privateRes.data.verification_notes,
       } : {}),
-    });
+    };
+    setProfile(merged);
+
+    // Apply color theme from profile on login
+    const ct = merged?.color_theme;
+    if (ct === "male" || ct === "female") {
+      safeStorage.setItem("style-color-theme", ct);
+      // Dynamically import to avoid circular deps
+      import("@/hooks/useColorTheme").then(mod => {
+        // trigger CSS variable update by dispatching a custom event
+        const r = document.documentElement;
+        if (ct === "male") {
+          r.style.setProperty("--primary", "170 100% 20%");
+          r.style.setProperty("--ring", "170 100% 20%");
+          r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))");
+          r.style.setProperty("--shadow-glow", "0 0 40px hsl(170 100% 20% / 0.3)");
+        } else {
+          r.style.setProperty("--primary", "262 80% 62%");
+          r.style.setProperty("--ring", "262 80% 62%");
+          r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(262 80% 62%), hsl(290 70% 58%))");
+          r.style.setProperty("--shadow-glow", "0 0 40px hsl(262 80% 62% / 0.3)");
+        }
+      }).catch(() => {});
+    }
   };
 
   useEffect(() => {
@@ -90,12 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string, userType: string = "client") => {
+  const signUp = async (email: string, password: string, displayName: string, userType: string = "client", gender?: string, colorTheme?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, user_type: userType },
+        data: { display_name: displayName, user_type: userType, gender: gender || null, color_theme: colorTheme || "female" },
         emailRedirectTo: window.location.origin,
       },
     });
