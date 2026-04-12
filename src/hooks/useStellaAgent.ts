@@ -189,13 +189,19 @@ export function useStellaAgent() {
 
   useEffect(() => () => clearWakeWordResumeTimeout(), [clearWakeWordResumeTimeout]);
 
-  // Auto-start wake word listening on mount
+  // Auto-start wake word listening on mount (once)
+  const wakeWordStartedRef = useRef(false);
   useEffect(() => {
-    if (!isSupported || !wakeWordActive || isWakeWordListening || isListening) return;
+    if (!isSupported || !wakeWordActive || wakeWordStartedRef.current) return;
+    if (isWakeWordListening || isListening) return;
 
-    const timer = window.setTimeout(() => startWakeWordListening(), 500);
-    return () => window.clearTimeout(timer);
-  }, [isSupported, wakeWordActive, isWakeWordListening, isListening, startWakeWordListening]);
+    wakeWordStartedRef.current = true;
+    const timer = window.setTimeout(() => startWakeWordListening(), 800);
+    return () => {
+      window.clearTimeout(timer);
+      wakeWordStartedRef.current = false;
+    };
+  }, [isSupported, wakeWordActive]); // minimal deps to avoid re-trigger loops
 
   // Process transcript when command listening ends
   useEffect(() => {
@@ -676,7 +682,7 @@ export function useStellaAgent() {
     // ── SHOW LATEST PHOTOS / POSTS ────────────────────────────────────────
     const latestPhotosMatch = stripped.match(/(?:mostrami|mostra|vedi|apri)\s+(?:le\s+)?ultim(?:e|a)\s+foto(?:\s+pubblicat[ae])?\s+(?:di|del|della|de|da)\s+(.+)/);
     if (latestPhotosMatch) {
-      const target = latestPhotosMatch[1]?.trim() ? latestPhotosMatch[1].trim() : latestPhotosMatch[2].trim();
+      const target = latestPhotosMatch[1]?.trim() || '';
       return {
         id: Date.now().toString(), type: 'action', text,
         response: `Ti mostro le ultime foto di ${target}...`, requiresConfirmation: false, silent: true,
