@@ -77,3 +77,22 @@ export function useColorTheme() {
 
   return { colorTheme, setColorTheme };
 }
+
+/**
+ * Temporarily override the color theme (e.g. when viewing another user's profile).
+ * Returns a cleanup function that restores the original theme.
+ */
+export function useTemporaryTheme(profileTheme: ColorTheme | string | null | undefined) {
+  const ownTheme = safeStorage.getItem("style-color-theme") === "male" ? "male" : "female";
+
+  useEffect(() => {
+    const resolved: ColorTheme = profileTheme === "male" ? "male" : "female";
+    // Only override if different from current user's theme
+    if (resolved !== ownTheme) {
+      applyColorTheme(resolved);
+      return () => {
+        applyColorTheme(ownTheme as ColorTheme);
+      };
+    }
+  }, [profileTheme, ownTheme]);
+}
