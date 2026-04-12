@@ -645,6 +645,7 @@ export function useStellaAgent() {
     switch (intent) {
       case 'navigate':
         if (params?.route) { navigate(params.route); toast.success(`🌟 Stella: ${response}`); }
+        else { navigate('/map-search'); toast.success(`🌟 Stella: ${response}`); }
         break;
       case 'search':
         navigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
