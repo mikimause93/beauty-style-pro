@@ -1,3 +1,5 @@
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 declare global {
@@ -52,6 +54,8 @@ export const useVoiceRecognition = (
 
   const recognitionRef = useRef<any>(null);
   const wakeWordRecognitionRef = useRef<any>(null);
+  const nativePartialResultsListenerRef = useRef<PluginListenerHandle | null>(null);
+  const nativeListeningStateListenerRef = useRef<PluginListenerHandle | null>(null);
   const isListeningRef = useRef(false);
   const wakeWordActiveRef = useRef(false);
   const onWakeWordRef = useRef(onWakeWordDetected);
@@ -59,18 +63,84 @@ export const useVoiceRecognition = (
   const handoffToCommandRef = useRef(false);
   const wakeWordCommandTimeoutRef = useRef<number | null>(null);
   const pendingWakeWordCommandRef = useRef('');
+  const nativeModeRef = useRef<'idle' | 'wake' | 'command'>('idle');
 
   useEffect(() => { onWakeWordRef.current = onWakeWordDetected; }, [onWakeWordDetected]);
   useEffect(() => { wakeWordsRef.current = wakeWords; }, [wakeWords]);
   useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
 
-  const isSupported = typeof window !== 'undefined' &&
+  const isWebSpeechSupported = typeof window !== 'undefined' &&
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+
+  const isNativeSpeechSupported = typeof window !== 'undefined' && (() => {
+    try {
+      return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('SpeechRecognition');
+    } catch {
+      return false;
+    }
+  })();
+
+  const isSupported = isWebSpeechSupported || isNativeSpeechSupported;
+  const permissionDeniedMessage = 'Per attivare Stella consenti l’accesso al microfono nelle impostazioni del dispositivo o del browser.';
 
   const clearWakeWordCommandTimeout = useCallback(() => {
     if (wakeWordCommandTimeoutRef.current !== null) {
       window.clearTimeout(wakeWordCommandTimeoutRef.current);
       wakeWordCommandTimeoutRef.current = null;
+    }
+  }, []);
+
+  const removeNativeListeners = useCallback(async () => {
+    const listeners = [nativePartialResultsListenerRef.current, nativeListeningStateListenerRef.current];
+    nativePartialResultsListenerRef.current = null;
+    nativeListeningStateListenerRef.current = null;
+
+    await Promise.all(listeners.map(async (listener) => {
+      if (!listener) return;
+      try { await listener.remove(); } catch {}
+    }));
+
+    try { await SpeechRecognition.removeAllListeners(); } catch {}
+  }, []);
+
+  const stopNativeRecognition = useCallback(async () => {
+    clearWakeWordCommandTimeout();
+    pendingWakeWordCommandRef.current = '';
+    nativeModeRef.current = 'idle';
+
+    await removeNativeListeners();
+
+    try { await SpeechRecognition.stop(); } catch {}
+
+    setIsWakeWordListening(false);
+    setIsListening(false);
+    isListeningRef.current = false;
+    setInterimTranscript('');
+  }, [clearWakeWordCommandTimeout, removeNativeListeners]);
+
+  const ensureNativePermissions = useCallback(async () => {
+    try {
+      const current = await SpeechRecognition.checkPermissions();
+      if (current.speechRecognition === 'granted') return true;
+
+      const requested = await SpeechRecognition.requestPermissions();
+      return requested.speechRecognition === 'granted';
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const primeBrowserMicrophone = useCallback(async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      return true;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch {
+      return false;
     }
   }, []);
 
@@ -104,6 +174,12 @@ export const useVoiceRecognition = (
 
   const stopListening = useCallback(() => {
     handoffToCommandRef.current = false;
+
+    if (isNativeSpeechSupported) {
+      void stopNativeRecognition();
+      return;
+    }
+
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
@@ -111,18 +187,71 @@ export const useVoiceRecognition = (
       isListeningRef.current = false;
       setInterimTranscript('');
     }
-  }, []);
+  }, [isNativeSpeechSupported, stopNativeRecognition]);
 
   const stopWakeWordListening = useCallback(() => {
     wakeWordActiveRef.current = false;
     handoffToCommandRef.current = false;
     pendingWakeWordCommandRef.current = '';
     clearWakeWordCommandTimeout();
+
+    if (isNativeSpeechSupported) {
+      void stopNativeRecognition();
+      return;
+    }
+
     stopWakeWordRecognitionInstance();
-  }, [clearWakeWordCommandTimeout, stopWakeWordRecognitionInstance]);
+  }, [clearWakeWordCommandTimeout, isNativeSpeechSupported, stopNativeRecognition, stopWakeWordRecognitionInstance]);
 
   const startListening = useCallback(() => {
     if (!isSupported) return;
+
+    if (isNativeSpeechSupported) {
+      void (async () => {
+        const hasPermission = await ensureNativePermissions();
+        if (!hasPermission) {
+          setError(permissionDeniedMessage);
+          return;
+        }
+
+        await stopNativeRecognition();
+
+        nativeModeRef.current = 'command';
+        setError(null);
+        setTranscript('');
+        setInterimTranscript('');
+        setIsWakeWordListening(false);
+        setIsListening(true);
+        isListeningRef.current = true;
+
+        try {
+          const { matches } = await SpeechRecognition.start({
+            language,
+            maxResults: 1,
+            partialResults: false,
+            popup: false,
+            prompt: 'Parla ora',
+          });
+
+          const spokenText = matches?.[0]?.trim();
+          if (spokenText) {
+            setTranscript(spokenText);
+          }
+        } catch (error: any) {
+          const message = typeof error?.message === 'string' ? error.message : 'native';
+          if (!String(message).toLowerCase().includes('cancel')) {
+            setError(`Speech recognition error: ${message}`);
+          }
+        } finally {
+          nativeModeRef.current = 'idle';
+          setIsListening(false);
+          isListeningRef.current = false;
+          setInterimTranscript('');
+          await removeNativeListeners();
+        }
+      })();
+      return;
+    }
 
     handoffToCommandRef.current = true;
 
@@ -138,66 +267,90 @@ export const useVoiceRecognition = (
       recognitionRef.current = null;
     }
 
-    try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognitionRef.current = recognition;
-
-      recognition.continuous = continuous;
-      recognition.interimResults = interimResults;
-      recognition.lang = language;
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        isListeningRef.current = true;
+    void (async () => {
+      const hasMicAccess = await primeBrowserMicrophone();
+      if (!hasMicAccess) {
         handoffToCommandRef.current = false;
-        setError(null);
-      };
+        setError(permissionDeniedMessage);
+        setIsListening(false);
+        isListeningRef.current = false;
+        return;
+      }
 
-      recognition.onresult = (event: any) => {
-        let finalTranscript = '';
-        let currentInterimTranscript = '';
+      try {
+        const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognitionCtor();
+        recognitionRef.current = recognition;
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscript += result[0].transcript;
-          } else {
-            currentInterimTranscript += result[0].transcript;
+        recognition.continuous = continuous;
+        recognition.interimResults = interimResults;
+        recognition.lang = language;
+
+        recognition.onstart = () => {
+          setIsListening(true);
+          isListeningRef.current = true;
+          handoffToCommandRef.current = false;
+          setError(null);
+        };
+
+        recognition.onresult = (event: any) => {
+          let finalTranscript = '';
+          let currentInterimTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+              finalTranscript += result[0].transcript;
+            } else {
+              currentInterimTranscript += result[0].transcript;
+            }
           }
-        }
 
-        if (finalTranscript) {
-          setTranscript(prev => prev + finalTranscript);
-        }
-        setInterimTranscript(currentInterimTranscript);
-      };
+          if (finalTranscript) {
+            setTranscript(prev => prev + finalTranscript);
+          }
+          setInterimTranscript(currentInterimTranscript);
+        };
 
-      recognition.onerror = (event: any) => {
-        if (event.error !== 'aborted' && event.error !== 'no-speech') {
-          setError(`Speech recognition error: ${event.error}`);
-        }
+        recognition.onerror = (event: any) => {
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            setError(permissionDeniedMessage);
+          } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
+            setError(`Speech recognition error: ${event.error}`);
+          }
+          setIsListening(false);
+          isListeningRef.current = false;
+          handoffToCommandRef.current = false;
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+          isListeningRef.current = false;
+          handoffToCommandRef.current = false;
+          setInterimTranscript('');
+          recognitionRef.current = null;
+        };
+
+        recognition.start();
+      } catch {
+        handoffToCommandRef.current = false;
+        setError('Speech recognition not supported');
         setIsListening(false);
         isListeningRef.current = false;
-        handoffToCommandRef.current = false;
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-        isListeningRef.current = false;
-        handoffToCommandRef.current = false;
-        setInterimTranscript('');
-        recognitionRef.current = null;
-      };
-
-      recognition.start();
-    } catch {
-      handoffToCommandRef.current = false;
-      setError('Speech recognition not supported');
-      setIsListening(false);
-      isListeningRef.current = false;
-    }
-  }, [isSupported, continuous, interimResults, language]);
+      }
+    })();
+  }, [
+    continuous,
+    ensureNativePermissions,
+    interimResults,
+    isNativeSpeechSupported,
+    isSupported,
+    language,
+    permissionDeniedMessage,
+    primeBrowserMicrophone,
+    removeNativeListeners,
+    stopNativeRecognition,
+  ]);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
@@ -209,6 +362,98 @@ export const useVoiceRecognition = (
   const startWakeWordListening = useCallback(() => {
     if (!isSupported || !wakeWordEnabled) return;
     if (isListeningRef.current) return;
+
+    if (isNativeSpeechSupported) {
+      void (async () => {
+        const hasPermission = await ensureNativePermissions();
+        if (!hasPermission) {
+          setError(permissionDeniedMessage);
+          return;
+        }
+
+        await stopNativeRecognition();
+
+        wakeWordActiveRef.current = true;
+        nativeModeRef.current = 'wake';
+        setError(null);
+        setIsWakeWordListening(true);
+        setInterimTranscript('');
+
+        try {
+          nativePartialResultsListenerRef.current = await SpeechRecognition.addListener('partialResults', (data) => {
+            const rawTranscript = data.matches?.[0]?.trim() ?? '';
+            const normalizedTranscript = rawTranscript.toLowerCase();
+
+            if (!normalizedTranscript || !wakeWordActiveRef.current) return;
+
+            setInterimTranscript(rawTranscript);
+
+            const liveCommand = extractCommandAfterWakeWord(normalizedTranscript);
+            const wakeWordFound = wakeWordsRef.current.some((word) =>
+              normalizedTranscript.includes(word.toLowerCase())
+            );
+
+            if (typeof liveCommand === 'string' && liveCommand.length > 0) {
+              pendingWakeWordCommandRef.current = liveCommand;
+              clearWakeWordCommandTimeout();
+              wakeWordCommandTimeoutRef.current = window.setTimeout(() => {
+                const command = pendingWakeWordCommandRef.current.trim();
+                if (!command || !wakeWordActiveRef.current) return;
+
+                pendingWakeWordCommandRef.current = '';
+                setWakeWordDetected(true);
+                onWakeWordRef.current?.(command);
+                handoffToCommandRef.current = false;
+                wakeWordActiveRef.current = false;
+                void stopNativeRecognition();
+              }, 850);
+              return;
+            }
+
+            if (wakeWordFound) {
+              clearWakeWordCommandTimeout();
+              pendingWakeWordCommandRef.current = '';
+              setWakeWordDetected(true);
+              onWakeWordRef.current?.();
+              handoffToCommandRef.current = true;
+              wakeWordActiveRef.current = false;
+              void stopNativeRecognition();
+              window.setTimeout(() => {
+                startListening();
+              }, 600);
+            }
+          });
+
+          nativeListeningStateListenerRef.current = await SpeechRecognition.addListener('listeningState', (data) => {
+            if (data.status !== 'stopped') return;
+
+            setIsWakeWordListening(false);
+
+            if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
+              window.setTimeout(() => {
+                if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
+                  startWakeWordListening();
+                }
+              }, 900);
+            }
+          });
+
+          await SpeechRecognition.start({
+            language,
+            maxResults: 1,
+            partialResults: true,
+            popup: false,
+            prompt: 'Di Stella',
+          });
+        } catch (error: any) {
+          nativeModeRef.current = 'idle';
+          setIsWakeWordListening(false);
+          const message = typeof error?.message === 'string' ? error.message : 'Wake word non disponibile';
+          setError(`Wake word detection error: ${message}`);
+        }
+      })();
+      return;
+    }
 
     wakeWordActiveRef.current = true;
 
@@ -294,7 +539,9 @@ export const useVoiceRecognition = (
         };
 
         recognition.onerror = (event: any) => {
-          if (event.error !== 'aborted' && event.error !== 'no-speech') {
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            setError(permissionDeniedMessage);
+          } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
             setError(`Wake word detection error: ${event.error}`);
           }
           setIsWakeWordListening(false);
@@ -319,7 +566,18 @@ export const useVoiceRecognition = (
     };
 
     createWakeWordRecognition();
-  }, [isSupported, wakeWordEnabled, language, startListening]);
+  }, [
+    clearWakeWordCommandTimeout,
+    ensureNativePermissions,
+    extractCommandAfterWakeWord,
+    isNativeSpeechSupported,
+    isSupported,
+    language,
+    permissionDeniedMessage,
+    startListening,
+    stopNativeRecognition,
+    wakeWordEnabled,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -327,6 +585,11 @@ export const useVoiceRecognition = (
       handoffToCommandRef.current = false;
       pendingWakeWordCommandRef.current = '';
       clearWakeWordCommandTimeout();
+
+      if (isNativeSpeechSupported) {
+        void stopNativeRecognition();
+      }
+
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch {}
       }
@@ -334,7 +597,7 @@ export const useVoiceRecognition = (
         try { wakeWordRecognitionRef.current.stop(); } catch {}
       }
     };
-  }, [clearWakeWordCommandTimeout]);
+  }, [clearWakeWordCommandTimeout, isNativeSpeechSupported, stopNativeRecognition]);
 
   return {
     isListening,
