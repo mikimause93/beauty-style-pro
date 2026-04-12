@@ -1196,7 +1196,7 @@ export function useStellaAgent() {
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals, addMessage, getUserStats, getUpcomingBookings]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
