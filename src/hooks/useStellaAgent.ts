@@ -816,9 +816,32 @@ export function useStellaAgent() {
       return { id: Date.now().toString(), type: 'info', text, response: msg, requiresConfirmation: false, silent: true,
         execute: () => { toast.success(`🌟 Stella: ${msg}`); } };
     }
-    if (stripped.includes('prossimo appuntamento') || stripped.includes('prossima prenotazione')) {
-      return { id: Date.now().toString(), type: 'info', text, response: 'Verifico le tue prenotazioni!', requiresConfirmation: false, silent: true,
-        execute: () => { navigate('/my-bookings'); toast.success('🌟 Stella: Ecco le tue prenotazioni!'); } };
+    if (stripped.includes('prossimo appuntamento') || stripped.includes('prossima prenotazione') || stripped.includes('i miei appuntamenti')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Verifico le tue prenotazioni...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getUpcomingBookings();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result.split('\n')[0]);
+          toast.success(`🌟 Stella: ${result.split('\n')[0]}`);
+        } };
+    }
+    if (stripped.includes('le mie statistiche') || stripped.includes('i miei dati') || stripped.includes('quanto ho') || stripped.includes('come va')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Carico le tue statistiche...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getUserStats();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result.replace(/[•📊\n]/g, ', '));
+          toast.success(`🌟 Stella: Ecco le tue stats!`);
+        } };
+    }
+    if (stripped.includes('notifiche non lette') || stripped.includes('ho notifiche') || stripped.includes('quante notifiche')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Controllo le notifiche...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getNotificationsSummary();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result);
+          toast.success(`🌟 Stella: ${result}`);
+        } };
     }
 
     // ── CALL ──────────────────────────────────────────────────────────────
