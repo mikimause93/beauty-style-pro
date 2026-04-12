@@ -27,13 +27,22 @@ export default function StellaVoiceAgent() {
     setInput('');
   }, [input, sendTextCommand]);
 
-  if (!isSupported) return null;
+  const statusText = !isSupported
+    ? '⌨️ Scrivimi qui sotto: la voce non è disponibile qui'
+    : isAIThinking
+      ? '🧠 Sto pensando...'
+      : isListening
+        ? '🔴 Ti ascolto...'
+        : isWakeWordListening
+          ? '🎤 Dì "Stella"...'
+          : speaking
+            ? '🔊 Sto parlando...'
+            : 'Assistente vocale super AI';
 
   return (
     <>
       <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[9998]" />
 
-      {/* Floating Stella Button (draggable) — uses theme primary */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -51,7 +60,7 @@ export default function StellaVoiceAgent() {
             transition={{ rotate: { repeat: Infinity, duration: 4, ease: 'easeInOut' } }}
           >
             <Sparkles className="w-6 h-6 text-primary-foreground" />
-            {(isWakeWordListening || isListening) && (
+            {isSupported && (isWakeWordListening || isListening) && (
               <span className="absolute -inset-1 rounded-full border-2 border-primary/60 animate-ping" />
             )}
             {speaking && (
@@ -61,7 +70,6 @@ export default function StellaVoiceAgent() {
         )}
       </AnimatePresence>
 
-      {/* Stella Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -72,38 +80,50 @@ export default function StellaVoiceAgent() {
             className="fixed inset-x-0 bottom-0 z-[9999] max-w-lg mx-auto pointer-events-auto"
           >
             <div className="bg-background/95 backdrop-blur-xl border-t border-primary/20 rounded-t-3xl shadow-2xl flex flex-col" style={{ maxHeight: '75vh' }}>
-              {/* Header */}
               <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
                 <div className={`w-10 h-10 rounded-full gradient-primary flex items-center justify-center shrink-0 ${isListening ? 'shadow-glow' : ''}`}>
                   <Sparkles className={`w-5 h-5 text-primary-foreground ${isListening ? 'animate-pulse' : ''}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold text-gradient-primary">Stella AI</h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {isAIThinking ? '🧠 Sto pensando...' : isListening ? '🔴 Ti ascolto...' : isWakeWordListening ? '🎤 Dì "Stella"...' : speaking ? '🔊 Sto parlando...' : 'Assistente vocale super AI'}
-                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{statusText}</p>
                 </div>
 
-                <button type="button" aria-label={wakeWordActive ? 'Disabilita wake word' : 'Abilita wake word'}
+                <button
+                  type="button"
+                  aria-label={wakeWordActive ? 'Disabilita wake word' : 'Abilita wake word'}
                   onClick={toggleWakeWord}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${wakeWordActive ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : 'bg-muted text-muted-foreground'}`}
+                  disabled={!isSupported}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${wakeWordActive ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : 'bg-muted text-muted-foreground'} ${!isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Radio className="w-4 h-4" />
                 </button>
-                <button type="button" aria-label={ttsEnabled ? 'Disabilita voce' : 'Abilita voce'}
+                <button
+                  type="button"
+                  aria-label={ttsEnabled ? 'Disabilita voce' : 'Abilita voce'}
                   onClick={toggleTTS}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${ttsEnabled ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : 'bg-muted text-muted-foreground'}`}
                 >
                   {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </button>
-                <button type="button" aria-label="Chiudi Stella" onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <button
+                  type="button"
+                  aria-label="Chiudi Stella"
+                  onClick={() => setIsOpen(false)}
+                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0"
+                >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Active listening banner */}
-              {(isWakeWordListening || isListening) && (
+              {!isSupported ? (
+                <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-muted border border-border/60 flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                  <p className="text-xs text-muted-foreground flex-1">
+                    Il microfono non è supportato in questo ambiente, ma Stella continua a funzionare se le scrivi qui sotto.
+                  </p>
+                </div>
+              ) : (isWakeWordListening || isListening) && (
                 <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shrink-0" />
                   <p className="text-xs text-primary font-medium flex-1">
@@ -112,13 +132,16 @@ export default function StellaVoiceAgent() {
                 </div>
               )}
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: '200px', maxHeight: '45vh' }}>
                 {messages.length === 0 && (
                   <div className="text-center py-8">
                     <Sparkles className="w-10 h-10 text-primary mx-auto mb-3 opacity-50" />
                     <p className="text-sm text-muted-foreground">Ciao! Sono Stella 🌟</p>
-                    <p className="text-xs text-muted-foreground mt-1">Il tuo assistente super AI — dì "Stella" o scrivi!</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isSupported
+                        ? 'Il tuo assistente super AI — dì "Stella" o scrivi!'
+                        : 'Il tuo assistente super AI — scrivimi qui sotto e ti rispondo subito!'}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-2 justify-center">
                       {[
                         '🗺️ Mappa professionisti',
@@ -130,7 +153,9 @@ export default function StellaVoiceAgent() {
                         '📅 Calendario contenuti',
                         '❓ Aiuto',
                       ].map(cmd => (
-                        <button key={cmd} type="button"
+                        <button
+                          key={cmd}
+                          type="button"
                           onClick={() => sendTextCommand(cmd.replace(/^.+?\s/, ''))}
                           className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary hover:bg-primary/20 transition-colors"
                         >
@@ -156,13 +181,17 @@ export default function StellaVoiceAgent() {
 
                       {msg.type === 'confirmation' && pendingCommand && (
                         <div className="flex gap-2 mt-2">
-                          <button type="button" aria-label="Conferma azione"
+                          <button
+                            type="button"
+                            aria-label="Conferma azione"
                             onClick={confirmAction}
                             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-500 text-white text-xs font-semibold hover:bg-green-600 transition-colors"
                           >
                             <Check className="w-3 h-3" /> Conferma
                           </button>
-                          <button type="button" aria-label="Annulla azione"
+                          <button
+                            type="button"
+                            aria-label="Annulla azione"
                             onClick={cancelAction}
                             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors"
                           >
@@ -174,7 +203,6 @@ export default function StellaVoiceAgent() {
                   </div>
                 ))}
 
-                {/* AI Thinking indicator */}
                 {isAIThinking && (
                   <div className="flex justify-start">
                     <div className="rounded-2xl px-3.5 py-2.5 bg-muted flex items-center gap-2">
@@ -195,7 +223,6 @@ export default function StellaVoiceAgent() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input bar */}
               <div className="px-4 py-3 border-t border-border/50 flex items-center gap-2">
                 <input
                   value={input}
@@ -205,16 +232,21 @@ export default function StellaVoiceAgent() {
                   className="flex-1 h-10 rounded-full bg-muted px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   disabled={isAIThinking}
                 />
-                <button type="button" aria-label={isListening ? 'Ferma ascolto' : 'Inizia ascolto'}
+                <button
+                  type="button"
+                  aria-label={isListening ? 'Ferma ascolto' : 'Inizia ascolto'}
                   onClick={toggleListening}
-                  disabled={isAIThinking}
+                  disabled={!isSupported || isAIThinking}
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 ${
                     isListening ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  } disabled:opacity-50`}
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
-                <button type="button" aria-label="Invia comando" onClick={handleSend}
+                <button
+                  type="button"
+                  aria-label="Invia comando"
+                  onClick={handleSend}
                   disabled={!input.trim() || isAIThinking}
                   className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow disabled:opacity-50 active:scale-95 transition-transform shrink-0"
                 >
