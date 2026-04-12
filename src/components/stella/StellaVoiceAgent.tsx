@@ -8,7 +8,7 @@ export default function StellaVoiceAgent() {
     messages, isOpen, setIsOpen,
     wakeWordActive, ttsEnabled,
     isListening, isWakeWordListening, interimTranscript, speaking,
-    pendingCommand, isSupported, isAIThinking,
+    pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction, clearMessages,
   } = useStellaAgent();
