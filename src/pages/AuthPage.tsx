@@ -164,28 +164,52 @@ export default function AuthPage() {
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
     const colorTheme = gender === "male" ? "male" : "female";
-    const { error } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme);
+
+    // Build extra metadata with all registration fields
+    const extraMeta: Record<string, any> = {
+      phone: phone || undefined,
+      city: city || undefined,
+      country: country || "Italia",
+      bio: bio || undefined,
+      surname: surname || undefined,
+      username: username || undefined,
+      whatsapp: whatsapp || undefined,
+      instagram: instagram || undefined,
+      tiktok: tiktok || undefined,
+      facebook: facebook || undefined,
+      latitude: latitude || undefined,
+      longitude: longitude || undefined,
+    };
+
+    if (accountType === "client" && interests.length > 0) {
+      extraMeta.interests = interests;
+    }
+    if (accountType === "professional") {
+      extraMeta.category = category || undefined;
+      extraMeta.description = description || undefined;
+      extraMeta.price_min = priceMin || undefined;
+      extraMeta.price_max = priceMax || undefined;
+    }
+    if (accountType === "business") {
+      extraMeta.company_name = companyName || undefined;
+      extraMeta.vat_number = vatNumber || undefined;
+      extraMeta.tax_code = taxCode || undefined;
+      extraMeta.address = address || undefined;
+      extraMeta.zip_code = zipCode || undefined;
+      extraMeta.website = website || undefined;
+      extraMeta.biz_category = bizCategory || undefined;
+      extraMeta.description = description || undefined;
+    }
+
+    // Clean undefined values
+    Object.keys(extraMeta).forEach(k => extraMeta[k] === undefined && delete extraMeta[k]);
+
+    const { error } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme, extraMeta);
     
     if (error) { 
       toast.error(error.message); 
       setLoading(false); 
       return; 
-    }
-
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
     }
 
     // Since email verification is now enabled, show verification screen
