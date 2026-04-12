@@ -1024,7 +1024,12 @@ export function useStellaAgent() {
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
     const actionFeedback = (msg: string, icon = '🌟') => {
-      toast.success(`${icon} Stella: ${msg}`, { duration: 3000 });
+      toast.success(`${icon} Stella: ${msg}`, { duration: 4000 });
+    };
+
+    // Helper: delay navigation so user sees the response first
+    const delayedNavigate = (route: string, delayMs = 1200) => {
+      setTimeout(() => navigate(route), delayMs);
     };
 
     switch (intent) {
