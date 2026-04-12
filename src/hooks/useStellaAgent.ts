@@ -278,7 +278,7 @@ export function useStellaAgent() {
       ]);
 
       const label = businessPhone?.business_name || professionalPhone?.business_name || profilePhone?.display_name || profiles[0].display_name || profiles[0].username || targetName;
-      const phone = profilePhone?.phone || professionalPhone?.phone || businessPhone?.phone;
+      const phone = profilePhone?.phone || professionalPhone?.whatsapp || businessPhone?.phone;
 
       if (phone) {
         window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
