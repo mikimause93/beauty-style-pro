@@ -68,8 +68,10 @@ function recordAction(actionType: string) {
 
 export function useStellaAgent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile } = useAuth();
   const { speak, cancel: cancelTTS, speaking } = useVoiceSynthesis();
+  const { analyzePatterns, getProactiveSuggestions, trackPageVisit, getTopPages } = useStellaLearning();
 
   const [messages, setMessages] = useState<StellaMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -77,9 +79,27 @@ export function useStellaAgent() {
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+
+  // Track page visits for learning
+  useEffect(() => {
+    trackPageVisit(location.pathname);
+  }, [location.pathname, trackPageVisit]);
+
+  // Periodically generate proactive suggestions
+  useEffect(() => {
+    if (!user) return;
+    const loadSuggestions = async () => {
+      const suggestions = await getProactiveSuggestions();
+      setProactiveSuggestions(suggestions.map(s => ({ text: s.text, command: s.command })));
+    };
+    loadSuggestions();
+    const interval = setInterval(loadSuggestions, 600000); // every 10 min
+    return () => clearInterval(interval);
+  }, [user, getProactiveSuggestions]);
 
   // Detect browser language for voice recognition
   const browserLang = typeof navigator !== 'undefined' ? navigator.language || 'it-IT' : 'it-IT';
