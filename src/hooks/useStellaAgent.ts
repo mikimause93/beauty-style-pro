@@ -777,6 +777,8 @@ export function useStellaAgent() {
           context: {
             user_type: profile?.user_type || 'client',
             user_name: profile?.display_name || 'User',
+            gender: (profile as any)?.gender || 'unknown',
+            color_theme: (profile as any)?.color_theme || 'female',
             qr_coins: profile?.qr_coins || 0,
             current_page: window.location.pathname,
           },
@@ -785,12 +787,12 @@ export function useStellaAgent() {
       if (error) throw error;
 
       const { intent, params, response: aiResponse, detected_language } = data || {};
-      const displayResponse = aiResponse || 'I\'m here to help!';
+      const displayResponse = aiResponse || 'Sono qui per aiutarti!';
 
-      addMessage({ role: 'stella', content: displayResponse, type: 'text' });
+      addMessage({ role: 'stella', content: displayResponse, type: intent && intent !== 'chat' ? 'action_result' : 'text' });
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
-      // Execute the parsed intent
+      // Execute the parsed intent immediately
       if (intent && intent !== 'chat') {
         await executeAIIntent(intent, params || {}, displayResponse);
         if (user) {
@@ -799,6 +801,16 @@ export function useStellaAgent() {
             status: 'completed', executed_at: new Date().toISOString(),
           }).then(() => {});
         }
+      }
+    } catch {
+      const fallback = 'Stella AI è temporaneamente offline. Dì "aiuto" per i comandi disponibili!';
+      addMessage({ role: 'stella', content: fallback, type: 'text' });
+      stellaSpeak(fallback);
+      toast.info(`🌟 ${fallback}`);
+    } finally {
+      setIsAIThinking(false);
+    }
+  }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
       } else {
         toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}${displayResponse.length > 100 ? '...' : ''}`);
       }
