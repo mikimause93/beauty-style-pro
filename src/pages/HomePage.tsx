@@ -212,7 +212,6 @@ export default function HomePage() {
             { Icon: BarChart3, label: "Predittiva", path: "/predictive-analytics" },
             { Icon: Globe, label: "Social AI", path: "/social-automation" },
             { Icon: Layout, label: "Sito Web", path: "/website-generator" },
-            { Icon: Medal, label: "Classifica", path: "/leaderboard" },
           ].map(item => (
             <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
               className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group" aria-label={item.label}>
