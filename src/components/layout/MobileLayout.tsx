@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import BottomNav from "./BottomNav";
 import MiniRadioPlayer from "@/components/radio/MiniRadioPlayer";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import StellaVoiceAgent from "@/components/stella/StellaVoiceAgent";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface MobileLayoutProps {
