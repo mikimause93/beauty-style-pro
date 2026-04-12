@@ -1024,22 +1024,27 @@ export function useStellaAgent() {
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
     const actionFeedback = (msg: string, icon = '🌟') => {
-      toast.success(`${icon} Stella: ${msg}`, { duration: 3000 });
+      toast.success(`${icon} Stella: ${msg}`, { duration: 4000 });
+    };
+
+    // Helper: delay navigation so user sees the response first
+    const delayedNavigate = (route: string, delayMs = 1200) => {
+      setTimeout(() => navigate(route), delayMs);
     };
 
     switch (intent) {
       case 'navigate':
         if (params?.route) {
-          navigate(params.route);
           actionFeedback(response, '🚀');
+          delayedNavigate(params.route);
         } else {
-          navigate('/map-search');
           actionFeedback(response, '📍');
+          delayedNavigate('/map-search');
         }
         break;
       case 'search':
-        navigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
         actionFeedback(response, '🔍');
+        delayedNavigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
         break;
       case 'show_profile': {
         if (params?.name) {
@@ -1078,8 +1083,8 @@ export function useStellaAgent() {
           actionFeedback(msgResult, '💬');
         } else if (params?.recipient) {
           await findProfileByName(params.recipient);
-          navigate('/chat');
           actionFeedback(response, '💬');
+          delayedNavigate('/chat');
         }
         break;
       case 'create_post': {
@@ -1087,20 +1092,21 @@ export function useStellaAgent() {
           const postResult = await createPost(params.content);
           actionFeedback(postResult, '📝');
         } else {
-          navigate('/create-post');
           actionFeedback(response, '📝');
+          delayedNavigate('/create-post');
         }
         break;
       }
       case 'book':
         if (params?.target_name) {
           const profiles = await findProfileByName(params.target_name);
-          if (profiles.length > 0) navigate(`/stylist/${profiles[0].user_id}`);
-          else navigate('/stylists');
+          actionFeedback(response, '✂️');
+          if (profiles.length > 0) delayedNavigate(`/stylist/${profiles[0].user_id}`);
+          else delayedNavigate('/stylists');
         } else {
-          navigate('/stylists');
+          actionFeedback(response, '✂️');
+          delayedNavigate('/stylists');
         }
-        actionFeedback(response, '✂️');
         break;
       case 'confirm_booking': {
         const confirmResult = await manageBooking('confirm');
@@ -1113,8 +1119,8 @@ export function useStellaAgent() {
         break;
       }
       case 'call':
-        navigate('/chat');
         actionFeedback(response, '📞');
+        delayedNavigate('/chat');
         break;
       case 'scroll':
         if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
@@ -1134,11 +1140,11 @@ export function useStellaAgent() {
         break;
       case 'refresh':
         actionFeedback(response, '🔄');
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(() => window.location.reload(), 1500);
         break;
       case 'back':
-        window.history.back();
         actionFeedback(response, '⬅️');
+        setTimeout(() => window.history.back(), 800);
         break;
       case 'info':
         if (params?.info_type === 'coins') {
@@ -1177,18 +1183,20 @@ export function useStellaAgent() {
           fun: { route: '/spin', msg: 'Gira la ruota della fortuna! 🎰' },
         };
         const s = suggestions[params?.suggestion_type || 'beauty'] || suggestions.beauty;
-        navigate(s.route);
         actionFeedback(s.msg, '💡');
+        delayedNavigate(s.route);
         break;
       }
       case 'find_nearby': {
         const nearbyResult = await findNearbyProfessionals(params?.city, params?.specialty);
         if (nearbyResult.found) {
+          addMessage({ role: 'stella', content: nearbyResult.message, type: 'action_result' });
           actionFeedback(nearbyResult.summary!, '📍');
-          navigate('/stylists');
+          delayedNavigate('/stylists', 2500);
         } else {
+          addMessage({ role: 'stella', content: nearbyResult.message, type: 'action_result' });
           actionFeedback(nearbyResult.message, '📍');
-          navigate('/map-search');
+          delayedNavigate('/map-search', 2500);
         }
         break;
       }
@@ -1200,8 +1208,8 @@ export function useStellaAgent() {
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
+    setIsOpen(true); // Always show panel so user sees the response
     try {
-      // Get user patterns for AI context
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
       const topPages = getTopPages().slice(0, 3).join(', ');
@@ -1221,15 +1229,16 @@ export function useStellaAgent() {
           },
         },
       });
-      if (error) throw error;
 
-      const { intent, params, response: aiResponse, detected_language } = data || {};
+      if (error) { console.error('Stella AI invoke error:', error); throw error; }
+      if (!data) { console.error('Stella AI: empty response'); throw new Error('Empty AI response'); }
+
+      const { intent, params, response: aiResponse } = data;
       const displayResponse = aiResponse || 'Sono qui per aiutarti!';
 
       addMessage({ role: 'stella', content: displayResponse, type: intent && intent !== 'chat' ? 'action_result' : 'text' });
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
 
-      // Execute the parsed intent immediately
       if (intent && intent !== 'chat') {
         await executeAIIntent(intent, params || {}, displayResponse);
         if (user) {
@@ -1239,7 +1248,8 @@ export function useStellaAgent() {
           }).then(() => {});
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Stella AI error:', err);
       const fallback = 'Stella AI è temporaneamente offline. Dì "aiuto" per i comandi disponibili!';
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
@@ -1247,7 +1257,7 @@ export function useStellaAgent() {
     } finally {
       setIsAIThinking(false);
     }
-  }, [addMessage, stellaSpeak, profile, user, executeAIIntent]);
+  }, [addMessage, stellaSpeak, profile, user, executeAIIntent, analyzePatterns, getTopPages]);
 
 
 
