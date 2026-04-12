@@ -1035,16 +1035,16 @@ export function useStellaAgent() {
     switch (intent) {
       case 'navigate':
         if (params?.route) {
-          navigate(params.route);
           actionFeedback(response, '🚀');
+          delayedNavigate(params.route);
         } else {
-          navigate('/map-search');
           actionFeedback(response, '📍');
+          delayedNavigate('/map-search');
         }
         break;
       case 'search':
-        navigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
         actionFeedback(response, '🔍');
+        delayedNavigate(`/search?q=${encodeURIComponent(params?.query || '')}`);
         break;
       case 'show_profile': {
         if (params?.name) {
