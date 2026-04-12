@@ -1295,10 +1295,11 @@ export function useStellaAgent() {
       // Open panel for confirmations
       setIsOpen(true);
     } else {
-      // Execute silently — no need to open panel
+      // Siri-like: execute silently with inline status, no panel
       cmd.execute();
       recordAction(cmd.type);
       addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
+      setInlineStatus(cmd.response);
       stellaSpeak(cmd.response);
 
       if (user) {
