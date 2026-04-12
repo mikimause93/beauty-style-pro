@@ -5,6 +5,7 @@ import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useVoiceSynthesis } from '@/hooks/useVoiceSynthesis';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { haversineDistance } from '@/hooks/useGeolocation';
 
 // ── Rate limits ──────────────────────────────────────────────────────────────
 const LIMITS = {
