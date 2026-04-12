@@ -32,7 +32,7 @@ interface ProfilePost {
 
 export default function ProfilePage() {
   const { id: viewUserId } = useParams();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, loading: authLoading, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   const { data: activeRemindersCount = 0 } = useSmartRemindersCount();
   const navigate = useNavigate();
