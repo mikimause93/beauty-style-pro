@@ -1245,17 +1245,16 @@ export function useStellaAgent() {
         // Siri-like: show inline status, don't open panel
         setInlineStatus(displayResponse.substring(0, 100));
         await executeAIIntent(intent, params || {}, displayResponse);
-      } else {
-        // Chat response: show in panel
-        setIsOpen(true);
-        setInlineStatus(null);
-      }
         if (user) {
           supabase.from('stella_commands').insert({
             user_id: user.id, command_text: text, command_type: intent,
             status: 'completed', executed_at: new Date().toISOString(),
           }).then(() => {});
         }
+      } else {
+        // Chat response: show in panel
+        setIsOpen(true);
+        setInlineStatus(null);
       }
     } catch (err) {
       console.error('Stella AI error:', err);
