@@ -676,7 +676,7 @@ export function useStellaAgent() {
     // ── SHOW LATEST PHOTOS / POSTS ────────────────────────────────────────
     const latestPhotosMatch = stripped.match(/(?:mostrami|mostra|vedi|apri)\s+(?:le\s+)?ultim(?:e|a)\s+foto(?:\s+pubblicat[ae])?\s+(?:di|del|della|de|da)\s+(.+)/);
     if (latestPhotosMatch) {
-      const target = latestPhotosMatch[1]?.trim() ? latestPhotosMatch[1].trim() : latestPhotosMatch[2].trim();
+      const target = latestPhotosMatch[1]?.trim() || '';
       return {
         id: Date.now().toString(), type: 'action', text,
         response: `Ti mostro le ultime foto di ${target}...`, requiresConfirmation: false, silent: true,
