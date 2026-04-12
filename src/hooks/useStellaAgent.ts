@@ -298,7 +298,7 @@ export function useStellaAgent() {
       const [{ data: profilePhone }, { data: professionalPhone }, { data: businessPhone }] = await Promise.all([
         supabase.from('profiles').select('display_name, phone').eq('user_id', targetUserId).maybeSingle(),
         supabase.from('professionals').select('business_name, whatsapp').eq('user_id', targetUserId).maybeSingle(),
-        supabase.from('businesses').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
+        supabase.from('businesses_public').select('business_name, phone').eq('user_id', targetUserId).maybeSingle(),
       ]);
 
       const label = businessPhone?.business_name || professionalPhone?.business_name || profilePhone?.display_name || profiles[0].display_name || profiles[0].username || targetName;
@@ -314,7 +314,7 @@ export function useStellaAgent() {
     }
 
     const { data: business } = await supabase
-      .from('businesses')
+      .from('businesses_public')
       .select('business_name, phone')
       .ilike('business_name', `%${targetName}%`)
       .eq('active', true)
@@ -473,7 +473,7 @@ export function useStellaAgent() {
     const { data: pros } = await query.order('rating', { ascending: false }).limit(10);
 
     // Try businesses table
-    let bizQuery = supabase.from('businesses').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
+    let bizQuery = supabase.from('businesses_public').select('id, business_name, business_type, city, rating, latitude, longitude, phone, address');
     if (city) bizQuery = bizQuery.ilike('city', `%${city}%`);
     bizQuery = bizQuery.eq('active', true);
     const { data: biz } = await bizQuery.order('rating', { ascending: false }).limit(10);
