@@ -81,7 +81,19 @@ IMPORTANT:
                   },
                   params: {
                     type: "object",
-                    description: "Action parameters depending on intent",
+                    description: "Action parameters. For 'navigate' intent, ALWAYS include 'route' (e.g. '/map-search'). For 'search' include 'query'. For 'like' optionally include 'target_name'. For 'follow'/'send_message'/'book'/'call' include 'target_name'. For 'scroll' include 'direction'. For 'theme' include 'mode'.",
+                    properties: {
+                      route: { type: "string", description: "App route path for navigate intent" },
+                      query: { type: "string" },
+                      target_name: { type: "string" },
+                      name: { type: "string" },
+                      recipient: { type: "string" },
+                      content: { type: "string" },
+                      direction: { type: "string", enum: ["up", "down", "top", "bottom"] },
+                      mode: { type: "string", enum: ["dark", "light"] },
+                      info_type: { type: "string", enum: ["coins", "bookings", "general"] },
+                      description: { type: "string" },
+                    },
                   },
                   response: {
                     type: "string",
