@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useVoiceSynthesis } from '@/hooks/useVoiceSynthesis';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { haversineDistance } from '@/hooks/useGeolocation';
+import { useStellaLearning } from '@/hooks/useStellaLearning';
 
 // ── Rate limits ──────────────────────────────────────────────────────────────
 const LIMITS = {
@@ -67,8 +68,10 @@ function recordAction(actionType: string) {
 
 export function useStellaAgent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile } = useAuth();
   const { speak, cancel: cancelTTS, speaking } = useVoiceSynthesis();
+  const { analyzePatterns, getProactiveSuggestions, trackPageVisit, getTopPages } = useStellaLearning();
 
   const [messages, setMessages] = useState<StellaMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -76,9 +79,27 @@ export function useStellaAgent() {
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
 
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+
+  // Track page visits for learning
+  useEffect(() => {
+    trackPageVisit(location.pathname);
+  }, [location.pathname, trackPageVisit]);
+
+  // Periodically generate proactive suggestions
+  useEffect(() => {
+    if (!user) return;
+    const loadSuggestions = async () => {
+      const suggestions = await getProactiveSuggestions();
+      setProactiveSuggestions(suggestions.map(s => ({ text: s.text, command: s.command })));
+    };
+    loadSuggestions();
+    const interval = setInterval(loadSuggestions, 600000); // every 10 min
+    return () => clearInterval(interval);
+  }, [user, getProactiveSuggestions]);
 
   // Detect browser language for voice recognition
   const browserLang = typeof navigator !== 'undefined' ? navigator.language || 'it-IT' : 'it-IT';
@@ -446,6 +467,43 @@ export function useStellaAgent() {
     return `Messaggio inviato a ${target.display_name || target.username}! 💬`;
   }, [user, findProfileByName]);
 
+  // ── Helper: get user stats summary ─────────────────────────────────────────
+  const getUserStats = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const [{ count: postCount }, { count: bookingCount }, { count: followerCount }] = await Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('client_id', user.id),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id),
+    ]);
+    const coins = profile?.qr_coins ?? 0;
+    return `📊 Le tue stats:\n• ${postCount || 0} post pubblicati\n• ${bookingCount || 0} prenotazioni\n• ${followerCount || 0} follower\n• ${coins} QR Coins`;
+  }, [user, profile]);
+
+  // ── Helper: get notifications summary ─────────────────────────────────────
+  const getNotificationsSummary = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const { count } = await supabase.from('notifications').select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id).eq('read', false);
+    if (!count || count === 0) return 'Non hai notifiche non lette! ✅';
+    return `Hai ${count} notifiche non lette! 🔔`;
+  }, [user]);
+
+  // ── Helper: get upcoming bookings ─────────────────────────────────────────
+  const getUpcomingBookings = useCallback(async () => {
+    if (!user) return 'Devi effettuare il login!';
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await supabase.from('bookings')
+      .select('booking_date, start_time, status')
+      .eq('client_id', user.id)
+      .gte('booking_date', today)
+      .in('status', ['confirmed', 'pending'])
+      .order('booking_date', { ascending: true })
+      .limit(3);
+    if (!data?.length) return 'Non hai appuntamenti in programma! 📅';
+    const lines = data.map((b, i) => `${i + 1}. ${b.booking_date} alle ${b.start_time} (${b.status === 'confirmed' ? '✅' : '⏳'})`);
+    return `📅 Prossimi appuntamenti:\n${lines.join('\n')}`;
+  }, [user]);
+
   // ── Helper: navigate to specific profile ──────────────────────────────────
   const goToProfile = useCallback(async (name: string) => {
     const profiles = await findProfileByName(name);
@@ -758,9 +816,32 @@ export function useStellaAgent() {
       return { id: Date.now().toString(), type: 'info', text, response: msg, requiresConfirmation: false, silent: true,
         execute: () => { toast.success(`🌟 Stella: ${msg}`); } };
     }
-    if (stripped.includes('prossimo appuntamento') || stripped.includes('prossima prenotazione')) {
-      return { id: Date.now().toString(), type: 'info', text, response: 'Verifico le tue prenotazioni!', requiresConfirmation: false, silent: true,
-        execute: () => { navigate('/my-bookings'); toast.success('🌟 Stella: Ecco le tue prenotazioni!'); } };
+    if (stripped.includes('prossimo appuntamento') || stripped.includes('prossima prenotazione') || stripped.includes('i miei appuntamenti')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Verifico le tue prenotazioni...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getUpcomingBookings();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result.split('\n')[0]);
+          toast.success(`🌟 Stella: ${result.split('\n')[0]}`);
+        } };
+    }
+    if (stripped.includes('le mie statistiche') || stripped.includes('i miei dati') || stripped.includes('quanto ho') || stripped.includes('come va')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Carico le tue statistiche...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getUserStats();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result.replace(/[•📊\n]/g, ', '));
+          toast.success(`🌟 Stella: Ecco le tue stats!`);
+        } };
+    }
+    if (stripped.includes('notifiche non lette') || stripped.includes('ho notifiche') || stripped.includes('quante notifiche')) {
+      return { id: Date.now().toString(), type: 'info', text, response: 'Controllo le notifiche...', requiresConfirmation: false,
+        execute: async () => {
+          const result = await getNotificationsSummary();
+          addMessage({ role: 'stella', content: result, type: 'action_result' });
+          stellaSpeak(result);
+          toast.success(`🌟 Stella: ${result}`);
+        } };
     }
 
     // ── CALL ──────────────────────────────────────────────────────────────
@@ -938,7 +1019,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals, addMessage, getUserStats, getNotificationsSummary, getUpcomingBookings]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
@@ -1064,8 +1145,13 @@ export function useStellaAgent() {
           const coins = profile?.qr_coins ?? 0;
           actionFeedback(`Hai ${coins} QR Coins`, '💰');
         } else if (params?.info_type === 'bookings') {
-          navigate('/my-bookings');
-          actionFeedback(response, '📅');
+          const bookingsInfo = await getUpcomingBookings();
+          addMessage({ role: 'stella', content: bookingsInfo, type: 'action_result' });
+          actionFeedback(bookingsInfo.split('\n')[0], '📅');
+        } else if (params?.info_type === 'general') {
+          const stats = await getUserStats();
+          addMessage({ role: 'stella', content: stats, type: 'action_result' });
+          actionFeedback('Ecco le tue statistiche!', '📊');
         } else {
           actionFeedback(response, 'ℹ️');
         }
@@ -1110,11 +1196,16 @@ export function useStellaAgent() {
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals, addMessage, getUserStats, getUpcomingBookings]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
     try {
+      // Get user patterns for AI context
+      const patterns = await analyzePatterns();
+      const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
+      const topPages = getTopPages().slice(0, 3).join(', ');
+
       const { data, error } = await supabase.functions.invoke('stella-intent', {
         body: {
           text,
@@ -1125,6 +1216,8 @@ export function useStellaAgent() {
             color_theme: (profile as any)?.color_theme || 'female',
             qr_coins: profile?.qr_coins || 0,
             current_page: window.location.pathname,
+            frequent_actions: topActions || 'none',
+            favorite_pages: topPages || 'none',
           },
         },
       });
@@ -1243,7 +1336,7 @@ export function useStellaAgent() {
   return {
     messages, isOpen, setIsOpen, wakeWordActive, ttsEnabled,
     isListening, isWakeWordListening, interimTranscript, speaking,
-    pendingCommand, isSupported, isAIThinking,
+    pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
     clearMessages: useCallback(() => setMessages([]), []),
