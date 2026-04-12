@@ -23,6 +23,7 @@ export default function MobileLayout({ children, hideRadio }: MobileLayoutProps)
         {children}
       </main>
       <ChatbotWidget />
+      <StellaVoiceAgent />
       <MiniRadioPlayer visible={showRadio} onClose={() => setShowRadio(false)} />
       <BottomNav />
     </div>
