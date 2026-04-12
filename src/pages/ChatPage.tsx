@@ -614,11 +614,15 @@ export default function ChatPage() {
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
             <div className="relative">
               <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              {selectedChat.online && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              )}
             </div>
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-xs text-green-500 font-medium">● Online</p>
+              <p className={`text-xs font-medium ${selectedChat.online ? "text-green-500" : "text-muted-foreground"}`}>
+                {selectedChat.online ? "● Online" : `Ultimo accesso ${formatLastSeen(selectedChat.lastSeen)}`}
+              </p>
             </div>
           </button>
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
