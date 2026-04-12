@@ -549,20 +549,22 @@ export const useVoiceRecognition = (
           recognition.onerror = (event: any) => {
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
               setError(permissionDeniedMessage);
+              wakeWordActiveRef.current = false;
             } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
               setError(`Wake word detection error: ${event.error}`);
             }
-            setIsWakeWordListening(false);
+            // Don't set isWakeWordListening false on no-speech — continuous mode keeps going
           };
 
           recognition.onend = () => {
             setIsWakeWordListening(false);
+            // Only restart if still active — browser may kill continuous after a while
             if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
               setTimeout(() => {
                 if (wakeWordActiveRef.current && !isListeningRef.current && !handoffToCommandRef.current) {
                   createWakeWordRecognition();
                 }
-              }, 4000);
+              }, 500);
             }
           };
 
