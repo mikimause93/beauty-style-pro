@@ -134,15 +134,32 @@ export default function StellaVoiceAgent() {
 
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: '200px', maxHeight: '45vh' }}>
                 {messages.length === 0 && (
-                  <div className="text-center py-8">
+                  <div className="text-center py-6">
                     <Sparkles className="w-10 h-10 text-primary mx-auto mb-3 opacity-50" />
                     <p className="text-sm text-muted-foreground">Ciao! Sono Stella 🌟</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {isSupported
-                        ? 'Il tuo assistente super AI — dì "Stella" o scrivi!'
-                        : 'Il tuo assistente super AI — scrivimi qui sotto e ti rispondo subito!'}
+                        ? 'Il cervello dell\'app — comando vocale, scritto e autonomo!'
+                        : 'Il cervello dell\'app — scrivimi e agisco subito!'}
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2 justify-center">
+
+                    {proactiveSuggestions.length > 0 && (
+                      <div className="mt-3 space-y-1.5">
+                        <p className="text-xs font-semibold text-primary/70">💡 Suggeriti per te:</p>
+                        {proactiveSuggestions.map((s, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => sendTextCommand(s.command)}
+                            className="w-full px-3 py-2 rounded-xl bg-primary/5 border border-primary/15 text-xs text-left text-foreground hover:bg-primary/10 transition-colors"
+                          >
+                            {s.text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="mt-3 flex flex-wrap gap-2 justify-center">
                       {[
                         '🗺️ Mappa professionisti',
                         '✂️ Prenota taglio',
