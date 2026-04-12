@@ -207,18 +207,34 @@ export default function AuthPage() {
     const { error } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme, extraMeta);
     
     if (error) { 
-      toast.error(error.message); 
+      // Handle duplicate email gracefully
+      if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
+        toast.error("Questa email è già registrata. Prova ad accedere.");
+      } else {
+        toast.error(error.message); 
+      }
       setLoading(false); 
       return; 
     }
 
-    // Since email verification is now enabled, show verification screen
-    setRegistrationResult({
-      success: true,
-      email: email,
-      accountType: accountType
-    });
+    // Auto-confirm is enabled, so user is logged in immediately
+    toast.success("Account creato con successo! Benvenuto su STYLE 🎉");
+    
+    // Save IBAN to profiles_private if provided (for professionals)
+    if ((accountType === "professional") && (iban || bankHolder)) {
+      try {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("profiles_private").upsert({
+            user_id: newUser.id,
+            iban: iban || null,
+            bank_holder_name: bankHolder || null,
+          });
+        }
+      } catch { /* non-critical */ }
+    }
 
+    navigate("/");
     setLoading(false);
   };
 
