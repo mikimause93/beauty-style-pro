@@ -916,7 +916,7 @@ export function useStellaAgent() {
     }
 
     return null;
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, stellaSpeak, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
 
   // ── AI Intent Parsing (multilingual — understands every language) ──────
   const executeAIIntent = useCallback(async (intent: string, params: any, response: string) => {
@@ -1088,7 +1088,7 @@ export function useStellaAgent() {
         actionFeedback(response.substring(0, 120) + (response.length > 120 ? '...' : ''), '💬');
         break;
     }
-  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking]);
+  }, [navigate, profile, user, goToProfile, likeLatestPost, followUser, unfollowUser, sendMessageTo, findProfileByName, commentOnPost, createPost, manageBooking, findNearbyProfessionals]);
 
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
