@@ -85,11 +85,11 @@ export default function HomePage() {
     try {
       const { data: postsData } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(20);
       const { data: streamsData } = await supabase.from('live_streams').select(`*, professional:professionals(business_name, user_id)`).in('status', ['live', 'scheduled']).order('viewer_count', { ascending: false }).limit(5);
-      const { data: profilesData } = await supabase.from('profiles').select('user_id, display_name, avatar_url').limit(10);
+      const { data: profilesData } = await supabase.from('profiles_public').select('user_id, display_name, avatar_url').limit(10);
 
       if (postsData) {
         const userIds = [...new Set(postsData.map(p => p.user_id))];
-        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type, verification_status').in('user_id', userIds);
+        const { data: postProfiles } = await supabase.from('profiles_public').select('user_id, display_name, avatar_url, user_type, verification_status').in('user_id', userIds);
         const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
         setPosts(postsData.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined })));
       }

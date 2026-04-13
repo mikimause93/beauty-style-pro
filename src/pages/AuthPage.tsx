@@ -127,7 +127,7 @@ export default function AuthPage() {
     setLoading(true);
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    else { toast.success("Benvenuto!"); }
     setLoading(false);
   };
 
@@ -204,7 +204,7 @@ export default function AuthPage() {
     // Clean undefined values
     Object.keys(extraMeta).forEach(k => extraMeta[k] === undefined && delete extraMeta[k]);
 
-    const { error } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme, extraMeta);
+    const { error, needsEmailVerification } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme, extraMeta);
     
     if (error) { 
       // Handle duplicate email gracefully
@@ -217,7 +217,13 @@ export default function AuthPage() {
       return; 
     }
 
-    // Auto-confirm is enabled, so user is logged in immediately
+    if (needsEmailVerification) {
+      toast.success("Controlla la tua email per confermare l'account");
+      setRegistrationResult({ success: true, email, accountType });
+      setLoading(false);
+      return;
+    }
+
     toast.success("Account creato con successo! Benvenuto su STYLE 🎉");
     
     // Save IBAN to profiles_private if provided (for professionals)
