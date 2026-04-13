@@ -8,7 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName: string, userType?: string, gender?: string, colorTheme?: string, extraMeta?: Record<string, any>) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, userType?: string, gender?: string, colorTheme?: string, extraMeta?: Record<string, any>) => Promise<{ error: any; needsEmailVerification: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -63,59 +63,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        // Handle expired/invalid tokens gracefully
-        if (event === "TOKEN_REFRESHED" && !session) {
-          console.warn("Token refresh failed, signing out");
-          setUser(null);
-          setSession(null);
-          setProfile(null);
-          setLoading(false);
-          return;
-        }
-        if (event === "SIGNED_OUT") {
-          setUser(null);
-          setSession(null);
-          setProfile(null);
-          setLoading(false);
-          return;
-        }
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setTimeout(() => fetchProfile(session.user.id), 500);
-        } else {
-          setProfile(null);
-        }
+    let isMounted = true;
+    let initialSessionResolved = false;
+
+    const clearAuthState = () => {
+      if (!isMounted) return;
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+    };
+
+    const applyAuthState = (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        void fetchProfile(nextSession.user.id);
+      } else {
+        setProfile(null);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "TOKEN_REFRESHED" && !nextSession) {
+        console.warn("Token refresh failed, signing out");
+        clearAuthState();
+        if (initialSessionResolved) setLoading(false);
+        return;
+      }
+
+      if (event === "SIGNED_OUT") {
+        clearAuthState();
+        if (initialSessionResolved) setLoading(false);
+        return;
+      }
+
+      applyAuthState(nextSession);
+
+      if (initialSessionResolved) {
         setLoading(false);
       }
-    );
+    });
 
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(({ data: { session: restoredSession }, error }) => {
+      if (!isMounted) return;
+
       if (error) {
         console.warn("Session recovery failed:", error.message);
-        // Clear stale tokens
         supabase.auth.signOut().catch(() => {});
-        setUser(null);
-        setSession(null);
-        setProfile(null);
+        clearAuthState();
+        initialSessionResolved = true;
         setLoading(false);
         return;
       }
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
+
+      applyAuthState(restoredSession);
+      initialSessionResolved = true;
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string, userType: string = "client", gender?: string, colorTheme?: string, extraMeta?: Record<string, any>) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -123,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: window.location.origin,
       },
     });
-    return { error };
+    return { error, needsEmailVerification: !data.session };
   };
 
   const signIn = async (email: string, password: string) => {

@@ -68,7 +68,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         .then(async ({ data }) => {
           if (data && data.length > 0) {
             const ids = data.map(d => d.user_id);
-            const { data: profiles } = await supabase.from("profiles").select("display_name").in("user_id", ids);
+            const { data: profiles } = await supabase.from("profiles_public").select("display_name").in("user_id", ids);
             if (profiles) setLikerNames(profiles.map(p => p.display_name || "Utente").filter(Boolean));
           }
         });
@@ -107,7 +107,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     if (data && data.length > 0) {
       const userIds = [...new Set(data.map(c => c.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, display_name, avatar_url")
         .in("user_id", userIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -146,7 +146,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
       message: comment.trim(),
     }).select().single();
     if (!error && data) {
-      const { data: prof } = await supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).maybeSingle();
+      const { data: prof } = await supabase.from("profiles_public").select("display_name, avatar_url").eq("user_id", user.id).maybeSingle();
       setComments(prev => [...prev, {
         id: data.id,
         message: data.message,
@@ -188,7 +188,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     const { data } = await supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(50);
     if (data && data.length > 0) {
       const ids = data.map(d => d.user_id);
-      const { data: profiles } = await supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", ids);
+      const { data: profiles } = await supabase.from("profiles_public").select("user_id, display_name, avatar_url").in("user_id", ids);
       if (profiles) setAllLikers(profiles.map(p => ({ user_id: p.user_id, display_name: p.display_name || "Utente", avatar_url: p.avatar_url })));
     }
     setShowLikersList(true);
