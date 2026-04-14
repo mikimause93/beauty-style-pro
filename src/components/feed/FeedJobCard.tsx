@@ -56,7 +56,7 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold truncate">{employerName}</p>
-            <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+            <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
               <Briefcase className="w-2.5 h-2.5" /> Lavoro
             </span>
           </div>
@@ -71,18 +71,18 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
             {job.category}
           </span>
-          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center gap-1">
             <Clock className="w-3 h-3" /> {typeLabels[job.employment_type] || job.employment_type}
           </span>
           {job.salary_min && (
-            <span className="px-2.5 py-1 rounded-full bg-success/10 text-success text-[10px] font-semibold flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold flex items-center gap-1">
               <Euro className="w-3 h-3" /> {job.salary_min}€{job.salary_max ? ` - ${job.salary_max}€` : "+"}
             </span>
           )}
-          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center gap-1">
             <MapPin className="w-3 h-3" /> {job.location}
           </span>
         </div>
@@ -91,7 +91,7 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
         {job.required_skills && job.required_skills.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {job.required_skills.slice(0, 4).map((skill, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-full border border-border text-[10px] text-muted-foreground">
+              <span key={i} className="px-2 py-0.5 rounded-full border border-border text-xs text-muted-foreground">
                 {skill}
               </span>
             ))}

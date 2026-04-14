@@ -48,7 +48,7 @@ export default function LiveBadges({ badges }: LiveBadgesProps) {
         return (
           <span
             key={badge}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-white bg-gradient-to-r ${config.gradient}`}
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${config.gradient}`}
           >
             {config.icon}
             {config.label}

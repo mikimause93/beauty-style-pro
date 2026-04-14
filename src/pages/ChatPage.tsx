@@ -1,7 +1,8 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, Image, Phone, Video, Search, Mic, MicOff, Paperclip, Play, Pause, X, File, Camera, Briefcase, MessageCircle, UserPlus, Globe, Volume2, CheckCheck, Clock } from "lucide-react";
 import AutoMessageSuggestions from "@/components/chat/AutoMessageSuggestions";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePresenceTracker, isUserOnline, formatLastSeen } from "@/hooks/usePresence";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +20,7 @@ interface Conversation {
   time: string;
   unread: number;
   online: boolean;
+  lastSeen: string | null;
   otherUserId: string;
 }
 
@@ -75,6 +77,7 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  usePresenceTracker();
 
   useEffect(() => {
     if (user) loadConversations();
@@ -178,22 +181,36 @@ export default function ChatPage() {
       const otherUserIds = data.map(c => c.participant_1 === user.id ? c.participant_2 : c.participant_1);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url")
+        .select("user_id, display_name, avatar_url, last_seen")
         .in("user_id", otherUserIds);
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
+      // Count unread messages per conversation
+      const unreadCounts = new Map<string, number>();
+      for (const c of data) {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", c.id)
+          .neq("sender_id", user.id)
+          .eq("read", false);
+        unreadCounts.set(c.id, count || 0);
+      }
+
       setConversations(data.map((c, i) => {
         const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
         const profile = profileMap.get(otherId);
+        const lastSeenVal = profile?.last_seen || null;
         return {
           id: c.id,
           name: profile?.display_name || "Utente",
           avatar: profile?.avatar_url || fallbackAvatars[i % fallbackAvatars.length],
           lastMessage: c.last_message || "Nessun messaggio",
           time: c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "",
-          unread: 0,
-          online: false,
+          unread: unreadCounts.get(c.id) || 0,
+          online: isUserOnline(lastSeenVal),
+          lastSeen: lastSeenVal,
           otherUserId: otherId,
         };
       }));
@@ -250,6 +267,7 @@ export default function ChatPage() {
         time: "",
         unread: 0,
         online: false,
+        lastSeen: null,
         otherUserId: otherUser.user_id,
       };
       setConversations(prev => [newConv, ...prev]);
@@ -274,6 +292,11 @@ export default function ChatPage() {
       content,
       message_type: "text",
     });
+    // Update conversation last_message
+    await supabase.from("conversations").update({
+      last_message: content,
+      last_message_at: new Date().toISOString(),
+    }).eq("id", selectedChat.id);
   };
 
   const uploadFile = async (file: File, type: MessageType) => {
@@ -386,6 +409,26 @@ export default function ChatPage() {
       setInCall(type);
       setCallTimer(0);
       callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
+
+      // Send call notification message to the other user
+      if (selectedChat && user) {
+        const callLabel = type === "voice" ? "📞 Chiamata vocale" : "📹 Videochiamata";
+        await supabase.from("messages").insert({
+          conversation_id: selectedChat.id,
+          sender_id: user.id,
+          content: `${callLabel} avviata`,
+          message_type: "text",
+        });
+        // Use SECURITY DEFINER function to bypass RLS (can't insert for other users directly)
+        await supabase.rpc('create_notification', {
+          _user_id: selectedChat.otherUserId,
+          _title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
+          _message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
+          _type: "call",
+          _data: { caller_id: user.id, call_type: type },
+        });
+      }
+      
       toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
     } catch (err) {
       toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
@@ -450,10 +493,25 @@ export default function ChatPage() {
     }
   };
 
-  // Real-time call translation state
+  // Real-time call translation state with ElevenLabs
   const [callTranslation, setCallTranslation] = useState<string>("");
   const [callTranslating, setCallTranslating] = useState(false);
+  const [callTargetLang, setCallTargetLang] = useState(getUserLanguage());
   const speechRecRef = useRef<any>(null);
+  const translationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isProcessingRef = useRef(false);
+
+  const playTranslationAudio = (audioBase64: string) => {
+    try {
+      if (translationAudioRef.current) {
+        translationAudioRef.current.pause();
+      }
+      const audioUrl = `data:audio/mpeg;base64,${audioBase64}`;
+      const audio = new Audio(audioUrl);
+      translationAudioRef.current = audio;
+      audio.play().catch(() => {});
+    } catch {}
+  };
 
   const startCallTranslation = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -470,29 +528,59 @@ export default function ChatPage() {
       const lastResult = event.results[event.results.length - 1];
       if (lastResult.isFinal) {
         const spokenText = lastResult[0].transcript;
+        if (isProcessingRef.current || spokenText.trim().length < 3) return;
+        isProcessingRef.current = true;
         setCallTranslating(true);
         try {
-          const translated = await translate(spokenText);
-          setCallTranslation(translated || spokenText);
+          // Call ElevenLabs translate+speak edge function
+          const resp = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-translate-speak`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ spokenText, targetLanguage: callTargetLang }),
+            }
+          );
+          if (resp.ok) {
+            const data = await resp.json();
+            setCallTranslation(data.translatedText || spokenText);
+            // Play the translated audio automatically
+            if (data.audioAvailable && data.audioBase64) {
+              playTranslationAudio(data.audioBase64);
+            }
+          } else {
+            // Fallback to text-only translation
+            const translated = await translate(spokenText);
+            setCallTranslation(translated || spokenText);
+          }
         } catch {
           setCallTranslation(spokenText);
         } finally {
           setCallTranslating(false);
+          isProcessingRef.current = false;
         }
       } else {
         setCallTranslation(lastResult[0].transcript + "...");
       }
     };
     
-    recognition.onerror = () => { /* silent */ };
+    recognition.onerror = () => {};
     recognition.start();
     speechRecRef.current = recognition;
-    toast.success("Traduzione chiamata attiva");
+    toast.success("🎤 Traduzione vocale ElevenLabs attiva");
   };
 
   const stopCallTranslation = () => {
     speechRecRef.current?.stop();
     speechRecRef.current = null;
+    if (translationAudioRef.current) {
+      translationAudioRef.current.pause();
+      translationAudioRef.current = null;
+    }
     setCallTranslation("");
   };
 
@@ -514,20 +602,20 @@ export default function ChatPage() {
               ))}
             </div>
           </div>
-          <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+          <span className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
             {formatDuration(msg.duration || 0)}
           </span>
         </button>
         {/* Translate voice button */}
         {msg.sender === "other" && autoTranslate && !hasTranscript && (
           <button onClick={() => transcribeAndTranslateVoice(msg)} disabled={isTranscribing}
-            className={`flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium ${msg.sender === "other" ? "bg-primary/10 text-primary" : "bg-primary-foreground/10 text-primary-foreground/70"}`}>
+            className={`flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${msg.sender === "other" ? "bg-primary/10 text-primary" : "bg-primary-foreground/10 text-primary-foreground/70"}`}>
             <Globe className="w-2.5 h-2.5" />
             {isTranscribing ? "Traduco..." : "Traduci audio"}
           </button>
         )}
         {hasTranscript && (
-          <p className={`text-[10px] italic mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+          <p className={`text-xs italic mt-1 ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
             🌐 {voiceTranscripts[msg.id]}
           </p>
         )}
@@ -546,11 +634,15 @@ export default function ChatPage() {
           <button onClick={() => navigate(`/profile/${selectedChat.otherUserId}`)} className="flex items-center gap-2 flex-1">
             <div className="relative">
               <img src={selectedChat.avatar} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-primary" />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              {selectedChat.online && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+              )}
             </div>
             <div>
               <p className="font-semibold text-sm">{selectedChat.name}</p>
-              <p className="text-[10px] text-green-500 font-medium">● Online</p>
+              <p className={`text-xs font-medium ${selectedChat.online ? "text-green-500" : "text-muted-foreground"}`}>
+                {selectedChat.online ? "● Online" : `Ultimo accesso ${formatLastSeen(selectedChat.lastSeen)}`}
+              </p>
             </div>
           </button>
           <button onClick={() => openWhatsApp(selectedChat.name, selectedChat.otherUserId)} className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center">
@@ -600,15 +692,40 @@ export default function ChatPage() {
               </div>
             )}
             
-            {/* Live translation subtitles */}
+            {/* Live translation subtitles + audio indicator */}
             {callTranslation && (
-              <div className="absolute bottom-36 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
+              <div className="absolute bottom-44 left-4 right-4 bg-card/90 backdrop-blur rounded-2xl px-4 py-3 border border-primary/30 shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-[10px] font-bold text-primary">Traduzione Live</span>
+                  <span className="text-xs font-bold text-primary">🔊 Traduzione Vocale Live</span>
                   {callTranslating && <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </div>
                 <p className="text-sm">{callTranslation}</p>
+              </div>
+            )}
+
+            {/* Language selector for translation */}
+            {speechRecRef.current && (
+              <div className="absolute top-16 left-4 right-4 flex justify-center">
+                <select
+                  value={callTargetLang}
+                  onChange={e => setCallTargetLang(e.target.value)}
+                  className="px-3 py-1.5 rounded-full bg-card/80 backdrop-blur border border-primary/30 text-xs font-medium text-foreground"
+                >
+                  <option value="it">🇮🇹 Italiano</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="es">🇪🇸 Español</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="de">🇩🇪 Deutsch</option>
+                  <option value="pt">🇧🇷 Português</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                  <option value="zh">🇨🇳 中文</option>
+                  <option value="ja">🇯🇵 日本語</option>
+                  <option value="ko">🇰🇷 한국어</option>
+                  <option value="ru">🇷🇺 Русский</option>
+                  <option value="hi">🇮🇳 हिन्दी</option>
+                  <option value="tr">🇹🇷 Türkçe</option>
+                </select>
               </div>
             )}
             
@@ -637,7 +754,7 @@ export default function ChatPage() {
         {autoTranslate && (
           <div className="px-4 py-1.5 bg-primary/5 border-b border-border flex items-center justify-center gap-2">
             <Globe className="w-3 h-3 text-primary" />
-            <span className="text-[10px] text-primary font-medium">Traduzione AI automatica attiva</span>
+            <span className="text-xs text-primary font-medium">Traduzione AI automatica attiva</span>
           </div>
         )}
 
@@ -675,7 +792,7 @@ export default function ChatPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{msg.fileName || "File"}</p>
-                      <p className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Tocca per aprire</p>
+                      <p className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Tocca per aprire</p>
                     </div>
                   </a>
                 )}
@@ -687,7 +804,7 @@ export default function ChatPage() {
                 )}
                 {msg.type !== "image" && msg.type !== "video" && (
                   <div className={`flex items-center justify-end gap-1 mt-1`}>
-                    <span className={`text-[10px] ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
+                    <span className={`text-xs ${msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{msg.time}</span>
                     {msg.sender === "me" && <CheckCheck className="w-3.5 h-3.5 text-primary-foreground/60" />}
                   </div>
                 )}
@@ -706,7 +823,7 @@ export default function ChatPage() {
             ].map(item => (
               <button key={item.label} onClick={item.action} className="flex flex-col items-center gap-1">
                 <div className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center text-primary-foreground`}>{item.icon}</div>
-                <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
+                <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
               </button>
             ))}
           </div>
@@ -806,7 +923,7 @@ export default function ChatPage() {
                 />
                 <div className="flex-1 text-left">
                   <p className="font-semibold text-sm">{u.display_name || "Utente"}</p>
-                  <p className="text-[10px] text-muted-foreground">Tocca per iniziare una chat</p>
+                  <p className="text-xs text-muted-foreground">Tocca per iniziare una chat</p>
                 </div>
                 <UserPlus className="w-4 h-4 text-primary" />
               </button>
@@ -840,17 +957,22 @@ export default function ChatPage() {
             >
               <div className="relative">
                 <img src={conv.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
-                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                {conv.online && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
+                )}
+                {!conv.online && conv.lastSeen && (
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-muted-foreground/40 border-2 border-background" />
+                )}
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-sm">{conv.name}</p>
-                  <span className="text-[10px] text-muted-foreground">{conv.time}</span>
+                  <span className="text-xs text-muted-foreground">{conv.time}</span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
               </div>
               {conv.unread > 0 && (
-                <span className="w-5 h-5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                   {conv.unread}
                 </span>
               )}

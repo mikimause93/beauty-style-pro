@@ -13,24 +13,20 @@ export function usePWA() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
 
-    // Listen for install prompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
     };
 
-    // Listen for successful installation
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
     };
 
-    // Online/offline status
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -39,24 +35,10 @@ export function usePWA() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Register service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then((reg) => {
-        setRegistration(reg);
-        
-        // Check for updates
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setUpdateAvailable(true);
-              }
-            });
-          }
-        });
-      }).catch((err) => {
-        console.warn('Service worker registration failed:', err);
+      // Unregister any existing service workers to prevent stale caches
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.unregister());
       });
     }
 
@@ -70,20 +52,20 @@ export function usePWA() {
 
   const installApp = async () => {
     if (!installPrompt) return false;
-    
+
     try {
       await installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      
+
       if (outcome === 'accepted') {
         setIsInstalled(true);
         setInstallPrompt(null);
         return true;
       }
     } catch (err) {
-      console.error("PWA install error:", err);
+      console.error('PWA install error:', err);
     }
-    
+
     return false;
   };
 

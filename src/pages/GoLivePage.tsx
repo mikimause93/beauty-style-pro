@@ -49,7 +49,7 @@ export default function GoLivePage() {
       .from("professionals")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!pro) {
       toast.error("Devi avere un profilo professionale per trasmettere");
@@ -222,7 +222,7 @@ export default function GoLivePage() {
               <Globe className="w-5 h-5" />
               <div className="text-left">
                 <p className="text-sm font-bold">Pubblica</p>
-                <p className="text-[10px] opacity-70">Visibile a tutti</p>
+                <p className="text-xs opacity-70">Visibile a tutti</p>
               </div>
             </button>
             <button
@@ -234,7 +234,7 @@ export default function GoLivePage() {
               <Lock className="w-5 h-5" />
               <div className="text-left">
                 <p className="text-sm font-bold">Solo Follower</p>
-                <p className="text-[10px] opacity-70">Invito esclusivo</p>
+                <p className="text-xs opacity-70">Invito esclusivo</p>
               </div>
             </button>
           </div>

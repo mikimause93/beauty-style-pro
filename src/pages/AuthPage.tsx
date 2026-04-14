@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { Eye, EyeOff, Mail, Lock, User, Scissors, Building2, MapPin, Phone, Camera, ChevronRight, ChevronLeft, Globe, Calendar, Briefcase, Upload, Loader2, CheckCircle, Instagram, AtSign, Banknote } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [username, setUsername] = useState("");
+  const [gender, setGender] = useState<"male" | "female" | "">("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("Italia");
@@ -125,7 +127,7 @@ export default function AuthPage() {
     setLoading(true);
     const { error } = await signIn(email, password);
     if (error) toast.error(error.message);
-    else { toast.success("Benvenuto!"); navigate("/"); }
+    else { toast.success("Benvenuto!"); }
     setLoading(false);
   };
 
@@ -161,37 +163,84 @@ export default function AuthPage() {
     if (!displayName) { toast.error("Inserisci il tuo nome"); setLoading(false); return; }
     if (!email || !password) { toast.error("Email e password obbligatorie"); setLoading(false); return; }
 
-    const { error } = await signUp(email, password, displayName, accountType);
+    const colorTheme = gender === "male" ? "male" : "female";
+
+    // Build extra metadata with all registration fields
+    const extraMeta: Record<string, any> = {
+      phone: phone || undefined,
+      city: city || undefined,
+      country: country || "Italia",
+      bio: bio || undefined,
+      surname: surname || undefined,
+      username: username || undefined,
+      whatsapp: whatsapp || undefined,
+      instagram: instagram || undefined,
+      tiktok: tiktok || undefined,
+      facebook: facebook || undefined,
+      latitude: latitude || undefined,
+      longitude: longitude || undefined,
+    };
+
+    if (accountType === "client" && interests.length > 0) {
+      extraMeta.interests = interests;
+    }
+    if (accountType === "professional") {
+      extraMeta.category = category || undefined;
+      extraMeta.description = description || undefined;
+      extraMeta.price_min = priceMin || undefined;
+      extraMeta.price_max = priceMax || undefined;
+    }
+    if (accountType === "business") {
+      extraMeta.company_name = companyName || undefined;
+      extraMeta.vat_number = vatNumber || undefined;
+      extraMeta.tax_code = taxCode || undefined;
+      extraMeta.address = address || undefined;
+      extraMeta.zip_code = zipCode || undefined;
+      extraMeta.website = website || undefined;
+      extraMeta.biz_category = bizCategory || undefined;
+      extraMeta.description = description || undefined;
+    }
+
+    // Clean undefined values
+    Object.keys(extraMeta).forEach(k => extraMeta[k] === undefined && delete extraMeta[k]);
+
+    const { error, needsEmailVerification } = await signUp(email, password, displayName, accountType, gender || undefined, colorTheme, extraMeta);
     
     if (error) { 
-      toast.error(error.message); 
+      // Handle duplicate email gracefully
+      if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
+        toast.error("Questa email è già registrata. Prova ad accedere.");
+      } else {
+        toast.error(error.message); 
+      }
       setLoading(false); 
       return; 
     }
 
-    // Save IBAN to payment_methods if provided
-    if (iban.trim()) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("payment_methods").insert({
-            user_id: session.user.id,
-            method_type: "iban",
-            label: `IBAN · ${iban.replace(/\s/g, "").slice(-4)}`,
-            iban_number: iban.trim(),
-            holder_name: bankHolder || displayName,
-          });
-        }
-      } catch { /* Will be addable from Wallet later */ }
+    if (needsEmailVerification) {
+      toast.success("Controlla la tua email per confermare l'account");
+      setRegistrationResult({ success: true, email, accountType });
+      setLoading(false);
+      return;
     }
 
-    // Since email verification is now enabled, show verification screen
-    setRegistrationResult({
-      success: true,
-      email: email,
-      accountType: accountType
-    });
+    toast.success("Account creato con successo! Benvenuto su STYLE 🎉");
+    
+    // Save IBAN to profiles_private if provided (for professionals)
+    if ((accountType === "professional") && (iban || bankHolder)) {
+      try {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("profiles_private").upsert({
+            user_id: newUser.id,
+            iban: iban || null,
+            bank_holder_name: bankHolder || null,
+          });
+        }
+      } catch { /* non-critical */ }
+    }
 
+    navigate("/");
     setLoading(false);
   };
 
@@ -201,7 +250,7 @@ export default function AuthPage() {
   const canProceed = () => {
     if (step === 0) return !!accountType;
     if (step === 1) {
-      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate;
+      if (accountType === "client") return !!name && !!email && !!password && !!phone && !!birthDate && !!gender;
       if (accountType === "professional") return !!name && !!email && !!password && !!phone;
       if (accountType === "business") return !!companyName && !!ownerName && !!email && !!password && !!vatNumber;
     }
@@ -270,7 +319,7 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Non hai ricevuto l'email? Controlla lo spam o clicca "Rinvia Email"
           </p>
         </div>
@@ -351,8 +400,55 @@ export default function AuthPage() {
               </button>
             </form>
           )}
-          <button className="w-full text-center mt-4 text-xs text-primary font-medium">Password dimenticata?</button>
-          <p className="text-center text-[10px] text-muted-foreground mt-8">
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">oppure</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Google OAuth */}
+          <button
+            type="button"
+            onClick={async () => {
+              setLoading(true);
+              const result = await lovable.auth.signInWithOAuth("google", {
+                redirect_uri: window.location.origin,
+              });
+              if (result.error) {
+                toast.error("Errore con Google: " + (result.error instanceof Error ? result.error.message : "Riprova"));
+                setLoading(false);
+                return;
+              }
+              if (result.redirected) return;
+              toast.success("Accesso con Google effettuato!");
+              navigate("/");
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-card border border-border/50 text-foreground font-semibold text-sm flex items-center justify-center gap-3 hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"/></svg>
+            Continua con Google
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              if (!email.trim()) { toast.error("Inserisci la tua email per recuperare la password"); return; }
+              setLoading(true);
+              const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+              });
+              if (error) toast.error(error.message);
+              else toast.success("Ti abbiamo inviato un'email per reimpostare la password");
+              setLoading(false);
+            }}
+            className="w-full text-center mt-4 text-xs text-primary font-medium"
+          >
+            Password dimenticata?
+          </button>
+          <p className="text-center text-xs text-muted-foreground mt-8">
             Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
           </p>
         </div>
@@ -414,6 +510,26 @@ export default function AuthPage() {
       {step === 1 && accountType === "client" && (
         <div className="space-y-4 fade-in">
           <h2 className="text-lg font-display font-bold">I tuoi dati</h2>
+          
+          {/* Gender selector */}
+          <div>
+            <p className="text-xs font-semibold mb-2 text-muted-foreground">Genere *</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setGender("female")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "female" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>
+                👩 Donna
+              </button>
+              <button type="button" onClick={() => setGender("male")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "male" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>
+                👨 Uomo
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <InputField icon={<User className="w-4 h-4" />} placeholder="Nome *" value={name} onChange={setName} />
             <InputField placeholder="Cognome *" value={surname} onChange={setSurname} />
@@ -470,6 +586,20 @@ export default function AuthPage() {
       {step === 1 && accountType === "professional" && (
         <div className="space-y-4 fade-in">
           <h2 className="text-lg font-display font-bold">I tuoi dati</h2>
+          {/* Gender selector */}
+          <div>
+            <p className="text-xs font-semibold mb-2 text-muted-foreground">Genere *</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setGender("female")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "female" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>👩 Donna</button>
+              <button type="button" onClick={() => setGender("male")}
+                className={`h-12 rounded-xl text-sm font-semibold transition-all ${
+                  gender === "male" ? "bg-primary text-primary-foreground shadow-lg" : "bg-card border border-border/50 text-muted-foreground"
+                }`}>👨 Uomo</button>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <InputField icon={<User className="w-4 h-4" />} placeholder="Nome *" value={name} onChange={setName} />
             <InputField placeholder="Cognome" value={surname} onChange={setSurname} />
@@ -630,7 +760,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground mt-6">
+      <p className="text-center text-xs text-muted-foreground mt-6">
         Continuando accetti i <span className="text-primary">Termini</span> e la <span className="text-primary">Privacy Policy</span>
       </p>
     </div>

@@ -6,13 +6,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
 import PageTracker from "@/components/PageTracker";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import PresenceTracker from "@/components/PresenceTracker";
+import StellaVoiceAgentWrapper from "@/components/stella/StellaVoiceAgentWrapper";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 initGlobalErrorHandler();
 
@@ -83,12 +87,22 @@ const BusinessTeamPage = lazy(() => import("./pages/BusinessTeamPage"));
 const EmployeeShiftsPage = lazy(() => import("./pages/EmployeeShiftsPage"));
 const EmployeeActivityPage = lazy(() => import("./pages/EmployeeActivityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const DebugPanelPage = lazy(() => import("./pages/DebugPanelPage"));
 const AILookGeneratorPage = lazy(() => import("./pages/AILookGeneratorPage"));
 const OffersPage = lazy(() => import("./pages/OffersPage"));
 const AuctionsPage = lazy(() => import("./pages/AuctionsPage"));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 const ProfessionalDashboardPage = lazy(() => import("./pages/ProfessionalDashboardPage"));
+const AIPreviewPage = lazy(() => import("./pages/AIPreviewPage"));
+const TenantDashboardPage = lazy(() => import("./pages/TenantDashboardPage"));
+const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
+const PredictiveAnalyticsPage = lazy(() => import("./pages/PredictiveAnalyticsPage"));
+const SocialAutomationPage = lazy(() => import("./pages/SocialAutomationPage"));
+const WebsiteGeneratorPage = lazy(() => import("./pages/WebsiteGeneratorPage"));
+const WhiteLabelPage = lazy(() => import("./pages/WhiteLabelPage"));
+const GlobalSettingsPage = lazy(() => import("./pages/GlobalSettingsPage"));
+const EnterpriseAPIPage = lazy(() => import("./pages/EnterpriseAPIPage"));
 
 const queryClient = new QueryClient();
 
@@ -101,18 +115,8 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    try {
-      const shown = sessionStorage.getItem("style_splash_shown");
-      return !shown;
-    } catch {
-      return false;
-    }
-  });
+  const [showSplash, setShowSplash] = useState(false);
   const handleSplashComplete = useCallback(() => {
-    try {
-      sessionStorage.setItem("style_splash_shown", "1");
-    } catch { /* intentionally empty */ }
     setShowSplash(false);
   }, []);
   return (
@@ -125,6 +129,7 @@ const App = () => {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
+        <TenantProvider>
         <RadioProvider>
           <PageTracker />
           <Suspense fallback={<PageLoader />}>
@@ -133,6 +138,7 @@ const App = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/search" element={<SearchPage />} />
@@ -210,15 +216,29 @@ const App = () => {
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
             <Route path="/professional-dashboard" element={<P><ProfessionalDashboardPage /></P>} />
+            <Route path="/ai-preview" element={<P><AIPreviewPage /></P>} />
+            <Route path="/ai-preview/:sector" element={<P><AIPreviewPage /></P>} />
+            <Route path="/content-calendar" element={<P><ContentCalendarPage /></P>} />
+            <Route path="/predictive-analytics" element={<P><PredictiveAnalyticsPage /></P>} />
+            <Route path="/social-automation" element={<P><SocialAutomationPage /></P>} />
+            <Route path="/website-generator" element={<P><WebsiteGeneratorPage /></P>} />
+            <Route path="/white-label" element={<P><WhiteLabelPage /></P>} />
+            <Route path="/global-settings" element={<P><GlobalSettingsPage /></P>} />
+            <Route path="/enterprise-api" element={<P><EnterpriseAPIPage /></P>} />
+            <Route path="/tenant" element={<P><TenantDashboardPage /></P>} />
             <Route path="/debug" element={<P><DebugPanelPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
         </RadioProvider>
+        </TenantProvider>
+        <PresenceTracker />
+        <StellaVoiceAgentWrapper />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  <SpeedInsights />
   </ErrorBoundary>
   );
 };

@@ -135,11 +135,11 @@ export default function OffersPage() {
                 <div key={offer.id} className="rounded-2xl bg-card border border-border/50 overflow-hidden">
                   <div className="relative h-32">
                     <img src={offer.image_url || fallbackImages[idx % fallbackImages.length]} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold" style={{ background: "rgba(0,0,0,0.6)", color: "#fff" }}>
+                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(0,0,0,0.6)", color: "#fff" }}>
                       <Icon className="w-3 h-3" /> {typeInfo.label}
                     </div>
                     {offer.discount_percentage && (
-                      <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                      <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                         -{offer.discount_percentage}%
                       </div>
                     )}
@@ -152,7 +152,7 @@ export default function OffersPage() {
                       <span className="text-xs text-muted-foreground line-through">€{Number(offer.original_price).toFixed(2)}</span>
                     </div>
                     {timeLeft && (
-                      <div className="flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" /> {timeLeft}
                       </div>
                     )}

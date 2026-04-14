@@ -59,7 +59,7 @@ export default function LiveMusicSelector({ isStreamer, onClose }: LiveMusicSele
             <img src={cover} alt="" className="w-10 h-10 rounded-lg object-cover animate-[spin_8s_linear_infinite]" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{currentStation.name}</p>
-              <p className="text-[10px] text-muted-foreground">{currentStation.genre}</p>
+              <p className="text-xs text-muted-foreground">{currentStation.genre}</p>
             </div>
             <div className="flex items-center gap-1.5">
               <button onClick={handleMute} className="w-8 h-8 rounded-full bg-card flex items-center justify-center">
@@ -89,7 +89,7 @@ export default function LiveMusicSelector({ isStreamer, onClose }: LiveMusicSele
                 <img src={coverImages[idx % coverImages.length]} alt="" className="w-10 h-10 rounded-lg object-cover" />
                 <div className="flex-1 text-left">
                   <p className={`text-sm font-medium ${isActive ? "text-primary" : ""}`}>{station.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{station.genre}</p>
+                  <p className="text-xs text-muted-foreground">{station.genre}</p>
                 </div>
                 {isActive ? (
                   <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">

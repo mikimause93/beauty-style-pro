@@ -68,7 +68,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
         .then(async ({ data }) => {
           if (data && data.length > 0) {
             const ids = data.map(d => d.user_id);
-            const { data: profiles } = await supabase.from("profiles").select("display_name").in("user_id", ids);
+            const { data: profiles } = await supabase.from("profiles_public").select("display_name").in("user_id", ids);
             if (profiles) setLikerNames(profiles.map(p => p.display_name || "Utente").filter(Boolean));
           }
         });
@@ -107,7 +107,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     if (data && data.length > 0) {
       const userIds = [...new Set(data.map(c => c.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, display_name, avatar_url")
         .in("user_id", userIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -146,7 +146,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
       message: comment.trim(),
     }).select().single();
     if (!error && data) {
-      const { data: prof } = await supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user.id).maybeSingle();
+      const { data: prof } = await supabase.from("profiles_public").select("display_name, avatar_url").eq("user_id", user.id).maybeSingle();
       setComments(prev => [...prev, {
         id: data.id,
         message: data.message,
@@ -188,7 +188,7 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
     const { data } = await supabase.from("post_likes").select("user_id").eq("post_id", post.id).limit(50);
     if (data && data.length > 0) {
       const ids = data.map(d => d.user_id);
-      const { data: profiles } = await supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", ids);
+      const { data: profiles } = await supabase.from("profiles_public").select("user_id, display_name, avatar_url").in("user_id", ids);
       if (profiles) setAllLikers(profiles.map(p => ({ user_id: p.user_id, display_name: p.display_name || "Utente", avatar_url: p.avatar_url })));
     }
     setShowLikersList(true);
@@ -253,8 +253,8 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
               <ChevronRight className="w-3 h-3 text-primary-foreground" />
             </div>
           </div>
-          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
-          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+          <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-xs font-bold">Prima</div>
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-xs font-bold">Dopo</div>
           <input type="range" min={10} max={90} value={sliderPos}
             onChange={e => setSliderPos(Number(e.target.value))}
             className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
@@ -289,10 +289,10 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
           <div className="flex-1" />
           {(post.profileData?.user_type === "professional" || post.profileData?.user_type === "business") && (
             <>
-              <button onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center gap-1">
+              <button type="button" onClick={() => navigate("/ai-look")} className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center gap-1">
                 <Wand2 className="w-3 h-3" /> Prova AI
               </button>
-              <button onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              <button type="button" onClick={() => navigate(`/booking/${post.user_id}`)} className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                 Prenota
               </button>
             </>
@@ -379,16 +379,16 @@ export default function PostCard({ post, onShare, onComment, fallbackImage }: Po
                     <span className="text-muted-foreground">{c.message}</span>
                   </p>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[10px] text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
+                    <span className="text-xs text-muted-foreground">{formatTimeAgo(c.created_at)}</span>
                     {/* Like */}
                     <button onClick={() => toggleCommentLike(c.id)} className="flex items-center gap-0.5">
                       <ThumbsUp className={`w-3 h-3 ${c.liked_by_me ? "text-primary fill-primary" : "text-muted-foreground"}`} />
-                      {c.like_count > 0 && <span className="text-[10px] text-muted-foreground">{c.like_count}</span>}
+                      {c.like_count > 0 && <span className="text-xs text-muted-foreground">{c.like_count}</span>}
                     </button>
                     {/* Applause */}
                     <button onClick={() => toggleCommentApplause(c.id)} className="flex items-center gap-0.5">
                       <Sparkles className={`w-3 h-3 ${c.applauded_by_me ? "text-accent fill-accent" : "text-muted-foreground"}`} />
-                      {c.applause_count > 0 && <span className="text-[10px] text-muted-foreground">{c.applause_count}</span>}
+                      {c.applause_count > 0 && <span className="text-xs text-muted-foreground">{c.applause_count}</span>}
                     </button>
                   </div>
                 </div>

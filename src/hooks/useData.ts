@@ -256,8 +256,8 @@ export function useMyReferralCode() {
         .from("referral_codes")
         .select("*")
         .eq("user_id", user!.id)
-        .single();
-      if (error && error.code !== "PGRST116") throw error;
+        .maybeSingle();
+      if (error) throw error;
       return data;
     },
     enabled: !!user,

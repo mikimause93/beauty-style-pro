@@ -69,7 +69,7 @@ export default function AdminPage() {
       supabase.from("products").select("id", { count: "exact", head: true }),
       supabase.from("user_subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("profile_boosts").select("id", { count: "exact", head: true }).eq("active", true),
-      supabase.from("platform_settings").select("value").eq("key", "booking_commission_percent").single(),
+      supabase.from("platform_settings").select("value").eq("key", "booking_commission_percent").maybeSingle(),
       supabase.from("user_subscriptions").select("*, subscription_plans(name, slug)").eq("status", "active"),
       supabase.from("transactions").select("id, amount", { count: "exact" }),
     ]);
@@ -217,7 +217,7 @@ export default function AdminPage() {
                 <div key={s.label} className="rounded-2xl bg-card border border-border/50 p-3 text-center">
                   <s.Icon className={`w-4 h-4 mx-auto mb-1.5 ${s.color}`} />
                   <p className="text-lg font-display font-bold">{s.value}</p>
-                  <p className="text-[9px] text-muted-foreground">{s.label}</p>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -228,10 +228,10 @@ export default function AdminPage() {
                 <h3 className="font-display font-bold text-sm">Revenue Overview</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><p className="opacity-70 text-[10px]">Commissione</p><p className="font-bold">{commission}%</p></div>
-                <div><p className="opacity-70 text-[10px]">Post Totali</p><p className="font-bold">{stats.posts}</p></div>
-                <div><p className="opacity-70 text-[10px]">Prodotti</p><p className="font-bold">{stats.products}</p></div>
-                <div><p className="opacity-70 text-[10px]">Boost Attivi</p><p className="font-bold">{stats.boosts}</p></div>
+                <div><p className="opacity-70 text-xs">Commissione</p><p className="font-bold">{commission}%</p></div>
+                <div><p className="opacity-70 text-xs">Post Totali</p><p className="font-bold">{stats.posts}</p></div>
+                <div><p className="opacity-70 text-xs">Prodotti</p><p className="font-bold">{stats.products}</p></div>
+                <div><p className="opacity-70 text-xs">Boost Attivi</p><p className="font-bold">{stats.boosts}</p></div>
               </div>
             </div>
 
@@ -257,9 +257,9 @@ export default function AdminPage() {
                     <img src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id}`} alt="" className="w-8 h-8 rounded-full object-cover" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{u.display_name || "Utente"}</p>
-                      <p className="text-[10px] text-muted-foreground">{u.user_type} · {u.qr_coins || 0} QRC</p>
+                      <p className="text-xs text-muted-foreground">{u.user_type} · {u.qr_coins || 0} QRC</p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       u.verification_status === "verified" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                     }`}>{u.verification_status === "verified" ? "Verificato" : u.user_type}</span>
                   </div>
@@ -278,11 +278,11 @@ export default function AdminPage() {
                 <img src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id}`} alt="" className="w-9 h-9 rounded-full object-cover" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate">{u.display_name || "Utente"}</p>
-                  <p className="text-[10px] text-muted-foreground">{u.user_type} · {u.city || "—"} · {u.qr_coins || 0} QRC</p>
-                  <p className="text-[9px] text-muted-foreground">{new Date(u.created_at).toLocaleDateString("it-IT")}</p>
+                  <p className="text-xs text-muted-foreground">{u.user_type} · {u.city || "—"} · {u.qr_coins || 0} QRC</p>
+                  <p className="text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString("it-IT")}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                     u.verification_status === "verified" ? "bg-primary/15 text-primary" 
                     : u.verification_status === "suspended" ? "bg-destructive/15 text-destructive"
                     : "bg-muted text-muted-foreground"
@@ -305,11 +305,11 @@ export default function AdminPage() {
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl bg-card border border-border/50 p-3 text-center">
                 <p className="text-lg font-bold text-primary">{receipts.length}</p>
-                <p className="text-[10px] text-muted-foreground">Ricevute</p>
+                <p className="text-xs text-muted-foreground">Ricevute</p>
               </div>
               <div className="rounded-xl bg-card border border-border/50 p-3 text-center">
                 <p className="text-lg font-bold text-primary">€{receipts.reduce((s, r) => s + (r.amount || 0), 0).toFixed(2)}</p>
-                <p className="text-[10px] text-muted-foreground">Volume</p>
+                <p className="text-xs text-muted-foreground">Volume</p>
               </div>
             </div>
             {receipts.length === 0 ? (
@@ -321,12 +321,12 @@ export default function AdminPage() {
                   <span className="text-sm font-bold text-primary">€{r.amount}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">{r.payment_method} · {r.receipt_type}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                  <span className="text-xs text-muted-foreground">{r.payment_method} · {r.receipt_type}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                     r.status === "paid" ? "bg-primary/15 text-primary" : "bg-yellow-500/15 text-yellow-600"
                   }`}>{r.status}</span>
                 </div>
-                <p className="text-[9px] text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                <p className="text-xs text-muted-foreground mt-1">{new Date(r.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
             ))}
           </div>
@@ -341,14 +341,14 @@ export default function AdminPage() {
             ) : reports.map(r => (
               <div key={r.id} className="p-4 rounded-2xl bg-card border border-border/50 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                     r.status === "pending" ? "bg-yellow-500/15 text-yellow-600" : r.status === "resolved" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                   }`}>{r.status}</span>
-                  <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("it-IT")}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("it-IT")}</span>
                 </div>
                 <p className="text-sm font-semibold">{r.reason}</p>
                 {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
-                <p className="text-[10px] text-muted-foreground">Tipo: {r.content_type}</p>
+                <p className="text-xs text-muted-foreground">Tipo: {r.content_type}</p>
                 {r.status === "pending" && (
                   <div className="flex gap-2 pt-1">
                     <button onClick={() => updateReportStatus(r.id, "resolved")}
@@ -378,13 +378,13 @@ export default function AdminPage() {
               <div key={v.id} className="p-4 rounded-2xl bg-card border border-border/50 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       v.status === "pending" ? "bg-yellow-500/15 text-yellow-600" 
                       : v.status === "approved" ? "bg-primary/15 text-primary" 
                       : v.status === "suspended" ? "bg-orange-500/15 text-orange-600"
                       : "bg-destructive/15 text-destructive"
                     }`}>{v.status}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
                       {v.account_type || v.verification_type}
                     </span>
                   </div>
@@ -397,7 +397,7 @@ export default function AdminPage() {
                 <p className="text-xs text-muted-foreground">
                   Tipo: {v.verification_type} · Doc: {v.document_type} · {(v.document_urls || []).length} doc
                 </p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {new Date(v.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </p>
 

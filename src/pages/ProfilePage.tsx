@@ -11,6 +11,7 @@ import MobileLayout from "@/components/layout/MobileLayout";
 import ShareMenu from "@/components/ShareMenu";
 import PostCard from "@/components/feed/PostCard";
 import ProfileShowcasePanel from "@/components/profile/ProfileShowcasePanel";
+import { useTemporaryTheme } from "@/hooks/useColorTheme";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -32,14 +33,16 @@ interface ProfilePost {
 
 export default function ProfilePage() {
   const { id: viewUserId } = useParams();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, loading: authLoading, signOut } = useAuth();
   const { unreadCount } = useNotifications();
   const { data: activeRemindersCount = 0 } = useSmartRemindersCount();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<"grid" | "feed" | "products" | "saved" | "vetrina">("grid");
   const [myPosts, setMyPosts] = useState<ProfilePost[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [myProducts, setMyProducts] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [viewProfile, setViewProfile] = useState<any>(null);
   const [showShare, setShowShare] = useState(false);
   const [sharePost, setSharePost] = useState<ProfilePost | null>(null);
@@ -63,7 +66,7 @@ export default function ProfilePage() {
   }, [targetUserId]);
 
   const loadViewProfile = async () => {
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", targetUserId!).single();
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", targetUserId!).maybeSingle();
     if (data) setViewProfile(data);
   };
 
@@ -90,6 +93,19 @@ export default function ProfilePage() {
   }, [viewProfile]);
 
   const displayProfile = isOwnProfile ? profile : viewProfile;
+
+  // Apply the visited profile's color theme temporarily
+  useTemporaryTheme(!isOwnProfile ? displayProfile?.color_theme : null);
+
+  if (authLoading && isOwnProfile) {
+    return (
+      <MobileLayout>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   if (!user && isOwnProfile) {
     return (
@@ -215,7 +231,7 @@ export default function ProfilePage() {
             <h2 className="text-base font-bold tracking-tight">{displayProfile?.display_name || 'Utente STYLE'}</h2>
             <VerifiedBadge status={displayProfile?.verification_status} userType={displayProfile?.user_type} size="sm" showLabel />
             {displayProfile?.verification_status !== "verified" && (
-              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 isBusiness ? 'bg-primary/20 text-primary' : isProfessional ? 'bg-primary/15 text-primary' : 'bg-primary/10 text-primary'
               }`}>
                 {isBusiness ? 'Business' : isProfessional ? 'Pro' : 'Cliente'}
@@ -251,17 +267,17 @@ export default function ProfilePage() {
           <div className="flex items-center gap-1 rounded-2xl bg-primary/5 border border-primary/10 px-2 py-1.5 mb-4">
             <button onClick={() => setActiveTab("grid")} className="flex items-center gap-1.5 px-3 py-1 rounded-xl hover:bg-background/50 transition-colors">
               <span className="text-sm font-bold">{postCount}</span>
-              <span className="text-[10px] text-muted-foreground">post</span>
+              <span className="text-xs text-muted-foreground">post</span>
             </button>
             <div className="w-px h-4 bg-border/50" />
             <div className="flex items-center gap-1.5 px-3 py-1">
               <span className="text-sm font-bold">{followerDisplay > 9999 ? `${(followerDisplay / 1000).toFixed(1)}K` : followerDisplay}</span>
-              <span className="text-[10px] text-muted-foreground">follower</span>
+              <span className="text-xs text-muted-foreground">follower</span>
             </div>
             <div className="w-px h-4 bg-border/50" />
             <div className="flex items-center gap-1.5 px-3 py-1">
               <span className="text-sm font-bold">{followingDisplay}</span>
-              <span className="text-[10px] text-muted-foreground">seguiti</span>
+              <span className="text-xs text-muted-foreground">seguiti</span>
             </div>
           </div>
 
@@ -352,13 +368,13 @@ export default function ProfilePage() {
                     <ItemIcon className="w-5 h-5 text-primary" />
                     {item.badge && item.badge > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
-                        <span className="text-[9px] text-destructive-foreground font-bold">
+                        <span className="text-xs text-destructive-foreground font-bold">
                           {item.badge > 99 ? '99+' : item.badge}
                         </span>
                       </div>
                     )}
                   </div>
-                  <span className="text-[9px] text-primary font-medium">{item.label}</span>
+                  <span className="text-xs text-primary font-medium">{item.label}</span>
                 </button>
               );
             })}
@@ -370,7 +386,7 @@ export default function ProfilePage() {
           <div className="mb-4">
             <div className="flex items-center justify-between px-1 mb-2">
               <h3 className="text-xs font-bold">Catalogo Prodotti</h3>
-              <button onClick={() => setActiveTab("products")} className="text-[10px] text-primary font-semibold">Vedi tutti</button>
+              <button onClick={() => setActiveTab("products")} className="text-xs text-primary font-semibold">Vedi tutti</button>
             </div>
             <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
               {myProducts.slice(0, 8).map(product => (
@@ -380,9 +396,9 @@ export default function ProfilePage() {
                   )}
                   <div className="p-2">
                     <p className="text-[11px] font-semibold truncate">{product.name}</p>
-                    <p className="text-[10px] text-primary font-bold">€{product.price}</p>
+                    <p className="text-xs text-primary font-bold">€{product.price}</p>
                     {product.ai_preview_enabled && (
-                      <button onClick={() => navigate("/ai-look")} className="mt-1 w-full flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-[9px] font-semibold">
+                      <button onClick={() => navigate("/ai-look")} className="mt-1 w-full flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-semibold">
                         <Wand2 className="w-2.5 h-2.5" /> Prova AI
                       </button>
                     )}
@@ -472,7 +488,7 @@ export default function ProfilePage() {
                     <div className="p-3">
                       <p className="text-xs font-semibold truncate">{product.name}</p>
                       <p className="text-sm font-bold text-primary mt-0.5">€{Number(product.price).toFixed(2)}</p>
-                      {product.category && <span className="text-[9px] text-muted-foreground">{product.category}</span>}
+                      {product.category && <span className="text-xs text-muted-foreground">{product.category}</span>}
                     </div>
                   </div>
                 ))}
