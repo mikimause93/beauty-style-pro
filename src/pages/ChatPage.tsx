@@ -419,13 +419,13 @@ export default function ChatPage() {
           content: `${callLabel} avviata`,
           message_type: "text",
         });
-        // Also send a notification
-        await supabase.from("notifications").insert({
-          user_id: selectedChat.otherUserId,
-          title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
-          message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
-          type: "call",
-          data: { caller_id: user.id, call_type: type },
+        // Use SECURITY DEFINER function to bypass RLS (can't insert for other users directly)
+        await supabase.rpc('create_notification', {
+          _user_id: selectedChat.otherUserId,
+          _title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
+          _message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
+          _type: "call",
+          _data: { caller_id: user.id, call_type: type },
         });
       }
       
