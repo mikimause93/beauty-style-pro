@@ -172,13 +172,13 @@ export default function QRTransferModal({ open, onClose, onComplete }: QRTransfe
         { user_id: recipient.user_id, type: "transfer_in", amount: amt, description: `Ricevuto da ${profile?.display_name || "utente"}`, status: "completed" },
       ]);
 
-      // Notify recipient
-      await supabase.from("notifications").insert({
-        user_id: recipient.user_id,
-        title: "QR Coins Ricevuti! 🎉",
-        message: `${profile?.display_name || "Qualcuno"} ti ha inviato ${amt} QR Coins`,
-        type: "transfer",
-        data: { sender_id: user.id, amount: amt },
+      // Use SECURITY DEFINER function to bypass RLS (can't insert notifications for other users)
+      await supabase.rpc('create_notification', {
+        _user_id: recipient.user_id,
+        _title: "QR Coins Ricevuti! 🎉",
+        _message: `${profile?.display_name || "Qualcuno"} ti ha inviato ${amt} QR Coins`,
+        _type: "transfer",
+        _data: { sender_id: user.id, amount: amt },
       });
 
       await refreshProfile();
