@@ -23,6 +23,7 @@ export default function ChallengesPage() {
 
   useEffect(() => {
     loadChallenges();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadChallenges = async () => {
@@ -92,7 +93,7 @@ export default function ChallengesPage() {
           {challenges.filter(c => c.featured).map(ch => (
             <div key={ch.id} className="rounded-2xl gradient-card border border-primary/20 p-4 shadow-card">
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold">In Evidenza</span>
+                <span className="px-2 py-0.5 rounded-full gradient-primary text-primary-foreground text-xs font-bold">In Evidenza</span>
                 <span className="text-2xl">{ch.icon}</span>
               </div>
               <p className="font-display font-bold">{ch.title}</p>
@@ -101,8 +102,8 @@ export default function ChallengesPage() {
                 <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${(ch.progress / ch.target_value) * 100}%` }} />
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-[10px] text-muted-foreground">{ch.progress}/{ch.target_value}</span>
-                <span className="text-[10px] text-gold font-semibold">+{ch.reward_qr_coin} QRC</span>
+                <span className="text-xs text-muted-foreground">{ch.progress}/{ch.target_value}</span>
+                <span className="text-xs text-gold font-semibold">+{ch.reward_qr_coin} QRC</span>
               </div>
             </div>
           ))}
@@ -119,8 +120,8 @@ export default function ChallengesPage() {
                     <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${(ch.progress / ch.target_value) * 100}%` }} />
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-muted-foreground">{ch.progress}/{ch.target_value}</span>
-                    <span className="text-[10px] text-gold font-semibold">+{ch.reward_qr_coin} QRC</span>
+                    <span className="text-xs text-muted-foreground">{ch.progress}/{ch.target_value}</span>
+                    <span className="text-xs text-gold font-semibold">+{ch.reward_qr_coin} QRC</span>
                   </div>
                 </div>
               </div>
@@ -132,11 +133,11 @@ export default function ChallengesPage() {
             <div className="flex">
               <div className="w-1/2 aspect-square relative">
                 <img src={beauty3} alt="Prima" className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full glass text-[10px] font-bold">Prima</div>
+                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full glass text-xs font-bold">Prima</div>
               </div>
               <div className="w-1/2 aspect-square relative">
                 <img src={beauty2} alt="Dopo" className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full glass text-[10px] font-bold">Dopo</div>
+                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full glass text-xs font-bold">Dopo</div>
               </div>
             </div>
           </div>

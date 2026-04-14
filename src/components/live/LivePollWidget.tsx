@@ -35,6 +35,7 @@ export default function LivePollWidget({ streamId }: LivePollWidgetProps) {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamId]);
 
   const fetchActivePoll = async () => {
@@ -45,7 +46,7 @@ export default function LivePollWidget({ streamId }: LivePollWidgetProps) {
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (data) {
       const options = Array.isArray(data.options) ? data.options as string[] : [];
@@ -63,7 +64,7 @@ export default function LivePollWidget({ streamId }: LivePollWidgetProps) {
           .select("option_index")
           .eq("poll_id", data.id)
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
         if (vote) setVoted(vote.option_index);
       }
     } else {

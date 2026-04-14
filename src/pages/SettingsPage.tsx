@@ -1,16 +1,18 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Lock, Bell, Mail, Moon, Sun, Globe, HelpCircle, FileText, Shield, LogOut, MapPin, Navigation, Ruler, ChevronRight, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useColorTheme, type ColorTheme } from "@/hooks/useColorTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, profile, signOut, refreshProfile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme, toggleTheme } = useTheme();
+  const { colorTheme, setColorTheme } = useColorTheme();
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [shareLocation, setShareLocation] = useState(false);
@@ -119,7 +121,7 @@ export default function SettingsPage() {
       <div className="px-5 py-6 space-y-6">
         {/* Account */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Account</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Account</p>
           <div className="space-y-1.5">
             <SettingRow icon={User} label="Modifica Profilo" onClick={() => navigate("/profile/edit")} />
             <SettingRow icon={Lock} label="Cambia Password" />
@@ -128,14 +130,14 @@ export default function SettingsPage() {
 
         {/* Location & Search */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Posizione & Ricerca</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Navigation className="w-4 h-4 text-primary" />
               <div className="flex-1">
                 <span className="text-sm">Condividi posizione</span>
                 {currentCoords && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}
                   </p>
                 )}
@@ -159,8 +161,8 @@ export default function SettingsPage() {
                 className="w-full accent-primary h-1"
               />
               <div className="flex justify-between mt-1">
-                <span className="text-[10px] text-muted-foreground">5 km</span>
-                <span className="text-[10px] text-muted-foreground">200 km</span>
+                <span className="text-xs text-muted-foreground">5 km</span>
+                <span className="text-xs text-muted-foreground">200 km</span>
               </div>
             </div>
 
@@ -170,7 +172,7 @@ export default function SettingsPage() {
 
         {/* Notifications */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Notifiche</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Notifiche</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Bell className="w-4 h-4 text-primary" />
@@ -187,16 +189,127 @@ export default function SettingsPage() {
 
         {/* Preferences */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Preferenze</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Preferenze</p>
           <div className="space-y-1.5">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
-              {theme === "dark" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
-              <div className="flex-1">
-                <span className="text-sm">Tema</span>
-                <p className="text-[10px] text-muted-foreground">{theme === "dark" ? "Scuro" : "Chiaro"}</p>
+            {/* Theme Picker */}
+            <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="flex items-center gap-2 mb-3">
+                {theme === "dark" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
+                <span className="text-sm font-medium">Tema Sfondo</span>
               </div>
-              <Toggle value={theme === "dark"} onChange={toggleTheme} />
+              <div className="grid grid-cols-2 gap-3">
+                {/* Dark card */}
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    theme === "dark"
+                      ? "border-primary shadow-[0_0_12px_hsl(var(--primary)/0.35)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  {/* Preview */}
+                  <div className="w-full h-14 rounded-lg bg-[#0a0a0b] flex flex-col gap-1 p-2 overflow-hidden">
+                    <div className="h-1.5 w-10 rounded bg-[#d946ef] opacity-90" />
+                    <div className="h-1 w-16 rounded bg-gray-700" />
+                    <div className="h-1 w-12 rounded bg-gray-700" />
+                    <div className="flex gap-1 mt-1">
+                      <div className="h-5 w-5 rounded bg-gray-800" />
+                      <div className="h-5 w-5 rounded bg-gray-800" />
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold">⬛ Scuro</span>
+                  {theme === "dark" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Light card */}
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    theme === "light"
+                      ? "border-primary shadow-[0_0_12px_hsl(var(--primary)/0.35)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  {/* Preview */}
+                  <div className="w-full h-14 rounded-lg bg-[#f8f8f8] flex flex-col gap-1 p-2 overflow-hidden border border-gray-200">
+                    <div className="h-1.5 w-10 rounded bg-[#d946ef] opacity-90" />
+                    <div className="h-1 w-16 rounded bg-gray-300" />
+                    <div className="h-1 w-12 rounded bg-gray-300" />
+                    <div className="flex gap-1 mt-1">
+                      <div className="h-5 w-5 rounded bg-gray-200" />
+                      <div className="h-5 w-5 rounded bg-gray-200" />
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold">⬜ Chiaro</span>
+                  {theme === "light" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
+            {/* Color Theme Picker */}
+            <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="flex items-center gap-2 mb-3">
+                <Palette className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Tema Colori</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Female / Viola */}
+                <button
+                  onClick={() => setColorTheme("female")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    colorTheme === "female"
+                      ? "border-primary shadow-[0_0_12px_hsl(262_80%_62%/0.4)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg flex gap-1.5 items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, hsl(262 80% 62%), hsl(290 70% 58%))" }}>
+                    <div className="h-5 w-5 rounded-full bg-white/20" />
+                    <div className="h-5 w-5 rounded-full bg-white/30" />
+                    <div className="h-5 w-5 rounded-full bg-white/15" />
+                  </div>
+                  <span className="text-xs font-semibold">💜 Viola</span>
+                  {colorTheme === "female" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "hsl(262 80% 62%)" }}>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Male / Verde Petrolio */}
+                <button
+                  onClick={() => setColorTheme("male")}
+                  className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 ${
+                    colorTheme === "male"
+                      ? "border-primary shadow-[0_0_12px_hsl(170_100%_20%/0.4)]"
+                      : "border-border/40 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg flex gap-1.5 items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, hsl(170 100% 20%), hsl(170 80% 30%))" }}>
+                    <div className="h-5 w-5 rounded-full bg-white/20" />
+                    <div className="h-5 w-5 rounded-full bg-white/30" />
+                    <div className="h-5 w-5 rounded-full bg-white/15" />
+                  </div>
+                  <span className="text-xs font-semibold">🌲 Verde Petrolio</span>
+                  {colorTheme === "male" && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "hsl(170 100% 20%)" }}>
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4L3.2 5.7L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50">
               <Globe className="w-4 h-4 text-primary" />
               <span className="flex-1 text-sm">Lingua</span>
@@ -207,7 +320,7 @@ export default function SettingsPage() {
 
         {/* Support */}
         <section>
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-3 px-1">Supporto</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3 px-1">Supporto</p>
           <div className="space-y-1.5">
             <SettingRow icon={Shield} label="Verifica Account" onClick={() => navigate("/verify-account")} />
             <SettingRow icon={HelpCircle} label="Centro Assistenza" />
@@ -222,7 +335,7 @@ export default function SettingsPage() {
           Logout
         </button>
 
-        <p className="text-center text-[10px] text-muted-foreground pb-4">STYLE v1.0.0</p>
+        <p className="text-center text-xs text-muted-foreground pb-4">STYLE v1.0.0</p>
       </div>
     </MobileLayout>
   );

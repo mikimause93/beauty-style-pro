@@ -22,11 +22,12 @@ export default function BoostProfilePage() {
 
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadData = async () => {
     const { data: settings } = await supabase
-      .from("platform_settings").select("value").eq("key", "boost_prices").single();
+      .from("platform_settings").select("value").eq("key", "boost_prices").maybeSingle();
     if (settings?.value) setPrices((settings.value as any) || {});
 
     if (user) {
@@ -124,7 +125,7 @@ export default function BoostProfilePage() {
                   selected === opt.days ? "border-primary bg-primary/5" : "border-border bg-card"
                 } ${opt.popular ? "relative" : ""}`}>
                 {opt.popular && (
-                  <div className="absolute -top-2 right-4 bg-primary text-primary-foreground text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  <div className="absolute -top-2 right-4 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
                     POPOLARE
                   </div>
                 )}

@@ -84,6 +84,7 @@ export default function TransformationChallengePage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"feed" | "leaderboard">("feed");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchChallenges(); }, []);
 
   const fetchChallenges = async () => {
@@ -162,7 +163,7 @@ export default function TransformationChallengePage() {
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-display font-bold">Challenge Trasformazione</h1>
-            <p className="text-[10px] text-muted-foreground">Vota, dona QRC e prenota il tuo look</p>
+            <p className="text-xs text-muted-foreground">Vota, dona QRC e prenota il tuo look</p>
           </div>
           <button onClick={() => navigate("/create-post")} className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shadow-glow">
             <Plus className="w-5 h-5 text-primary-foreground" />
@@ -213,19 +214,19 @@ export default function TransformationChallengePage() {
                   <div className="flex relative">
                     <div className="w-1/2 aspect-[3/4] relative">
                       <img src={ch.before_image_url || beauty3} alt="Prima" className="w-full h-full object-cover" />
-                      <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full glass text-[10px] font-bold">Prima</div>
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full glass text-xs font-bold">Prima</div>
                     </div>
                     <div className="w-1/2 aspect-[3/4] relative">
                       <img src={ch.after_image_url || beauty2} alt="Dopo" className="w-full h-full object-cover" />
-                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full glass text-[10px] font-bold">Dopo</div>
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full glass text-xs font-bold">Dopo</div>
                     </div>
                     {ch.featured && (
-                      <div className="absolute top-2 left-2 px-2 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+                      <div className="absolute top-2 left-2 px-2 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center gap-1">
                         <Flame className="w-3 h-3" /> Trending
                       </div>
                     )}
                     {ch.replicable && (
-                      <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-bold flex items-center gap-1">
+                      <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold flex items-center gap-1">
                         <Sparkles className="w-3 h-3" /> Replicabile
                       </div>
                     )}
@@ -238,7 +239,7 @@ export default function TransformationChallengePage() {
                       <img src={ch.creator?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${ch.creator_id}`} alt="" className="w-9 h-9 rounded-full object-cover" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{ch.creator?.display_name || "Professionista"}</p>
-                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">{ch.category}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold capitalize">{ch.category}</span>
                       </div>
                     </div>
 
@@ -248,10 +249,10 @@ export default function TransformationChallengePage() {
                     {/* Style Details */}
                     {ch.style_name && (
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.style_name}</span>}
-                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.technique}</span>}
-                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">{ch.estimated_duration}</span>}
-                        {ch.estimated_price && <span className="px-2 py-1 rounded-full bg-muted text-[10px] font-medium">€{ch.estimated_price}</span>}
+                        {ch.style_name && <span className="px-2 py-1 rounded-full bg-muted text-xs font-medium">{ch.style_name}</span>}
+                        {ch.technique && <span className="px-2 py-1 rounded-full bg-muted text-xs font-medium">{ch.technique}</span>}
+                        {ch.estimated_duration && <span className="px-2 py-1 rounded-full bg-muted text-xs font-medium">{ch.estimated_duration}</span>}
+                        {ch.estimated_price && <span className="px-2 py-1 rounded-full bg-muted text-xs font-medium">€{ch.estimated_price}</span>}
                       </div>
                     )}
 
@@ -259,7 +260,7 @@ export default function TransformationChallengePage() {
                     {ch.products_used && ch.products_used.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {ch.products_used.map((p, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">{p}</span>
+                          <span key={i} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-medium">{p}</span>
                         ))}
                       </div>
                     )}
@@ -276,7 +277,7 @@ export default function TransformationChallengePage() {
                         <Coins className="w-4 h-4" />
                         <span className="text-xs font-bold">{ch.qr_coin_received}</span>
                       </button>
-                      <button onClick={() => setSavedIds(prev => { const n = new Set(prev); n.has(ch.id) ? n.delete(ch.id) : n.add(ch.id); return n; })}
+                      <button onClick={() => setSavedIds(prev => { const n = new Set(prev); if (n.has(ch.id)) { n.delete(ch.id); } else { n.add(ch.id); } return n; })}
                         className={`p-2 rounded-xl ${savedIds.has(ch.id) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                         <Bookmark className={`w-4 h-4 ${savedIds.has(ch.id) ? "fill-primary" : ""}`} />
                       </button>
@@ -342,7 +343,7 @@ export default function TransformationChallengePage() {
                         <img src={ch.after_image_url || beauty2} alt="" className="w-10 h-10 rounded-lg object-cover" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate">{ch.title}</p>
-                          <p className="text-[10px] text-muted-foreground">{ch.creator?.display_name || "Pro"}</p>
+                          <p className="text-xs text-muted-foreground">{ch.creator?.display_name || "Pro"}</p>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <ThumbsUp className="w-3 h-3 text-primary" />
@@ -368,7 +369,7 @@ export default function TransformationChallengePage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{ch.title}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-muted-foreground">{ch.creator?.display_name}</span>
+                        <span className="text-xs text-muted-foreground">{ch.creator?.display_name}</span>
                         <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[8px] font-bold capitalize">{ch.category}</span>
                       </div>
                     </div>
@@ -379,7 +380,7 @@ export default function TransformationChallengePage() {
                       </div>
                       <div className="flex items-center gap-1 mt-0.5">
                         <Coins className="w-3 h-3 text-accent" />
-                        <span className="text-[10px] text-accent font-medium">{ch.qr_coin_received}</span>
+                        <span className="text-xs text-accent font-medium">{ch.qr_coin_received}</span>
                       </div>
                     </div>
                   </div>

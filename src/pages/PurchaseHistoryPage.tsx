@@ -67,14 +67,14 @@ export default function PurchaseHistoryPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">Ordine #{p.id.slice(0, 8)}</p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(p.created_at).toLocaleDateString("it-IT")} · {p.payment_method}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-primary">€{p.total_price}</p>
                   {p.discount_amount > 0 && (
-                    <p className="text-[10px] text-primary">-€{p.discount_amount}</p>
+                    <p className="text-xs text-primary">-€{p.discount_amount}</p>
                   )}
                 </div>
               </div>

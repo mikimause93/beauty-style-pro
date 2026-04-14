@@ -1,7 +1,7 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Share2, Radio as RadioIcon, Coins, Loader2, AlertCircle, ArrowLeft, Search, X } from "lucide-react";
 import { SpotifyIcon, YouTubeIcon, RadioTowerIcon } from "@/components/icons/BrandIcons";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRadio } from "@/contexts/RadioContext";
 import { useQRCoinRewards } from "@/hooks/useQRCoinRewards";
@@ -26,6 +26,11 @@ export default function RadioPage() {
   const [liked, setLiked] = useState(false);
   const [source, setSource] = useState<MusicSource>("radio");
   const [radioFilter, setRadioFilter] = useState<RadioFilter>("all");
+  const [musicSearch, setMusicSearch] = useState("");
+  const [showMusicSearch, setShowMusicSearch] = useState(false);
+  const musicSearchRef = useRef<HTMLInputElement>(null);
+  const spotifyRef = useRef<{ search: (q: string) => void } | null>(null);
+  const youtubeRef = useRef<{ search: (q: string) => void } | null>(null);
   const { awardCoins } = useQRCoinRewards();
 
   const currentIdx = stations.findIndex(s => s.id === currentStation.id);
@@ -59,15 +64,51 @@ export default function RadioPage() {
             <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-lg font-display font-bold">Beauty Music</h1>
-              <p className="text-[10px] text-muted-foreground">Radio · Spotify · YouTube</p>
-            </div>
+            {!showMusicSearch && (
+              <div>
+                <h1 className="text-lg font-display font-bold">Beauty Music</h1>
+                <p className="text-xs text-muted-foreground">Radio · Spotify · YouTube</p>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 text-[10px] font-bold text-accent">
-              <Coins className="w-3 h-3" /> +1 QRC/2min
-            </span>
+            {showMusicSearch ? (
+              <div className="flex items-center gap-2 flex-1">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    ref={musicSearchRef}
+                    value={musicSearch}
+                    onChange={e => setMusicSearch(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && musicSearch.trim()) {
+                        // Pass search to the active source's embed
+                        spotifyRef.current?.search(musicSearch);
+                        youtubeRef.current?.search(musicSearch);
+                        toast.success(`Cercando "${musicSearch}"...`);
+                      }
+                    }}
+                    placeholder={source === "radio" ? "Cerca stazione..." : source === "spotify" ? "Cerca su Spotify..." : "Cerca su YouTube..."}
+                    autoFocus
+                    className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                </div>
+                <button onClick={() => { setShowMusicSearch(false); setMusicSearch(""); }}
+                  className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 text-xs font-bold text-accent">
+                  <Coins className="w-3 h-3" /> +1 QRC/2min
+                </span>
+                <button onClick={() => { setShowMusicSearch(true); setTimeout(() => musicSearchRef.current?.focus(), 50); }}
+                  className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Search className="w-4 h-4 text-primary" />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -112,7 +153,7 @@ export default function RadioPage() {
                 <h2 className="text-lg font-bold">{currentStation.name}</h2>
                 <p className="text-sm text-muted-foreground">{currentStation.genre}</p>
                 {isPlaying && (
-                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-500/10 text-[10px] text-green-500 font-semibold">
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-500/10 text-xs text-green-500 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> LIVE
                   </span>
                 )}
@@ -155,11 +196,11 @@ export default function RadioPage() {
               <div className="flex items-center justify-center gap-8 mt-4">
                 <button onClick={() => setLiked(!liked)} className="flex flex-col items-center gap-1">
                   <Heart className={`w-5 h-5 ${liked ? "text-primary fill-primary" : "text-muted-foreground"}`} />
-                  <span className="text-[10px] text-muted-foreground">Mi piace</span>
+                  <span className="text-xs text-muted-foreground">Mi piace</span>
                 </button>
                 <button onClick={handleShare} className="flex flex-col items-center gap-1">
                   <Share2 className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground">Condividi</span>
+                  <span className="text-xs text-muted-foreground">Condividi</span>
                 </button>
               </div>
             </div>
@@ -196,6 +237,7 @@ export default function RadioPage() {
                     if (radioFilter === "beauty") return s.genre.includes("✨");
                     return true;
                   })
+                  .filter(s => !musicSearch.trim() || s.name.toLowerCase().includes(musicSearch.toLowerCase()) || s.genre.toLowerCase().includes(musicSearch.toLowerCase()))
                   .map((station, idx) => (
                   <button key={station.id} onClick={() => play(station)}
                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
@@ -211,7 +253,7 @@ export default function RadioPage() {
                       <p className="text-[11px] text-muted-foreground">{station.genre}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">{station.listener_count}</span>
+                      <span className="text-xs text-muted-foreground">{station.listener_count}</span>
                       {currentStation.id === station.id && isPlaying && (
                         <div className="flex items-center gap-0.5">
                           <div className="w-0.5 h-3 bg-primary rounded-full animate-pulse" />
@@ -236,7 +278,7 @@ export default function RadioPage() {
               </svg>
               <div>
                 <h2 className="text-base font-display font-bold">Spotify</h2>
-                <p className="text-[10px] text-muted-foreground">Playlist integrate per il tuo salone</p>
+                <p className="text-xs text-muted-foreground">Playlist integrate per il tuo salone</p>
               </div>
             </div>
             <SpotifyEmbed />
@@ -252,7 +294,7 @@ export default function RadioPage() {
               </svg>
               <div>
                 <h2 className="text-base font-display font-bold">YouTube Music</h2>
-                <p className="text-[10px] text-muted-foreground">Video musicali e playlist complete</p>
+                <p className="text-xs text-muted-foreground">Video musicali e playlist complete</p>
               </div>
             </div>
             <YouTubeEmbed />

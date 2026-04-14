@@ -1,9 +1,22 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import safeStorage from "@/lib/safeStorage";
 
-// Apply saved theme on mount
-const savedTheme = localStorage.getItem("style-theme");
+// Apply saved color theme (female/male) immediately to avoid flash
+const savedColorTheme = safeStorage.getItem("style-color-theme");
+if (savedColorTheme === "male") {
+  const r = document.documentElement;
+  r.style.setProperty("--primary", "32 80% 48%");
+  r.style.setProperty("--ring", "32 80% 48%");
+  r.style.setProperty("--sidebar-primary", "32 80% 48%");
+  r.style.setProperty("--sidebar-ring", "32 80% 48%");
+  r.style.setProperty("--gradient-primary", "linear-gradient(135deg, hsl(32 80% 48%), hsl(38 90% 55%))");
+  r.style.setProperty("--shadow-glow", "0 0 40px hsl(32 80% 48% / 0.3)");
+}
+
+const savedTheme = safeStorage.getItem("style-theme");
+
 if (savedTheme === "light") {
   const root = document.documentElement;
   root.style.setProperty("--background", "0 0% 97%");

@@ -135,7 +135,7 @@ async function buildUserContext(supabase: any, userId: string): Promise<string> 
   const [profileRes, postsRes, bookingsRes, subsRes, transRes, proRes] = await Promise.all([
     supabase.from("profiles")
       .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
-      .eq("user_id", userId).single(),
+      .eq("user_id", userId).maybeSingle(),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", userId),
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("client_id", userId),
     supabase.from("user_subscriptions").select("*, subscription_plans(name)")
@@ -195,12 +195,27 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      authenticatedUserId = data?.user?.id ?? null;
+    }
+
     const { role, message, messages, user_id, context, stream } = await req.json();
+
+    // Use authenticated user ID, fallback to provided user_id only if authenticated
+    const effectiveUserId = authenticatedUserId || user_id;
+    if (!effectiveUserId) {
+      return jsonResponse({ error: "Authentication required" }, 401);
+    }
 
     // Build prompt from role
     let userType: string | undefined;
     if (user_id) {
-      const { data: profile } = await supabase.from("profiles").select("user_type").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_type").eq("user_id", user_id).maybeSingle();
       userType = profile?.user_type;
     }
 
@@ -256,18 +271,20 @@ serve(async (req) => {
     // Log conversation
     if (user_id) {
       const userMsg = chatMessages.slice(-1)[0]?.content || '';
-      await supabase.from("chatbot_messages").insert({
-        user_id,
-        message_type: role || "chat",
-        content: `User: ${userMsg}\nBot: ${reply}`,
-        status: "completed"
-      }).catch(() => {});
+      try {
+        await supabase.from("chatbot_messages").insert({
+          user_id,
+          message_type: role || "chat",
+          content: `User: ${userMsg}\nBot: ${reply}`,
+          status: "completed"
+        });
+      } catch { /* chat log persistence is non-critical */ }
     }
 
     return jsonResponse({ reply, role: role || "auto" });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("ai-router error:", e);
-    return jsonResponse({ error: e.message }, 500);
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 

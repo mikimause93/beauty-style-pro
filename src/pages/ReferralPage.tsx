@@ -17,6 +17,7 @@ export default function ReferralPage() {
 
   useEffect(() => {
     if (user) loadReferralData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadReferralData = async () => {
@@ -156,7 +157,7 @@ export default function ReferralPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold">Amico #{ref.referred_id.slice(0, 6)}</p>
-                    <p className="text-[10px] text-muted-foreground">{new Date(ref.created_at).toLocaleDateString("it-IT")}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(ref.created_at).toLocaleDateString("it-IT")}</p>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${ref.reward_claimed ? "bg-success/20 text-success" : "bg-gold/20 text-gold"}`}>
                     {ref.reward_claimed ? "✓ +20 QRC" : "In attesa"}

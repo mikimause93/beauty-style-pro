@@ -56,7 +56,7 @@ export default function ReelsSection() {
               <Play className="w-4 h-4 text-primary-foreground drop-shadow-lg" />
             </div>
             <div className="absolute bottom-2 left-2 right-2">
-              <p className="text-[9px] text-primary-foreground font-medium truncate drop-shadow-lg">{reel.caption}</p>
+              <p className="text-xs text-primary-foreground font-medium truncate drop-shadow-lg">{reel.caption}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="flex items-center gap-0.5 text-[8px] text-primary-foreground/80">
                   <Heart className="w-2.5 h-2.5" /> {reel.likes > 999 ? `${(reel.likes/1000).toFixed(1)}K` : reel.likes}

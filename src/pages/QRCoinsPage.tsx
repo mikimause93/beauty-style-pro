@@ -32,6 +32,7 @@ export default function QRCoinsPage() {
   useEffect(() => {
     if (user) fetchTransactions();
     else setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchTransactions = async () => {

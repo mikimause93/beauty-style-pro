@@ -61,6 +61,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professionalId]);
 
   const loadData = async () => {
@@ -71,7 +72,7 @@ export default function BookingPage() {
     }
 
     const [{ data: pro }, { data: svc }] = await Promise.all([
-      supabase.from("professionals").select("*").eq("id", professionalId).single(),
+      supabase.from("professionals").select("*").eq("id", professionalId).maybeSingle(),
       supabase.from("services").select("*").eq("professional_id", professionalId).eq("active", true),
     ]);
 
@@ -266,7 +267,7 @@ export default function BookingPage() {
                       isSelected ? "gradient-primary text-primary-foreground" : "bg-card"
                     }`}
                   >
-                    <span className="text-[10px] font-medium">{dayNames[date.getDay()]}</span>
+                    <span className="text-xs font-medium">{dayNames[date.getDay()]}</span>
                     <span className="text-lg font-bold">{date.getDate()}</span>
                   </button>
                 );

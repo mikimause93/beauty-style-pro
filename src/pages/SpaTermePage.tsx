@@ -60,7 +60,7 @@ export default function SpaTermePage() {
           <button key={cat.label} onClick={() => setActiveTab(cat.label)}
             className="flex flex-col items-center gap-2 min-w-[72px] py-3 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all">
             <cat.icon className={`w-6 h-6 ${cat.color}`} />
-            <span className="text-[10px] text-primary/70 font-medium">{cat.label}</span>
+            <span className="text-xs text-primary/70 font-medium">{cat.label}</span>
           </button>
         ))}
       </div>
@@ -71,7 +71,7 @@ export default function SpaTermePage() {
           <img src={beauty2} alt="Spa" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute bottom-3 left-4 right-4">
-            <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">In evidenza</span>
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">In evidenza</span>
             <p className="text-sm font-bold text-white mt-0.5">Scopri le migliori Spa vicino a te</p>
             <p className="text-[11px] text-white/70">Trattamenti esclusivi e percorsi benessere</p>
           </div>
@@ -101,7 +101,7 @@ export default function SpaTermePage() {
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-accent fill-accent" />
                   <span className="text-xs font-medium">{t.rating}</span>
-                  <span className="text-[10px] text-muted-foreground">({t.reviews})</span>
+                  <span className="text-xs text-muted-foreground">({t.reviews})</span>
                 </div>
                 <span className="text-sm font-bold text-primary">€{t.price}</span>
               </div>

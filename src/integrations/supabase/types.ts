@@ -148,6 +148,69 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_credit_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          transaction_type: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_credits: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          id: string
+          monthly_quota: number | null
+          plan: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          monthly_quota?: number | null
+          plan?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          monthly_quota?: number | null
+          plan?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_module_configs: {
         Row: {
           active: boolean
@@ -202,6 +265,90 @@ export type Database = {
           roles?: string[]
           triggers?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_proactive_suggestions: {
+        Row: {
+          action_url: string | null
+          clicked_at: string | null
+          created_at: string | null
+          dismissed_at: string | null
+          expires_at: string | null
+          id: string
+          priority: number | null
+          shown_at: string | null
+          suggestion_data: Json | null
+          suggestion_text: string | null
+          suggestion_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          shown_at?: string | null
+          suggestion_data?: Json | null
+          suggestion_text?: string | null
+          suggestion_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          shown_at?: string | null
+          suggestion_data?: Json | null
+          suggestion_text?: string | null
+          suggestion_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_voice_sessions: {
+        Row: {
+          action_taken: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          entities: Json | null
+          id: string
+          intent: string | null
+          response: string | null
+          session_type: string | null
+          transcription: string | null
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          entities?: Json | null
+          id?: string
+          intent?: string | null
+          response?: string | null
+          session_type?: string | null
+          transcription?: string | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          entities?: Json | null
+          id?: string
+          intent?: string | null
+          response?: string | null
+          session_type?: string | null
+          transcription?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1045,6 +1192,74 @@ export type Database = {
           },
         ]
       }
+      content_calendar: {
+        Row: {
+          ai_generated: boolean | null
+          ai_prompt: string | null
+          content_text: string | null
+          created_at: string
+          engagement_score: number | null
+          hashtags: string[] | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          metadata: Json | null
+          platform: string
+          published_at: string | null
+          scheduled_at: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content_text?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_prompt?: string | null
+          content_text?: string | null
+          created_at?: string
+          engagement_score?: number | null
+          hashtags?: string[] | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          platform?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
@@ -1720,7 +1935,6 @@ export type Database = {
           scheduled_at: string | null
           started_at: string | null
           status: string
-          stream_key: string | null
           stream_url: string | null
           thumbnail_url: string | null
           title: string
@@ -1746,7 +1960,6 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
-          stream_key?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title: string
@@ -1772,7 +1985,6 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
-          stream_key?: string | null
           stream_url?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -2208,6 +2420,113 @@ export type Database = {
           },
         ]
       }
+      predictive_insights: {
+        Row: {
+          action_taken: boolean | null
+          confidence_score: number | null
+          created_at: string
+          description: string | null
+          id: string
+          insight_type: string
+          prediction_data: Json | null
+          status: string | null
+          tenant_id: string | null
+          timeframe: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_taken?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type: string
+          prediction_data?: Json | null
+          status?: string | null
+          tenant_id?: string | null
+          timeframe?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_taken?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insight_type?: string
+          prediction_data?: Json | null
+          status?: string | null
+          tenant_id?: string | null
+          timeframe?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictive_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preview_sessions: {
+        Row: {
+          ai_model_used: string | null
+          ai_prompt: string | null
+          confidence_score: number | null
+          created_at: string | null
+          generated_image_url: string | null
+          id: string
+          is_favorite: boolean | null
+          original_image_url: string
+          processing_time_seconds: number | null
+          sector: string
+          session_type: string | null
+          status: string | null
+          style_name: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          ai_prompt?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          generated_image_url?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url: string
+          processing_time_seconds?: number | null
+          sector?: string
+          session_type?: string | null
+          status?: string | null
+          style_name?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          ai_prompt?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          generated_image_url?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_image_url?: string
+          processing_time_seconds?: number | null
+          sector?: string
+          session_type?: string | null
+          status?: string | null
+          style_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_purchases: {
         Row: {
           buyer_id: string
@@ -2462,33 +2781,78 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_shops: {
+        Row: {
+          avg_rating: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          shop_banner_url: string | null
+          shop_description: string | null
+          shop_logo_url: string | null
+          shop_name: string
+          total_products: number | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avg_rating?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          shop_banner_url?: string | null
+          shop_description?: string | null
+          shop_logo_url?: string | null
+          shop_name: string
+          total_products?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avg_rating?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          shop_banner_url?: string | null
+          shop_description?: string | null
+          shop_logo_url?: string | null
+          shop_name?: string
+          total_products?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
           availability: Json | null
           avatar_url: string | null
-          bank_holder_name: string | null
           bio: string | null
-          birth_date: string | null
           city: string | null
+          color_theme: string | null
           country: string | null
           created_at: string
           cv_url: string | null
           desired_categories: string[] | null
           display_name: string | null
-          document_urls: string[] | null
           experience_years: number | null
           facebook: string | null
           follower_count: number
           following_count: number
-          iban: string | null
+          gender: string | null
           id: string
           instagram: string | null
           interests: string[] | null
+          last_seen: string | null
           latitude: number | null
           longitude: number | null
-          otp_code: string | null
-          otp_expires_at: string | null
           phone: string | null
           phone_verified: boolean
           portfolio_urls: string[] | null
@@ -2502,7 +2866,6 @@ export type Database = {
           user_type: string
           username: string | null
           verification_level: string
-          verification_notes: string | null
           verification_status: string
           whatsapp: string | null
         }
@@ -2510,28 +2873,25 @@ export type Database = {
           account_type?: string
           availability?: Json | null
           avatar_url?: string | null
-          bank_holder_name?: string | null
           bio?: string | null
-          birth_date?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
-          document_urls?: string[] | null
           experience_years?: number | null
           facebook?: string | null
           follower_count?: number
           following_count?: number
-          iban?: string | null
+          gender?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
+          last_seen?: string | null
           latitude?: number | null
           longitude?: number | null
-          otp_code?: string | null
-          otp_expires_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           portfolio_urls?: string[] | null
@@ -2545,7 +2905,6 @@ export type Database = {
           user_type?: string
           username?: string | null
           verification_level?: string
-          verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
         }
@@ -2553,28 +2912,25 @@ export type Database = {
           account_type?: string
           availability?: Json | null
           avatar_url?: string | null
-          bank_holder_name?: string | null
           bio?: string | null
-          birth_date?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string
           cv_url?: string | null
           desired_categories?: string[] | null
           display_name?: string | null
-          document_urls?: string[] | null
           experience_years?: number | null
           facebook?: string | null
           follower_count?: number
           following_count?: number
-          iban?: string | null
+          gender?: string | null
           id?: string
           instagram?: string | null
           interests?: string[] | null
+          last_seen?: string | null
           latitude?: number | null
           longitude?: number | null
-          otp_code?: string | null
-          otp_expires_at?: string | null
           phone?: string | null
           phone_verified?: boolean
           portfolio_urls?: string[] | null
@@ -2588,9 +2944,50 @@ export type Database = {
           user_type?: string
           username?: string | null
           verification_level?: string
-          verification_notes?: string | null
           verification_status?: string
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      profiles_private: {
+        Row: {
+          bank_holder_name: string | null
+          birth_date: string | null
+          created_at: string | null
+          document_urls: string[] | null
+          iban: string | null
+          id: string
+          otp_code: string | null
+          otp_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+          verification_notes: string | null
+        }
+        Insert: {
+          bank_holder_name?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          document_urls?: string[] | null
+          iban?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          verification_notes?: string | null
+        }
+        Update: {
+          bank_holder_name?: string | null
+          birth_date?: string | null
+          created_at?: string | null
+          document_urls?: string[] | null
+          iban?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verification_notes?: string | null
         }
         Relationships: []
       }
@@ -3208,6 +3605,106 @@ export type Database = {
         }
         Relationships: []
       }
+      social_accounts: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          follower_count: number | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          metadata: Json | null
+          platform: string
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          platform?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_analytics: {
+        Row: {
+          clicks: number | null
+          comments: number | null
+          content_id: string | null
+          id: string
+          impressions: number | null
+          likes: number | null
+          reach: number | null
+          recorded_at: string
+          saves: number | null
+          shares: number | null
+        }
+        Insert: {
+          clicks?: number | null
+          comments?: number | null
+          content_id?: string | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          reach?: number | null
+          recorded_at?: string
+          saves?: number | null
+          shares?: number | null
+        }
+        Update: {
+          clicks?: number | null
+          comments?: number | null
+          content_id?: string | null
+          id?: string
+          impressions?: number | null
+          likes?: number | null
+          reach?: number | null
+          recorded_at?: string
+          saves?: number | null
+          shares?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_analytics_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_calendar"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       special_offers: {
         Row: {
           active: boolean | null
@@ -3313,6 +3810,171 @@ export type Database = {
           prize_type?: string
           prize_value?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      stella_action_log: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_commands: {
+        Row: {
+          command_text: string
+          command_type: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          intent: Json | null
+          requires_confirmation: boolean | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          command_text: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          command_text?: string
+          command_type?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          intent?: Json | null
+          requires_confirmation?: boolean | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_scheduled_actions: {
+        Row: {
+          action_params: Json | null
+          action_type: string
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          scheduled_for: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          action_params?: Json | null
+          action_type: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          action_params?: Json | null
+          action_type?: string
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          scheduled_for?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stella_user_settings: {
+        Row: {
+          auto_actions_enabled: boolean | null
+          can_book: boolean | null
+          can_follow: boolean | null
+          can_like_comment: boolean | null
+          can_send_messages: boolean | null
+          can_spend_coins: boolean | null
+          max_comments_per_hour: number | null
+          max_likes_per_hour: number | null
+          max_messages_per_hour: number | null
+          require_confirmation_for: string[] | null
+          scheduling_enabled: boolean | null
+          total_actions_executed: number | null
+          total_commands_issued: number | null
+          updated_at: string | null
+          user_id: string
+          voice_enabled: boolean | null
+        }
+        Insert: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id: string
+          voice_enabled?: boolean | null
+        }
+        Update: {
+          auto_actions_enabled?: boolean | null
+          can_book?: boolean | null
+          can_follow?: boolean | null
+          can_like_comment?: boolean | null
+          can_send_messages?: boolean | null
+          can_spend_coins?: boolean | null
+          max_comments_per_hour?: number | null
+          max_likes_per_hour?: number | null
+          max_messages_per_hour?: number | null
+          require_confirmation_for?: string[] | null
+          scheduling_enabled?: boolean | null
+          total_actions_executed?: number | null
+          total_commands_issued?: number | null
+          updated_at?: string | null
+          user_id?: string
+          voice_enabled?: boolean | null
         }
         Relationships: []
       }
@@ -3425,6 +4087,29 @@ export type Database = {
             foreignKeyName: "stream_comments_stream_id_fkey"
             columns: ["stream_id"]
             isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_credentials: {
+        Row: {
+          stream_id: string
+          stream_key: string
+        }
+        Insert: {
+          stream_id: string
+          stream_key: string
+        }
+        Update: {
+          stream_id?: string
+          stream_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_credentials_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: true
             referencedRelation: "live_streams"
             referencedColumns: ["id"]
           },
@@ -3726,6 +4411,157 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tenant_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: string
+          tenant_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: string
+          tenant_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: string
+          tenant_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_members: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string
+          permissions: string[] | null
+          role: string
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          permissions?: string[] | null
+          role?: string
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          permissions?: string[] | null
+          role?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          brand_colors: Json | null
+          country: string | null
+          cover_url: string | null
+          created_at: string
+          currency: string | null
+          custom_domain: string | null
+          description: string | null
+          features_enabled: string[] | null
+          id: string
+          language: string | null
+          logo_url: string | null
+          max_members: number | null
+          name: string
+          owner_id: string
+          plan: string
+          settings: Json | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_colors?: Json | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          language?: string | null
+          logo_url?: string | null
+          max_members?: number | null
+          name: string
+          owner_id: string
+          plan?: string
+          settings?: Json | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_colors?: Json | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_domain?: string | null
+          description?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          language?: string | null
+          logo_url?: string | null
+          max_members?: number | null
+          name?: string
+          owner_id?: string
+          plan?: string
+          settings?: Json | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tracks: {
         Row: {
@@ -4213,6 +5049,125 @@ export type Database = {
         }
         Relationships: []
       }
+      website_pages: {
+        Row: {
+          content_html: string | null
+          created_at: string
+          custom_domain: string | null
+          id: string
+          og_image: string | null
+          page_type: string
+          published: boolean | null
+          seo_description: string | null
+          seo_keywords: string[] | null
+          seo_title: string | null
+          slug: string
+          styles: Json | null
+          template: string | null
+          tenant_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_html?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          og_image?: string | null
+          page_type?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string[] | null
+          seo_title?: string | null
+          slug: string
+          styles?: Json | null
+          template?: string | null
+          tenant_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_html?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          og_image?: string | null
+          page_type?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string[] | null
+          seo_title?: string | null
+          slug?: string
+          styles?: Json | null
+          template?: string | null
+          tenant_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whitelabel_configs: {
+        Row: {
+          agency_id: string
+          brand_name: string
+          created_at: string
+          custom_domain: string | null
+          features_enabled: string[] | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          max_tenants: number | null
+          metadata: Json | null
+          primary_color: string | null
+          reseller_commission: number | null
+          secondary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          brand_name: string
+          created_at?: string
+          custom_domain?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_tenants?: number | null
+          metadata?: Json | null
+          primary_color?: string | null
+          reseller_commission?: number | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          brand_name?: string
+          created_at?: string
+          custom_domain?: string | null
+          features_enabled?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          max_tenants?: number | null
+          metadata?: Json | null
+          primary_color?: string | null
+          reseller_commission?: number | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       businesses_public: {
@@ -4220,7 +5175,6 @@ export type Database = {
           active: boolean | null
           address: string | null
           bio: string | null
-          branding_theme: Json | null
           business_name: string | null
           business_type: string | null
           categories: string[] | null
@@ -4243,16 +5197,15 @@ export type Database = {
           slug: string | null
           updated_at: string | null
           user_id: string | null
+          verification_status: string | null
           verified: boolean | null
           website: string | null
           working_hours: Json | null
-          zip_code: string | null
         }
         Insert: {
           active?: boolean | null
           address?: string | null
           bio?: string | null
-          branding_theme?: Json | null
           business_name?: string | null
           business_type?: string | null
           categories?: string[] | null
@@ -4275,16 +5228,15 @@ export type Database = {
           slug?: string | null
           updated_at?: string | null
           user_id?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           website?: string | null
           working_hours?: Json | null
-          zip_code?: string | null
         }
         Update: {
           active?: boolean | null
           address?: string | null
           bio?: string | null
-          branding_theme?: Json | null
           business_name?: string | null
           business_type?: string | null
           categories?: string[] | null
@@ -4307,10 +5259,10 @@ export type Database = {
           slug?: string | null
           updated_at?: string | null
           user_id?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           website?: string | null
           working_hours?: Json | null
-          zip_code?: string | null
         }
         Relationships: []
       }
@@ -4319,19 +5271,17 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          color_theme: string | null
           country: string | null
           created_at: string | null
-          desired_categories: string[] | null
           display_name: string | null
-          experience_years: number | null
           facebook: string | null
           follower_count: number | null
           following_count: number | null
-          id: string | null
+          gender: string | null
           instagram: string | null
-          phone_verified: boolean | null
-          portfolio_urls: string[] | null
           qr_coins: number | null
+          sector: string | null
           skills: string[] | null
           tiktok: string | null
           user_id: string | null
@@ -4343,19 +5293,17 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string | null
-          desired_categories?: string[] | null
           display_name?: string | null
-          experience_years?: number | null
           facebook?: string | null
           follower_count?: number | null
           following_count?: number | null
-          id?: string | null
+          gender?: string | null
           instagram?: string | null
-          phone_verified?: boolean | null
-          portfolio_urls?: string[] | null
           qr_coins?: number | null
+          sector?: string | null
           skills?: string[] | null
           tiktok?: string | null
           user_id?: string | null
@@ -4367,19 +5315,17 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          color_theme?: string | null
           country?: string | null
           created_at?: string | null
-          desired_categories?: string[] | null
           display_name?: string | null
-          experience_years?: number | null
           facebook?: string | null
           follower_count?: number | null
           following_count?: number | null
-          id?: string | null
+          gender?: string | null
           instagram?: string | null
-          phone_verified?: boolean | null
-          portfolio_urls?: string[] | null
           qr_coins?: number | null
+          sector?: string | null
           skills?: string[] | null
           tiktok?: string | null
           user_id?: string | null
@@ -4428,6 +5374,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      stella_check_rate_limit: {
+        Args: { _action_type: string; _user_id: string }
+        Returns: Json
       }
       track_user_action: {
         Args: {

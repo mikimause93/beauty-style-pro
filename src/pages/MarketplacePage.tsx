@@ -113,24 +113,24 @@ export default function MarketplacePage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold">{req.profiles?.display_name || "Utente"}</p>
-                      <p className="text-[10px] text-muted-foreground">{new Date(req.created_at).toLocaleDateString("it-IT")}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(req.created_at).toLocaleDateString("it-IT")}</p>
                     </div>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${urgencyColor[req.urgency] || urgencyColor.normal}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${urgencyColor[req.urgency] || urgencyColor.normal}`}>
                     {req.urgency === "urgent" ? "Urgente" : req.urgency === "flexible" ? "Flessibile" : "Normale"}
                   </span>
                 </div>
                 <h3 className="font-semibold text-sm mb-1">{req.title}</h3>
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{req.description}</p>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">{req.category}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">{req.category}</span>
                   {req.location && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                       <MapPin className="w-3 h-3" /> {req.location}
                     </span>
                   )}
                   {req.budget_max && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-success font-semibold">
+                    <span className="flex items-center gap-0.5 text-xs text-success font-semibold">
                       <Euro className="w-3 h-3" /> {req.budget_min ? `${req.budget_min}–` : ""}{req.budget_max}€
                     </span>
                   )}
@@ -184,13 +184,13 @@ export default function MarketplacePage() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-semibold text-sm">{cast.title}</h3>
-                    <p className="text-[10px] text-muted-foreground">{cast.profiles?.display_name}</p>
+                    <p className="text-xs text-muted-foreground">{cast.profiles?.display_name}</p>
                   </div>
                   <div className="flex gap-1">
                     {cast.featured && (
-                      <span className="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-bold">Featured</span>
+                      <span className="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-xs font-bold">Featured</span>
                     )}
-                    <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-bold">
                       {castingTypeLabel[cast.casting_type] || cast.casting_type}
                     </span>
                   </div>
@@ -198,15 +198,15 @@ export default function MarketplacePage() {
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{cast.description}</p>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {cast.location && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                       <MapPin className="w-3 h-3" /> {cast.location}
                     </span>
                   )}
                   {cast.compensation && (
-                    <span className="text-[10px] text-success font-semibold">{cast.compensation}</span>
+                    <span className="text-xs text-success font-semibold">{cast.compensation}</span>
                   )}
                   {cast.event_date && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" /> {new Date(cast.event_date).toLocaleDateString("it-IT")}
                     </span>
                   )}
@@ -295,7 +295,7 @@ export default function MarketplacePage() {
             {serviceRequests?.slice(0, 3).map((req: any) => (
               <div key={req.id} className="p-3 rounded-xl bg-card border border-border">
                 <p className="text-xs font-semibold">{req.title}</p>
-                <p className="text-[10px] text-muted-foreground">{req.location} • {req.category}</p>
+                <p className="text-xs text-muted-foreground">{req.location} • {req.category}</p>
               </div>
             ))}
           </div>
