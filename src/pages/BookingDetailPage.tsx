@@ -22,7 +22,7 @@ export default function BookingDetailPage() {
   const fetchBooking = async () => {
     const { data, error } = await supabase
       .from("bookings")
-      .select("*, professionals(business_name, city, user_id), services(name, price, duration_minutes)")
+      .select("*, professionals(id, business_name, city, user_id), services(name, price, duration_minutes)")
       .eq("id", id!)
       .maybeSingle();
     if (!error) setBooking(data);
@@ -175,13 +175,13 @@ export default function BookingDetailPage() {
           {booking.status === "completed" && (
             <>
               <button
-                onClick={() => navigate(`/booking`)}
+                onClick={() => navigate(`/my-bookings/${booking.id}/review`)}
                 className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
               >
                 <Star className="w-4 h-4" /> Lascia una Recensione
               </button>
               <button
-                onClick={() => navigate(`/booking`)}
+                onClick={() => navigate(`/booking/${booking.professionals?.id || booking.professional_id}`)}
                 className="w-full h-12 rounded-xl bg-card border border-border font-semibold text-sm flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" /> Prenota di Nuovo
@@ -191,7 +191,7 @@ export default function BookingDetailPage() {
 
           {booking.status === "cancelled" && (
             <button
-              onClick={() => navigate(`/booking`)}
+              onClick={() => navigate(`/booking/${booking.professionals?.id || booking.professional_id}`)}
               className="w-full h-12 rounded-xl gradient-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-4 h-4" /> Prenota di Nuovo

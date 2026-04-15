@@ -1,17 +1,33 @@
 import MobileLayout from "@/components/layout/MobileLayout";
 import { ArrowLeft, Home, MapPin, Calendar, Clock, CreditCard, MessageCircle, Star, Check, Sparkles } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import stylist2 from "@/assets/stylist-2.jpg";
 
-const mockServices = [
-  { id: "1", name: "Taglio Donna a Domicilio", price: 50, duration: 60 },
-  { id: "2", name: "Colore + Piega a Domicilio", price: 85, duration: 120 },
-  { id: "3", name: "Balayage a Domicilio", price: 150, duration: 150 },
-  { id: "4", name: "Piega a Domicilio", price: 35, duration: 45 },
+const fallbackServices: ServiceItem[] = [
+  { id: "fallback-1", name: "Taglio Donna a Domicilio", price: 50, duration: 60, isFallback: true },
+  { id: "fallback-2", name: "Colore + Piega a Domicilio", price: 85, duration: 120, isFallback: true },
+  { id: "fallback-3", name: "Balayage a Domicilio", price: 150, duration: 150, isFallback: true },
+  { id: "fallback-4", name: "Piega a Domicilio", price: 35, duration: 45, isFallback: true },
 ];
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  price: number;
+  duration: number;
+  isFallback?: boolean;
+}
+
+interface ProfessionalInfo {
+  id: string;
+  business_name: string;
+  rating: number | null;
+  user_id: string;
+}
 
 const timeSlots = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
@@ -26,8 +42,32 @@ export default function HomeServicePage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState<ServiceItem[]>(fallbackServices);
+  const [professional, setProfessional] = useState<ProfessionalInfo | null>(null);
 
-  const selectedServiceData = mockServices.find((s) => s.id === selectedService);
+  useEffect(() => {
+    if (!id) return;
+    const load = async () => {
+      const { data: pro } = await supabase
+        .from("professionals")
+        .select("id, business_name, rating, user_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (pro) setProfessional(pro);
+
+      const { data: svc } = await supabase
+        .from("services")
+        .select("id, name, price, duration_minutes")
+        .eq("professional_id", id)
+        .eq("active", true);
+      if (svc && svc.length > 0) {
+        setServices(svc.map(s => ({ id: s.id, name: s.name, price: s.price, duration: s.duration_minutes, isFallback: false })));
+      }
+    };
+    load();
+  }, [id]);
+
+  const selectedServiceData = services.find((s) => s.id === selectedService);
 
   const handleConfirm = async () => {
     if (!user) {
@@ -39,11 +79,34 @@ export default function HomeServicePage() {
       toast.error("Inserisci il tuo indirizzo");
       return;
     }
+
+    const professionalId = professional?.id;
+    if (!professionalId) {
+      toast.error("Professionista non trovato");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    const { error } = await supabase.from("bookings").insert({
+      client_id: user.id,
+      professional_id: professionalId,
+      service_id: selectedServiceData?.isFallback ? undefined : selectedService,
+      booking_date: selectedDate,
+      start_time: selectedTime,
+      total_price: selectedServiceData?.price,
+      notes: `A domicilio: ${address}${notes ? ` — ${notes}` : ""}`,
+    });
+
+    if (error) {
+      toast.error("Errore nella prenotazione. Riprova.");
+      setLoading(false);
+      return;
+    }
+
     toast.success("Prenotazione a domicilio confermata! Il professionista verrà da te.");
     setLoading(false);
-    navigate("/profile");
+    navigate("/my-bookings");
   };
 
   const dates = Array.from({ length: 7 }, (_, i) => {
@@ -75,12 +138,18 @@ export default function HomeServicePage() {
         {step === 1 && (
           <div className="space-y-4 fade-in">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-              <img src={stylist2} alt="" className="w-12 h-12 rounded-xl object-cover" />
+              {professional ? (
+                <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
+                  {professional.business_name[0]}
+                </div>
+              ) : (
+                <img src={stylist2} alt="" className="w-12 h-12 rounded-xl object-cover" />
+              )}
               <div>
-                <p className="text-sm font-bold">Professionista selezionato</p>
+                <p className="text-sm font-bold">{professional?.business_name || "Professionista selezionato"}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <Star className="w-3 h-3 text-gold fill-gold" />
-                  <span className="text-xs">4.9</span>
+                  <span className="text-xs">{professional?.rating ?? "4.9"}</span>
                   <span className="text-xs text-muted-foreground">· Viene a domicilio</span>
                 </div>
               </div>
@@ -88,7 +157,7 @@ export default function HomeServicePage() {
 
             <h2 className="text-sm font-bold mt-4">Scegli il servizio</h2>
             <div className="space-y-2">
-              {mockServices.map((s) => (
+              {services.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setSelectedService(s.id)}
