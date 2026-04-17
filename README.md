@@ -15,6 +15,26 @@
 
 ---
 
+## 📸 Screenshot
+
+<p align="center">
+  <img src="docs/screenshots/home.svg" width="180" alt="Home Feed" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/stylists.svg" width="180" alt="Stilisti" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/booking.svg" width="180" alt="Prenotazione" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/before-after.svg" width="180" alt="Prima & Dopo" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/profile.svg" width="180" alt="Profilo" />
+</p>
+
+| Home Feed | Stilisti | Prenotazione | Prima & Dopo | Profilo |
+|:---------:|:--------:|:------------:|:------------:|:-------:|
+| Feed social con storie, post e live | Cerca e prenota professionisti | Selezione data, orario e servizio | Gallery trasformazioni interattiva | Portfolio, statistiche e impostazioni |
+
+---
+
 ## ✨ Funzionalità
 
 ### Core

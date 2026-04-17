@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="812" viewBox="0 0 375 812">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d1b4e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="375" height="812" fill="#0f0f1a" rx="20"/>
+
+  <!-- Cover photo area -->
+  <rect x="0" y="0" width="375" height="160" fill="url(#coverGrad)"/>
+  <text x="187" y="100" text-anchor="middle" font-size="60">💜</text>
+
+  <!-- Back button -->
+  <circle cx="32" cy="32" r="16" fill="rgba(0,0,0,0.5)"/>
+  <text x="32" y="38" text-anchor="middle" font-size="16" fill="white">←</text>
+  <!-- Settings button -->
+  <circle cx="343" cy="32" r="16" fill="rgba(0,0,0,0.5)"/>
+  <text x="343" y="38" text-anchor="middle" font-size="16" fill="white">⚙️</text>
+
+  <!-- Avatar -->
+  <circle cx="187" cy="160" r="52" fill="url(#grad1)"/>
+  <circle cx="187" cy="160" r="46" fill="#1a1a2e"/>
+  <text x="187" y="175" text-anchor="middle" font-size="50">👩‍🦱</text>
+  <!-- Camera badge on avatar -->
+  <circle cx="224" cy="195" r="12" fill="#7c3aed"/>
+  <text x="224" y="200" text-anchor="middle" font-size="12" fill="white">📷</text>
+
+  <!-- Name & bio -->
+  <text x="187" y="232" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" fill="white">Martina Rossi</text>
+  <!-- Verified badge -->
+  <text x="242" y="232" font-size="16" fill="#7c3aed">✓</text>
+  <text x="187" y="252" text-anchor="middle" font-family="Arial" font-size="12" fill="#7c3aed">@martina.rossi · Stilista</text>
+  <text x="187" y="270" text-anchor="middle" font-family="Arial" font-size="12" fill="#888">✂️ Hairstylist · 📍 Milano</text>
+  <text x="187" y="288" text-anchor="middle" font-family="Arial" font-size="12" fill="#ccc">Specializzata in balayage e colore 💜</text>
+
+  <!-- Stats row -->
+  <rect x="20" y="300" width="335" height="56" rx="14" fill="#1a1a2e" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.4"/>
+  <text x="80" y="322" text-anchor="middle" font-family="Arial Black" font-size="17" font-weight="900" fill="white">1.2K</text>
+  <text x="80" y="340" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">Post</text>
+  <line x1="147" y1="308" x2="147" y2="348" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.4"/>
+  <text x="187" y="322" text-anchor="middle" font-family="Arial Black" font-size="17" font-weight="900" fill="white">8.4K</text>
+  <text x="187" y="340" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">Follower</text>
+  <line x1="227" y1="308" x2="227" y2="348" stroke="#7c3aed" stroke-width="0.5" stroke-opacity="0.4"/>
+  <text x="295" y="322" text-anchor="middle" font-family="Arial Black" font-size="17" font-weight="900" fill="white">342</text>
+  <text x="295" y="340" text-anchor="middle" font-family="Arial" font-size="10" fill="#888">Seguiti</text>
+
+  <!-- Action buttons -->
+  <rect x="20" y="368" width="160" height="38" rx="10" fill="url(#grad1)"/>
+  <text x="100" y="392" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="white">✏️ Modifica Profilo</text>
+  <rect x="192" y="368" width="163" height="38" rx="10" fill="#1a1a2e" stroke="#7c3aed" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="273" y="392" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#7c3aed">↗️ Condividi</text>
+
+  <!-- Tab bar for posts grid -->
+  <rect x="0" y="418" width="375" height="40" fill="#0f0f1a"/>
+  <rect x="0" y="454" width="125" height="2" fill="#7c3aed"/>
+  <text x="62" y="443" text-anchor="middle" font-size="18" fill="#7c3aed">⊞</text>
+  <text x="187" y="443" text-anchor="middle" font-size="18" fill="#666">≡</text>
+  <text x="312" y="443" text-anchor="middle" font-size="18" fill="#666">🛍️</text>
+
+  <!-- Photo grid -->
+  <!-- Row 1 -->
+  <rect x="1" y="456" width="124" height="110" fill="url(#coverGrad)"/>
+  <text x="63" y="515" text-anchor="middle" font-size="50">💇‍♀️</text>
+  <rect x="126" y="456" width="124" height="110" fill="#2a1a3e"/>
+  <text x="188" y="515" text-anchor="middle" font-size="50">🎨</text>
+  <rect x="251" y="456" width="124" height="110" fill="#1a2a2e"/>
+  <text x="313" y="515" text-anchor="middle" font-size="50">✂️</text>
+  <!-- Row 2 -->
+  <rect x="1" y="567" width="124" height="110" fill="#2a2a1e"/>
+  <text x="63" y="626" text-anchor="middle" font-size="50">💅</text>
+  <rect x="126" y="567" width="124" height="110" fill="url(#coverGrad)"/>
+  <text x="188" y="626" text-anchor="middle" font-size="50">💄</text>
+  <rect x="251" y="567" width="124" height="110" fill="#1e2a2e"/>
+  <text x="313" y="626" text-anchor="middle" font-size="50">🌟</text>
+  <!-- Row 3 partial -->
+  <rect x="1" y="678" width="124" height="80" fill="#2a1a1e"/>
+  <text x="63" y="725" text-anchor="middle" font-size="45">🏆</text>
+  <rect x="126" y="678" width="124" height="80" fill="#1a2a1e"/>
+  <text x="188" y="725" text-anchor="middle" font-size="45">⭐</text>
+  <rect x="251" y="678" width="124" height="80" fill="url(#coverGrad)"/>
+  <text x="313" y="725" text-anchor="middle" font-size="45">🎯</text>
+
+  <!-- Bottom Nav -->
+  <rect x="0" y="752" width="375" height="60" fill="#0f0f1a" opacity="0.97"/>
+  <line x1="0" y1="752" x2="375" y2="752" stroke="#7c3aed" stroke-width="1" opacity="0.3"/>
+  <text x="37" y="778" text-anchor="middle" font-size="22" fill="#666">🏠</text>
+  <text x="37" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Home</text>
+  <text x="112" y="778" text-anchor="middle" font-size="22" fill="#666">🔍</text>
+  <text x="112" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Cerca</text>
+  <circle cx="187" cy="775" r="20" fill="url(#grad1)"/>
+  <text x="187" y="781" text-anchor="middle" font-size="20" fill="white">+</text>
+  <text x="262" y="778" text-anchor="middle" font-size="22" fill="#666">💬</text>
+  <text x="262" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Chat</text>
+  <text x="337" y="778" text-anchor="middle" font-size="22" fill="#7c3aed">👤</text>
+  <text x="337" y="796" text-anchor="middle" font-family="Arial" font-size="10" fill="#7c3aed">Profilo</text>
+</svg>
