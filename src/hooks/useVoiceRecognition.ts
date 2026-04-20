@@ -136,13 +136,37 @@ export const useVoiceRecognition = (
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Advanced audio constraints to isolate user voice:
+      // - echoCancellation: removes speaker feedback (TTS playback)
+      // - noiseSuppression: filters background noise
+      // - autoGainControl: normalizes voice volume
+      // - channelCount mono + 16kHz sample rate matches speech recognition models
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: true },
+          autoGainControl: { ideal: true },
+          channelCount: { ideal: 1 },
+          sampleRate: { ideal: 16000 },
+        } as MediaTrackConstraints,
+      });
       stream.getTracks().forEach((track) => track.stop());
       return true;
     } catch {
-      return false;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        return true;
+      } catch {
+        return false;
+      }
     }
   }, []);
+
+  // Minimum confidence to accept a transcription result (0-1).
+  // Filters out background chatter / noise mistakenly transcribed.
+  const MIN_CONFIDENCE = 0.55;
+  const MIN_WAKE_CONFIDENCE = 0.6;
 
   const extractCommandAfterWakeWord = useCallback((sourceTranscript: string) => {
     const normalizedTranscript = sourceTranscript.toLowerCase().trim().replace(/\s+/g, ' ');
