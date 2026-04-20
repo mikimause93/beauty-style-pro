@@ -6,6 +6,7 @@ import { usePresenceTracker, isUserOnline, formatLastSeen } from "@/hooks/usePre
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCall } from "@/contexts/CallContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -77,6 +78,7 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  const callApi = useCall();
   usePresenceTracker();
 
   useEffect(() => {

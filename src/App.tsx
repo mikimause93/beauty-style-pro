@@ -14,6 +14,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PresenceTracker from "@/components/PresenceTracker";
 import StellaVoiceAgentWrapper from "@/components/stella/StellaVoiceAgentWrapper";
+import { CallProvider } from "@/contexts/CallContext";
+import CallManager from "@/components/calls/CallManager";
 import { initGlobalErrorHandler } from "@/lib/errorLogger";
 import { Loader2 } from "lucide-react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -129,6 +131,7 @@ const App = () => {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AuthProvider>
+        <CallProvider>
         <TenantProvider>
         <RadioProvider>
           <PageTracker />
@@ -234,6 +237,8 @@ const App = () => {
         </TenantProvider>
         <PresenceTracker />
         <StellaVoiceAgentWrapper />
+        <CallManager />
+        </CallProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
