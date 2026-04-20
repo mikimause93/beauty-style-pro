@@ -323,10 +323,15 @@ export const useVoiceRecognition = (
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
+            const alt = result[0];
+            const confidence = typeof alt.confidence === 'number' ? alt.confidence : 1;
             if (result.isFinal) {
-              finalTranscript += result[0].transcript;
+              // Reject low-confidence final results — likely background noise
+              if (confidence >= MIN_CONFIDENCE) {
+                finalTranscript += alt.transcript;
+              }
             } else {
-              currentInterimTranscript += result[0].transcript;
+              currentInterimTranscript += alt.transcript;
             }
           }
 
