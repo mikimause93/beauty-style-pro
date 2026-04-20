@@ -136,13 +136,37 @@ export const useVoiceRecognition = (
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Advanced audio constraints to isolate user voice:
+      // - echoCancellation: removes speaker feedback (TTS playback)
+      // - noiseSuppression: filters background noise
+      // - autoGainControl: normalizes voice volume
+      // - channelCount mono + 16kHz sample rate matches speech recognition models
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: true },
+          autoGainControl: { ideal: true },
+          channelCount: { ideal: 1 },
+          sampleRate: { ideal: 16000 },
+        } as MediaTrackConstraints,
+      });
       stream.getTracks().forEach((track) => track.stop());
       return true;
     } catch {
-      return false;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        return true;
+      } catch {
+        return false;
+      }
     }
   }, []);
+
+  // Minimum confidence to accept a transcription result (0-1).
+  // Filters out background chatter / noise mistakenly transcribed.
+  const MIN_CONFIDENCE = 0.55;
+  const MIN_WAKE_CONFIDENCE = 0.6;
 
   const extractCommandAfterWakeWord = useCallback((sourceTranscript: string) => {
     const normalizedTranscript = sourceTranscript.toLowerCase().trim().replace(/\s+/g, ' ');
@@ -299,10 +323,15 @@ export const useVoiceRecognition = (
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
+            const alt = result[0];
+            const confidence = typeof alt.confidence === 'number' ? alt.confidence : 1;
             if (result.isFinal) {
-              finalTranscript += result[0].transcript;
+              // Reject low-confidence final results — likely background noise
+              if (confidence >= MIN_CONFIDENCE) {
+                finalTranscript += alt.transcript;
+              }
             } else {
-              currentInterimTranscript += result[0].transcript;
+              currentInterimTranscript += alt.transcript;
             }
           }
 
@@ -488,14 +517,39 @@ export const useVoiceRecognition = (
           };
 
           recognition.onresult = (event: any) => {
-            const currentTranscript = Array.from(event.results)
-              .map((result: any) => result[0].transcript)
-              .join('').toLowerCase();
+            // Compute live transcript + average confidence for wake-word gating.
+            // Low-confidence noise is ignored to focus on the user's voice.
+            let liveText = '';
+            let finalText = '';
+            let liveConfSum = 0;
+            let liveConfCount = 0;
+            let finalConfSum = 0;
+            let finalConfCount = 0;
 
-            const finalTranscript = Array.from(event.results)
-              .filter((result: any) => result.isFinal)
-              .map((result: any) => result[0].transcript)
-              .join(' ').toLowerCase();
+            for (let i = 0; i < event.results.length; i++) {
+              const r = event.results[i];
+              const alt = r[0];
+              const conf = typeof alt.confidence === 'number' ? alt.confidence : 0.7;
+              liveText += alt.transcript;
+              liveConfSum += conf;
+              liveConfCount += 1;
+              if (r.isFinal) {
+                finalText += alt.transcript + ' ';
+                finalConfSum += conf;
+                finalConfCount += 1;
+              }
+            }
+
+            const liveAvgConf = liveConfCount ? liveConfSum / liveConfCount : 0;
+            const finalAvgConf = finalConfCount ? finalConfSum / finalConfCount : 0;
+
+            // Discard noisy chunks
+            if (liveAvgConf < MIN_WAKE_CONFIDENCE && finalAvgConf < MIN_WAKE_CONFIDENCE) {
+              return;
+            }
+
+            const currentTranscript = liveText.toLowerCase();
+            const finalTranscript = finalText.toLowerCase();
 
             const finalCommand = extractCommandAfterWakeWord(finalTranscript);
             const liveCommand = extractCommandAfterWakeWord(currentTranscript);
