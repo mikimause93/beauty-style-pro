@@ -6,6 +6,7 @@ import { usePresenceTracker, isUserOnline, formatLastSeen } from "@/hooks/usePre
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCall } from "@/contexts/CallContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import stylist1 from "@/assets/stylist-1.jpg";
@@ -77,6 +78,7 @@ export default function ChatPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const { translate, translating, autoTranslate, setAutoTranslate, getUserLanguage } = useTranslation();
+  const callApi = useCall();
   usePresenceTracker();
 
   useEffect(() => {
@@ -394,44 +396,24 @@ export default function ChatPage() {
 
 
   const startCall = async (type: "voice" | "video") => {
+    if (!selectedChat || !user) return;
     try {
-      const constraints: MediaStreamConstraints = type === "video" 
-        ? { audio: true, video: { facingMode: "user", width: 640, height: 480 } }
-        : { audio: true };
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      localStreamRef.current = stream;
-      
-      if (type === "video" && localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-      }
-      
-      setInCall(type);
-      setCallTimer(0);
-      callTimerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
-
-      // Send call notification message to the other user
-      if (selectedChat && user) {
-        const callLabel = type === "voice" ? "📞 Chiamata vocale" : "📹 Videochiamata";
-        await supabase.from("messages").insert({
-          conversation_id: selectedChat.id,
-          sender_id: user.id,
-          content: `${callLabel} avviata`,
-          message_type: "text",
-        });
-        // Use SECURITY DEFINER function to bypass RLS (can't insert for other users directly)
-        await supabase.rpc('create_notification', {
-          _user_id: selectedChat.otherUserId,
-          _title: type === "voice" ? "📞 Chiamata in arrivo" : "📹 Videochiamata in arrivo",
-          _message: `${user.user_metadata?.display_name || "Un utente"} ti sta chiamando`,
-          _type: "call",
-          _data: { caller_id: user.id, call_type: type },
-        });
-      }
-      
-      toast.success(type === "voice" ? "Chiamata vocale avviata" : "Videochiamata avviata");
+      const callLabel = type === "voice" ? "📞 Chiamata vocale" : "📹 Videochiamata";
+      // Log message in conversation history
+      await supabase.from("messages").insert({
+        conversation_id: selectedChat.id,
+        sender_id: user.id,
+        content: `${callLabel} avviata`,
+        message_type: "text",
+      });
+      // Trigger real WebRTC call via global manager
+      await callApi.startCall(
+        selectedChat.otherUserId,
+        type === "voice" ? "audio" : "video",
+        selectedChat.name,
+      );
     } catch (err) {
-      toast.error("Impossibile accedere a " + (type === "video" ? "fotocamera e microfono" : "microfono"));
+      toast.error("Impossibile avviare la chiamata");
     }
   };
 

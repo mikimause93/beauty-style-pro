@@ -834,6 +834,39 @@ export type Database = {
         }
         Relationships: []
       }
+      call_signals: {
+        Row: {
+          call_id: string
+          call_kind: string | null
+          created_at: string
+          from_user: string
+          id: string
+          payload: Json | null
+          signal_type: string
+          to_user: string
+        }
+        Insert: {
+          call_id: string
+          call_kind?: string | null
+          created_at?: string
+          from_user: string
+          id?: string
+          payload?: Json | null
+          signal_type: string
+          to_user: string
+        }
+        Update: {
+          call_id?: string
+          call_kind?: string | null
+          created_at?: string
+          from_user?: string
+          id?: string
+          payload?: Json | null
+          signal_type?: string
+          to_user?: string
+        }
+        Relationships: []
+      }
       casting_applications: {
         Row: {
           applicant_id: string
@@ -5347,6 +5380,7 @@ export type Database = {
           valid: boolean
         }[]
       }
+      cleanup_old_call_signals: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           _data?: Json
