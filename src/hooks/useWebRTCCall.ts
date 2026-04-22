@@ -31,13 +31,8 @@ interface SignalRow {
   created_at: string;
 }
 
-/**
- * Global WebRTC call manager. Mount once at the app root via <CallManager />.
- * Listens for incoming call signals on the call_signals table and orchestrates
- * a real peer-to-peer audio/video connection.
- */
 export function useWebRTCCall() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [status, setStatus] = useState<CallStatus>("idle");
   const [incoming, setIncoming] = useState<IncomingCall | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -49,7 +44,18 @@ export function useWebRTCCall() {
   const callIdRef = useRef<string | null>(null);
   const peerIdRef = useRef<string | null>(null);
   const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
+  const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+  const statusRef = useRef<CallStatus>("idle");
+  const incomingRef = useRef<IncomingCall | null>(null);
+
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
+  useEffect(() => {
+    incomingRef.current = incoming;
+  }, [incoming]);
 
   const sendSignal = useCallback(async (
     type: string,
@@ -61,7 +67,8 @@ export function useWebRTCCall() {
     if (!user) return;
     const cid = callId || callIdRef.current;
     if (!cid) return;
-    await supabase.from("call_signals").insert({
+
+    const { error } = await supabase.from("call_signals").insert({
       call_id: cid,
       from_user: user.id,
       to_user: toUser,
@@ -69,82 +76,124 @@ export function useWebRTCCall() {
       payload,
       call_kind: kind,
     });
+
+    if (error) throw error;
   }, [user]);
 
+  const stopRingtone = useCallback(() => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current = null;
+    }
+  }, []);
+
   const cleanupPeer = useCallback(() => {
+    stopRingtone();
     if (pcRef.current) {
       try { pcRef.current.close(); } catch {}
       pcRef.current = null;
     }
     if (localStream) {
-      localStream.getTracks().forEach(t => t.stop());
+      localStream.getTracks().forEach((track) => track.stop());
     }
     setLocalStream(null);
     setRemoteStream(null);
     pendingIceRef.current = [];
-    if (ringtoneRef.current) {
-      ringtoneRef.current.pause();
-      ringtoneRef.current = null;
-    }
-  }, [localStream]);
+    pendingOfferRef.current = null;
+  }, [localStream, stopRingtone]);
 
-  const endCall = useCallback(async (notifyPeer = true) => {
-    if (notifyPeer && peerIdRef.current && callIdRef.current) {
-      await sendSignal("hangup", peerIdRef.current, null, activeKind);
-    }
-    cleanupPeer();
+  const resetCallState = useCallback(() => {
     callIdRef.current = null;
     peerIdRef.current = null;
-    setStatus("idle");
     setIncoming(null);
     setPeerName("");
-  }, [activeKind, cleanupPeer, sendSignal]);
+    setStatus("idle");
+  }, []);
+
+  const endCall = useCallback(async (notifyPeer = true) => {
+    try {
+      if (notifyPeer && peerIdRef.current && callIdRef.current) {
+        await sendSignal("hangup", peerIdRef.current, null, activeKind, callIdRef.current);
+      }
+    } catch {}
+    cleanupPeer();
+    resetCallState();
+  }, [activeKind, cleanupPeer, resetCallState, sendSignal]);
 
   const createPeer = useCallback((toUser: string, callId: string, kind: CallKind) => {
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        void sendSignal("ice", toUser, e.candidate.toJSON(), kind, callId);
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        void sendSignal("ice", toUser, event.candidate.toJSON(), kind, callId);
       }
     };
 
-    pc.ontrack = (e) => {
-      const [stream] = e.streams;
+    pc.ontrack = (event) => {
+      const [stream] = event.streams;
       if (stream) setRemoteStream(stream);
     };
 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === "connected") {
         setStatus("in-call");
-      } else if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
-        toast.error("Connessione persa");
-        void endCall(true);
+      } else if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
+        cleanupPeer();
+        resetCallState();
       }
     };
 
     pcRef.current = pc;
     return pc;
-  }, [endCall, sendSignal]);
+  }, [cleanupPeer, resetCallState, sendSignal]);
 
   const getMedia = useCallback(async (kind: CallKind): Promise<MediaStream> => {
     const constraints: MediaStreamConstraints = {
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      video: kind === "video" ? { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" } : false,
+      video: kind === "video"
+        ? { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
+        : false,
     };
-    return await navigator.mediaDevices.getUserMedia(constraints);
+    return navigator.mediaDevices.getUserMedia(constraints);
   }, []);
 
-  /** Start an outgoing call */
+  const hydrateIncoming = useCallback(async (signal: SignalRow) => {
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("user_id", signal.from_user)
+      .maybeSingle();
+
+    setActiveKind((signal.call_kind as CallKind) || "video");
+    setIncoming({
+      callId: signal.call_id,
+      fromUser: signal.from_user,
+      fromName: prof?.display_name || signal.payload?.name || "Sconosciuto",
+      fromAvatar: prof?.avatar_url || signal.payload?.avatar || undefined,
+      kind: (signal.call_kind as CallKind) || "video",
+    });
+    setPeerName(prof?.display_name || signal.payload?.name || "Sconosciuto");
+    setStatus("ringing-in");
+
+    try {
+      const audio = new Audio("data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YRwAAAAAAA==");
+      audio.loop = true;
+      audio.volume = 0.4;
+      ringtoneRef.current = audio;
+      await audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
   const startCall = useCallback(async (toUser: string, kind: CallKind, peerDisplayName?: string) => {
     if (!user) {
       toast.error("Devi essere loggato");
       return;
     }
-    if (status !== "idle") {
+    if (statusRef.current !== "idle") {
       toast.error("Hai già una chiamata in corso");
       return;
     }
+
     try {
       const callId = crypto.randomUUID();
       callIdRef.current = callId;
@@ -157,26 +206,26 @@ export function useWebRTCCall() {
       setLocalStream(stream);
 
       const pc = createPeer(toUser, callId, kind);
-      stream.getTracks().forEach(t => pc.addTrack(t, stream));
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-      // Send ringing signal first (so peer can show incoming UI)
-      await sendSignal("ringing", toUser, { name: peerDisplayName }, kind, callId);
+      await sendSignal("ringing", toUser, {
+        name: profile?.display_name || user.email || "Utente",
+        avatar: profile?.avatar_url || null,
+      }, kind, callId);
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       await sendSignal("offer", toUser, { sdp: offer.sdp, type: offer.type }, kind, callId);
-    } catch (err: any) {
-      toast.error(err?.message || "Impossibile avviare la chiamata");
+    } catch (error: any) {
+      toast.error(error?.message || "Impossibile avviare la chiamata");
       cleanupPeer();
-      setStatus("idle");
-      callIdRef.current = null;
-      peerIdRef.current = null;
+      resetCallState();
     }
-  }, [cleanupPeer, createPeer, getMedia, sendSignal, status, user]);
+  }, [cleanupPeer, createPeer, getMedia, profile?.avatar_url, profile?.display_name, resetCallState, sendSignal, user]);
 
-  /** Accept an incoming call */
   const acceptCall = useCallback(async () => {
     if (!incoming || !user) return;
+
     try {
       const { callId, fromUser, kind } = incoming;
       callIdRef.current = callId;
@@ -184,49 +233,167 @@ export function useWebRTCCall() {
       setActiveKind(kind);
       setPeerName(incoming.fromName || "");
       setStatus("connecting");
-      if (ringtoneRef.current) { ringtoneRef.current.pause(); ringtoneRef.current = null; }
+      stopRingtone();
 
       const stream = await getMedia(kind);
       setLocalStream(stream);
 
       const pc = createPeer(fromUser, callId, kind);
-      stream.getTracks().forEach(t => pc.addTrack(t, stream));
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       setIncoming(null);
 
-      // Tell caller we accepted (they'll know the offer is processable)
-      await sendSignal("accept", fromUser, null, kind, callId);
-    } catch (err: any) {
-      toast.error(err?.message || "Impossibile accettare la chiamata");
-      void endCall(true);
-    }
-  }, [createPeer, endCall, getMedia, incoming, sendSignal, user]);
+      if (pendingOfferRef.current) {
+        await pc.setRemoteDescription(new RTCSessionDescription(pendingOfferRef.current));
+        pendingOfferRef.current = null;
+      }
 
-  /** Reject an incoming call */
+      for (const candidate of pendingIceRef.current) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+      }
+      pendingIceRef.current = [];
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      await sendSignal("accept", fromUser, null, kind, callId);
+      await sendSignal("answer", fromUser, { sdp: answer.sdp, type: answer.type }, kind, callId);
+    } catch (error: any) {
+      toast.error(error?.message || "Impossibile accettare la chiamata");
+      await endCall(true);
+    }
+  }, [createPeer, endCall, getMedia, incoming, sendSignal, stopRingtone, user]);
+
   const rejectCall = useCallback(async () => {
     if (!incoming) return;
-    await sendSignal("reject", incoming.fromUser, null, incoming.kind, incoming.callId);
-    if (ringtoneRef.current) { ringtoneRef.current.pause(); ringtoneRef.current = null; }
-    setIncoming(null);
-    setStatus("idle");
-    callIdRef.current = null;
-    peerIdRef.current = null;
-  }, [incoming, sendSignal]);
+    try {
+      await sendSignal("reject", incoming.fromUser, null, incoming.kind, incoming.callId);
+    } catch {}
+    stopRingtone();
+    cleanupPeer();
+    resetCallState();
+  }, [cleanupPeer, incoming, resetCallState, sendSignal, stopRingtone]);
 
-  /** Toggle local mic */
-  const toggleMic = useCallback((on?: boolean) => {
+  const toggleMic = useCallback((enabled?: boolean) => {
     if (!localStream) return;
-    localStream.getAudioTracks().forEach(t => t.enabled = on ?? !t.enabled);
+    localStream.getAudioTracks().forEach((track) => {
+      track.enabled = enabled ?? !track.enabled;
+    });
   }, [localStream]);
 
-  /** Toggle local camera */
-  const toggleCamera = useCallback((on?: boolean) => {
+  const toggleCamera = useCallback((enabled?: boolean) => {
     if (!localStream) return;
-    localStream.getVideoTracks().forEach(t => t.enabled = on ?? !t.enabled);
+    localStream.getVideoTracks().forEach((track) => {
+      track.enabled = enabled ?? !track.enabled;
+    });
   }, [localStream]);
 
-  // Realtime signaling listener
   useEffect(() => {
     if (!user) return;
+
+    const handleSignal = async (signal: SignalRow) => {
+      const pc = pcRef.current;
+
+      try {
+        if (signal.signal_type === "ringing") {
+          if (statusRef.current !== "idle") {
+            await supabase.from("call_signals").insert({
+              call_id: signal.call_id,
+              from_user: user.id,
+              to_user: signal.from_user,
+              signal_type: "reject",
+              payload: { reason: "busy" },
+              call_kind: signal.call_kind,
+            });
+            return;
+          }
+          callIdRef.current = signal.call_id;
+          peerIdRef.current = signal.from_user;
+          await hydrateIncoming(signal);
+          return;
+        }
+
+        if (signal.signal_type === "offer") {
+          const offer = { type: "offer" as RTCSdpType, sdp: signal.payload?.sdp };
+          callIdRef.current = signal.call_id;
+          peerIdRef.current = signal.from_user;
+          setActiveKind((signal.call_kind as CallKind) || "video");
+
+          if (statusRef.current === "idle" && !incomingRef.current) {
+            await hydrateIncoming(signal);
+          }
+
+          if (!pc) {
+            pendingOfferRef.current = offer;
+            return;
+          }
+
+          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          await sendSignal("answer", signal.from_user, { sdp: answer.sdp, type: answer.type }, (signal.call_kind as CallKind) || "video", signal.call_id);
+          return;
+        }
+
+        if (signal.signal_type === "answer") {
+          if (!pc || signal.call_id !== callIdRef.current) return;
+          await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: signal.payload?.sdp }));
+          for (const candidate of pendingIceRef.current) {
+            try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+          }
+          pendingIceRef.current = [];
+          setStatus("connecting");
+          return;
+        }
+
+        if (signal.signal_type === "ice") {
+          if (signal.call_id !== callIdRef.current) return;
+          const candidate = signal.payload as RTCIceCandidateInit;
+          if (pc && pc.remoteDescription) {
+            try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+          } else {
+            pendingIceRef.current.push(candidate);
+          }
+          return;
+        }
+
+        if (signal.signal_type === "accept") {
+          setStatus("connecting");
+          return;
+        }
+
+        if (signal.signal_type === "reject") {
+          toast.info(signal.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
+          cleanupPeer();
+          resetCallState();
+          return;
+        }
+
+        if (signal.signal_type === "hangup") {
+          toast.info("Chiamata terminata");
+          cleanupPeer();
+          resetCallState();
+        }
+      } catch (error) {
+        console.error("[CallSignal]", error);
+      }
+    };
+
+    const loadPendingSignals = async () => {
+      const since = new Date(Date.now() - 45_000).toISOString();
+      const { data } = await supabase
+        .from("call_signals")
+        .select("*")
+        .eq("to_user", user.id)
+        .gte("created_at", since)
+        .in("signal_type", ["ringing", "offer"])
+        .order("created_at", { ascending: true })
+        .limit(10);
+
+      for (const signal of (data || []) as SignalRow[]) {
+        await handleSignal(signal);
+      }
+    };
+
+    void loadPendingSignals();
 
     const channel = supabase
       .channel(`call-signals-${user.id}`)
@@ -238,106 +405,15 @@ export function useWebRTCCall() {
           table: "call_signals",
           filter: `to_user=eq.${user.id}`,
         },
-        async (payload) => {
-          const sig = payload.new as SignalRow;
-          const pc = pcRef.current;
-
-          try {
-            if (sig.signal_type === "ringing") {
-              // Incoming call notification
-              if (status !== "idle") {
-                // Already busy — auto-reject
-                await supabase.from("call_signals").insert({
-                  call_id: sig.call_id,
-                  from_user: user.id,
-                  to_user: sig.from_user,
-                  signal_type: "reject",
-                  payload: { reason: "busy" },
-                  call_kind: sig.call_kind,
-                });
-                return;
-              }
-              // Fetch caller profile
-              const { data: prof } = await supabase
-                .from("profiles")
-                .select("display_name, avatar_url")
-                .eq("user_id", sig.from_user)
-                .maybeSingle();
-              setIncoming({
-                callId: sig.call_id,
-                fromUser: sig.from_user,
-                fromName: prof?.display_name || sig.payload?.name || "Sconosciuto",
-                fromAvatar: prof?.avatar_url || undefined,
-                kind: (sig.call_kind as CallKind) || "video",
-              });
-              setStatus("ringing-in");
-              // Try to play ringtone (best-effort)
-              try {
-                const audio = new Audio("data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YRwAAAAAAA==");
-                audio.loop = true;
-                audio.volume = 0.4;
-                ringtoneRef.current = audio;
-                await audio.play().catch(() => {});
-              } catch {}
-            } else if (sig.signal_type === "offer") {
-              if (!pc || sig.call_id !== callIdRef.current) return;
-              await pc.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp: sig.payload.sdp }));
-              // Drain any queued ICE
-              for (const c of pendingIceRef.current) {
-                try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-              }
-              pendingIceRef.current = [];
-              const answer = await pc.createAnswer();
-              await pc.setLocalDescription(answer);
-              await sendSignal("answer", sig.from_user, { sdp: answer.sdp, type: answer.type }, (sig.call_kind as CallKind) || "video", sig.call_id);
-            } else if (sig.signal_type === "answer") {
-              if (!pc || sig.call_id !== callIdRef.current) return;
-              await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: sig.payload.sdp }));
-              for (const c of pendingIceRef.current) {
-                try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-              }
-              pendingIceRef.current = [];
-              setStatus("connecting");
-            } else if (sig.signal_type === "ice") {
-              if (sig.call_id !== callIdRef.current) return;
-              const cand = sig.payload as RTCIceCandidateInit;
-              if (pc && pc.remoteDescription) {
-                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch {}
-              } else {
-                pendingIceRef.current.push(cand);
-              }
-            } else if (sig.signal_type === "accept") {
-              // Callee accepted; offer was already sent — we're just waiting for answer
-              setStatus("connecting");
-            } else if (sig.signal_type === "reject") {
-              toast.info(sig.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
-              cleanupPeer();
-              callIdRef.current = null;
-              peerIdRef.current = null;
-              setStatus("idle");
-              setIncoming(null);
-            } else if (sig.signal_type === "hangup") {
-              toast.info("Chiamata terminata");
-              cleanupPeer();
-              callIdRef.current = null;
-              peerIdRef.current = null;
-              setStatus("idle");
-              setIncoming(null);
-            }
-          } catch (err) {
-            console.error("[CallSignal]", err);
-          }
-        },
+        (payload) => { void handleSignal(payload.new as SignalRow); },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, status]);
+  }, [cleanupPeer, hydrateIncoming, resetCallState, sendSignal, user]);
 
-  // Cleanup on unmount
   useEffect(() => () => cleanupPeer(), [cleanupPeer]);
 
   return {
