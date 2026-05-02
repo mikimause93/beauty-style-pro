@@ -48,6 +48,8 @@ export function useWebRTCCall() {
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
   const statusRef = useRef<CallStatus>("idle");
   const incomingRef = useRef<IncomingCall | null>(null);
+  const disconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const processedSignalsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     statusRef.current = status;
@@ -89,6 +91,10 @@ export function useWebRTCCall() {
 
   const cleanupPeer = useCallback(() => {
     stopRingtone();
+    if (disconnectTimerRef.current) {
+      clearTimeout(disconnectTimerRef.current);
+      disconnectTimerRef.current = null;
+    }
     if (pcRef.current) {
       try { pcRef.current.close(); } catch {}
       pcRef.current = null;
@@ -136,8 +142,22 @@ export function useWebRTCCall() {
 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === "connected") {
+        if (disconnectTimerRef.current) {
+          clearTimeout(disconnectTimerRef.current);
+          disconnectTimerRef.current = null;
+        }
         setStatus("in-call");
-      } else if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
+      } else if (pc.connectionState === "disconnected") {
+        // Don't drop immediately — WebRTC often recovers within seconds
+        if (!disconnectTimerRef.current) {
+          disconnectTimerRef.current = setTimeout(() => {
+            if (pcRef.current?.connectionState !== "connected") {
+              cleanupPeer();
+              resetCallState();
+            }
+          }, 8000);
+        }
+      } else if (["failed", "closed"].includes(pc.connectionState)) {
         cleanupPeer();
         resetCallState();
       }
@@ -290,6 +310,15 @@ export function useWebRTCCall() {
     if (!user) return;
 
     const handleSignal = async (signal: SignalRow) => {
+      // Dedupe: realtime + loadPendingSignals may deliver same row twice
+      if (processedSignalsRef.current.has(signal.id)) return;
+      processedSignalsRef.current.add(signal.id);
+      if (processedSignalsRef.current.size > 200) {
+        processedSignalsRef.current = new Set(
+          Array.from(processedSignalsRef.current).slice(-100),
+        );
+      }
+
       const pc = pcRef.current;
 
       try {
@@ -378,15 +407,16 @@ export function useWebRTCCall() {
     };
 
     const loadPendingSignals = async () => {
-      const since = new Date(Date.now() - 45_000).toISOString();
+      // Extend window to 90s so late accepts (app reopened from background) still connect
+      const since = new Date(Date.now() - 90_000).toISOString();
       const { data } = await supabase
         .from("call_signals")
         .select("*")
         .eq("to_user", user.id)
         .gte("created_at", since)
-        .in("signal_type", ["ringing", "offer"])
+        .in("signal_type", ["ringing", "offer", "ice", "hangup"])
         .order("created_at", { ascending: true })
-        .limit(10);
+        .limit(50);
 
       for (const signal of (data || []) as SignalRow[]) {
         await handleSignal(signal);
@@ -394,6 +424,15 @@ export function useWebRTCCall() {
     };
 
     void loadPendingSignals();
+
+    // Re-scan when tab becomes visible again (app returns from background)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && statusRef.current === "idle") {
+        void loadPendingSignals();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleVisibility);
 
     const channel = supabase
       .channel(`call-signals-${user.id}`)
@@ -411,6 +450,8 @@ export function useWebRTCCall() {
 
     return () => {
       supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleVisibility);
     };
   }, [cleanupPeer, hydrateIncoming, resetCallState, sendSignal, user]);
 
