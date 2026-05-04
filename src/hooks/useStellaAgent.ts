@@ -22,7 +22,9 @@ const LIMITS = {
 } as const;
 
 const CONFIRMATION_REQUIRED = new Set([
-  'book', 'payment', 'follow', 'message', 'delete', 'spend_coins',
+  // Solo azioni davvero sensibili: pagamenti, telefonate reali, prenotazioni,
+  // eliminazioni, spesa di QR Coin. Like/follow/message vanno via senza conferma.
+  'book', 'payment', 'call', 'delete', 'spend_coins',
 ]);
 
 export interface StellaCommand {
