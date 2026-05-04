@@ -1071,7 +1071,9 @@ export function useStellaAgent() {
     if (callMatch) {
       return {
         id: Date.now().toString(), type: 'call', text,
-        response: `Cerco ${callMatch[1]} per la chiamata!`, requiresConfirmation: false, silent: true,
+        response: `Vuoi che chiami ${callMatch[1]}? Conferma per procedere.`,
+        requiresConfirmation: true,
+        silent: false,
         execute: async () => {
           const result = await callContact(callMatch[1].trim());
           toast.success(`🌟 Stella: ${result}`);
