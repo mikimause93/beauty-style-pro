@@ -7,9 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import useGeolocation, { haversineDistance, getCoordsFromCity, ITALIAN_CITIES } from "@/hooks/useGeolocation";
 import { toast } from "sonner";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
 
 type Professional = {
   id: string;
@@ -45,7 +42,6 @@ type EventItem = {
   start_date: string;
 };
 
-const fallbackAvatars = [stylist1, stylist2, beauty1];
 const SPECIALTIES = ["Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist", "Makeup Artist", "Massaggiatore"];
 
 type MarkerFilter = "all" | "salon" | "job" | "event";
@@ -395,7 +391,11 @@ export default function MapSearchPage() {
             <button onClick={() => navigate(`/stylist/${p.id}`)}
               className="w-full flex items-center gap-3 p-3.5 text-left">
               <div className="relative">
-                <img src={p.avatar || fallbackAvatars[i % 3]} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                <img
+                  src={p.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`}
+                  alt=""
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
                 {p.is_verified && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
                     <span className="text-[7px] text-primary-foreground">✓</span>
