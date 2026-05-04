@@ -1,39 +1,78 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Search, Heart, MapPin, Star } from "lucide-react";
+import { ArrowLeft, Search, MapPin, Star, Navigation, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
+import useGeolocation, { haversineDistance, getCoordsFromCity } from "@/hooks/useGeolocation";
 
-const fallbackStylists = [
-  { id: "1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, review_count: 127, avatar: stylist2, hourly_rate: 45 },
-  { id: "2", business_name: "Sylvie Leaciu Cozeni", specialty: "Colorist", city: "Roma", rating: 4.8, review_count: 89, avatar: stylist1, hourly_rate: 55 },
-  { id: "3", business_name: "Marco Barberi", specialty: "Barber", city: "Napoli", rating: 4.7, review_count: 64, avatar: beauty1, hourly_rate: 35 },
-];
+type Stylist = {
+  id: string;
+  business_name: string;
+  specialty: string | null;
+  city: string | null;
+  rating: number | null;
+  review_count: number | null;
+  hourly_rate: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  avatar: string | null;
+  user_id?: string;
+  distance?: number;
+};
+
+const SPECIALTIES = ["Tutti", "Hairstylist", "Colorist", "Barber", "Estetista", "Nail Artist", "Makeup Artist", "Massaggiatore"];
 
 export default function StylistsPage() {
   const navigate = useNavigate();
+  const { coords } = useGeolocation();
   const [search, setSearch] = useState("");
-  const [stylists, setStylists] = useState(fallbackStylists);
+  const [specialty, setSpecialty] = useState<string>("Tutti");
+  const [stylists, setStylists] = useState<Stylist[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadProfessionals(); }, []);
 
   const loadProfessionals = async () => {
-    const { data } = await supabase.from("professionals").select("*, profiles:user_id(avatar_url)").order("rating", { ascending: false });
-    if (data && data.length > 0) {
-      setStylists(data.map((p: any, i: number) => ({
+    setLoading(true);
+    const { data } = await supabase
+      .from("professionals")
+      .select("id, user_id, business_name, specialty, city, rating, review_count, hourly_rate, latitude, longitude, profiles:user_id(avatar_url)")
+      .order("rating", { ascending: false });
+    if (data) {
+      setStylists(data.map((p: any) => ({
         ...p,
-        avatar: (Array.isArray(p.profiles) ? p.profiles[0]?.avatar_url : p.profiles?.avatar_url) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
+        avatar: (Array.isArray(p.profiles) ? p.profiles[0]?.avatar_url : p.profiles?.avatar_url) || null,
       })));
     }
+    setLoading(false);
   };
 
-  const filtered = stylists.filter(s =>
-    s.business_name.toLowerCase().includes(search.toLowerCase()) ||
-    (s.specialty || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const enriched = useMemo(() => stylists.map(s => {
+    const lat = s.latitude ?? (s.city ? getCoordsFromCity(s.city)[0] : null);
+    const lng = s.longitude ?? (s.city ? getCoordsFromCity(s.city)[1] : null);
+    const distance = lat != null && lng != null
+      ? Math.round(haversineDistance(coords[0], coords[1], lat, lng) * 10) / 10
+      : undefined;
+    return { ...s, distance };
+  }), [stylists, coords]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return enriched
+      .filter(s => {
+        if (specialty !== "Tutti" && (s.specialty || "").toLowerCase() !== specialty.toLowerCase()) return false;
+        if (!q) return true;
+        return s.business_name.toLowerCase().includes(q)
+          || (s.specialty || "").toLowerCase().includes(q)
+          || (s.city || "").toLowerCase().includes(q);
+      })
+      .sort((a, b) => {
+        const da = a.distance ?? 9999;
+        const db = b.distance ?? 9999;
+        if (da !== db) return da - db;
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      });
+  }, [enriched, search, specialty]);
 
   return (
     <MobileLayout>
@@ -42,36 +81,73 @@ export default function StylistsPage() {
           <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-display font-bold">Stilisti</h1>
+          <h1 className="text-lg font-display font-bold">Professionisti</h1>
         </div>
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca stilisti..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca per nome, servizio o città..."
             className="w-full h-10 rounded-xl bg-card border border-border/50 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+        </div>
+        <div className="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar">
+          {SPECIALTIES.map(s => (
+            <button key={s} type="button" aria-label={`Filtra ${s}`} onClick={() => setSpecialty(s)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                specialty === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}>
+              {s === "Tutti" ? <Filter className="w-3 h-3" /> : null}{s}
+            </button>
+          ))}
         </div>
       </header>
 
       <div className="px-5 py-4 space-y-2">
-        {filtered.map(stylist => (
+        {loading && (
+          <div className="space-y-2">
+            {[1,2,3,4].map(i => <div key={i} className="h-20 rounded-2xl bg-card animate-pulse" />)}
+          </div>
+        )}
+        {!loading && filtered.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-sm text-muted-foreground">Nessun professionista trovato.</p>
+          </div>
+        )}
+        {!loading && filtered.map(stylist => (
           <button key={stylist.id} onClick={() => navigate(`/stylist/${stylist.id}`)}
             className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/50 hover:border-primary/20 transition-all duration-200 text-left">
-            <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover" />
+            <img
+              src={stylist.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${stylist.id}`}
+              alt=""
+              className="w-14 h-14 rounded-xl object-cover"
+            />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{stylist.business_name}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{stylist.specialty}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{stylist.specialty || "Beauty Pro"}</p>
               <div className="flex items-center gap-2 mt-1.5">
                 <Star className="w-3 h-3 text-accent fill-accent" />
-                <span className="text-xs font-medium">{stylist.rating}</span>
-                <span className="text-xs text-muted-foreground">({stylist.review_count})</span>
-                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                  <MapPin className="w-3 h-3" /> {stylist.city}
-                </span>
+                <span className="text-xs font-medium">{stylist.rating ?? "—"}</span>
+                {stylist.review_count != null && (
+                  <span className="text-xs text-muted-foreground">({stylist.review_count})</span>
+                )}
+                {stylist.city && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    <MapPin className="w-3 h-3" />{stylist.city}
+                  </span>
+                )}
+                {stylist.distance !== undefined && (
+                  <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
+                    <Navigation className="w-2.5 h-2.5" />{stylist.distance} km
+                  </span>
+                )}
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold">€{stylist.hourly_rate}</p>
-              <p className="text-xs text-muted-foreground">/ora</p>
-              <button onClick={e => { e.stopPropagation(); navigate(`/booking`); }}
+              {stylist.hourly_rate != null && (
+                <>
+                  <p className="text-sm font-bold">€{stylist.hourly_rate}</p>
+                  <p className="text-xs text-muted-foreground">/ora</p>
+                </>
+              )}
+              <button type="button" aria-label="Prenota" onClick={e => { e.stopPropagation(); navigate(`/booking/${stylist.id}`); }}
                 className="mt-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                 Prenota
               </button>
