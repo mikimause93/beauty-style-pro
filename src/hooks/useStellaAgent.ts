@@ -22,7 +22,9 @@ const LIMITS = {
 } as const;
 
 const CONFIRMATION_REQUIRED = new Set([
-  'book', 'payment', 'follow', 'message', 'delete', 'spend_coins',
+  // Solo azioni davvero sensibili: pagamenti, telefonate reali, prenotazioni,
+  // eliminazioni, spesa di QR Coin. Like/follow/message vanno via senza conferma.
+  'book', 'payment', 'call', 'delete', 'spend_coins',
 ]);
 
 export interface StellaCommand {
@@ -1069,7 +1071,9 @@ export function useStellaAgent() {
     if (callMatch) {
       return {
         id: Date.now().toString(), type: 'call', text,
-        response: `Cerco ${callMatch[1]} per la chiamata!`, requiresConfirmation: false, silent: true,
+        response: `Vuoi che chiami ${callMatch[1]}? Conferma per procedere.`,
+        requiresConfirmation: true,
+        silent: false,
         execute: async () => {
           const result = await callContact(callMatch[1].trim());
           toast.success(`🌟 Stella: ${result}`);
@@ -1492,6 +1496,24 @@ export function useStellaAgent() {
 
     const cmd = parseCommand(text);
     if (!cmd) {
+      // Prima di chiedere all'AI, prova ad eseguire l'azione direttamente sulla
+      // pagina visibile: Stella cerca un pulsante/link col testo del comando.
+      // Questo copre TUTTE le azioni di tutte le pagine (anche quelle non mappate).
+      const cleaned = text
+        .toLowerCase()
+        .replace(/^(stella|hey stella|ehi stella|ciao stella|ok stella)[,\s]*/i, '')
+        .replace(/^(per favore|puoi|vuoi|adesso|ora)\s+/i, '')
+        .replace(/^(clicca|premi|tocca|seleziona|apri|attiva|vai a|vai su)\s+/i, '')
+        .trim();
+      if (cleaned && clickVisibleAction([cleaned])) {
+        const ok = `Ho premuto "${cleaned}".`;
+        addMessage({ role: 'stella', content: ok, type: 'action_result' });
+        setInlineStatus(ok);
+        stellaSpeak(ok);
+        logStellaCommand(text, 'action');
+        scheduleWakeWordResume();
+        return;
+      }
       await askAI(text);
       return;
     }
@@ -1532,7 +1554,7 @@ export function useStellaAgent() {
         scheduleWakeWordResume();
       }
     }
-  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume]);
+  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume, clickVisibleAction]);
 
   handleCommandRef.current = handleCommand;
 
