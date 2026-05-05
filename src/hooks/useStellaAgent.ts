@@ -1009,7 +1009,12 @@ export function useStellaAgent() {
         },
       };
     }
-    if (stripped.includes('prenota') || stripped.includes('prenotazione') || stripped.includes('appuntamento') || stripped.includes('fissa')) {
+    // FIX: only trigger if the verb stands alone (not "conferma prenotazione",
+    // "annulla prenotazione" — those are handled below).
+    if (
+      (stripped.startsWith('prenota') || stripped === 'prenotazione' || stripped === 'appuntamento' || stripped === 'fissa appuntamento')
+      && !stripped.includes('conferma') && !stripped.includes('annulla') && !stripped.includes('cancella') && !stripped.includes('disdici')
+    ) {
       return {
         id: Date.now().toString(), type: 'navigate', text,
         response: 'Ti mostro i professionisti disponibili!', requiresConfirmation: false, silent: true,
