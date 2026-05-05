@@ -892,7 +892,9 @@ export function useStellaAgent() {
     }
 
     // ── DIRECT FOLLOW ─────────────────────────────────────────────────────
-    const followMatch = stripped.match(/(?:segui|inizia a seguire|aggiungi)\s+(.+)/);
+    // FIX: "aggiungi" was too broad ("aggiungi al carrello" → tried to follow user "al carrello").
+    // Restrict to explicit follow verbs only.
+    const followMatch = stripped.match(/^(?:segui|inizia a seguire|follow)\s+(.+)/);
     if (followMatch) {
       const target = followMatch[1].trim();
       return {
