@@ -24,6 +24,8 @@ type Professional = {
   avatar?: string;
   distance?: number;
   aiScore?: number;
+  source?: "professional" | "profile";
+  user_id?: string;
 };
 
 type JobPost = {
@@ -93,7 +95,7 @@ export default function MapSearchPage() {
     
     if (data && data.length > 0) {
       data.forEach((p: any) => {
-        allPros.push({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` });
+        allPros.push({ ...p, avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`, source: "professional", user_id: p.user_id });
       });
     }
     
@@ -103,6 +105,8 @@ export default function MapSearchPage() {
         if ((p.user_type === "professional" || p.user_type === "business") && !allPros.find(pro => pro.id === p.user_id)) {
           allPros.push({
             id: p.user_id,
+            user_id: p.user_id,
+            source: "profile",
             business_name: p.display_name || "Utente",
             specialty: p.user_type === "business" ? "Business" : "Professionista",
             city: p.city,
@@ -182,7 +186,7 @@ export default function MapSearchPage() {
           sublabel: `${p.specialty || "Beauty"} · ${p.distance}km · ${p.rating ? `★${p.rating}` : ""} · Disponibile`,
           type: p.is_verified ? "premium" : "salon",
           rating: p.rating || undefined,
-          onClick: () => navigate(`/stylist/${p.id}`),
+          onClick: () => navigate(p.source === "profile" ? `/profile/${p.user_id}` : `/stylist/${p.id}`),
         });
       });
     }
@@ -388,7 +392,7 @@ export default function MapSearchPage() {
 
         {filtered.map((p, i) => (
           <div key={p.id} className="rounded-2xl bg-card border border-border/50 overflow-hidden hover:border-primary/20 transition-all duration-200">
-            <button onClick={() => navigate(`/stylist/${p.id}`)}
+            <button onClick={() => navigate(p.source === "profile" ? `/profile/${p.user_id}` : `/stylist/${p.id}`)}
               className="w-full flex items-center gap-3 p-3.5 text-left">
               <div className="relative">
                 <img
