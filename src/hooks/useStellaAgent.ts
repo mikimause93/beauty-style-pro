@@ -700,10 +700,16 @@ export function useStellaAgent() {
     }
 
     // ── SHOW / OPEN PROFILE by name (direct DB lookup) ────────────────────
-    const profileMatch = stripped.match(/(?:mostrami|mostra|apri|vedi|fammi vedere|portami a|portami al|vai al|chi è)\s+(?:il\s+)?(?:profilo\s+)?(?:di\s+)?(.+)/);
-    if (profileMatch && !stripped.includes('profilo mio') && !stripped.includes('mio profilo')) {
+    // FIX: must explicitly mention "profilo" — otherwise this regex eats every
+    // navigation command ("apri mappa" → "profilo di mappa"). Also exclude
+    // "il mio profilo" / "profilo mio" (handled by navRoutes).
+    const profileMatch = stripped.match(/(?:mostrami|mostra|apri|vedi|fammi vedere|portami a|portami al|vai al|chi è)\s+(?:il\s+)?profilo\s+(?:di\s+)?(.+)/)
+      || stripped.match(/^profilo\s+(?:di\s+)?(.+)/);
+    if (profileMatch && !stripped.includes('profilo mio') && !stripped.includes('mio profilo') && !/^(?:il\s+)?profilo$/.test(stripped)) {
       const name = profileMatch[1].replace(/\s+(?:profilo)$/, '').trim();
-      if (name.length > 1) {
+      // Skip if "name" is actually a known route keyword
+      const reservedWords = ['mio', 'tuo', 'utente', 'cliente', 'pro', 'professionista', 'business'];
+      if (name.length > 1 && !reservedWords.includes(name)) {
         return {
           id: Date.now().toString(), type: 'action', text,
           response: `Cerco il profilo di ${name}...`, requiresConfirmation: false, silent: true,
@@ -886,7 +892,9 @@ export function useStellaAgent() {
     }
 
     // ── DIRECT FOLLOW ─────────────────────────────────────────────────────
-    const followMatch = stripped.match(/(?:segui|inizia a seguire|aggiungi)\s+(.+)/);
+    // FIX: "aggiungi" was too broad ("aggiungi al carrello" → tried to follow user "al carrello").
+    // Restrict to explicit follow verbs only.
+    const followMatch = stripped.match(/^(?:segui|inizia a seguire|follow)\s+(.+)/);
     if (followMatch) {
       const target = followMatch[1].trim();
       return {
@@ -1001,7 +1009,12 @@ export function useStellaAgent() {
         },
       };
     }
-    if (stripped.includes('prenota') || stripped.includes('prenotazione') || stripped.includes('appuntamento') || stripped.includes('fissa')) {
+    // FIX: only trigger if the verb stands alone (not "conferma prenotazione",
+    // "annulla prenotazione" — those are handled below).
+    if (
+      (stripped.startsWith('prenota') || stripped === 'prenotazione' || stripped === 'appuntamento' || stripped === 'fissa appuntamento')
+      && !stripped.includes('conferma') && !stripped.includes('annulla') && !stripped.includes('cancella') && !stripped.includes('disdici')
+    ) {
       return {
         id: Date.now().toString(), type: 'navigate', text,
         response: 'Ti mostro i professionisti disponibili!', requiresConfirmation: false, silent: true,
