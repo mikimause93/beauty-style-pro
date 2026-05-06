@@ -687,16 +687,35 @@ export function useStellaAgent() {
       return `Non ho trovato "${name}" esattamente, apro la ricerca!`;
     }
     const p = profiles[0];
+    rememberTarget(p.display_name || p.username || name, p.user_id);
     navigate(`/profile/${p.user_id}`);
     return `Ecco il profilo di ${p.display_name || p.username}! 👤`;
-  }, [findProfileByName, navigate]);
+  }, [findProfileByName, navigate, rememberTarget]);
 
   // ── FULL COMMAND PARSER ─────────────────────────────────────────────────────
   const parseCommand = useCallback((text: string): StellaCommand | null => {
     const t = text.toLowerCase().trim();
 
     // ── Strip "stella" prefix if present ──────────────────────────────────
-    const stripped = t.replace(/^(?:stella|hey stella|ehi stella|ciao stella)\s*[,.]?\s*/i, '');
+    let stripped = t.replace(/^(?:stella|hey stella|ehi stella|ciao stella)\s*[,.]?\s*/i, '');
+
+    // ── L2: PRONOUN RESOLUTION ─────────────────────────────────────────
+    // "chiamalo / scrivigli / seguilo / prenotalo / mostralo" → use last target
+    const remembered = getRememberedTarget();
+    if (remembered) {
+      const pronounMap: Array<{ re: RegExp; replace: string }> = [
+        { re: /^chiamal[oa]\b/, replace: `chiama ${remembered.name}` },
+        { re: /^scrivigli\b|^scrivile\b|^mandagli un messaggio\b|^mandale un messaggio\b/, replace: `scrivi un messaggio a ${remembered.name}` },
+        { re: /^seguil[oa]\b/, replace: `segui ${remembered.name}` },
+        { re: /^smetti di seguirl[oa]\b|^non seguirl[oa] piu\b/, replace: `unfollow ${remembered.name}` },
+        { re: /^prenotal[oa]\b|^prenota con lui\b|^prenota con lei\b/, replace: `prenota con ${remembered.name}` },
+        { re: /^mostral[oa]\b|^aprilo\b|^aprila\b|^vai sul suo profilo\b/, replace: `apri profilo ${remembered.name}` },
+        { re: /^metti like al suo post\b|^like al suo post\b|^like ai suoi post\b/, replace: `metti like a ${remembered.name}` },
+      ];
+      for (const { re, replace } of pronounMap) {
+        if (re.test(stripped)) { stripped = stripped.replace(re, replace); break; }
+      }
+    }
 
     // ── SHOW LATEST PHOTOS / POSTS ────────────────────────────────────────
     const latestPhotosMatch = stripped.match(/(?:mostrami|mostra|vedi|apri)\s+(?:le\s+)?ultim(?:e|a)\s+foto(?:\s+pubblicat[ae])?\s+(?:di|del|della|de|da)\s+(.+)/);
