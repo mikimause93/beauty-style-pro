@@ -953,7 +953,9 @@ export function useStellaAgent() {
       const content = msgMatch[2].trim();
       return {
         id: Date.now().toString(), type: 'message', text,
-        response: `Invio messaggio a ${recipient}...`, requiresConfirmation: false, silent: true,
+        response: `Conferma invio a ${recipient}: "${content}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'message', recipient, content },
         execute: async () => {
           const result = await sendMessageTo(recipient, content);
           toast.success(`🌟 Stella: ${result}`);
