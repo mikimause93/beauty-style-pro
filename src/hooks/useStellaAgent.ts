@@ -1680,13 +1680,15 @@ export function useStellaAgent() {
   // ── Confirm / Cancel pending action ─────────────────────────────────────
   const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
+    const cmd = pendingCommand;
     try {
-      await Promise.resolve(pendingCommand.execute());
-      recordAction(pendingCommand.type);
-      addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result' });
+      await Promise.resolve(cmd.execute());
+      recordAction(cmd.type);
+      const followups = computeFollowups(cmd);
+      addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result', followups });
       stellaSpeak('Fatto!');
       toast.success('🌟 Stella: Fatto! ✅');
-      logStellaCommand(pendingCommand.text, pendingCommand.type, {
+      logStellaCommand(cmd.text, cmd.type, {
         requires_confirmation: true,
         confirmed_at: new Date().toISOString(),
       });
@@ -1700,7 +1702,10 @@ export function useStellaAgent() {
       setPendingCommand(null);
       scheduleWakeWordResume();
     }
-  }, [pendingCommand, addMessage, stellaSpeak, logStellaCommand, scheduleWakeWordResume]);
+  }, [pendingCommand, addMessage, stellaSpeak, logStellaCommand, scheduleWakeWordResume, computeFollowups]);
+
+  // expose latest confirm/cancel via refs (used by voice "sì/no")
+  useEffect(() => { confirmActionRef.current = confirmAction; }, [confirmAction]);
 
   const cancelAction = useCallback(() => {
     setPendingCommand(null);
@@ -1708,6 +1713,7 @@ export function useStellaAgent() {
     stellaSpeak('Annullato.');
     scheduleWakeWordResume(800);
   }, [addMessage, stellaSpeak, scheduleWakeWordResume]);
+  useEffect(() => { cancelActionRef.current = cancelAction; }, [cancelAction]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
