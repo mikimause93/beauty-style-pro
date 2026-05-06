@@ -35,6 +35,8 @@ export interface StellaCommand {
   requiresConfirmation: boolean;
   execute: () => void | Promise<void>;
   silent?: boolean; // execute without opening panel
+  preview?: { kind: 'message' | 'comment' | 'post'; recipient?: string; content: string };
+  followups?: Array<{ text: string; command: string }>;
 }
 
 interface StellaMessage {
@@ -43,6 +45,8 @@ interface StellaMessage {
   content: string;
   type?: 'text' | 'confirmation' | 'action_result';
   pending?: StellaCommand;
+  preview?: { kind: 'message' | 'comment' | 'post'; recipient?: string; content: string };
+  followups?: Array<{ text: string; command: string }>;
 }
 
 const actionCounts = new Map<string, { count: number; resetAt: number }>();
