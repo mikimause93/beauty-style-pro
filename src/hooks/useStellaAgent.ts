@@ -1186,7 +1186,9 @@ export function useStellaAgent() {
       const comment = commentMatch[2].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Commento sul post di ${target}...`, requiresConfirmation: false, silent: true,
+        response: `Conferma commento sul post di ${target}: "${comment}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'comment', recipient: target, content: comment },
         execute: async () => {
           const result = await commentOnPost(comment, target);
           toast.success(`🌟 Stella: ${result}`);
@@ -1199,7 +1201,9 @@ export function useStellaAgent() {
       const comment = commentSimple[1].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Commento: "${comment}"`, requiresConfirmation: false, silent: true,
+        response: `Conferma commento: "${comment}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'comment', content: comment },
         execute: async () => {
           const result = await commentOnPost(comment);
           toast.success(`🌟 Stella: ${result}`);
@@ -1214,7 +1218,9 @@ export function useStellaAgent() {
       const content = postMatch[1].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Pubblico il post...`, requiresConfirmation: false, silent: true,
+        response: `Conferma pubblicazione: "${content}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'post', content },
         execute: async () => {
           const result = await createPost(content);
           toast.success(`🌟 Stella: ${result}`);
