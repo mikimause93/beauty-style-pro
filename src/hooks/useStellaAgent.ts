@@ -596,8 +596,9 @@ export function useStellaAgent() {
     
     if (error?.code === '23505') return `Stai già seguendo ${target.display_name || target.username}!`;
     if (error) return 'Errore nel seguire. Riprova!';
+    rememberTarget(target.display_name || target.username || targetName, target.user_id);
     return `Ora segui ${target.display_name || target.username}! ✅`;
-  }, [user, findProfileByName]);
+  }, [user, findProfileByName, rememberTarget]);
 
   // ── Helper: send message ──────────────────────────────────────────────────
   const sendMessageTo = useCallback(async (targetName: string, content: string) => {
@@ -607,6 +608,7 @@ export function useStellaAgent() {
     if (profiles.length === 0) return `Non ho trovato nessun profilo con il nome "${targetName}".`;
     
     const target = profiles[0];
+    rememberTarget(target.display_name || target.username || targetName, target.user_id);
     
     // Find or create conversation
     const { data: existing } = await supabase
@@ -640,7 +642,7 @@ export function useStellaAgent() {
     }).eq('id', conversationId);
     
     return `Messaggio inviato a ${target.display_name || target.username}! 💬`;
-  }, [user, findProfileByName]);
+  }, [user, findProfileByName, rememberTarget]);
 
   // ── Helper: get user stats summary ─────────────────────────────────────────
   const getUserStats = useCallback(async () => {
