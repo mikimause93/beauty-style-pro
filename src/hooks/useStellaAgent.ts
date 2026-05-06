@@ -35,6 +35,8 @@ export interface StellaCommand {
   requiresConfirmation: boolean;
   execute: () => void | Promise<void>;
   silent?: boolean; // execute without opening panel
+  preview?: { kind: 'message' | 'comment' | 'post'; recipient?: string; content: string };
+  followups?: Array<{ text: string; command: string }>;
 }
 
 interface StellaMessage {
@@ -43,6 +45,8 @@ interface StellaMessage {
   content: string;
   type?: 'text' | 'confirmation' | 'action_result';
   pending?: StellaCommand;
+  preview?: { kind: 'message' | 'comment' | 'post'; recipient?: string; content: string };
+  followups?: Array<{ text: string; command: string }>;
 }
 
 const actionCounts = new Map<string, { count: number; resetAt: number }>();
@@ -90,10 +94,14 @@ export function useStellaAgent() {
   const [wakeWordActive, setWakeWordActive] = useState(true);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
+  const pendingCommandRef = useRef<StellaCommand | null>(null);
+  useEffect(() => { pendingCommandRef.current = pendingCommand; }, [pendingCommand]);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
+  const confirmActionRef = useRef<() => Promise<void> | void>(() => {});
+  const cancelActionRef = useRef<() => void>(() => {});
   const restartWakeWordTimeoutRef = useRef<number | null>(null);
   const lastHandledTranscriptRef = useRef({ text: '', at: 0 });
   const speakingRef = useRef(false);
@@ -108,6 +116,19 @@ export function useStellaAgent() {
   const isOpenRef = useRef(false);
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
   useEffect(() => { speakingRef.current = speaking; }, [speaking]);
+
+  // ── L2: short-term conversational memory (pronoun resolution) ───────────
+  const lastTargetRef = useRef<{ name: string; userId?: string; at: number } | null>(null);
+  const rememberTarget = useCallback((name: string, userId?: string) => {
+    lastTargetRef.current = { name, userId, at: Date.now() };
+  }, []);
+  const getRememberedTarget = useCallback(() => {
+    const t = lastTargetRef.current;
+    if (!t) return null;
+    // expire after 3 minutes
+    if (Date.now() - t.at > 3 * 60 * 1000) { lastTargetRef.current = null; return null; }
+    return t;
+  }, []);
 
   // Track page visits for learning
   useEffect(() => {
@@ -579,8 +600,9 @@ export function useStellaAgent() {
     
     if (error?.code === '23505') return `Stai già seguendo ${target.display_name || target.username}!`;
     if (error) return 'Errore nel seguire. Riprova!';
+    rememberTarget(target.display_name || target.username || targetName, target.user_id);
     return `Ora segui ${target.display_name || target.username}! ✅`;
-  }, [user, findProfileByName]);
+  }, [user, findProfileByName, rememberTarget]);
 
   // ── Helper: send message ──────────────────────────────────────────────────
   const sendMessageTo = useCallback(async (targetName: string, content: string) => {
@@ -590,6 +612,7 @@ export function useStellaAgent() {
     if (profiles.length === 0) return `Non ho trovato nessun profilo con il nome "${targetName}".`;
     
     const target = profiles[0];
+    rememberTarget(target.display_name || target.username || targetName, target.user_id);
     
     // Find or create conversation
     const { data: existing } = await supabase
@@ -623,7 +646,7 @@ export function useStellaAgent() {
     }).eq('id', conversationId);
     
     return `Messaggio inviato a ${target.display_name || target.username}! 💬`;
-  }, [user, findProfileByName]);
+  }, [user, findProfileByName, rememberTarget]);
 
   // ── Helper: get user stats summary ─────────────────────────────────────────
   const getUserStats = useCallback(async () => {
@@ -670,16 +693,35 @@ export function useStellaAgent() {
       return `Non ho trovato "${name}" esattamente, apro la ricerca!`;
     }
     const p = profiles[0];
+    rememberTarget(p.display_name || p.username || name, p.user_id);
     navigate(`/profile/${p.user_id}`);
     return `Ecco il profilo di ${p.display_name || p.username}! 👤`;
-  }, [findProfileByName, navigate]);
+  }, [findProfileByName, navigate, rememberTarget]);
 
   // ── FULL COMMAND PARSER ─────────────────────────────────────────────────────
   const parseCommand = useCallback((text: string): StellaCommand | null => {
     const t = text.toLowerCase().trim();
 
     // ── Strip "stella" prefix if present ──────────────────────────────────
-    const stripped = t.replace(/^(?:stella|hey stella|ehi stella|ciao stella)\s*[,.]?\s*/i, '');
+    let stripped = t.replace(/^(?:stella|hey stella|ehi stella|ciao stella)\s*[,.]?\s*/i, '');
+
+    // ── L2: PRONOUN RESOLUTION ─────────────────────────────────────────
+    // "chiamalo / scrivigli / seguilo / prenotalo / mostralo" → use last target
+    const remembered = getRememberedTarget();
+    if (remembered) {
+      const pronounMap: Array<{ re: RegExp; replace: string }> = [
+        { re: /^chiamal[oa]\b/, replace: `chiama ${remembered.name}` },
+        { re: /^scrivigli\b|^scrivile\b|^mandagli un messaggio\b|^mandale un messaggio\b/, replace: `scrivi un messaggio a ${remembered.name}` },
+        { re: /^seguil[oa]\b/, replace: `segui ${remembered.name}` },
+        { re: /^smetti di seguirl[oa]\b|^non seguirl[oa] piu\b/, replace: `unfollow ${remembered.name}` },
+        { re: /^prenotal[oa]\b|^prenota con lui\b|^prenota con lei\b/, replace: `prenota con ${remembered.name}` },
+        { re: /^mostral[oa]\b|^aprilo\b|^aprila\b|^vai sul suo profilo\b/, replace: `apri profilo ${remembered.name}` },
+        { re: /^metti like al suo post\b|^like al suo post\b|^like ai suoi post\b/, replace: `metti like a ${remembered.name}` },
+      ];
+      for (const { re, replace } of pronounMap) {
+        if (re.test(stripped)) { stripped = stripped.replace(re, replace); break; }
+      }
+    }
 
     // ── SHOW LATEST PHOTOS / POSTS ────────────────────────────────────────
     const latestPhotosMatch = stripped.match(/(?:mostrami|mostra|vedi|apri)\s+(?:le\s+)?ultim(?:e|a)\s+foto(?:\s+pubblicat[ae])?\s+(?:di|del|della|de|da)\s+(.+)/);
@@ -915,7 +957,9 @@ export function useStellaAgent() {
       const content = msgMatch[2].trim();
       return {
         id: Date.now().toString(), type: 'message', text,
-        response: `Invio messaggio a ${recipient}...`, requiresConfirmation: false, silent: true,
+        response: `Conferma invio a ${recipient}: "${content}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'message', recipient, content },
         execute: async () => {
           const result = await sendMessageTo(recipient, content);
           toast.success(`🌟 Stella: ${result}`);
@@ -1146,7 +1190,9 @@ export function useStellaAgent() {
       const comment = commentMatch[2].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Commento sul post di ${target}...`, requiresConfirmation: false, silent: true,
+        response: `Conferma commento sul post di ${target}: "${comment}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'comment', recipient: target, content: comment },
         execute: async () => {
           const result = await commentOnPost(comment, target);
           toast.success(`🌟 Stella: ${result}`);
@@ -1159,7 +1205,9 @@ export function useStellaAgent() {
       const comment = commentSimple[1].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Commento: "${comment}"`, requiresConfirmation: false, silent: true,
+        response: `Conferma commento: "${comment}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'comment', content: comment },
         execute: async () => {
           const result = await commentOnPost(comment);
           toast.success(`🌟 Stella: ${result}`);
@@ -1174,7 +1222,9 @@ export function useStellaAgent() {
       const content = postMatch[1].trim();
       return {
         id: Date.now().toString(), type: 'action' as StellaCommand['type'], text,
-        response: `Pubblico il post...`, requiresConfirmation: false, silent: true,
+        response: `Conferma pubblicazione: "${content}"`,
+        requiresConfirmation: true, silent: false,
+        preview: { kind: 'post', content },
         execute: async () => {
           const result = await createPost(content);
           toast.success(`🌟 Stella: ${result}`);
@@ -1505,6 +1555,15 @@ export function useStellaAgent() {
     const text = rawText.trim();
     if (!text) return;
 
+    // ── L2: VOICE CONFIRM/CANCEL while a command is pending ─────────────
+    const lower = text.toLowerCase().trim();
+    if (pendingCommandRef.current) {
+      const yes = /^(s[iì]|sì|si|conferma|confermo|ok|okay|va bene|vai|procedi|esegui|fallo|invia|pubblica|certo|d['’]accordo)\b/.test(lower);
+      const no = /^(no|annulla|cancella|stop|ferma|lascia stare|lascia perdere|non importa)\b/.test(lower);
+      if (yes) { addMessage({ role: 'user', content: text }); await confirmActionRef.current(); return; }
+      if (no)  { addMessage({ role: 'user', content: text }); cancelActionRef.current(); return; }
+    }
+
     addMessage({ role: 'user', content: text });
 
     const cmd = parseCommand(text);
@@ -1543,8 +1602,8 @@ export function useStellaAgent() {
 
     if (cmd.requiresConfirmation && !cmd.silent) {
       setPendingCommand(cmd);
-      addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd });
-      stellaSpeak(cmd.response);
+      addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd, preview: cmd.preview });
+      stellaSpeak(cmd.response + ' Dì sì per confermare o no per annullare.');
       // Open panel for confirmations
       setIsOpen(true);
     } else {
@@ -1552,7 +1611,8 @@ export function useStellaAgent() {
         // Siri-like: execute silently with inline status, no panel
         await Promise.resolve(cmd.execute());
         recordAction(cmd.type);
-        addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
+        const followups = computeFollowups(cmd);
+        addMessage({ role: 'stella', content: cmd.response, type: 'action_result', followups });
         setInlineStatus(cmd.response);
         stellaSpeak(cmd.response);
         logStellaCommand(text, cmd.type);
@@ -1571,16 +1631,64 @@ export function useStellaAgent() {
 
   handleCommandRef.current = handleCommand;
 
+  // ── L2: contextual followup chips after each action ─────────────────────
+  const computeFollowups = useCallback((cmd: StellaCommand): Array<{ text: string; command: string }> => {
+    const t = cmd.text.toLowerCase();
+    const remembered = lastTargetRef.current;
+    const named = remembered?.name;
+    if (cmd.type === 'follow' && named) {
+      return [
+        { text: `💬 Scrivi a ${named}`, command: `scrivigli` },
+        { text: `📞 Chiama ${named}`, command: `chiamalo` },
+        { text: `👤 Apri profilo`, command: `aprilo` },
+      ];
+    }
+    if (cmd.type === 'message' || /scrivi|messaggio|invia/.test(t)) {
+      return [
+        { text: '✉️ Apri tutte le chat', command: 'apri chat' },
+        { text: '🔔 Notifiche', command: 'apri notifiche' },
+      ];
+    }
+    if (cmd.type === 'book' || /prenota/.test(t)) {
+      return [
+        { text: '📅 Le mie prenotazioni', command: 'i miei appuntamenti' },
+        { text: '💳 Wallet', command: 'apri wallet' },
+      ];
+    }
+    if (/profilo/.test(t) && named) {
+      return [
+        { text: `📞 Chiama`, command: 'chiamalo' },
+        { text: `💬 Scrivi`, command: 'scrivigli' },
+        { text: `➕ Segui`, command: 'seguilo' },
+      ];
+    }
+    if (cmd.type === 'like') {
+      return [
+        { text: '💬 Commenta', command: 'commenta bellissimo sull\'ultimo post' },
+        { text: '🔍 Esplora', command: 'esplora' },
+      ];
+    }
+    if (cmd.type === 'navigate') {
+      return [
+        { text: '🔍 Cerca', command: 'cerca ' },
+        { text: '🗺️ Mappa', command: 'apri mappa' },
+      ];
+    }
+    return [];
+  }, []);
+
   // ── Confirm / Cancel pending action ─────────────────────────────────────
   const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
+    const cmd = pendingCommand;
     try {
-      await Promise.resolve(pendingCommand.execute());
-      recordAction(pendingCommand.type);
-      addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result' });
+      await Promise.resolve(cmd.execute());
+      recordAction(cmd.type);
+      const followups = computeFollowups(cmd);
+      addMessage({ role: 'stella', content: 'Fatto! ✅', type: 'action_result', followups });
       stellaSpeak('Fatto!');
       toast.success('🌟 Stella: Fatto! ✅');
-      logStellaCommand(pendingCommand.text, pendingCommand.type, {
+      logStellaCommand(cmd.text, cmd.type, {
         requires_confirmation: true,
         confirmed_at: new Date().toISOString(),
       });
@@ -1594,7 +1702,10 @@ export function useStellaAgent() {
       setPendingCommand(null);
       scheduleWakeWordResume();
     }
-  }, [pendingCommand, addMessage, stellaSpeak, logStellaCommand, scheduleWakeWordResume]);
+  }, [pendingCommand, addMessage, stellaSpeak, logStellaCommand, scheduleWakeWordResume, computeFollowups]);
+
+  // expose latest confirm/cancel via refs (used by voice "sì/no")
+  useEffect(() => { confirmActionRef.current = confirmAction; }, [confirmAction]);
 
   const cancelAction = useCallback(() => {
     setPendingCommand(null);
@@ -1602,6 +1713,7 @@ export function useStellaAgent() {
     stellaSpeak('Annullato.');
     scheduleWakeWordResume(800);
   }, [addMessage, stellaSpeak, scheduleWakeWordResume]);
+  useEffect(() => { cancelActionRef.current = cancelAction; }, [cancelAction]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;

@@ -265,6 +265,16 @@ export default function StellaVoiceAgent() {
                     }`}>
                       <p className="text-sm whitespace-pre-line">{msg.content}</p>
 
+                      {msg.preview && (
+                        <div className="mt-2 rounded-lg bg-background/60 border border-border/40 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                            Anteprima {msg.preview.kind === 'message' ? 'messaggio' : msg.preview.kind === 'comment' ? 'commento' : 'post'}
+                            {msg.preview.recipient ? ` → ${msg.preview.recipient}` : ''}
+                          </p>
+                          <p className="text-sm font-medium">{msg.preview.content}</p>
+                        </div>
+                      )}
+
                       {msg.type === 'confirmation' && pendingCommand && (
                         <div className="flex gap-2 mt-2">
                           <button
@@ -283,6 +293,22 @@ export default function StellaVoiceAgent() {
                           >
                             <XCircle className="w-3 h-3" /> Annulla
                           </button>
+                        </div>
+                      )}
+
+                      {msg.followups && msg.followups.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {msg.followups.map((f, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-label={f.text}
+                              onClick={() => sendTextCommand(f.command)}
+                              className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] text-primary hover:bg-primary/20 transition-colors"
+                            >
+                              {f.text}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
