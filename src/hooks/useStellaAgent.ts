@@ -100,6 +100,8 @@ export function useStellaAgent() {
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
+  const confirmActionRef = useRef<() => Promise<void> | void>(() => {});
+  const cancelActionRef = useRef<() => void>(() => {});
   const restartWakeWordTimeoutRef = useRef<number | null>(null);
   const lastHandledTranscriptRef = useRef({ text: '', at: 0 });
   const speakingRef = useRef(false);
