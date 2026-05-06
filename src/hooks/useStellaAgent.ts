@@ -1631,6 +1631,52 @@ export function useStellaAgent() {
 
   handleCommandRef.current = handleCommand;
 
+  // ── L2: contextual followup chips after each action ─────────────────────
+  const computeFollowups = useCallback((cmd: StellaCommand): Array<{ text: string; command: string }> => {
+    const t = cmd.text.toLowerCase();
+    const remembered = lastTargetRef.current;
+    const named = remembered?.name;
+    if (cmd.type === 'follow' && named) {
+      return [
+        { text: `💬 Scrivi a ${named}`, command: `scrivigli` },
+        { text: `📞 Chiama ${named}`, command: `chiamalo` },
+        { text: `👤 Apri profilo`, command: `aprilo` },
+      ];
+    }
+    if (cmd.type === 'message' || /scrivi|messaggio|invia/.test(t)) {
+      return [
+        { text: '✉️ Apri tutte le chat', command: 'apri chat' },
+        { text: '🔔 Notifiche', command: 'apri notifiche' },
+      ];
+    }
+    if (cmd.type === 'book' || /prenota/.test(t)) {
+      return [
+        { text: '📅 Le mie prenotazioni', command: 'i miei appuntamenti' },
+        { text: '💳 Wallet', command: 'apri wallet' },
+      ];
+    }
+    if (/profilo/.test(t) && named) {
+      return [
+        { text: `📞 Chiama`, command: 'chiamalo' },
+        { text: `💬 Scrivi`, command: 'scrivigli' },
+        { text: `➕ Segui`, command: 'seguilo' },
+      ];
+    }
+    if (cmd.type === 'like') {
+      return [
+        { text: '💬 Commenta', command: 'commenta bellissimo sull\'ultimo post' },
+        { text: '🔍 Esplora', command: 'esplora' },
+      ];
+    }
+    if (cmd.type === 'navigate') {
+      return [
+        { text: '🔍 Cerca', command: 'cerca ' },
+        { text: '🗺️ Mappa', command: 'apri mappa' },
+      ];
+    }
+    return [];
+  }, []);
+
   // ── Confirm / Cancel pending action ─────────────────────────────────────
   const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
