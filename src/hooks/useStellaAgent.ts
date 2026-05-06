@@ -113,6 +113,19 @@ export function useStellaAgent() {
   useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
   useEffect(() => { speakingRef.current = speaking; }, [speaking]);
 
+  // ── L2: short-term conversational memory (pronoun resolution) ───────────
+  const lastTargetRef = useRef<{ name: string; userId?: string; at: number } | null>(null);
+  const rememberTarget = useCallback((name: string, userId?: string) => {
+    lastTargetRef.current = { name, userId, at: Date.now() };
+  }, []);
+  const getRememberedTarget = useCallback(() => {
+    const t = lastTargetRef.current;
+    if (!t) return null;
+    // expire after 3 minutes
+    if (Date.now() - t.at > 3 * 60 * 1000) { lastTargetRef.current = null; return null; }
+    return t;
+  }, []);
+
   // Track page visits for learning
   useEffect(() => {
     trackPageVisit(location.pathname);
