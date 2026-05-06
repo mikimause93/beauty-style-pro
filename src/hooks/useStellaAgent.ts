@@ -1553,6 +1553,15 @@ export function useStellaAgent() {
     const text = rawText.trim();
     if (!text) return;
 
+    // ── L2: VOICE CONFIRM/CANCEL while a command is pending ─────────────
+    const lower = text.toLowerCase().trim();
+    if (pendingCommandRef.current) {
+      const yes = /^(s[iì]|sì|si|conferma|confermo|ok|okay|va bene|vai|procedi|esegui|fallo|invia|pubblica|certo|d['’]accordo)\b/.test(lower);
+      const no = /^(no|annulla|cancella|stop|ferma|lascia stare|lascia perdere|non importa)\b/.test(lower);
+      if (yes) { addMessage({ role: 'user', content: text }); await confirmActionRef.current(); return; }
+      if (no)  { addMessage({ role: 'user', content: text }); cancelActionRef.current(); return; }
+    }
+
     addMessage({ role: 'user', content: text });
 
     const cmd = parseCommand(text);
@@ -1591,8 +1600,8 @@ export function useStellaAgent() {
 
     if (cmd.requiresConfirmation && !cmd.silent) {
       setPendingCommand(cmd);
-      addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd });
-      stellaSpeak(cmd.response);
+      addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd, preview: cmd.preview });
+      stellaSpeak(cmd.response + ' Dì sì per confermare o no per annullare.');
       // Open panel for confirmations
       setIsOpen(true);
     } else {
@@ -1600,7 +1609,8 @@ export function useStellaAgent() {
         // Siri-like: execute silently with inline status, no panel
         await Promise.resolve(cmd.execute());
         recordAction(cmd.type);
-        addMessage({ role: 'stella', content: cmd.response, type: 'action_result' });
+        const followups = computeFollowups(cmd);
+        addMessage({ role: 'stella', content: cmd.response, type: 'action_result', followups });
         setInlineStatus(cmd.response);
         stellaSpeak(cmd.response);
         logStellaCommand(text, cmd.type);
