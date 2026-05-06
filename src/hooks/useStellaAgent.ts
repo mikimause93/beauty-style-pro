@@ -94,6 +94,8 @@ export function useStellaAgent() {
   const [wakeWordActive, setWakeWordActive] = useState(true);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [pendingCommand, setPendingCommand] = useState<StellaCommand | null>(null);
+  const pendingCommandRef = useRef<StellaCommand | null>(null);
+  useEffect(() => { pendingCommandRef.current = pendingCommand; }, [pendingCommand]);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
