@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, X, Mic, MicOff, Volume2, VolumeX, Send, Check, XCircle, Radio, Loader2, ChevronUp } from 'lucide-react';
+import { Sparkles, X, Mic, MicOff, Volume2, VolumeX, Send, Check, XCircle, Radio, Loader2, ChevronUp, RotateCcw } from 'lucide-react';
 import { useStellaAgent } from '@/hooks/useStellaAgent';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,7 +11,7 @@ export default function StellaVoiceAgent() {
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
-    sendTextCommand, confirmAction, cancelAction, clearMessages,
+    sendTextCommand, confirmAction, cancelAction, repeatPending, clearMessages,
   } = useStellaAgent();
 
   const [input, setInput] = useState('');
@@ -292,6 +292,14 @@ export default function StellaVoiceAgent() {
                             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors"
                           >
                             <XCircle className="w-3 h-3" /> Annulla
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Ripeti il comando in attesa"
+                            onClick={repeatPending}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted text-foreground text-xs font-semibold hover:bg-muted/80 transition-colors border border-border"
+                          >
+                            <RotateCcw className="w-3 h-3" /> Ripeti
                           </button>
                         </div>
                       )}
