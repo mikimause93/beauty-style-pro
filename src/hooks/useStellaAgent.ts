@@ -1643,7 +1643,24 @@ export function useStellaAgent() {
     if (cmd.requiresConfirmation && !cmd.silent) {
       setPendingCommand(cmd);
       addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd, preview: cmd.preview });
-      stellaSpeak(cmd.response + ' Dì sì per confermare o no per annullare.');
+      stellaSpeak(cmd.response + ' Dì "sì" per confermare o "no" per annullare.');
+      pendingRepromptCountRef.current = 0;
+      if (pendingRepromptTimerRef.current) window.clearTimeout(pendingRepromptTimerRef.current);
+      const scheduleReprompt = () => {
+        pendingRepromptTimerRef.current = window.setTimeout(() => {
+          if (!pendingCommandRef.current) return;
+          pendingRepromptCountRef.current += 1;
+          if (pendingRepromptCountRef.current >= 2) {
+            // Auto-cancel dopo 2 reprompt senza risposta
+            cancelActionRef.current();
+            return;
+          }
+          stellaSpeak('Sei ancora lì? Dì sì per confermare o no per annullare.');
+          setInlineStatus('⏳ In attesa di conferma — dì "sì" o "no"');
+          scheduleReprompt();
+        }, 8000);
+      };
+      scheduleReprompt();
       // Open panel for confirmations
       setIsOpen(true);
     } else {
