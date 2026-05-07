@@ -1765,12 +1765,24 @@ export function useStellaAgent() {
   useEffect(() => { confirmActionRef.current = confirmAction; }, [confirmAction]);
 
   const cancelAction = useCallback(() => {
+    if (pendingRepromptTimerRef.current) { window.clearTimeout(pendingRepromptTimerRef.current); pendingRepromptTimerRef.current = null; }
     setPendingCommand(null);
     addMessage({ role: 'stella', content: 'Azione annullata.' });
     stellaSpeak('Annullato.');
     scheduleWakeWordResume(800);
   }, [addMessage, stellaSpeak, scheduleWakeWordResume]);
   useEffect(() => { cancelActionRef.current = cancelAction; }, [cancelAction]);
+
+  // Ripete il comando in attesa, mostrando di nuovo l'anteprima e leggendolo a voce.
+  const repeatPending = useCallback(() => {
+    const cmd = pendingCommandRef.current;
+    if (!cmd) return;
+    const reminder = `Sto aspettando conferma per: "${cmd.response}". Dì sì per confermare o no per annullare.`;
+    addMessage({ role: 'stella', content: reminder, type: 'confirmation', pending: cmd, preview: cmd.preview });
+    stellaSpeak(reminder);
+    setInlineStatus('⏳ In attesa di conferma');
+  }, [addMessage, stellaSpeak]);
+  useEffect(() => { repeatPendingRef.current = repeatPending; }, [repeatPending]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
