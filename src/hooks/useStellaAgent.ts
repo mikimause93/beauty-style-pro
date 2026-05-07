@@ -1738,6 +1738,7 @@ export function useStellaAgent() {
   const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
     const cmd = pendingCommand;
+    if (pendingRepromptTimerRef.current) { window.clearTimeout(pendingRepromptTimerRef.current); pendingRepromptTimerRef.current = null; }
     try {
       await Promise.resolve(cmd.execute());
       recordAction(cmd.type);
