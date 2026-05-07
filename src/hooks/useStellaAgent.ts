@@ -1819,6 +1819,7 @@ export function useStellaAgent() {
     inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
+    repeatPending,
     clearMessages,
   };
 }
