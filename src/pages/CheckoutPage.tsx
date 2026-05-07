@@ -134,7 +134,7 @@ export default function CheckoutPage() {
       }
 
       toast.success("Pagamento completato!");
-      navigate(`/wallet`);
+      navigate(type === "booking" ? `/my-bookings` : `/wallet`);
     } catch (e) {
       toast.error("Errore nel pagamento");
     }
