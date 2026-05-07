@@ -102,6 +102,9 @@ export function useStellaAgent() {
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
   const confirmActionRef = useRef<() => Promise<void> | void>(() => {});
   const cancelActionRef = useRef<() => void>(() => {});
+  const repeatPendingRef = useRef<() => void>(() => {});
+  const pendingRepromptTimerRef = useRef<number | null>(null);
+  const pendingRepromptCountRef = useRef(0);
   const restartWakeWordTimeoutRef = useRef<number | null>(null);
   const lastHandledTranscriptRef = useRef({ text: '', at: 0 });
   const speakingRef = useRef(false);
@@ -1558,10 +1561,47 @@ export function useStellaAgent() {
     // ── L2: VOICE CONFIRM/CANCEL while a command is pending ─────────────
     const lower = text.toLowerCase().trim();
     if (pendingCommandRef.current) {
-      const yes = /^(s[iì]|sì|si|conferma|confermo|ok|okay|va bene|vai|procedi|esegui|fallo|invia|pubblica|certo|d['’]accordo)\b/.test(lower);
-      const no = /^(no|annulla|cancella|stop|ferma|lascia stare|lascia perdere|non importa)\b/.test(lower);
+      // Normalizza: rimuovi accenti, punteggiatura, prefissi vocativi, filler.
+      const normalized = lower
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+        .replace(/[.,!?;:¡¿"«»()\-–—]/g, ' ')
+        .replace(/^(stella|hey stella|ehi stella|ciao stella|ok stella|allora|beh|mmm|ehm|uhm|si si|no no)\s+/i, '')
+        .replace(/^(per favore|grazie|dai|allora|forza|certo che)\s+/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const first = normalized.split(' ')[0] || '';
+      const yesWords = new Set([
+        'si','sii','sisi','sissi','sisignora','certo','certamente','assolutamente','ovvio','ovviamente',
+        'conferma','confermo','confermato','confermare','ok','okay','okei','oki','okk','va','vabbe','vabbene','vabene',
+        'vai','procedi','esegui','eseguilo','fallo','falla','invia','inviala','manda','mandalo','pubblica','pubblicalo',
+        'daccordo','accordo','perfetto','bene','benissimo','approvato','approvo','autorizzo','procedere',
+        'yes','yep','yeah','yup','sure','confirm','do','send','go',
+        'oui','ja','jawohl','claro','vale','dale'
+      ]);
+      const noWords = new Set([
+        'no','nope','nah','annulla','annullato','annullare','cancella','cancellato','cancellare','cancel',
+        'stop','ferma','fermati','fermo','lascia','dimentica','dimenticalo','niente','nulla','nada',
+        'aspetta','attendi','non','nessuno','negativo','negative','denied','non importa',
+        'nein','non','no no'
+      ]);
+      const repeatWords = new Set([
+        'ripeti','ripetilo','ripetimi','cosa','come','non','rip','again','repeat','riascolta','rileggi','che','what'
+      ]);
+      const isRepeat = /^(ripeti|ripetilo|ripetimi|riascolta|rileggi|cosa hai detto|che hai detto|come|cosa|che cosa|non ho capito|non ho sentito|repeat|again|what)\b/.test(normalized)
+        || repeatWords.has(first);
+      const yes = yesWords.has(first) || /^(va\s+bene|d\s*accordo|ok\s+vai|si\s+si|certo\s+che\s+si|si\s+grazie|si\s+conferma)/.test(normalized);
+      const no  = noWords.has(first) || /^(non\s+(va|importa|mi\s+va|farlo|inviare|fare))/.test(normalized) || /^(no\s+grazie|no\s+annulla|lascia\s+(stare|perdere))/.test(normalized);
+      if (isRepeat && !yes && !no) {
+        addMessage({ role: 'user', content: text });
+        repeatPendingRef.current();
+        return;
+      }
       if (yes) { addMessage({ role: 'user', content: text }); await confirmActionRef.current(); return; }
       if (no)  { addMessage({ role: 'user', content: text }); cancelActionRef.current(); return; }
+      // Non riconosciuto mentre c'è un pending: ricorda all'utente cosa è in attesa.
+      addMessage({ role: 'user', content: text });
+      repeatPendingRef.current();
+      return;
     }
 
     addMessage({ role: 'user', content: text });
@@ -1603,7 +1643,24 @@ export function useStellaAgent() {
     if (cmd.requiresConfirmation && !cmd.silent) {
       setPendingCommand(cmd);
       addMessage({ role: 'stella', content: cmd.response, type: 'confirmation', pending: cmd, preview: cmd.preview });
-      stellaSpeak(cmd.response + ' Dì sì per confermare o no per annullare.');
+      stellaSpeak(cmd.response + ' Dì "sì" per confermare o "no" per annullare.');
+      pendingRepromptCountRef.current = 0;
+      if (pendingRepromptTimerRef.current) window.clearTimeout(pendingRepromptTimerRef.current);
+      const scheduleReprompt = () => {
+        pendingRepromptTimerRef.current = window.setTimeout(() => {
+          if (!pendingCommandRef.current) return;
+          pendingRepromptCountRef.current += 1;
+          if (pendingRepromptCountRef.current >= 2) {
+            // Auto-cancel dopo 2 reprompt senza risposta
+            cancelActionRef.current();
+            return;
+          }
+          stellaSpeak('Sei ancora lì? Dì sì per confermare o no per annullare.');
+          setInlineStatus('⏳ In attesa di conferma — dì "sì" o "no"');
+          scheduleReprompt();
+        }, 8000);
+      };
+      scheduleReprompt();
       // Open panel for confirmations
       setIsOpen(true);
     } else {
@@ -1681,6 +1738,7 @@ export function useStellaAgent() {
   const confirmAction = useCallback(async () => {
     if (!pendingCommand) return;
     const cmd = pendingCommand;
+    if (pendingRepromptTimerRef.current) { window.clearTimeout(pendingRepromptTimerRef.current); pendingRepromptTimerRef.current = null; }
     try {
       await Promise.resolve(cmd.execute());
       recordAction(cmd.type);
@@ -1708,12 +1766,24 @@ export function useStellaAgent() {
   useEffect(() => { confirmActionRef.current = confirmAction; }, [confirmAction]);
 
   const cancelAction = useCallback(() => {
+    if (pendingRepromptTimerRef.current) { window.clearTimeout(pendingRepromptTimerRef.current); pendingRepromptTimerRef.current = null; }
     setPendingCommand(null);
     addMessage({ role: 'stella', content: 'Azione annullata.' });
     stellaSpeak('Annullato.');
     scheduleWakeWordResume(800);
   }, [addMessage, stellaSpeak, scheduleWakeWordResume]);
   useEffect(() => { cancelActionRef.current = cancelAction; }, [cancelAction]);
+
+  // Ripete il comando in attesa, mostrando di nuovo l'anteprima e leggendolo a voce.
+  const repeatPending = useCallback(() => {
+    const cmd = pendingCommandRef.current;
+    if (!cmd) return;
+    const reminder = `Sto aspettando conferma per: "${cmd.response}". Dì sì per confermare o no per annullare.`;
+    addMessage({ role: 'stella', content: reminder, type: 'confirmation', pending: cmd, preview: cmd.preview });
+    stellaSpeak(reminder);
+    setInlineStatus('⏳ In attesa di conferma');
+  }, [addMessage, stellaSpeak]);
+  useEffect(() => { repeatPendingRef.current = repeatPending; }, [repeatPending]);
 
   const sendTextCommand = useCallback((text: string) => {
     if (!text.trim()) return;
@@ -1749,6 +1819,7 @@ export function useStellaAgent() {
     inlineStatus, clearInlineStatus,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
+    repeatPending,
     clearMessages,
   };
 }
