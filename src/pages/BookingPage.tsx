@@ -111,24 +111,30 @@ export default function BookingPage() {
     }
 
     setLoading(true);
-    const { error } = await supabase.from("bookings").insert({
-      client_id: user.id,
-      professional_id: professional.id,
-      service_id: selectedServiceData?.id.startsWith("default-") ? undefined : selectedService,
-      booking_date: selectedDate,
-      start_time: selectedTime,
-      total_price: selectedServiceData?.price,
-      notes: notes || undefined,
-    });
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .insert({
+        client_id: user.id,
+        professional_id: professional.id,
+        service_id: selectedServiceData?.id.startsWith("default-") ? undefined : selectedService,
+        booking_date: selectedDate,
+        start_time: selectedTime,
+        total_price: selectedServiceData?.price,
+        notes: notes || undefined,
+      })
+      .select("id")
+      .single();
 
-    if (error) {
+    if (error || !booking) {
       console.error("Booking error:", error);
       toast.error("Errore nella prenotazione");
       setLoading(false);
     } else {
-      toast.success("Prenotazione confermata! Procedi al pagamento.");
-      // Redirect to checkout with booking details
-      navigate(`/checkout?service=${encodeURIComponent(selectedServiceData?.name || '')}&amount=${selectedServiceData?.price || 0}&booking=true`);
+      toast.success("Prenotazione creata! Procedi al pagamento.");
+      const desc = `${selectedServiceData?.name || "Servizio"} · ${selectedDate} ${selectedTime}`;
+      navigate(
+        `/checkout?amount=${selectedServiceData?.price || 0}&desc=${encodeURIComponent(desc)}&type=booking&ref=${booking.id}`
+      );
     }
   };
 
