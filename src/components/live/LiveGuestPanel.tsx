@@ -36,6 +36,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamId]);
 
   const fetchRequests = async () => {
@@ -123,7 +124,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold">{g.profile?.display_name || "Ospite"}</p>
-                    <p className="text-[10px] text-primary font-semibold">In diretta 🔴</p>
+                    <p className="text-xs text-primary font-semibold">In diretta 🔴</p>
                   </div>
                   {(isHost || g.user_id === user?.id) && (
                     <button onClick={() => isHost ? handleRequest(g.id, "rejected") : leaveGuest()}
@@ -150,7 +151,7 @@ export default function LiveGuestPanel({ streamId, isHost, onClose }: LiveGuestP
                     alt="" className="w-10 h-10 rounded-full" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate">{g.profile?.display_name || "Utente"}</p>
-                    {g.message && <p className="text-[10px] text-muted-foreground truncate">"{g.message}"</p>}
+                    {g.message && <p className="text-xs text-muted-foreground truncate">"{g.message}"</p>}
                   </div>
                   <div className="flex gap-1.5">
                     <button onClick={() => handleRequest(g.id, "accepted")}

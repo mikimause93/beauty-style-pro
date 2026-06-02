@@ -1,4 +1,5 @@
-import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2 } from "lucide-react";
+import { Search, Bell, MessageCircle, Plus, Play, Eye, Heart, Share2, Bookmark, Coins, Briefcase, MapPin, Star, Users, Video, ShoppingBag, ChevronRight, Scissors, CalendarDays, Map as MapIcon, Home, Target, Sparkles, Film, Gift, Trophy, Camera, Radio, Medal, Podcast, Droplets, Zap, Gamepad2, Wand2, Sun, Moon, Globe, BarChart3, Layout } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 import HomeMusicWidget from "@/components/feed/HomeMusicWidget";
 import TrendingClips from "@/components/feed/TrendingClips";
 import StoriesBar from "@/components/feed/StoriesBar";
@@ -18,12 +19,12 @@ import { useNotifications } from "@/hooks/useNotifications";
 import useChatbot from "@/hooks/useChatbot";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
-import logo from "@/assets/logo.png";
+
 import stylist1 from "@/assets/stylist-1.jpg";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
-import beauty3 from "@/assets/beauty-3.jpg";
+
 
 interface Post {
   id: string;
@@ -35,7 +36,7 @@ interface Post {
   comment_count: number;
   post_type: string | null;
   created_at: string;
-  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string };
+  profileData?: { display_name: string | null; avatar_url: string | null; user_type: string; verification_status?: string | null };
 }
 
 const tabs = ["Nuovi", "Stilisti", "Popolari", "Stream"];
@@ -48,6 +49,7 @@ export default function HomePage() {
   const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const { trackAction } = useChatbot();
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("Nuovi");
   const [posts, setPosts] = useState<Post[]>([]);
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
@@ -83,21 +85,21 @@ export default function HomePage() {
     try {
       const { data: postsData } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(20);
       const { data: streamsData } = await supabase.from('live_streams').select(`*, professional:professionals(business_name, user_id)`).in('status', ['live', 'scheduled']).order('viewer_count', { ascending: false }).limit(5);
-      const { data: profilesData } = await supabase.from('profiles').select('user_id, display_name, avatar_url').limit(10);
+      const { data: profilesData } = await supabase.from('profiles_public').select('user_id, display_name, avatar_url').limit(10);
 
       if (postsData) {
         const userIds = [...new Set(postsData.map(p => p.user_id))];
-        const { data: postProfiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url, user_type').in('user_id', userIds);
+        const { data: postProfiles } = await supabase.from('profiles_public').select('user_id, display_name, avatar_url, user_type, verification_status').in('user_id', userIds);
         const profileMap = new Map(postProfiles?.map(p => [p.user_id, p]) || []);
         setPosts(postsData.map(p => ({ ...p, profileData: profileMap.get(p.user_id) || undefined })));
       }
 
       if (streamsData) setLiveStreams(streamsData.map(s => ({ ...s, professional: Array.isArray(s.professional) ? s.professional[0] : s.professional })));
       if (profilesData) {
-        setStories(profilesData.map((p, i) => ({
-          id: p.user_id, name: p.display_name || 'User',
-          avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
-          isLive: i < 2, hasStory: true,
+        setStories(profilesData.filter(p => p.avatar_url).map((p) => ({
+          id: p.user_id, name: p.display_name || 'Utente',
+          avatar: p.avatar_url!,
+          isLive: false, hasStory: true,
         })));
       }
 
@@ -105,7 +107,7 @@ export default function HomePage() {
       if (jobsData) setJobPosts(jobsData);
 
       const { data: profsData } = await supabase.from('professionals').select('*').limit(10);
-      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}` })));
+      if (profsData) setStylists(profsData.map((p) => ({ ...p, avatar: (p.portfolio_images && p.portfolio_images[0]) || '' })));
     } catch (error) { console.error('Error:', error); }
   };
 
@@ -138,38 +140,41 @@ export default function HomePage() {
 
   return (
     <MobileLayout>
-      {/* Header — minimal & clean */}
+      {/* Header — luxury & clean */}
       <header className="sticky top-0 z-50 glass">
         <div className="flex items-center justify-between px-5 py-3">
-          <span className="text-2xl font-display font-bold italic tracking-tight" style={{ background: "linear-gradient(135deg, #9b59b6, #8b5cf6, #a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Style</span>
+          <span className="text-2xl font-bold tracking-tight text-gradient-chrome" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Style</span>
           <div className="flex items-center gap-1.5">
-            <button onClick={() => navigate("/search")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <Search className="w-[20px] h-[20px] text-muted-foreground" />
+            <button type="button" onClick={() => navigate("/search")} aria-label="Cerca" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <Search className="w-[18px] h-[18px] text-neon" />
             </button>
-            <button onClick={() => navigate("/qr-coins")} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold">
-              <Coins className="w-3.5 h-3.5 text-primary" />
+            <button type="button" onClick={toggleTheme} aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"} className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              {theme === "dark" ? <Sun className="w-[18px] h-[18px] text-neon" /> : <Moon className="w-[18px] h-[18px] text-neon" />}
+            </button>
+            <button type="button" onClick={() => navigate("/qr-coins")} aria-label="QR Coins" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-gold shadow-glow-gold text-xs font-bold text-black">
+              <Coins className="w-3.5 h-3.5" />
               <span>{profile?.qr_coins?.toLocaleString() || '0'}</span>
             </button>
-            <button onClick={() => navigate("/notifications")} className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <Bell className="w-[20px] h-[20px] text-muted-foreground" />
+            <button type="button" onClick={() => navigate("/notifications")} aria-label="Notifiche" className="relative w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <Bell className="w-[18px] h-[18px] text-neon" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-primary shadow-glow border border-background" />
               )}
             </button>
-            <button onClick={() => navigate("/chat")} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-              <MessageCircle className="w-[20px] h-[20px] text-muted-foreground" />
+            <button type="button" onClick={() => navigate("/chat")} aria-label="Messaggi" className="w-9 h-9 rounded-full neon-icon flex items-center justify-center hover:scale-105 transition-transform">
+              <MessageCircle className="w-[18px] h-[18px] text-neon" />
             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 px-5 pb-3 overflow-x-auto no-scrollbar">
+        {/* Tabs — chrome pill style */}
+        <div className="flex gap-2 px-5 pb-3 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
-            <button key={tab} onClick={() => handleTabClick(tab)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === tab 
-                   ? "bg-primary text-primary-foreground shadow-md" 
-                   : "bg-primary/10 text-primary hover:bg-primary/20"
+            <button type="button" key={tab} onClick={() => handleTabClick(tab)}
+              className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 whitespace-nowrap ${
+                activeTab === tab
+                   ? "gradient-primary text-white shadow-glow"
+                   : "neon-icon text-foreground/60 hover:text-foreground/90"
               }`}>
               {tab}
             </button>
@@ -182,18 +187,19 @@ export default function HomePage() {
         <StoriesBar />
       </div>
 
-      {/* Quick Actions — single compact scrollable row under stories */}
+      {/* Quick Actions — Neon LED icons */}
       {activeTab === "Nuovi" && (
-        <div className="flex gap-2 px-5 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-4 px-5 mb-5 overflow-x-auto no-scrollbar py-2">
           {[
+            { Icon: Sparkles, label: "Stella AI", path: "/ai-assistant" },
             { Icon: Wand2, label: "AI Look", path: "/ai-look" },
             { Icon: Scissors, label: "Stilisti", path: "/stylists" },
             { Icon: CalendarDays, label: "Prenota", path: "/booking" },
+            { Icon: ShoppingBag, label: "Shop", path: "/shop" },
             { Icon: MapIcon, label: "Mappa", path: "/map-search" },
             { Icon: Droplets, label: "Spa", path: "/spa-terme" },
             { Icon: Home, label: "Domicilio", path: "/map-search" },
             { Icon: Target, label: "Missioni", path: "/missions" },
-            { Icon: Sparkles, label: "AI", path: "/ai-assistant" },
             { Icon: Zap, label: "Quiz", path: "/quiz-live" },
             { Icon: Gamepad2, label: "Talent", path: "/talent-game" },
             { Icon: Film, label: "Shorts", path: "/shorts" },
@@ -202,13 +208,17 @@ export default function HomePage() {
             { Icon: Camera, label: "Prima/Dopo", path: "/before-after" },
             { Icon: Radio, label: "Radio", path: "/radio" },
             { Icon: Medal, label: "Classifica", path: "/leaderboard" },
+            { Icon: CalendarDays, label: "Contenuti", path: "/content-calendar" },
+            { Icon: BarChart3, label: "Predittiva", path: "/predictive-analytics" },
+            { Icon: Globe, label: "Social AI", path: "/social-automation" },
+            { Icon: Layout, label: "Sito Web", path: "/website-generator" },
           ].map(item => (
-            <button key={item.label} onClick={() => handleQuickAction(item.label, item.path)}
-              className="flex flex-col items-center gap-1 min-w-[52px] shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center shadow-sm">
-                <item.Icon className="w-4.5 h-4.5 text-primary" />
+            <button key={item.label} type="button" onClick={() => handleQuickAction(item.label, item.path)}
+              className="flex flex-col items-center gap-2.5 min-w-[72px] shrink-0 group" aria-label={item.label}>
+              <div className="w-[60px] h-[60px] rounded-2xl neon-icon flex items-center justify-center transition-all duration-300 group-active:scale-90 group-hover:scale-110 group-hover:neon-icon-active relative">
+                <item.Icon className="w-7 h-7 text-neon relative z-10" />
               </div>
-              <span className="text-[9px] text-primary font-semibold leading-tight">{item.label}</span>
+              <span className="text-xs text-foreground/60 font-medium leading-tight tracking-wide" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{item.label}</span>
             </button>
           ))}
         </div>
@@ -243,26 +253,26 @@ export default function HomePage() {
       {/* Live Banner — subtle */}
       {activeTab !== "Stilisti" && (
         <div className="px-5 mb-5">
-          <button onClick={() => navigate("/live")} className="w-full rounded-2xl overflow-hidden relative h-28 bg-card border border-border/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+          <button onClick={() => navigate("/live")} className="w-full rounded-2xl overflow-hidden relative h-28 luxury-card">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/15 to-transparent" />
             <div className="absolute inset-0 flex items-center px-5">
               <div className="flex items-center gap-4 w-full">
                 <div className="flex -space-x-2">
                   {[stylist1, stylist2, beauty1].map((img, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-card overflow-hidden" style={{ zIndex: 3 - i }}>
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-card overflow-hidden shadow-md" style={{ zIndex: 3 - i }}>
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary live-pulse" />
-                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">In diretta</span>
+                    <span className="w-2 h-2 rounded-full bg-live live-pulse shadow-sm" />
+                    <span className="text-xs font-bold text-live uppercase tracking-widest">In diretta</span>
                   </div>
-                  <p className="text-sm font-semibold">Beauty streaming</p>
+                  <p className="text-sm font-semibold tracking-tight">Beauty streaming</p>
                   <p className="text-[11px] text-muted-foreground">Tutorial in diretta</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <ChevronRight className="w-5 h-5 text-primary" />
               </div>
             </div>
           </button>
@@ -299,26 +309,26 @@ export default function HomePage() {
         {activeTab === "Stilisti" && (
           <div className="space-y-3 fade-in">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Professionisti</h3>
+              <h3 className="text-sm font-semibold tracking-tight">Professionisti</h3>
               <button onClick={() => navigate("/stylists")} className="text-xs text-primary font-semibold">Vedi tutti</button>
             </div>
             {stylists.map(stylist => (
               <button key={stylist.id} onClick={() => navigate(`/stylist/${stylist.id}`)}
-                className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-primary/20 hover:border-primary/40 transition-all duration-200 text-left shadow-sm">
-                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/10" />
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl luxury-card hover:border-primary/40 transition-all duration-200 text-left shadow-luxury">
+                <img src={stylist.avatar} alt="" className="w-14 h-14 rounded-xl object-cover border border-primary/20 shadow-sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{stylist.business_name}</p>
-                  <p className="text-xs text-primary/70 mt-0.5">{stylist.specialty || 'Beauty Pro'}</p>
+                  <p className="font-semibold text-sm truncate tracking-tight">{stylist.business_name}</p>
+                  <p className="text-xs text-primary mt-0.5 font-medium">{stylist.specialty || 'Beauty Pro'}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <Star className="w-3 h-3 text-accent fill-accent" />
-                    <span className="text-xs font-medium">{stylist.rating || '4.5'}</span>
+                    <span className="text-xs font-semibold">{stylist.rating || '4.5'}</span>
                     <span className="text-xs text-muted-foreground">({stylist.review_count || 0})</span>
                     {stylist.city && <span className="text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="w-3 h-3" /> {stylist.city}</span>}
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-primary">€{stylist.hourly_rate || 40}</p>
-                  <p className="text-[10px] text-muted-foreground">/ora</p>
+                  <p className="text-sm font-bold text-gradient-primary">€{stylist.hourly_rate || 40}</p>
+                  <p className="text-xs text-muted-foreground">/ora</p>
                 </div>
               </button>
             ))}
@@ -343,8 +353,8 @@ export default function HomePage() {
                           <h3 className="font-semibold text-sm truncate">{job.title}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">{name} · {job.location}</p>
                           <div className="flex flex-wrap gap-1.5 mt-2">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium">{job.category}</span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">{job.employment_type}</span>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">{job.category}</span>
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground">{job.employment_type}</span>
                           </div>
                         </div>
                       </div>
@@ -363,7 +373,7 @@ export default function HomePage() {
                     <p className="text-xs font-medium truncate">{post.profileData?.display_name || 'Beauty Pro'}</p>
                     <div className="flex items-center gap-1.5 mt-1">
                       <Heart className="w-3 h-3 text-primary fill-primary" />
-                      <span className="text-[10px] text-muted-foreground">{post.like_count}</span>
+                      <span className="text-xs text-muted-foreground">{post.like_count}</span>
                     </div>
                   </div>
                 </div>
@@ -380,16 +390,16 @@ export default function HomePage() {
               <button onClick={() => navigate("/live")} className="text-xs text-primary font-semibold">Apri Live</button>
             </div>
 
-            <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
+              <div className="flex gap-2.5 overflow-x-auto no-scrollbar">
               {[
                 { Icon: CalendarDays, label: "Eventi", path: "/events" },
                 { Icon: Podcast, label: "Radio", path: "/radio" },
                 { Icon: Trophy, label: "Sfide", path: "/challenges" },
               ].map(item => (
                 <button key={item.label} onClick={() => navigate(item.path)}
-                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl bg-primary/15 border border-primary/30 hover:border-primary/50 transition-all duration-200 shrink-0 shadow-sm">
-                   <item.Icon className="w-5 h-5 text-primary" />
-                   <span className="text-[10px] text-primary font-semibold">{item.label}</span>
+                   className="flex flex-col items-center gap-1.5 py-3 min-w-[80px] rounded-2xl gradient-primary shadow-glow transition-all duration-200 shrink-0">
+                   <item.Icon className="w-5 h-5 text-white drop-shadow-sm" />
+                   <span className="text-xs text-white font-semibold tracking-wide">{item.label}</span>
                  </button>
               ))}
             </div>
@@ -409,12 +419,12 @@ export default function HomePage() {
                   <img src={stream.thumbnail_url || beauty2} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/80" />
                   <div className="absolute top-3 left-3">
-                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground live-pulse" />Live
                     </span>
                   </div>
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 glass px-2 py-1 rounded-full">
-                    <Eye className="w-3 h-3" /><span className="text-[10px]">{stream.viewer_count}</span>
+                    <Eye className="w-3 h-3" /><span className="text-xs">{stream.viewer_count}</span>
                   </div>
                   <div className="absolute bottom-3 left-3">
                     <p className="font-semibold text-sm">{stream.title}</p>

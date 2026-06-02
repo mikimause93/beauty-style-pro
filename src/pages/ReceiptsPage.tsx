@@ -12,6 +12,7 @@ export default function ReceiptsPage() {
 
   useEffect(() => {
     if (user) loadReceipts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadReceipts = async () => {
@@ -42,12 +43,12 @@ export default function ReceiptsPage() {
             <div key={r.id} className="p-4 rounded-2xl bg-card border border-border/50 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase text-primary">{r.receipt_type}</span>
-                <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("it-IT")}</span>
+                <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("it-IT")}</span>
               </div>
               <p className="text-sm font-medium">{r.service_name || "Pagamento"}</p>
               <div className="flex items-center justify-between">
                 <span className="text-lg font-display font-bold">€{Number(r.amount).toFixed(2)}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                   r.status === "paid" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
                 }`}>{r.status === "paid" ? "Pagato" : r.status}</span>
               </div>

@@ -193,6 +193,7 @@ export function useChatbot() {
       }, 10000); // Increased from 3 seconds to 10 seconds
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return {

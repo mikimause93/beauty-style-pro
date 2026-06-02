@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/layout/MobileLayout";
-import { ArrowLeft, Star, MapPin, Clock, Calendar, Heart, Share2, MessageCircle, Check } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Clock, Calendar, Heart, Share2, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import { useFollow } from "@/hooks/useFollow";
 import { supabase } from "@/integrations/supabase/client";
 import ShareMenu from "@/components/ShareMenu";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import stylist2 from "@/assets/stylist-2.jpg";
 import beauty1 from "@/assets/beauty-1.jpg";
 import beauty2 from "@/assets/beauty-2.jpg";
@@ -16,7 +17,7 @@ const fallbackStylist = {
   id: "1", name: "Martina Rossi", specialty: "Hairstylist · Colorist", city: "Milano",
   rating: 4.9, reviewCount: 127, user_id: "",
   bio: "Specializzata in balayage e tecniche di colorazione avanzate. 10+ anni di esperienza nei migliori saloni di Milano.",
-  avatar: stylist2, verified: true,
+  avatar: stylist2, verification_status: "verified", user_type: "professional",
   services: [
     { id: "1", name: "Taglio Donna", price: 35, duration: 45 },
     { id: "2", name: "Colore + Piega", price: 65, duration: 90 },
@@ -45,8 +46,10 @@ export default function StylistDetailPage() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).single();
+      const { data: pro } = await supabase.from("professionals").select("*").eq("id", id).maybeSingle();
       if (pro) {
+        // Fetch verification status from profile (authoritative source)
+        const { data: profProfile } = await supabase.from("profiles").select("verification_status, user_type").eq("user_id", pro.user_id).maybeSingle();
         setStylist(prev => ({
           ...prev,
           name: pro.business_name,
@@ -54,7 +57,8 @@ export default function StylistDetailPage() {
           city: pro.city || "",
           rating: Number(pro.rating) || 4.9,
           reviewCount: pro.review_count || 0,
-          verified: pro.is_verified || false,
+          verification_status: profProfile?.verification_status ?? null,
+          user_type: profProfile?.user_type || "professional",
           bio: pro.description || prev.bio,
           user_id: pro.user_id,
         }));
@@ -97,9 +101,9 @@ export default function StylistDetailPage() {
         <div className="flex flex-col items-center mb-6">
           <div className="w-28 h-28 rounded-full p-0.5 gradient-primary mb-3 relative">
             <img src={stylist.avatar} alt="" className="w-full h-full rounded-full object-cover border-3 border-background" />
-            {stylist.verified && (
-              <div className="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                <Check className="w-3 h-3 text-primary-foreground" />
+            {stylist.verification_status === "verified" && (
+              <div className="absolute bottom-1 right-1">
+                <VerifiedBadge status="verified" userType={stylist.user_type} size="sm" />
               </div>
             )}
           </div>
@@ -114,18 +118,18 @@ export default function StylistDetailPage() {
           <div className="flex items-center gap-6 mt-4">
             <div className="text-center">
               <p className="font-bold">{followerCount > 999 ? `${(followerCount / 1000).toFixed(1)}K` : followerCount}</p>
-              <p className="text-[10px] text-muted-foreground">Followers</p>
+              <p className="text-xs text-muted-foreground">Followers</p>
             </div>
             <div className="text-center">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <p className="font-bold">{stylist.rating}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground">{stylist.reviewCount} reviews</p>
+              <p className="text-xs text-muted-foreground">{stylist.reviewCount} reviews</p>
             </div>
             <div className="text-center">
               <p className="font-bold">{services.length}</p>
-              <p className="text-[10px] text-muted-foreground">Servizi</p>
+              <p className="text-xs text-muted-foreground">Servizi</p>
             </div>
           </div>
 
@@ -180,7 +184,7 @@ export default function StylistDetailPage() {
                 <div className="text-right">
                   <p className="text-sm font-bold text-primary">€{service.price}</p>
                   <button onClick={() => navigate(`/booking/${id}?service=${service.id}`)}
-                    className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-[10px] font-semibold">
+                    className="mt-1 px-3 py-1 rounded-full gradient-primary text-primary-foreground text-xs font-semibold">
                     Prenota
                   </button>
                 </div>
@@ -202,7 +206,7 @@ export default function StylistDetailPage() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{review.comment}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">{review.date}</p>
+                <p className="text-xs text-muted-foreground mt-1">{review.date}</p>
               </div>
             ))}
           </div>

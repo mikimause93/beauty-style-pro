@@ -26,6 +26,7 @@ export default function JobDetailPage() {
 
   useEffect(() => {
     if (id) fetchJob();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchJob = async () => {
@@ -33,7 +34,7 @@ export default function JobDetailPage() {
       .from("job_posts")
       .select("*, professionals(business_name, city, rating, user_id), businesses(business_name, city, logo_url, rating, user_id)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     setJob(data);
     if (user) {
       const { data: existing } = await supabase

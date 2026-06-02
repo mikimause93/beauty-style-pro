@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,28 +31,87 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const event = JSON.parse(body) as Stripe.Event;
+
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    let event: Stripe.Event;
+
+    if (webhookSecret) {
+      const signature = req.headers.get("stripe-signature");
+      if (!signature) {
+        return new Response("Missing stripe-signature header", { status: 400 });
+      }
+      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+    } else {
+      event = JSON.parse(body) as Stripe.Event;
+    }
+
     logStep("Event received", { type: event.type });
 
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id;
+        const refId = session.metadata?.ref_id;
+        const refType = session.metadata?.ref_type;
+        const description = session.metadata?.description;
         const customerEmail = session.customer_email || session.customer_details?.email;
-        logStep("Checkout completed", { userId, customerEmail, mode: session.mode });
+        logStep("Checkout completed", { userId, customerEmail, mode: session.mode, refType, refId });
 
         if (userId && session.mode === "payment") {
           // One-off payment - create receipt
           await supabase.from("receipts").insert({
             user_id: userId,
-            receipt_type: "payment",
-            service_name: "Pagamento Stripe",
+            receipt_type: refType || "payment",
+            service_name: description || "Pagamento Stripe",
             amount: (session.amount_total || 0) / 100,
             payment_method: "stripe",
             status: "paid",
             stripe_session_id: session.id,
           });
           logStep("Receipt created for one-off payment");
+
+          // Update related resource
+          if (refType === "booking" && refId) {
+            const { error: bErr } = await supabase
+              .from("bookings")
+              .update({ status: "confirmed" })
+              .eq("id", refId);
+            if (bErr) logStep("Booking update error", { error: bErr.message });
+            else logStep("Booking confirmed", { refId });
+
+            await supabase.from("notifications").insert({
+              user_id: userId,
+              title: "Prenotazione confermata ✅",
+              message: "Il tuo pagamento è andato a buon fine, prenotazione confermata.",
+              type: "booking",
+            });
+          }
+
+          if (refType === "product" && refId) {
+            const { data: prod } = await supabase
+              .from("products")
+              .select("seller_id, price")
+              .eq("id", refId)
+              .maybeSingle();
+            await supabase.from("product_purchases").insert({
+              buyer_id: userId,
+              product_id: refId,
+              unit_price: (session.amount_total || 0) / 100,
+              total_price: (session.amount_total || 0) / 100,
+              payment_method: "stripe",
+            });
+            if (prod?.seller_id) {
+              const total = (session.amount_total || 0) / 100;
+              await supabase.from("platform_commissions").insert({
+                seller_id: prod.seller_id,
+                buyer_id: userId,
+                order_amount: total,
+                commission_rate: 5,
+                commission_amount: total * 0.05,
+                commission_type: "product",
+              });
+            }
+          }
         }
 
         if (userId && session.mode === "subscription") {

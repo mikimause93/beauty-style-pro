@@ -118,7 +118,7 @@ export default function InstallmentsPage() {
                       {plan.paid_count}/{plan.installment_count} rate pagate
                     </p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                     plan.status === "completed" ? "bg-green-500/20 text-green-500" :
                     plan.status === "defaulted" ? "bg-destructive/20 text-destructive" :
                     "bg-primary/20 text-primary"
@@ -143,7 +143,7 @@ export default function InstallmentsPage() {
                         {statusIcon(payment.status)}
                         <div>
                           <p className="text-xs font-medium">Rata {payment.installment_number}</p>
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             Scadenza: {new Date(payment.due_date).toLocaleDateString("it-IT")}
                           </p>
                         </div>
@@ -153,7 +153,7 @@ export default function InstallmentsPage() {
                         {payment.status === "pending" && (
                           <button
                             onClick={() => payInstallment(payment)}
-                            className="px-3 py-1 rounded-lg gradient-primary text-primary-foreground text-[10px] font-bold"
+                            className="px-3 py-1 rounded-lg gradient-primary text-primary-foreground text-xs font-bold"
                           >
                             Paga
                           </button>
