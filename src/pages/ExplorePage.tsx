@@ -93,7 +93,7 @@ export default function ExplorePage() {
                 <p className="col-span-3 text-center text-xs text-muted-foreground py-8">Nessun post di tendenza al momento.</p>
               )}
               {posts.slice(0, 9).map((post) => (
-                <button key={post.id} onClick={() => {}} className="aspect-square relative overflow-hidden">
+                <button key={post.id} type="button" aria-label="Apri post" onClick={() => navigate(`/post/${post.id}`)} className="aspect-square relative overflow-hidden">
                   {post.image_url && <img src={post.image_url} alt="" className="w-full h-full object-cover" />}
                   <div className="absolute bottom-1 left-1 flex items-center gap-0.5 bg-black/50 rounded-full px-1.5 py-0.5">
                     <Star className="w-2.5 h-2.5 text-white" />
