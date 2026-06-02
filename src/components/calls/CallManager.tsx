@@ -1,0 +1,272 @@
+import { useEffect, useRef, useState } from "react";
+import { useCall } from "@/contexts/CallContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Phone, PhoneOff, Video, Mic, MicOff, VideoOff, Globe2, Volume2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+
+export default function CallManager() {
+  const {
+    status, incoming, localStream, remoteStream, activeKind, peerName,
+    acceptCall, rejectCall, endCall, toggleMic, toggleCamera,
+  } = useCall();
+
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const speechRecRef = useRef<any>(null);
+  const translationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isProcessingRef = useRef(false);
+  const [muted, setMuted] = useState(false);
+  const [camOff, setCamOff] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [callTranslation, setCallTranslation] = useState("");
+  const [callTranslating, setCallTranslating] = useState(false);
+  const [callTargetLang, setCallTargetLang] = useState(
+    typeof navigator !== "undefined" ? navigator.language.slice(0, 2) : "it",
+  );
+
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
+  useEffect(() => {
+    if (status !== "in-call") {
+      setElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(timer);
+  }, [status]);
+
+  const stopLiveTranslation = () => {
+    speechRecRef.current?.stop?.();
+    speechRecRef.current = null;
+    if (translationAudioRef.current) {
+      translationAudioRef.current.pause();
+      translationAudioRef.current = null;
+    }
+    setCallTranslation("");
+    setCallTranslating(false);
+  };
+
+  useEffect(() => {
+    if (!["connecting", "in-call", "ringing-out"].includes(status)) {
+      stopLiveTranslation();
+    }
+  }, [status]);
+
+  const playTranslationAudio = (audioBase64: string) => {
+    try {
+      translationAudioRef.current?.pause();
+      const audio = new Audio(`data:audio/mpeg;base64,${audioBase64}`);
+      translationAudioRef.current = audio;
+      void audio.play().catch(() => {});
+    } catch {}
+  };
+
+  const startLiveTranslation = () => {
+    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Recognition) {
+      toast.error("Traduzione vocale non supportata su questo dispositivo");
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = typeof navigator !== "undefined" ? navigator.language : "it-IT";
+
+    recognition.onresult = async (event: any) => {
+      const lastResult = event.results[event.results.length - 1];
+      const spokenText = lastResult?.[0]?.transcript?.trim();
+      if (!spokenText) return;
+
+      if (!lastResult.isFinal) {
+        setCallTranslation(`${spokenText}...`);
+        return;
+      }
+
+      if (isProcessingRef.current || spokenText.length < 2) return;
+      isProcessingRef.current = true;
+      setCallTranslating(true);
+
+      try {
+        const { data, error } = await supabase.functions.invoke("elevenlabs-translate-speak", {
+          body: { spokenText, targetLanguage: callTargetLang },
+        });
+
+        if (error) throw error;
+
+        setCallTranslation(data?.translatedText || spokenText);
+        if (data?.audioAvailable && data?.audioBase64) {
+          playTranslationAudio(data.audioBase64);
+        }
+      } catch {
+        setCallTranslation(spokenText);
+      } finally {
+        setCallTranslating(false);
+        isProcessingRef.current = false;
+      }
+    };
+
+    recognition.onerror = () => {
+      setCallTranslating(false);
+      isProcessingRef.current = false;
+    };
+
+    recognition.start();
+    speechRecRef.current = recognition;
+    toast.success("Traduzione vocale realtime attiva");
+  };
+
+  if (status === "ringing-in" && incoming) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center p-6">
+        <div className="text-center mb-8 animate-in fade-in zoom-in duration-300">
+          <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-primary animate-pulse">
+            <AvatarImage src={incoming.fromAvatar} />
+            <AvatarFallback className="text-3xl">{incoming.fromName?.[0] || "?"}</AvatarFallback>
+          </Avatar>
+          <h2 className="text-2xl font-bold mb-1">{incoming.fromName || "Sconosciuto"}</h2>
+          <p className="text-muted-foreground flex items-center justify-center gap-2">
+            {incoming.kind === "video" ? <Video className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+            Chiamata {incoming.kind === "video" ? "video" : "audio"} in arrivo...
+          </p>
+        </div>
+        <div className="flex gap-12">
+          <Button size="lg" variant="destructive" className="rounded-full w-16 h-16 p-0" onClick={rejectCall}>
+            <PhoneOff className="w-7 h-7" />
+          </Button>
+          <Button size="lg" className="rounded-full w-16 h-16 p-0" onClick={acceptCall}>
+            <Phone className="w-7 h-7" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "ringing-out" || status === "connecting" || status === "in-call") {
+    const isVideo = activeKind === "video";
+    return (
+      <div className="fixed inset-0 z-[200] bg-black flex flex-col">
+        <div className="relative flex-1 overflow-hidden">
+          {isVideo && remoteStream ? (
+            <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-white">
+              <Avatar className="w-40 h-40 mb-6 ring-4 ring-primary">
+                <AvatarFallback className="text-4xl bg-primary/20">{peerName?.[0] || "?"}</AvatarFallback>
+              </Avatar>
+              <h2 className="text-2xl font-bold">{peerName || "Chiamata"}</h2>
+              <p className="text-white/70 mt-2">
+                {status === "ringing-out" && "Squillo..."}
+                {status === "connecting" && "Connessione..."}
+                {status === "in-call" && `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`}
+              </p>
+            </div>
+          )}
+
+          {isVideo && localStream && (
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute top-4 right-4 w-32 h-44 rounded-xl object-cover border-2 border-white/30 shadow-xl"
+            />
+          )}
+
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            {status === "in-call" && (
+              <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
+              </div>
+            )}
+            <select
+              value={callTargetLang}
+              onChange={(e) => setCallTargetLang(e.target.value)}
+              className="bg-black/50 text-white border border-white/15 rounded-full px-3 py-1 text-sm"
+            >
+              <option value="it">IT</option>
+              <option value="en">EN</option>
+              <option value="es">ES</option>
+              <option value="fr">FR</option>
+              <option value="de">DE</option>
+              <option value="pt">PT</option>
+              <option value="ar">AR</option>
+            </select>
+          </div>
+
+          {callTranslation && (
+            <div className="absolute left-4 right-4 bottom-28 bg-black/65 backdrop-blur rounded-2xl px-4 py-3 text-white border border-white/10">
+              <div className="flex items-center gap-2 text-xs text-white/70 mb-1">
+                <Globe2 className="w-3.5 h-3.5" />
+                Traduzione realtime
+                {callTranslating && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+              </div>
+              <p className="text-sm leading-relaxed">{callTranslation}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-black/80 backdrop-blur p-6 flex justify-center gap-4 sm:gap-6">
+          <Button
+            size="lg"
+            variant="secondary"
+            className="rounded-full w-14 h-14 p-0"
+            onClick={() => {
+              const nextMuted = !muted;
+              setMuted(nextMuted);
+              toggleMic(!nextMuted);
+            }}
+          >
+            {muted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+          </Button>
+
+          {isVideo && (
+            <Button
+              size="lg"
+              variant="secondary"
+              className="rounded-full w-14 h-14 p-0"
+              onClick={() => {
+                const nextCamOff = !camOff;
+                setCamOff(nextCamOff);
+                toggleCamera(!nextCamOff);
+              }}
+            >
+              {camOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}
+            </Button>
+          )}
+
+          <Button
+            size="lg"
+            variant={speechRecRef.current ? "default" : "secondary"}
+            className="rounded-full w-14 h-14 p-0"
+            onClick={() => {
+              if (speechRecRef.current) stopLiveTranslation();
+              else startLiveTranslation();
+            }}
+          >
+            {speechRecRef.current ? <Volume2 className="w-6 h-6" /> : <Globe2 className="w-6 h-6" />}
+          </Button>
+
+          <Button size="lg" variant="destructive" className="rounded-full w-14 h-14 p-0" onClick={() => endCall(true)}>
+            <PhoneOff className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}

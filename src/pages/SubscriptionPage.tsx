@@ -179,7 +179,7 @@ export default function SubscriptionPage() {
                 <div key={plan.slug}
                   className={`rounded-2xl border-2 ${isCurrent ? "border-primary ring-2 ring-primary/20" : PLAN_COLORS[plan.slug]} bg-card p-5 transition-all ${plan.slug === "premium" ? "relative overflow-hidden" : ""}`}>
                   {plan.slug === "premium" && (
-                    <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                    <div className="absolute top-0 right-0 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-bl-xl">
                       MIGLIORE
                     </div>
                   )}

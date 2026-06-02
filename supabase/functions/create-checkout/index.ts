@@ -34,9 +34,19 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated");
     logStep("User authenticated", { email: user.email });
 
-    const { priceId, mode = "subscription", successUrl, cancelUrl } = await req.json();
-    if (!priceId) throw new Error("priceId is required");
-    logStep("Request parsed", { priceId, mode });
+    const {
+      priceId,
+      mode = "subscription",
+      successUrl,
+      cancelUrl,
+      amount,
+      description,
+      currency = "eur",
+      refId,
+      refType,
+    } = await req.json();
+    if (!priceId && !amount) throw new Error("priceId or amount is required");
+    logStep("Request parsed", { priceId, mode, amount, refType, refId });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -50,14 +60,30 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://beauty-style-pro.lovable.app";
 
+    const lineItems = priceId
+      ? [{ price: priceId, quantity: 1 }]
+      : [{
+          price_data: {
+            currency,
+            product_data: { name: description || "Pagamento Beauty Style Pro" },
+            unit_amount: Math.round(Number(amount)),
+          },
+          quantity: 1,
+        }];
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: lineItems,
       mode: mode as "subscription" | "payment",
       success_url: successUrl || `${origin}/subscriptions?success=true`,
       cancel_url: cancelUrl || `${origin}/subscriptions?cancelled=true`,
-      metadata: { user_id: user.id },
+      metadata: {
+        user_id: user.id,
+        ...(refId ? { ref_id: String(refId) } : {}),
+        ...(refType ? { ref_type: String(refType) } : {}),
+        ...(description ? { description: String(description).slice(0, 400) } : {}),
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id });

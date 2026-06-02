@@ -195,7 +195,22 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      authenticatedUserId = data?.user?.id ?? null;
+    }
+
     const { role, message, messages, user_id, context, stream } = await req.json();
+
+    // Use authenticated user ID, fallback to provided user_id only if authenticated
+    const effectiveUserId = authenticatedUserId || user_id;
+    if (!effectiveUserId) {
+      return jsonResponse({ error: "Authentication required" }, 401);
+    }
 
     // Build prompt from role
     let userType: string | undefined;
@@ -256,12 +271,14 @@ serve(async (req) => {
     // Log conversation
     if (user_id) {
       const userMsg = chatMessages.slice(-1)[0]?.content || '';
-      await supabase.from("chatbot_messages").insert({
-        user_id,
-        message_type: role || "chat",
-        content: `User: ${userMsg}\nBot: ${reply}`,
-        status: "completed"
-      }).then(() => {}).catch(() => { /* Intentionally ignored: chat log persistence is non-critical */ });
+      try {
+        await supabase.from("chatbot_messages").insert({
+          user_id,
+          message_type: role || "chat",
+          content: `User: ${userMsg}\nBot: ${reply}`,
+          status: "completed"
+        });
+      } catch { /* chat log persistence is non-critical */ }
     }
 
     return jsonResponse({ reply, role: role || "auto" });

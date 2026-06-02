@@ -135,7 +135,7 @@ export default function ProfileShowcasePanel({ isOwnProfile, userId }: ProfileSh
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {count > 0 && (
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                   activeTab === tab.key ? "bg-primary-foreground/20" : "bg-muted"
                 }`}>
                   {count}
@@ -245,7 +245,7 @@ export default function ProfileShowcasePanel({ isOwnProfile, userId }: ProfileSh
               {/* Title overlay */}
               {item.title && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/80 to-transparent px-2 py-1.5">
-                  <p className="text-[9px] font-medium text-foreground truncate">{item.title}</p>
+                  <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
                 </div>
               )}
             </div>

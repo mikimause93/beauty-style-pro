@@ -49,36 +49,19 @@
   <meta name="twitter:title" content="STYLE - La Piattaforma Beauty">
   <meta property="og:description" content="Prenota appuntamenti, scopri professionisti, guarda live streaming e acquista prodotti beauty. La tua piattaforma beauty completa.">
   <meta name="twitter:description" content="Prenota appuntamenti, scopri professionisti, guarda live streaming e acquista prodotti beauty. La tua piattaforma beauty completa.">
-  <script>
-    (function() {
-      var params = new URLSearchParams(window.location.search);
-      var p = params.get('p');
-      if (p) {
-        var base = '/beauty-style-pro';
-        var path = decodeURIComponent(p.replace(/^\//, ''));
-        var query = params.get('q') ? '?' + decodeURIComponent(params.get('q')) : '';
-        var hash = window.location.hash;
-        window.history.replaceState(null, null, base + path + query + hash);
-      }
-    })();
-  </script>
 </head>
 
   <body>
     <div id="root"></div>
-    <!-- SPA redirect handler for GitHub Pages 404 redirect -->
     <script>
-      (function () {
-        var redirect = sessionStorage.getItem("spa-redirect");
-        if (redirect) {
-          sessionStorage.removeItem("spa-redirect");
-          try {
-            var data = JSON.parse(redirect);
-            var url = data.path + (data.search || "") + (data.hash || "");
-            window.history.replaceState(null, "", url);
-          } catch (e) {
-            console.error("Failed to parse spa-redirect:", e);
-          }        }
+      // Register service worker for PWA install — skip in iframes and preview
+      (function() {
+        var isIframe = false;
+        try { isIframe = window.self !== window.top; } catch(e) { isIframe = true; }
+        var isPreview = location.hostname.includes('lovableproject.com') || location.hostname.includes('id-preview--');
+        if ('serviceWorker' in navigator && !isIframe && !isPreview) {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        }
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>

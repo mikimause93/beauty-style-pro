@@ -31,7 +31,7 @@ export default function TrendingClips() {
     if (data && data.length > 0) {
       const userIds = [...new Set(data.map(p => p.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, display_name, avatar_url")
         .in("user_id", userIds);
 
@@ -69,10 +69,10 @@ export default function TrendingClips() {
               </div>
             )}
             <div className="absolute bottom-0 inset-x-0 p-2">
-              <p className="text-[10px] font-medium truncate">{clip.profileName}</p>
+              <p className="text-xs font-medium truncate">{clip.profileName}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <Heart className="w-2.5 h-2.5 text-primary fill-primary" />
-                <span className="text-[9px] text-muted-foreground">{clip.like_count}</span>
+                <span className="text-xs text-muted-foreground">{clip.like_count}</span>
               </div>
             </div>
           </button>

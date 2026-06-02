@@ -41,24 +41,30 @@ export default function CheckoutPage() {
   const handlePay = async () => {
     setProcessing(true);
     try {
-      // Stripe-based payments (card, paypal, klarna)
+      // Stripe-based payments (card, paypal, klarna) — webhook records receipt
       if (selected === "card" || selected === "paypal" || selected === "klarna") {
+        const successUrl =
+          type === "booking"
+            ? `${window.location.origin}/my-bookings?payment=success`
+            : `${window.location.origin}/wallet?payment=success`;
         const { data, error } = await supabase.functions.invoke("create-checkout", {
           body: {
-            priceId: null, // One-off payment
+            priceId: null,
             mode: "payment",
             amount: Math.round(amount * 100),
             description,
-            successUrl: `${window.location.origin}/wallet?payment=success`,
-            cancelUrl: `${window.location.origin}/checkout?amount=${amount}&desc=${description}&type=${type}&ref=${refId}`,
+            refId,
+            refType: type,
+            successUrl,
+            cancelUrl: `${window.location.origin}/checkout?amount=${amount}&desc=${encodeURIComponent(description)}&type=${type}&ref=${refId}`,
           },
         });
         if (error) throw error;
         if (data?.url) {
-          window.open(data.url, "_blank");
-          setProcessing(false);
+          window.location.href = data.url;
           return;
         }
+        throw new Error("Stripe URL non disponibile");
       }
 
       if (selected === "wallet") {

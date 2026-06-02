@@ -23,7 +23,7 @@ export default function ReviewPage() {
       .from("bookings")
       .select("professional_id")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (!booking) {
       toast.error("Prenotazione non trovata");

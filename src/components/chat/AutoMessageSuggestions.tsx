@@ -55,7 +55,7 @@ export default function AutoMessageSuggestions({ recipientName, context, onSelec
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
         <Sparkles className="w-3 h-3 text-primary" />
-        <span className="text-[10px] font-bold text-primary">AI Messaggi</span>
+        <span className="text-xs font-bold text-primary">AI Messaggi</span>
       </div>
       {loading ? (
         <div className="text-xs text-muted-foreground">Genero suggerimenti...</div>

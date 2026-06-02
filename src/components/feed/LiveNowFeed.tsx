@@ -27,15 +27,17 @@ export default function LiveNowFeed({ streams }: LiveNowFeedProps) {
           <span className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
           <h2 className="font-display font-bold text-base">LIVE ORA</h2>
         </div>
-        <button onClick={() => navigate("/live")} className="text-xs font-semibold text-primary">
+        <button type="button" onClick={() => navigate("/live")} className="text-xs font-semibold text-primary">
           Vedi tutte →
         </button>
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1">
         {streams.map(s => (
           <button
+            type="button"
             key={s.id}
             onClick={() => navigate("/live")}
+            aria-label={`Guarda live di ${s.professional?.business_name || "Streamer"}`}
             className="relative min-w-[160px] aspect-[3/4] rounded-2xl overflow-hidden bg-card shrink-0 group"
           >
             <img
@@ -46,16 +48,16 @@ export default function LiveNowFeed({ streams }: LiveNowFeedProps) {
 
             {/* Top badges */}
             <div className="absolute top-2 left-2 flex gap-1.5">
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-destructive-foreground animate-pulse" /> LIVE
               </span>
             </div>
             <div className="absolute top-2 right-2 flex flex-col gap-1">
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full glass text-[10px] font-medium">
+              <span className="flex items-center gap-1 px-2 py-1 rounded-full glass text-xs font-medium">
                 <Eye className="w-3 h-3" /> {s.viewer_count}
               </span>
               {(s.qr_coin_pool || 0) > 0 && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-bold">
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold">
                   <Coins className="w-3 h-3" /> {s.qr_coin_pool}
                 </span>
               )}
@@ -70,9 +72,9 @@ export default function LiveNowFeed({ streams }: LiveNowFeedProps) {
                 />
                 <p className="text-xs font-bold truncate">{s.professional?.business_name || "Streamer"}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground line-clamp-1">{s.title}</p>
+              <p className="text-xs text-muted-foreground line-clamp-1">{s.title}</p>
               {s.category && (
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[8px] font-bold capitalize">{s.category}</span>
+                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold capitalize">{s.category}</span>
               )}
             </div>
 

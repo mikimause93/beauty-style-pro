@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
               <img src={(entry as any).avatar_url || fallbackAvatars[(i + 3) % fallbackAvatars.length]} alt="" className="w-10 h-10 rounded-full object-cover" />
               <div className="flex-1">
                 <p className="text-sm font-semibold">{entry.name}</p>
-                <p className="text-[10px] text-muted-foreground">{entry.subtitle}</p>
+                <p className="text-xs text-muted-foreground">{entry.subtitle}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Zap className="w-3 h-3 text-gold" />

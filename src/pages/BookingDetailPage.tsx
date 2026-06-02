@@ -24,7 +24,7 @@ export default function BookingDetailPage() {
       .from("bookings")
       .select("*, professionals(business_name, city, user_id), services(name, price, duration_minutes)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     if (!error) setBooking(data);
     setLoading(false);
   };

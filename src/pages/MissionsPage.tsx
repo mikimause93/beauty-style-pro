@@ -172,7 +172,7 @@ export default function MissionsPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold">Livello {level}</p>
-                <p className="text-[10px] text-muted-foreground">{xp}/{xpToNext} XP</p>
+                <p className="text-xs text-muted-foreground">{xp}/{xpToNext} XP</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -231,8 +231,8 @@ export default function MissionsPage() {
                       <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${Math.min(100, (mission.progress / mission.target) * 100)}%` }} />
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px] text-muted-foreground">{mission.progress}/{mission.target}</span>
-                      <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5">
+                      <span className="text-xs text-muted-foreground">{mission.progress}/{mission.target}</span>
+                      <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
                         <Zap className="w-3 h-3" />+{mission.reward} QRC
                       </span>
                     </div>
@@ -287,8 +287,8 @@ export default function MissionsPage() {
                       <div className="h-full rounded-full gradient-primary transition-all" style={{ width: `${Math.min(100, (mission.progress / mission.target) * 100)}%` }} />
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px] text-muted-foreground">{mission.progress}/{mission.target}</span>
-                      <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5">
+                      <span className="text-xs text-muted-foreground">{mission.progress}/{mission.target}</span>
+                      <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
                         <Zap className="w-3 h-3" />+{mission.reward} QRC
                       </span>
                     </div>
@@ -331,8 +331,8 @@ export default function MissionsPage() {
                     )}
                   </div>
                   <p className="text-xs font-bold mt-2">{badge.name}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{badge.description}</p>
-                  <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                  <p className="text-xs text-muted-foreground mt-0.5">{badge.description}</p>
+                  <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-bold ${
                     badge.rarity === "legendary" ? "bg-amber-500/20 text-amber-600" :
                     badge.rarity === "epic" ? "bg-purple-500/20 text-purple-600" :
                     badge.rarity === "rare" ? "bg-blue-500/20 text-blue-600" :
