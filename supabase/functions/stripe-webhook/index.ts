@@ -74,7 +74,7 @@ serve(async (req) => {
           if (refType === "booking" && refId) {
             const { error: bErr } = await supabase
               .from("bookings")
-              .update({ status: "confirmed", payment_status: "paid" })
+              .update({ status: "confirmed" })
               .eq("id", refId);
             if (bErr) logStep("Booking update error", { error: bErr.message });
             else logStep("Booking confirmed", { refId });
