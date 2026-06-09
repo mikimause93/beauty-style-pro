@@ -48,7 +48,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ translated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("Translation error:", e);
     return new Response(JSON.stringify({ translated: "", error: "Translation failed" }), {
       status: 500,
