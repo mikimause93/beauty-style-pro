@@ -99,6 +99,26 @@ export function useStellaAgent() {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
+  const [actionSteps, setActionSteps] = useState<Array<{ id: string; icon: string; label: string; status: 'pending' | 'done' | 'error' }>>([]);
+  const actionStepsClearTimerRef = useRef<number | null>(null);
+  const scheduleStepsClear = useCallback((delay = 4500) => {
+    if (actionStepsClearTimerRef.current) window.clearTimeout(actionStepsClearTimerRef.current);
+    actionStepsClearTimerRef.current = window.setTimeout(() => setActionSteps([]), delay);
+  }, []);
+  const pushStep = useCallback((icon: string, label: string, status: 'pending' | 'done' | 'error' = 'pending') => {
+    const id = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+    setActionSteps(prev => [...prev, { id, icon, label, status }]);
+    if (actionStepsClearTimerRef.current) { window.clearTimeout(actionStepsClearTimerRef.current); actionStepsClearTimerRef.current = null; }
+    return id;
+  }, []);
+  const completeStep = useCallback((id: string, status: 'done' | 'error' = 'done', label?: string) => {
+    setActionSteps(prev => prev.map(s => s.id === id ? { ...s, status, label: label ?? s.label } : s));
+    scheduleStepsClear();
+  }, [scheduleStepsClear]);
+  const clearSteps = useCallback(() => {
+    if (actionStepsClearTimerRef.current) { window.clearTimeout(actionStepsClearTimerRef.current); actionStepsClearTimerRef.current = null; }
+    setActionSteps([]);
+  }, []);
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
   const confirmActionRef = useRef<() => Promise<void> | void>(() => {});
   const cancelActionRef = useRef<() => void>(() => {});
@@ -1499,6 +1519,7 @@ export function useStellaAgent() {
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
     setInlineStatus('Sto pensando...');
+    const thinkId = pushStep('🧠', `Capisco: "${text}"`, 'pending');
     try {
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
@@ -1532,12 +1553,19 @@ export function useStellaAgent() {
       if (intent && intent !== 'chat') {
         // Siri-like: show inline status, don't open panel
         setInlineStatus(displayResponse.substring(0, 100));
+        completeStep(thinkId, 'done', `Intento: ${intent}`);
+        const doId = pushStep('⚡', displayResponse.substring(0, 60), 'pending');
         await executeAIIntent(intent, params || {}, displayResponse);
+        completeStep(doId, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         logStellaCommand(text, intent);
       } else {
         // Chat response: show in panel
         setIsOpen(true);
         setInlineStatus(null);
+        completeStep(thinkId, 'done', 'Risposta in chat');
+        scheduleStepsClear();
       }
     } catch (err) {
       console.error('Stella AI error:', err);
@@ -1545,11 +1573,13 @@ export function useStellaAgent() {
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
       toast.info(`🌟 ${fallback}`);
+      completeStep(thinkId, 'error', fallback);
+      scheduleStepsClear(6000);
     } finally {
       setIsAIThinking(false);
       scheduleWakeWordResume(1800);
     }
-  }, [addMessage, stellaSpeak, profile, executeAIIntent, analyzePatterns, getTopPages, logStellaCommand, scheduleWakeWordResume]);
+  }, [addMessage, stellaSpeak, profile, executeAIIntent, analyzePatterns, getTopPages, logStellaCommand, scheduleWakeWordResume, pushStep, completeStep, scheduleStepsClear]);
 
 
 
@@ -1621,6 +1651,10 @@ export function useStellaAgent() {
         const ok = `Ho premuto "${cleaned}".`;
         addMessage({ role: 'stella', content: ok, type: 'action_result' });
         setInlineStatus(ok);
+        pushStep('🎯', `Comando: ${text}`, 'done');
+        pushStep('👆', `Tap su "${cleaned}"`, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         stellaSpeak(ok);
         logStellaCommand(text, 'action');
         scheduleWakeWordResume();
@@ -1666,11 +1700,16 @@ export function useStellaAgent() {
     } else {
       try {
         // Siri-like: execute silently with inline status, no panel
+        const goalId = pushStep('🎯', `Comando: ${text}`, 'done');
+        const doingId = pushStep('⚡', cmd.response, 'pending');
         await Promise.resolve(cmd.execute());
         recordAction(cmd.type);
         const followups = computeFollowups(cmd);
         addMessage({ role: 'stella', content: cmd.response, type: 'action_result', followups });
         setInlineStatus(cmd.response);
+        completeStep(doingId, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         stellaSpeak(cmd.response);
         logStellaCommand(text, cmd.type);
       } catch (error) {
@@ -1678,13 +1717,15 @@ export function useStellaAgent() {
         const failureMessage = 'Non sono riuscita a completare l’azione richiesta.';
         addMessage({ role: 'stella', content: failureMessage, type: 'text' });
         setInlineStatus(failureMessage);
+        pushStep('⚠️', failureMessage, 'error');
+        scheduleStepsClear(6000);
         stellaSpeak(failureMessage);
         toast.error(`🌟 Stella: ${failureMessage}`);
       } finally {
         scheduleWakeWordResume();
       }
     }
-  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume, clickVisibleAction]);
+  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume, clickVisibleAction, pushStep, completeStep, scheduleStepsClear]);
 
   handleCommandRef.current = handleCommand;
 
@@ -1817,6 +1858,7 @@ export function useStellaAgent() {
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     inlineStatus, clearInlineStatus,
+    actionSteps, clearSteps,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
     repeatPending,

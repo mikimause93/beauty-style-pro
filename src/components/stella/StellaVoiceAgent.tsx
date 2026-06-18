@@ -10,6 +10,7 @@ export default function StellaVoiceAgent() {
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     inlineStatus, clearInlineStatus,
+    actionSteps, clearSteps,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction, repeatPending, clearMessages,
   } = useStellaAgent();
@@ -51,6 +52,61 @@ export default function StellaVoiceAgent() {
   return (
     <>
       <div ref={constraintsRef} className="fixed inset-0 pointer-events-none z-[9998]" />
+
+      {/* ═══ SIRI-STYLE ACTION STEPS OVERLAY ═══ */}
+      <AnimatePresence>
+        {!isOpen && actionSteps.length > 0 && (
+          <motion.div
+            initial={{ y: -20, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -20, opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 320 }}
+            className="fixed top-4 left-4 right-4 z-[9999] pointer-events-auto max-w-md mx-auto"
+          >
+            <div className="bg-background/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-2xl px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+                    <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+                  </div>
+                  <p className="text-xs font-bold text-gradient-primary">Stella sta lavorando</p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Chiudi steps"
+                  onClick={clearSteps}
+                  className="w-6 h-6 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <ul className="space-y-1.5">
+                {actionSteps.map((s, idx) => (
+                  <motion.li
+                    key={s.id}
+                    initial={{ x: -8, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: idx * 0.04 }}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <span className="text-base leading-none w-5 text-center">{s.icon}</span>
+                    <span className={`flex-1 ${s.status === 'error' ? 'text-red-500' : s.status === 'done' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {s.label}
+                    </span>
+                    {s.status === 'pending' ? (
+                      <Loader2 className="w-3 h-3 animate-spin text-primary shrink-0" />
+                    ) : s.status === 'done' ? (
+                      <Check className="w-3 h-3 text-green-500 shrink-0" />
+                    ) : (
+                      <XCircle className="w-3 h-3 text-red-500 shrink-0" />
+                    )}
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ═══ SIRI-LIKE INLINE STATUS BAR ═══ */}
       <AnimatePresence>
