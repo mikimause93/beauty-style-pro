@@ -1641,6 +1641,10 @@ export function useStellaAgent() {
         const ok = `Ho premuto "${cleaned}".`;
         addMessage({ role: 'stella', content: ok, type: 'action_result' });
         setInlineStatus(ok);
+        pushStep('🎯', `Comando: ${text}`, 'done');
+        pushStep('👆', `Tap su "${cleaned}"`, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         stellaSpeak(ok);
         logStellaCommand(text, 'action');
         scheduleWakeWordResume();
@@ -1686,11 +1690,16 @@ export function useStellaAgent() {
     } else {
       try {
         // Siri-like: execute silently with inline status, no panel
+        const goalId = pushStep('🎯', `Comando: ${text}`, 'done');
+        const doingId = pushStep('⚡', cmd.response, 'pending');
         await Promise.resolve(cmd.execute());
         recordAction(cmd.type);
         const followups = computeFollowups(cmd);
         addMessage({ role: 'stella', content: cmd.response, type: 'action_result', followups });
         setInlineStatus(cmd.response);
+        completeStep(doingId, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         stellaSpeak(cmd.response);
         logStellaCommand(text, cmd.type);
       } catch (error) {
@@ -1698,13 +1707,15 @@ export function useStellaAgent() {
         const failureMessage = 'Non sono riuscita a completare l’azione richiesta.';
         addMessage({ role: 'stella', content: failureMessage, type: 'text' });
         setInlineStatus(failureMessage);
+        pushStep('⚠️', failureMessage, 'error');
+        scheduleStepsClear(6000);
         stellaSpeak(failureMessage);
         toast.error(`🌟 Stella: ${failureMessage}`);
       } finally {
         scheduleWakeWordResume();
       }
     }
-  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume, clickVisibleAction]);
+  }, [addMessage, parseCommand, stellaSpeak, askAI, logStellaCommand, scheduleWakeWordResume, clickVisibleAction, pushStep, completeStep, scheduleStepsClear]);
 
   handleCommandRef.current = handleCommand;
 
@@ -1837,6 +1848,7 @@ export function useStellaAgent() {
     isListening, isWakeWordListening, interimTranscript, speaking,
     pendingCommand, isSupported, isAIThinking, proactiveSuggestions,
     inlineStatus, clearInlineStatus,
+    actionSteps, clearSteps,
     toggleWakeWord, toggleTTS, toggleListening,
     sendTextCommand, confirmAction, cancelAction,
     repeatPending,
