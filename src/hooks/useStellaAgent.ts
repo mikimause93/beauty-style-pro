@@ -1519,6 +1519,7 @@ export function useStellaAgent() {
   const askAI = useCallback(async (text: string) => {
     setIsAIThinking(true);
     setInlineStatus('Sto pensando...');
+    const thinkId = pushStep('🧠', `Capisco: "${text}"`, 'pending');
     try {
       const patterns = await analyzePatterns();
       const topActions = patterns.slice(0, 5).map(p => `${p.action}(${p.count}x)`).join(', ');
@@ -1552,12 +1553,19 @@ export function useStellaAgent() {
       if (intent && intent !== 'chat') {
         // Siri-like: show inline status, don't open panel
         setInlineStatus(displayResponse.substring(0, 100));
+        completeStep(thinkId, 'done', `Intento: ${intent}`);
+        const doId = pushStep('⚡', displayResponse.substring(0, 60), 'pending');
         await executeAIIntent(intent, params || {}, displayResponse);
+        completeStep(doId, 'done');
+        pushStep('✅', 'Fatto', 'done');
+        scheduleStepsClear();
         logStellaCommand(text, intent);
       } else {
         // Chat response: show in panel
         setIsOpen(true);
         setInlineStatus(null);
+        completeStep(thinkId, 'done', 'Risposta in chat');
+        scheduleStepsClear();
       }
     } catch (err) {
       console.error('Stella AI error:', err);
@@ -1565,11 +1573,13 @@ export function useStellaAgent() {
       addMessage({ role: 'stella', content: fallback, type: 'text' });
       stellaSpeak(fallback);
       toast.info(`🌟 ${fallback}`);
+      completeStep(thinkId, 'error', fallback);
+      scheduleStepsClear(6000);
     } finally {
       setIsAIThinking(false);
       scheduleWakeWordResume(1800);
     }
-  }, [addMessage, stellaSpeak, profile, executeAIIntent, analyzePatterns, getTopPages, logStellaCommand, scheduleWakeWordResume]);
+  }, [addMessage, stellaSpeak, profile, executeAIIntent, analyzePatterns, getTopPages, logStellaCommand, scheduleWakeWordResume, pushStep, completeStep, scheduleStepsClear]);
 
 
 
