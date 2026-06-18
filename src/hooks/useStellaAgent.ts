@@ -99,6 +99,26 @@ export function useStellaAgent() {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [proactiveSuggestions, setProactiveSuggestions] = useState<Array<{ text: string; command: string }>>([]);
   const [inlineStatus, setInlineStatus] = useState<string | null>(null);
+  const [actionSteps, setActionSteps] = useState<Array<{ id: string; icon: string; label: string; status: 'pending' | 'done' | 'error' }>>([]);
+  const actionStepsClearTimerRef = useRef<number | null>(null);
+  const scheduleStepsClear = useCallback((delay = 4500) => {
+    if (actionStepsClearTimerRef.current) window.clearTimeout(actionStepsClearTimerRef.current);
+    actionStepsClearTimerRef.current = window.setTimeout(() => setActionSteps([]), delay);
+  }, []);
+  const pushStep = useCallback((icon: string, label: string, status: 'pending' | 'done' | 'error' = 'pending') => {
+    const id = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+    setActionSteps(prev => [...prev, { id, icon, label, status }]);
+    if (actionStepsClearTimerRef.current) { window.clearTimeout(actionStepsClearTimerRef.current); actionStepsClearTimerRef.current = null; }
+    return id;
+  }, []);
+  const completeStep = useCallback((id: string, status: 'done' | 'error' = 'done', label?: string) => {
+    setActionSteps(prev => prev.map(s => s.id === id ? { ...s, status, label: label ?? s.label } : s));
+    scheduleStepsClear();
+  }, [scheduleStepsClear]);
+  const clearSteps = useCallback(() => {
+    if (actionStepsClearTimerRef.current) { window.clearTimeout(actionStepsClearTimerRef.current); actionStepsClearTimerRef.current = null; }
+    setActionSteps([]);
+  }, []);
   const handleCommandRef = useRef<(text: string) => Promise<void> | void>(() => {});
   const confirmActionRef = useRef<() => Promise<void> | void>(() => {});
   const cancelActionRef = useRef<() => void>(() => {});
