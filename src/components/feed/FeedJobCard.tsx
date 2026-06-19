@@ -56,7 +56,7 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold truncate">{employerName}</p>
-            <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+            <span className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
               <Briefcase className="w-2.5 h-2.5" /> Lavoro
             </span>
           </div>
@@ -71,18 +71,18 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
             {job.category}
           </span>
-          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center gap-1">
             <Clock className="w-3 h-3" /> {typeLabels[job.employment_type] || job.employment_type}
           </span>
           {job.salary_min && (
-            <span className="px-2.5 py-1 rounded-full bg-success/10 text-success text-[10px] font-semibold flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold flex items-center gap-1">
               <Euro className="w-3 h-3" /> {job.salary_min}€{job.salary_max ? ` - ${job.salary_max}€` : "+"}
             </span>
           )}
-          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex items-center gap-1">
             <MapPin className="w-3 h-3" /> {job.location}
           </span>
         </div>
@@ -91,7 +91,7 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
         {job.required_skills && job.required_skills.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {job.required_skills.slice(0, 4).map((skill, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-full border border-border text-[10px] text-muted-foreground">
+              <span key={i} className="px-2 py-0.5 rounded-full border border-border text-xs text-muted-foreground">
                 {skill}
               </span>
             ))}
@@ -114,19 +114,19 @@ export default function FeedJobCard({ job }: FeedJobCardProps) {
       <div className="px-4 pb-4">
         <div className="flex items-center gap-4 pt-3 border-t border-border/50">
           <button onClick={() => { setLiked(!liked); setLikeCount(prev => prev + (liked ? -1 : 1)); }} className="flex items-center gap-1.5 group">
-            <Heart className={`w-[20px] h-[20px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
+            <Heart className={`w-[22px] h-[22px] transition-all duration-200 ${liked ? "text-primary fill-primary scale-110" : "text-muted-foreground group-hover:text-foreground"}`} />
             <span className="text-xs font-medium text-muted-foreground">{likeCount}</span>
           </button>
           <button onClick={() => navigate(`/hr/job/${job.id}`)} className="flex items-center gap-1.5 group">
-            <MessageCircle className="w-[20px] h-[20px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            <MessageCircle className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
             <span className="text-xs font-medium text-muted-foreground">Commenta</span>
           </button>
           <button className="group">
-            <Share2 className="w-[20px] h-[20px] text-muted-foreground group-hover:text-foreground transition-colors" />
+            <Share2 className="w-[22px] h-[22px] text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
           <div className="flex-1" />
           <button onClick={() => setSaved(!saved)}>
-            <Bookmark className={`w-[20px] h-[20px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
+            <Bookmark className={`w-[22px] h-[22px] transition-all duration-200 ${saved ? "text-primary fill-primary" : "text-muted-foreground"}`} />
           </button>
         </div>
       </div>

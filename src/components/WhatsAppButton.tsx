@@ -47,7 +47,7 @@ export default function WhatsAppButton({ userId, name, context = "service", serv
 
   return (
     <button onClick={openWhatsApp}
-      className={className || "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-semibold"}>
+      className={className || "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-semibold"}>
       <WhatsAppIcon className="w-3.5 h-3.5" />
       WhatsApp
     </button>

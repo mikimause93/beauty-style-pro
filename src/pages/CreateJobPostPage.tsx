@@ -98,13 +98,13 @@ export default function CreateJobPostPage() {
         .from("professionals")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       const { data: bus } = await supabase
         .from("businesses")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!prof && !bus) {
         toast.error("Devi essere un professionista o business per pubblicare annunci");

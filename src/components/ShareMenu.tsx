@@ -70,21 +70,21 @@ export default function ShareMenu({ url, title, description, onClose, onChatShar
               <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-[10px] font-medium">Chat</span>
+              <span className="text-xs font-medium">Chat</span>
             </button>
           )}
           <button onClick={handleCopy} className="flex flex-col items-center gap-1.5">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
               {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5 text-muted-foreground" />}
             </div>
-            <span className="text-[10px] font-medium">{copied ? "Copiato!" : "Copia"}</span>
+            <span className="text-xs font-medium">{copied ? "Copiato!" : "Copia"}</span>
           </button>
           {navigator.share && (
             <button onClick={handleNativeShare} className="flex flex-col items-center gap-1.5">
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <Share2 className="w-5 h-5 text-muted-foreground" />
               </div>
-              <span className="text-[10px] font-medium">Altro</span>
+              <span className="text-xs font-medium">Altro</span>
             </button>
           )}
         </div>
@@ -96,7 +96,7 @@ export default function ShareMenu({ url, title, description, onClose, onChatShar
               <div className={`w-12 h-12 rounded-full ${social.color} flex items-center justify-center`}>
                 <social.Icon className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-[10px] font-medium text-muted-foreground">{social.label}</span>
+              <span className="text-xs font-medium text-muted-foreground">{social.label}</span>
             </button>
           ))}
         </div>

@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Search, MapPin, Star, Briefcase, ShoppingBag, Users, Sparkles, User, Navigation } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
-import stylist1 from "@/assets/stylist-1.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
+import { haversineDistance, getCoordsFromCity } from "@/hooks/useGeolocation";
 
 type Tab = "tutti" | "persone" | "stilisti" | "servizi" | "prodotti" | "lavoro";
 
@@ -14,12 +13,16 @@ interface UserResult {
   avatar_url: string | null;
   user_type: string;
   city: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export default function SearchPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
+  // Pre-fill from ?q= (set by voice command "cerca [query]")
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [tab, setTab] = useState<Tab>("tutti");
   const [stylists, setStylists] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
@@ -27,31 +30,67 @@ export default function SearchPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [users, setUsers] = useState<UserResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Try to get user location for distance display
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        pos => setUserCoords([pos.coords.latitude, pos.coords.longitude]),
+        () => {} // silent fail — distance just won't be shown
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => { if (query.trim().length >= 2) search(); }, 350);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tab]);
 
   const search = async () => {
     setLoading(true);
     const q = `%${query}%`;
 
-    // Search registered users (profiles)
+    // Search registered users (profiles) - also fetch location for distance
     if (tab === "tutti" || tab === "persone") {
       const { data } = await supabase
         .from("profiles")
-        .select("user_id, display_name, avatar_url, user_type, city")
+        .select("user_id, display_name, avatar_url, user_type, city, latitude, longitude")
         .ilike("display_name", q)
-        .limit(15);
-      if (data) setUsers(data);
+        .limit(30);
+      if (data) {
+        const sorted = (data as UserResult[]).map(u => {
+          const lat = u.latitude ?? (u.city ? getCoordsFromCity(u.city)[0] : null);
+          const lng = u.longitude ?? (u.city ? getCoordsFromCity(u.city)[1] : null);
+          const distance = userCoords && lat != null && lng != null
+            ? haversineDistance(userCoords[0], userCoords[1], lat, lng)
+            : 9999;
+          return { ...u, _distance: distance };
+        }).sort((a, b) => (a as any)._distance - (b as any)._distance).slice(0, 15);
+        setUsers(sorted);
+      }
     }
 
     if (tab === "tutti" || tab === "stilisti") {
-      const { data } = await supabase.from("professionals").select("*").or(`business_name.ilike.${q},specialty.ilike.${q},city.ilike.${q}`).limit(10);
-      if (data) setStylists(data);
+      const { data } = await supabase.from("professionals")
+        .select("*, profiles:user_id(avatar_url)")
+        .or(`business_name.ilike.${q},specialty.ilike.${q},city.ilike.${q}`)
+        .limit(30);
+      if (data) {
+        const sorted = data.map((s: any) => {
+          const lat = s.latitude ?? (s.city ? getCoordsFromCity(s.city)[0] : null);
+          const lng = s.longitude ?? (s.city ? getCoordsFromCity(s.city)[1] : null);
+          const distance = userCoords && lat != null && lng != null
+            ? Math.round(haversineDistance(userCoords[0], userCoords[1], lat, lng) * 10) / 10
+            : undefined;
+          const avatar = Array.isArray(s.profiles) ? s.profiles[0]?.avatar_url : s.profiles?.avatar_url;
+          return { ...s, distance, avatar };
+        }).sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999)).slice(0, 10);
+        setStylists(sorted);
+      }
     }
 
     if (tab === "tutti" || tab === "servizi") {
@@ -144,7 +183,13 @@ export default function SearchPage() {
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Persone</h3>
             <div className="space-y-2">
-              {users.map(u => (
+              {users.map(u => {
+                const uLat = u.latitude || (u.city ? getCoordsFromCity(u.city)[0] : null);
+                const uLng = u.longitude || (u.city ? getCoordsFromCity(u.city)[1] : null);
+                const dist = userCoords && uLat && uLng
+                  ? Math.round(haversineDistance(userCoords[0], userCoords[1], uLat, uLng) * 10) / 10
+                  : null;
+                return (
                 <button key={u.user_id} onClick={() => navigate(`/profile/${u.user_id}`)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left">
                   <img
@@ -154,19 +199,25 @@ export default function SearchPage() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{u.display_name || "Utente"}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
                         {userTypeLabel(u.user_type)}
                       </span>
                       {u.city && (
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                           <MapPin className="w-2.5 h-2.5" />{u.city}
+                        </span>
+                      )}
+                      {dist !== null && (
+                        <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
+                          <Navigation className="w-2.5 h-2.5" />{dist} km
                         </span>
                       )}
                     </div>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -176,20 +227,29 @@ export default function SearchPage() {
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Professionisti</h3>
             <div className="space-y-2">
-              {stylists.map((s, i) => (
+              {stylists.map((s) => (
                 <button key={s.id} onClick={() => navigate(`/stylist/${s.id}`)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all text-left">
-                  <img src={i % 2 === 0 ? stylist1 : beauty1} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                  <img
+                    src={s.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.id}`}
+                    alt=""
+                    className="w-12 h-12 rounded-xl object-cover"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{s.business_name}</p>
                     <p className="text-xs text-muted-foreground">{s.specialty || "Beauty Pro"}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Star className="w-3 h-3 text-accent fill-accent" />
-                      <span className="text-[10px]">{s.rating || "4.5"}</span>
-                      {s.city && <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{s.city}</span>}
+                      <span className="text-xs">{s.rating ?? "—"}</span>
+                      {s.city && <span className="text-xs text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{s.city}</span>}
+                      {s.distance !== undefined && (
+                        <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
+                          <Navigation className="w-2.5 h-2.5" />{s.distance} km
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <span className="text-sm font-bold">€{s.hourly_rate || 40}/h</span>
+                  {s.hourly_rate != null && <span className="text-sm font-bold">€{s.hourly_rate}/h</span>}
                 </button>
               ))}
             </div>
@@ -226,7 +286,10 @@ export default function SearchPage() {
               {products.map(p => (
                 <button key={p.id} onClick={() => navigate("/shop")}
                   className="rounded-xl bg-card border border-border/50 overflow-hidden text-left">
-                  <img src={p.image_url || beauty1} alt="" className="w-full aspect-square object-cover" />
+                  {p.image_url
+                    ? <img src={p.image_url} alt="" className="w-full aspect-square object-cover" />
+                    : <div className="w-full aspect-square bg-muted flex items-center justify-center text-xs text-muted-foreground">Nessuna immagine</div>
+                  }
                   <div className="p-2.5">
                     <p className="text-xs font-medium truncate">{p.name}</p>
                     <p className="text-sm font-bold text-primary mt-0.5">€{p.price}</p>
@@ -247,7 +310,7 @@ export default function SearchPage() {
                   className="w-full text-left p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all">
                   <p className="text-sm font-semibold truncate">{j.title}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{j.location} · {j.employment_type}</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium">{j.category}</span>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">{j.category}</span>
                 </button>
               ))}
             </div>

@@ -10,6 +10,7 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   return <RadioContext.Provider value={radio}>{children}</RadioContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRadio(): RadioContextType {
   const ctx = useContext(RadioContext);
   if (!ctx) throw new Error("useRadio must be used within RadioProvider");

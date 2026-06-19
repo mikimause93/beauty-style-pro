@@ -31,6 +31,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professionalId]);
 
   const fetchData = async () => {
@@ -43,7 +44,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
         const { data: svc } = await supabase.from("services").select("id, name, price, duration").eq("professional_id", professionalId).limit(5);
         svcData = svc || [];
 
-        const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).single();
+        const { data: pro } = await supabase.from("professionals").select("user_id").eq("id", professionalId).maybeSingle();
         if (pro) {
           const { data: prods } = await supabase.from("products").select("id, name, price, image_url, rating").eq("seller_id", pro.user_id).eq("active", true).limit(5);
           prodData = prods || [];
@@ -140,7 +141,7 @@ export default function LiveShopPanel({ professionalId, onClose }: LiveShopPanel
                       </div>
                       <div className="flex items-center gap-1 mt-1">
                         <Coins className="w-3 h-3 text-accent" />
-                        <span className="text-[10px] text-muted-foreground">+{Math.round(p.price * 0.5)} QRC</span>
+                        <span className="text-xs text-muted-foreground">+{Math.round(p.price * 0.5)} QRC</span>
                       </div>
                     </button>
                   ))}

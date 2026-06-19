@@ -187,7 +187,21 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { action, user_id, data: reqData } = await req.json();
+
+    // Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      authenticatedUserId = data?.user?.id ?? null;
+    }
+
+    const { action, user_id: body_user_id, data: reqData } = await req.json();
+    const user_id = authenticatedUserId || body_user_id;
+    if (!user_id) {
+      return jsonResponse({ error: "Authentication required" }, 401);
+    }
 
     // ===== ACTION: Track user action =====
     if (action === "track_action") {
@@ -224,7 +238,7 @@ serve(async (req) => {
           .from("profiles")
           .select("user_type, created_at, qr_coins, city, bio, avatar_url")
           .eq("user_id", user_id)
-          .single();
+          .maybeSingle();
 
         const [postsRes, bookingsRes, subsRes] = await Promise.all([
           supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", user_id),
@@ -348,8 +362,8 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidat
       if (!LOVABLE_API_KEY) return jsonResponse({ match_score: 50, analysis: "AI non disponibile" });
 
       const [jobRes, profileRes] = await Promise.all([
-        job_id ? supabase.from("job_posts").select("*").eq("id", job_id).single() : Promise.resolve({ data: null }),
-        applicant_id ? supabase.from("profiles").select("*").eq("user_id", applicant_id).single() : Promise.resolve({ data: null }),
+        job_id ? supabase.from("job_posts").select("*").eq("id", job_id).maybeSingle() : Promise.resolve({ data: null }),
+        applicant_id ? supabase.from("profiles").select("*").eq("user_id", applicant_id).maybeSingle() : Promise.resolve({ data: null }),
       ]);
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -400,7 +414,7 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidat
     if (action === "recommend_services") {
       if (!LOVABLE_API_KEY) return jsonResponse({ recommendations: [] });
 
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).maybeSingle();
       const { data: pastBookings } = await supabase
         .from("bookings")
         .select("*, services(name, category)")
@@ -481,7 +495,7 @@ ${isBusiness ? 'Focus: visibilità, prenotazioni, marketing, analytics, candidat
         .from("profiles")
         .select("user_type, display_name, qr_coins, city, bio, follower_count, following_count, avatar_url, created_at, iban, verification_status")
         .eq("user_id", user_id)
-        .single();
+        .maybeSingle();
 
       const userType = profile?.user_type || 'client';
 
@@ -557,23 +571,14 @@ CONTESTO UTENTE ATTUALE:
 
         if (!response.ok) {
           if (response.status === 429) {
-            return new Response(JSON.stringify({ error: "Troppe richieste, riprova tra poco" }), {
-              status: 429,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+            return jsonResponse({ error: "Troppe richieste, riprova tra poco" }, 429);
           }
           if (response.status === 402) {
-            return new Response(JSON.stringify({ error: "Crediti AI esauriti" }), {
-              status: 402,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+            return jsonResponse({ error: "Crediti AI esauriti" }, 402);
           }
           const errText = await response.text();
           console.error("AI gateway streaming error:", response.status, errText);
-          return new Response(JSON.stringify({ error: "Errore AI gateway" }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Errore AI gateway" }, 500);
         }
 
         return new Response(response.body, {
@@ -636,7 +641,7 @@ CONTESTO UTENTE ATTUALE:
         .from("profiles")
         .select("user_type, display_name, qr_coins, city")
         .eq("user_id", user_id)
-        .single();
+        .maybeSingle();
 
       const userType = profile?.user_type || "client";
       const userName = profile?.display_name || "Utente";
@@ -746,9 +751,9 @@ Regole: max 60 char per messaggio, emoji, tono motivante, CTA chiare. Italiano.`
     }
 
     return jsonResponse({ error: "Unknown action" }, 400);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("chatbot-assistant error:", e);
-    return jsonResponse({ error: e.message }, 500);
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 
