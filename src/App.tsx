@@ -30,6 +30,7 @@ const ShopPage = lazy(() => import("./pages/ShopPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const WelcomeOnboardingPage = lazy(() => import("./pages/WelcomeOnboardingPage"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const BookingDetailPage = lazy(() => import("./pages/BookingDetailPage"));
 const MyBookingsPage = lazy(() => import("./pages/MyBookingsPage"));
@@ -143,6 +144,7 @@ const App = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/welcome" element={<WelcomeOnboardingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/stylists" element={<StylistsPage />} />
