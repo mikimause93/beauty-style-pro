@@ -111,6 +111,20 @@ const queryClient = new QueryClient();
 
 const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{children}</ProtectedRoute>;
 
+const WelcomeGate = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  React.useEffect(() => {
+    if (location.pathname !== "/") return;
+    try {
+      const done = localStorage.getItem("stayle_welcome_completed");
+      if (!done) navigate("/welcome", { replace: true });
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+  return <>{children}</>;
+};
+
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <Loader2 className="w-8 h-8 text-primary animate-spin" />
