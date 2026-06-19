@@ -154,7 +154,7 @@ const App = () => {
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<WelcomeGate><HomePage /></WelcomeGate>} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
