@@ -457,17 +457,15 @@ export default function ChatPage() {
     if (!msg.mediaUrl || voiceTranscripts[msg.id]) return;
     setTranscribing(msg.id);
     try {
-      // Use Web Speech API for basic transcription simulation
-      // In production this would call an STT edge function
-      const { data } = await supabase.functions.invoke("ai-translate", {
-        body: { 
-          text: `[Audio message from chat - ${msg.duration || 5}s duration]`,
-          sourceLang: "auto-detect",
-          targetLang: getUserLanguage()
+      const { data, error } = await supabase.functions.invoke("voice-transcribe", {
+        body: {
+          audioUrl: msg.mediaUrl,
+          targetLanguage: getUserLanguage(),
         },
       });
-      setVoiceTranscripts(prev => ({ ...prev, [msg.id]: data?.translated || "Trascrizione non disponibile" }));
-      toast.success("Audio trascritto e tradotto");
+      if (error) throw error;
+      const text = data?.translated || data?.transcript || "Trascrizione non disponibile";
+      setVoiceTranscripts(prev => ({ ...prev, [msg.id]: text }));
     } catch {
       toast.error("Errore nella trascrizione");
     } finally {
