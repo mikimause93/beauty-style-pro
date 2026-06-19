@@ -60,9 +60,9 @@ export default function AIMatchBanner() {
         </div>
         <div className="flex-1">
           <p className="text-xs font-bold">AI Smart Match</p>
-          <p className="text-[10px] text-muted-foreground">Suggerimenti personalizzati</p>
+          <p className="text-xs text-muted-foreground">Suggerimenti personalizzati</p>
         </div>
-        <button onClick={() => setDismissed(true)} className="text-[10px] text-muted-foreground">✕</button>
+        <button onClick={() => setDismissed(true)} className="text-xs text-muted-foreground">✕</button>
       </div>
 
       {loading ? (
@@ -80,7 +80,7 @@ export default function AIMatchBanner() {
           {/* Nearby Pros */}
           {suggestions.nearbyPros && suggestions.nearbyPros.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Vicino a te</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Vicino a te</p>
               {suggestions.nearbyPros.map((pro, i) => (
                 <button key={i} onClick={() => navigate(`/stylist/${pro.id}`)}
                   className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left">
@@ -89,7 +89,7 @@ export default function AIMatchBanner() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold truncate">{pro.name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{pro.reason}</p>
+                    <p className="text-xs text-muted-foreground truncate">{pro.reason}</p>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 </button>
@@ -100,13 +100,13 @@ export default function AIMatchBanner() {
           {/* Smart Offers */}
           {suggestions.smartOffers && suggestions.smartOffers.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Offerte per te</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Offerte per te</p>
               {suggestions.smartOffers.map((offer, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-accent/10">
                   <Zap className="w-3.5 h-3.5 text-accent shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[11px] font-semibold truncate">{offer.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{offer.description}</p>
+                    <p className="text-xs text-muted-foreground truncate">{offer.description}</p>
                   </div>
                 </div>
               ))}
@@ -117,7 +117,7 @@ export default function AIMatchBanner() {
           {suggestions.aiTips && suggestions.aiTips.length > 0 && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
               {suggestions.aiTips.map((tip, i) => (
-                <span key={i} className="px-3 py-1.5 rounded-full bg-primary/10 text-[10px] text-primary font-medium whitespace-nowrap shrink-0">
+                <span key={i} className="px-3 py-1.5 rounded-full bg-primary/10 text-xs text-primary font-medium whitespace-nowrap shrink-0">
                   💡 {tip}
                 </span>
               ))}

@@ -187,7 +187,21 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { action, user_id, data: reqData } = await req.json();
+
+    // Authenticate user via JWT
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data } = await supabase.auth.getUser(token);
+      authenticatedUserId = data?.user?.id ?? null;
+    }
+
+    const { action, user_id: body_user_id, data: reqData } = await req.json();
+    const user_id = authenticatedUserId || body_user_id;
+    if (!user_id) {
+      return jsonResponse({ error: "Authentication required" }, 401);
+    }
 
     // ===== ACTION: Track user action =====
     if (action === "track_action") {

@@ -161,7 +161,7 @@ export default function InteractiveMap({
         ].map((item) => (
           <div key={item.type} className="flex items-center gap-1">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: MARKER_COLORS[item.type] }} />
-            <span className="text-[9px] text-muted-foreground">{item.label}</span>
+            <span className="text-xs text-muted-foreground">{item.label}</span>
           </div>
         ))}
       </div>

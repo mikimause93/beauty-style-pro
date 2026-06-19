@@ -40,7 +40,7 @@ const MiniRadioPlayer = forwardRef<HTMLDivElement, MiniRadioPlayerProps>(
 
             <button onClick={() => navigate("/radio")} className="flex-1 min-w-0 text-left">
               <p className="text-xs font-semibold truncate">{currentStation.name}</p>
-              <p className="text-[9px] text-muted-foreground truncate">{currentStation.genre}</p>
+              <p className="text-xs text-muted-foreground truncate">{currentStation.genre}</p>
             </button>
 
             <div className="flex items-center gap-1 shrink-0">

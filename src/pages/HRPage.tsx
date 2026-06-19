@@ -57,13 +57,13 @@ export default function HRPage() {
         .from("professionals")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       
       const { data: bus } = await supabase
         .from("businesses")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       let query = supabase.from("job_posts").select("*, job_applications(count)");
       
@@ -126,7 +126,7 @@ export default function HRPage() {
       rejected: "Rifiutata",
     };
     return (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${styles[status] || "bg-muted text-muted-foreground"}`}>
+      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${styles[status] || "bg-muted text-muted-foreground"}`}>
         {labels[status] || status}
       </span>
     );
@@ -260,21 +260,21 @@ export default function HRPage() {
                               </p>
                             </div>
                             {job.featured && (
-                              <span className="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-bold flex-shrink-0">
+                              <span className="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-xs font-bold flex-shrink-0">
                                 Featured
                               </span>
                             )}
                           </div>
                           
                           <div className="flex flex-wrap gap-2 mt-2">
-                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="w-3 h-3" /> {job.location}
                             </span>
-                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="w-3 h-3" /> {job.employment_type === "full_time" ? "Full-time" : job.employment_type}
                             </span>
                             {job.salary_min && (
-                              <span className="flex items-center gap-1 text-[10px] text-success font-semibold">
+                              <span className="flex items-center gap-1 text-xs text-success font-semibold">
                                 <Euro className="w-3 h-3" /> {job.salary_min}€ - {job.salary_max}€
                               </span>
                             )}
@@ -283,12 +283,12 @@ export default function HRPage() {
                           {job.required_skills && job.required_skills.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {job.required_skills.slice(0, 3).map((skill: string, i: number) => (
-                                <span key={i} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">
+                                <span key={i} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
                                   {skill}
                                 </span>
                               ))}
                               {job.required_skills.length > 3 && (
-                                <span className="text-[10px] text-muted-foreground">+{job.required_skills.length - 3}</span>
+                                <span className="text-xs text-muted-foreground">+{job.required_skills.length - 3}</span>
                               )}
                             </div>
                           )}
@@ -318,7 +318,7 @@ export default function HRPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-sm">{job.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       job.status === "active" ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"
                     }`}>
                       {job.status === "active" ? "Attivo" : job.status}

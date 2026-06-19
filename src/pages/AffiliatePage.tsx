@@ -122,17 +122,17 @@ export default function AffiliatePage() {
               <div className="p-3 rounded-2xl bg-card border border-border/50 text-center">
                 <Coins className="w-5 h-5 text-primary mx-auto mb-1" />
                 <p className="text-lg font-bold">€{Number(affiliate.total_earnings).toFixed(2)}</p>
-                <p className="text-[10px] text-muted-foreground">Guadagni Totali</p>
+                <p className="text-xs text-muted-foreground">Guadagni Totali</p>
               </div>
               <div className="p-3 rounded-2xl bg-card border border-border/50 text-center">
                 <Users className="w-5 h-5 text-accent mx-auto mb-1" />
                 <p className="text-lg font-bold">{affiliate.total_sales}</p>
-                <p className="text-[10px] text-muted-foreground">Vendite</p>
+                <p className="text-xs text-muted-foreground">Vendite</p>
               </div>
               <div className="p-3 rounded-2xl bg-card border border-border/50 text-center">
                 <TrendingUp className="w-5 h-5 text-green-500 mx-auto mb-1" />
                 <p className="text-lg font-bold">{affiliate.commission_rate}%</p>
-                <p className="text-[10px] text-muted-foreground">Commissione</p>
+                <p className="text-xs text-muted-foreground">Commissione</p>
               </div>
             </div>
 
@@ -190,7 +190,7 @@ export default function AffiliatePage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-semibold">Ordine €{Number(sale.order_amount).toFixed(2)}</p>
-                        <p className="text-[10px] text-muted-foreground">{new Date(sale.created_at).toLocaleDateString("it-IT")}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(sale.created_at).toLocaleDateString("it-IT")}</p>
                       </div>
                       <span className="text-sm font-bold text-green-500">+€{Number(sale.commission_amount).toFixed(2)}</span>
                     </div>

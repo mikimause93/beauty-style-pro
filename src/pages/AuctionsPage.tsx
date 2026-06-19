@@ -159,10 +159,10 @@ export default function AuctionsPage() {
                 <div key={auction.id} className="rounded-2xl bg-card border border-border/50 overflow-hidden">
                   <div className="relative h-36">
                     <img src={auction.image_url || fallbackImages[idx % fallbackImages.length]} alt="" className="w-full h-full object-cover" />
-                    <div className={`absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isEnding ? "bg-red-500 text-white" : "bg-background/80 text-foreground"}`}>
+                    <div className={`absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${isEnding ? "bg-red-500 text-white" : "bg-background/80 text-foreground"}`}>
                       <Clock className="w-3 h-3" /> {timeLeft}
                     </div>
-                    <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 text-[10px] font-semibold">
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 text-xs font-semibold">
                       <Users className="w-3 h-3" /> {auction.bid_count || 0} offerte
                     </div>
                   </div>
@@ -171,12 +171,12 @@ export default function AuctionsPage() {
                     {auction.description && <p className="text-[11px] text-muted-foreground line-clamp-2">{auction.description}</p>}
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Offerta attuale</p>
+                        <p className="text-xs text-muted-foreground">Offerta attuale</p>
                         <p className="text-lg font-bold text-primary">€{Number(auction.current_price).toFixed(2)}</p>
                       </div>
                       {auction.buy_now_price && (
                         <button onClick={() => buyNow(auction)}
-                          className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-[10px] font-bold flex items-center gap-1">
+                          className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-bold flex items-center gap-1">
                           <Trophy className="w-3 h-3" /> Compra ora €{Number(auction.buy_now_price).toFixed(2)}
                         </button>
                       )}

@@ -1,6 +1,49 @@
+import { supabase } from "@/integrations/supabase/client";
+
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chatbot-assistant`;
+
+async function streamGuestFallback({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Msg[];
+  onDelta: (deltaText: string) => void;
+  onDone: () => void;
+  onError?: (error: string) => void;
+}) {
+  const lastUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "user")
+    ?.content?.trim();
+
+  if (!lastUserMessage) {
+    onError?.("Inserisci un messaggio");
+    return;
+  }
+
+  const { data, error } = await supabase.functions.invoke("stella-intent", {
+    body: {
+      text: lastUserMessage,
+      context: {
+        guest: true,
+        current_page: typeof window !== "undefined" ? window.location.pathname : "/",
+      },
+    },
+  });
+
+  if (error) {
+    onError?.("Errore nella risposta AI");
+    return;
+  }
+
+  const reply = data?.response || "Ciao! Come posso aiutarti?";
+  onDelta(reply);
+  onDone();
+}
 
 export async function streamChat({
   userId,
@@ -9,12 +52,17 @@ export async function streamChat({
   onDone,
   onError,
 }: {
-  userId: string;
+  userId?: string;
   messages: Msg[];
   onDelta: (deltaText: string) => void;
   onDone: () => void;
   onError?: (error: string) => void;
 }) {
+  if (!userId) {
+    await streamGuestFallback({ messages, onDelta, onDone, onError });
+    return;
+  }
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
@@ -77,7 +125,6 @@ export async function streamChat({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
