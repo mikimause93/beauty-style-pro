@@ -153,6 +153,10 @@ export default function ChatPage() {
           setMessages(prev => [...prev, newMsg]);
           // Auto-translate incoming message in real-time
           autoTranslateMsg(msg.id, msg.content);
+          // Auto-transcribe + translate incoming voice messages
+          if (newMsg.type === "voice" && newMsg.mediaUrl && autoTranslate) {
+            setTimeout(() => transcribeAndTranslateVoice(newMsg), 300);
+          }
         }
       })
       .subscribe();
