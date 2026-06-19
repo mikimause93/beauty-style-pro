@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RadioProvider } from "@/contexts/RadioContext";
 import { TenantProvider } from "@/contexts/TenantContext";
@@ -114,7 +115,7 @@ const P = ({ children }: { children: React.ReactNode }) => <ProtectedRoute>{chil
 const WelcomeGate = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  React.useEffect(() => {
+  useEffect(() => {
     if (location.pathname !== "/") return;
     try {
       const done = localStorage.getItem("stayle_welcome_completed");
