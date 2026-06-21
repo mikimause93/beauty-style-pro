@@ -1,3 +1,5 @@
+import { Mic, Volume2 } from "lucide-react";
+
 interface Props {
   wakeWordEnabled: boolean;
   isTTSEnabled: boolean;
@@ -14,7 +16,7 @@ export default function AIVoiceControls({ wakeWordEnabled, isTTSEnabled, onToggl
           wakeWordEnabled ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-muted text-muted-foreground"
         }`}
       >
-        🎤 Wake Word {wakeWordEnabled ? "ON" : "OFF"}
+        <Mic className="w-3 h-3 inline mr-1" aria-hidden="true" /> Wake Word {wakeWordEnabled ? "ON" : "OFF"}
       </button>
       <button
         onClick={onToggleTTS}
@@ -22,7 +24,7 @@ export default function AIVoiceControls({ wakeWordEnabled, isTTSEnabled, onToggl
           isTTSEnabled ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-muted text-muted-foreground"
         }`}
       >
-        🔊 Audio {isTTSEnabled ? "ON" : "OFF"}
+        <Volume2 className="w-3 h-3 inline mr-1" aria-hidden="true" /> Audio {isTTSEnabled ? "ON" : "OFF"}
       </button>
     </div>
   );
