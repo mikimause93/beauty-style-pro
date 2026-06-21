@@ -45,7 +45,7 @@ serve(async (req) => {
       .from("profiles")
       .select("qr_coins, iban, bank_holder_name, verification_status")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!profile) throw new Error("Profile not found");
     if (profile.qr_coins < amount) throw new Error("Insufficient balance");
