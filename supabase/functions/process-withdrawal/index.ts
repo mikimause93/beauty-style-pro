@@ -40,27 +40,26 @@ serve(async (req) => {
     if (!iban) throw new Error("IBAN required");
     logStep("Withdrawal request", { userId: user.id, amount, iban: `****${iban.slice(-4)}` });
 
-    // Check user balance
+    // Verification info (non-blocking)
     const { data: profile } = await supabase
       .from("profiles")
-      .select("qr_coins, iban, bank_holder_name, verification_status")
+      .select("verification_status")
       .eq("user_id", user.id)
       .single();
-
-    if (!profile) throw new Error("Profile not found");
-    if (profile.qr_coins < amount) throw new Error("Insufficient balance");
-    if (profile.verification_status !== "verified") {
-      // Allow withdrawals but flag for review
+    if (profile && profile.verification_status !== "verified") {
       logStep("User not fully verified, flagging for review");
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Deduct balance
-    await supabase
-      .from("profiles")
-      .update({ qr_coins: profile.qr_coins - amount })
-      .eq("user_id", user.id);
+    // Atomically deduct balance (prevents TOCTOU race)
+    const { data: newBalance, error: debitErr } = await supabase.rpc("debit_qr_coins", {
+      _user_id: user.id,
+      _amount: amount,
+    });
+    if (debitErr) {
+      throw new Error("Insufficient balance");
+    }
 
     // Record transaction
     await supabase.from("transactions").insert({
@@ -89,12 +88,12 @@ serve(async (req) => {
       type: "payment",
     });
 
-    logStep("Withdrawal processed successfully", { newBalance: profile.qr_coins - amount });
+    logStep("Withdrawal processed successfully", { newBalance });
 
     return new Response(JSON.stringify({
       success: true,
       message: "Prelievo in elaborazione",
-      newBalance: profile.qr_coins - amount,
+      newBalance,
       estimatedArrival: "2-5 giorni lavorativi",
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
