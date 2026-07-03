@@ -5391,6 +5391,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      credit_qr_coins: {
+        Args: { _amount: number; _user_id: string }
+        Returns: number
+      }
+      debit_ai_credits: {
+        Args: { _amount: number; _user_id: string }
+        Returns: number
+      }
+      debit_qr_coins: {
+        Args: { _amount: number; _user_id: string }
+        Returns: number
+      }
       get_chatbot_suggestions: {
         Args: { _user_id: string }
         Returns: {

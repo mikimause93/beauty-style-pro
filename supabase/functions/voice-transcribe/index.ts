@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireUser } from "../_shared/auth-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    try { await requireUser(req); } catch (r) { if (r instanceof Response) return r; throw r; }
     const { audioUrl, audioBase64, mimeType, targetLanguage } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -21,7 +23,22 @@ serve(async (req) => {
       audioBytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) audioBytes[i] = bin.charCodeAt(i);
     } else if (audioUrl) {
-      const r = await fetch(audioUrl);
+      // Validate URL against allow-list to prevent SSRF
+      let parsed: URL;
+      try { parsed = new URL(audioUrl); } catch {
+        return new Response(JSON.stringify({ error: "Invalid audioUrl" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const allowedHosts = [
+        new URL(Deno.env.get("SUPABASE_URL") ?? "http://localhost").host,
+      ];
+      if (parsed.protocol !== "https:" || !allowedHosts.includes(parsed.host)) {
+        return new Response(JSON.stringify({ error: "audioUrl host not allowed" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const r = await fetch(parsed.toString());
       if (!r.ok) throw new Error("Cannot fetch audio");
       contentType = r.headers.get("content-type") || contentType;
       audioBytes = new Uint8Array(await r.arrayBuffer());
