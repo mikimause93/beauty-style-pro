@@ -204,13 +204,14 @@ serve(async (req) => {
       authenticatedUserId = data?.user?.id ?? null;
     }
 
-    const { role, message, messages, user_id, context, stream } = await req.json();
+    const { role, message, messages, context, stream } = await req.json();
 
-    // Use authenticated user ID, fallback to provided user_id only if authenticated
-    const effectiveUserId = authenticatedUserId || user_id;
-    if (!effectiveUserId) {
+    // Require valid JWT; never trust client-supplied user_id
+    if (!authenticatedUserId) {
       return jsonResponse({ error: "Authentication required" }, 401);
     }
+    const effectiveUserId = authenticatedUserId;
+    const user_id = authenticatedUserId;
 
     // Build prompt from role
     let userType: string | undefined;
