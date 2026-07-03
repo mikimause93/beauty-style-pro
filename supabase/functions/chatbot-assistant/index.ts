@@ -197,11 +197,11 @@ serve(async (req) => {
       authenticatedUserId = data?.user?.id ?? null;
     }
 
-    const { action, user_id: body_user_id, data: reqData } = await req.json();
-    const user_id = authenticatedUserId || body_user_id;
-    if (!user_id) {
+    const { action, data: reqData } = await req.json();
+    if (!authenticatedUserId) {
       return jsonResponse({ error: "Authentication required" }, 401);
     }
+    const user_id = authenticatedUserId;
 
     // ===== ACTION: Track user action =====
     if (action === "track_action") {
