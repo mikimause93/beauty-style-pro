@@ -33,17 +33,14 @@ serve(async (req) => {
     const body = await req.text();
 
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    let event: Stripe.Event;
-
-    if (webhookSecret) {
-      const signature = req.headers.get("stripe-signature");
-      if (!signature) {
-        return new Response("Missing stripe-signature header", { status: 400 });
-      }
-      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-    } else {
-      event = JSON.parse(body) as Stripe.Event;
+    if (!webhookSecret) {
+      return new Response("STRIPE_WEBHOOK_SECRET not set", { status: 500 });
     }
+    const signature = req.headers.get("stripe-signature");
+    if (!signature) {
+      return new Response("Missing stripe-signature header", { status: 400 });
+    }
+    const event: Stripe.Event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
 
     logStep("Event received", { type: event.type });
 
