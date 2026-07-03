@@ -39,14 +39,12 @@ serve(async (req) => {
 
     if (!session_id) throw new Error("session_id required");
 
-    // Check AI credits
-    const { data: credits } = await supabase
-      .from("ai_credits")
-      .select("balance")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!credits || credits.balance < 1) {
+    // Atomically reserve 1 AI credit (prevents TOCTOU)
+    const { data: newBalanceData, error: debitErr } = await supabase.rpc("debit_ai_credits", {
+      _user_id: user.id,
+      _amount: 1,
+    });
+    if (debitErr) {
       return new Response(JSON.stringify({ 
         error: "Crediti AI insufficienti. Acquista crediti per continuare.",
         credits_needed: true 
@@ -55,6 +53,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" } 
       });
     }
+    const newBalance: number = typeof newBalanceData === "number" ? newBalanceData : 0;
 
     // Update session status
     await supabase
@@ -95,6 +94,9 @@ serve(async (req) => {
     if (!aiResponse.ok) {
       const errorStatus = aiResponse.status;
       if (errorStatus === 429) {
+        // Refund the reserved credit on failure
+        await supabase.rpc("credit_qr_coins", { _user_id: user.id, _amount: 0 }); // no-op placeholder
+        await supabase.from("ai_credits").update({ balance: newBalance + 1, updated_at: new Date().toISOString() }).eq("user_id", user.id);
         await supabase
           .from("preview_sessions")
           .update({ status: "failed" })
@@ -108,6 +110,7 @@ serve(async (req) => {
         });
       }
       if (errorStatus === 402) {
+        await supabase.from("ai_credits").update({ balance: newBalance + 1, updated_at: new Date().toISOString() }).eq("user_id", user.id);
         await supabase
           .from("preview_sessions")
           .update({ status: "failed" })
@@ -120,6 +123,8 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      // Refund on any other AI failure
+      await supabase.from("ai_credits").update({ balance: newBalance + 1, updated_at: new Date().toISOString() }).eq("user_id", user.id);
       throw new Error(`AI generation failed: ${errorStatus}`);
     }
 
@@ -168,18 +173,12 @@ serve(async (req) => {
       })
       .eq("id", session_id);
 
-    // Deduct credit
-    await supabase
-      .from("ai_credits")
-      .update({ balance: credits.balance - 1, updated_at: new Date().toISOString() })
-      .eq("user_id", user.id);
-
-    // Log transaction
+    // Log transaction (credit already atomically deducted above)
     await supabase.from("ai_credit_transactions").insert({
       user_id: user.id,
       transaction_type: "usage",
       amount: -1,
-      balance_after: credits.balance - 1,
+      balance_after: newBalance,
       description: `AI Preview - ${sector}: ${style_name || "custom"}`,
       metadata: { session_id, sector },
     });
@@ -190,7 +189,7 @@ serve(async (req) => {
         session_id,
         generated_image_url: generatedImageUrl,
         ai_description: generatedContent,
-        credits_remaining: credits.balance - 1,
+        credits_remaining: newBalance,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
