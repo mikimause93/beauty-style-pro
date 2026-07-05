@@ -5414,6 +5414,13 @@ export type Database = {
         }[]
       }
       get_own_stream_key: { Args: { _stream_id: string }; Returns: string }
+      get_team_member_contact: {
+        Args: { _member_id: string }
+        Returns: {
+          email: string
+          phone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
