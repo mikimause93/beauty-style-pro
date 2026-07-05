@@ -2891,6 +2891,10 @@ export type Database = {
           portfolio_urls: string[] | null
           qr_coins: number
           sector: string | null
+          show_cv: boolean
+          show_location: boolean
+          show_phone: boolean
+          show_whatsapp: boolean
           skills: string[] | null
           surname: string | null
           tiktok: string | null
@@ -2930,6 +2934,10 @@ export type Database = {
           portfolio_urls?: string[] | null
           qr_coins?: number
           sector?: string | null
+          show_cv?: boolean
+          show_location?: boolean
+          show_phone?: boolean
+          show_whatsapp?: boolean
           skills?: string[] | null
           surname?: string | null
           tiktok?: string | null
@@ -2969,6 +2977,10 @@ export type Database = {
           portfolio_urls?: string[] | null
           qr_coins?: number
           sector?: string | null
+          show_cv?: boolean
+          show_location?: boolean
+          show_phone?: boolean
+          show_whatsapp?: boolean
           skills?: string[] | null
           surname?: string | null
           tiktok?: string | null
@@ -5443,6 +5455,10 @@ export type Database = {
           portfolio_urls: string[] | null
           qr_coins: number
           sector: string | null
+          show_cv: boolean
+          show_location: boolean
+          show_phone: boolean
+          show_whatsapp: boolean
           skills: string[] | null
           surname: string | null
           tiktok: string | null
@@ -5462,6 +5478,16 @@ export type Database = {
         }
       }
       get_own_stream_key: { Args: { _stream_id: string }; Returns: string }
+      get_public_contact: {
+        Args: { _user_id: string }
+        Returns: {
+          cv_url: string
+          latitude: number
+          longitude: number
+          phone: string
+          whatsapp: string
+        }[]
+      }
       get_team_member_contact: {
         Args: { _member_id: string }
         Returns: {
