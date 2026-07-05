@@ -24,11 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     const [profileRes, privateRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+      supabase.rpc("get_my_profile"),
       supabase.from("profiles_private").select("*").eq("user_id", userId).maybeSingle(),
     ]);
+    const ownProfile = Array.isArray(profileRes.data) ? profileRes.data[0] : profileRes.data;
     const merged = {
-      ...profileRes.data,
+      ...ownProfile,
       ...(privateRes.data ? {
         iban: privateRes.data.iban,
         bank_holder_name: privateRes.data.bank_holder_name,
