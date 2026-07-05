@@ -98,8 +98,9 @@ export default function CheckoutPage() {
         status: "paid",
       });
 
-      // Track platform commission (5%)
-      const commissionAmount = amount * 0.05;
+      // Track platform commission (15% - V7 Enterprise SaaS policy)
+      const COMMISSION_RATE = 15;
+      const commissionAmount = amount * (COMMISSION_RATE / 100);
       if (refId) {
         // Get seller id from product or booking
         let sellerId = null;
@@ -112,7 +113,7 @@ export default function CheckoutPage() {
             seller_id: sellerId,
             buyer_id: user.id,
             order_amount: amount,
-            commission_rate: 5,
+            commission_rate: COMMISSION_RATE,
             commission_amount: commissionAmount,
             commission_type: type === "product" ? "product" : "service",
           });
