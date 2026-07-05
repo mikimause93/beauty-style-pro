@@ -32,6 +32,11 @@ export default function EditProfilePage() {
   const [bankHolderName, setBankHolderName] = useState(profile?.bank_holder_name || "");
   const [enableWithdrawals, setEnableWithdrawals] = useState(!!(profile?.iban));
   const [isPublicProfile, setIsPublicProfile] = useState(true);
+  const [whatsapp, setWhatsapp] = useState(profile?.whatsapp || "");
+  const [showWhatsapp, setShowWhatsapp] = useState(!!profile?.show_whatsapp);
+  const [showPhone, setShowPhone] = useState(!!profile?.show_phone);
+  const [showLocation, setShowLocation] = useState(!!profile?.show_location);
+  const [showCv, setShowCv] = useState(!!profile?.show_cv);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,6 +114,11 @@ export default function EditProfilePage() {
       display_name: displayName, bio, city, phone,
       user_type: userType, avatar_url: avatarUrl, skills,
       desired_categories: desiredCategories,
+      whatsapp,
+      show_whatsapp: showWhatsapp,
+      show_phone: showPhone,
+      show_location: showLocation,
+      show_cv: showCv,
     }).eq("user_id", user.id);
 
     // Save IBAN to profiles_private
@@ -203,6 +213,11 @@ export default function EditProfilePage() {
 
             <FieldWithHint hint="Visibile ai clienti per contattarti">
               <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Telefono" type="tel"
+                className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+            </FieldWithHint>
+
+            <FieldWithHint hint="Numero WhatsApp (opzionale)">
+              <input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp" type="tel"
                 className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
             </FieldWithHint>
 
@@ -319,8 +334,33 @@ export default function EditProfilePage() {
             </div>
           </div>
         </Section>
+
+        {/* Privacy contatti */}
+        <Section title="Privacy contatti">
+          <p className="text-[11px] text-muted-foreground/80 mb-2 px-1">
+            Scegli quali dati mostrare agli altri utenti. I dati che disattivi restano privati.
+          </p>
+          <div className="space-y-2">
+            <PrivacyRow label="Mostra WhatsApp" hint="Altri utenti possono aprirti WhatsApp" checked={showWhatsapp} onChange={setShowWhatsapp} />
+            <PrivacyRow label="Mostra telefono" hint="Numero visibile su profilo e prenotazioni" checked={showPhone} onChange={setShowPhone} />
+            <PrivacyRow label="Mostra posizione GPS" hint="Appari sulla mappa con distanza esatta" checked={showLocation} onChange={setShowLocation} />
+            <PrivacyRow label="Mostra CV / portfolio" hint="Link CV visibile a professionisti/HR" checked={showCv} onChange={setShowCv} />
+          </div>
+        </Section>
       </div>
     </MobileLayout>
+  );
+}
+
+function PrivacyRow({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/50">
+      <div className="flex-1 min-w-0 pr-3">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-[11px] text-muted-foreground">{hint}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
   );
 }
 
