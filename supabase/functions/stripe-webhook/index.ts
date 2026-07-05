@@ -99,12 +99,14 @@ serve(async (req) => {
             });
             if (prod?.seller_id) {
               const total = (session.amount_total || 0) / 100;
+              // Marketplace commission: 15% (V7 Enterprise SaaS policy)
+              const COMMISSION_RATE = 15;
               await supabase.from("platform_commissions").insert({
                 seller_id: prod.seller_id,
                 buyer_id: userId,
                 order_amount: total,
-                commission_rate: 5,
-                commission_amount: total * 0.05,
+                commission_rate: COMMISSION_RATE,
+                commission_amount: total * (COMMISSION_RATE / 100),
                 commission_type: "product",
               });
             }
