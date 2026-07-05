@@ -5413,6 +5413,54 @@ export type Database = {
           suggestion_id: string
         }[]
       }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          account_type: string
+          availability: Json | null
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          color_theme: string | null
+          country: string | null
+          created_at: string
+          cv_url: string | null
+          desired_categories: string[] | null
+          display_name: string | null
+          experience_years: number | null
+          facebook: string | null
+          follower_count: number
+          following_count: number
+          gender: string | null
+          id: string
+          instagram: string | null
+          interests: string[] | null
+          last_seen: string | null
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          phone_verified: boolean
+          portfolio_urls: string[] | null
+          qr_coins: number
+          sector: string | null
+          skills: string[] | null
+          surname: string | null
+          tiktok: string | null
+          updated_at: string
+          user_id: string
+          user_type: string
+          username: string | null
+          verification_level: string
+          verification_status: string
+          whatsapp: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_own_stream_key: { Args: { _stream_id: string }; Returns: string }
       get_team_member_contact: {
         Args: { _member_id: string }
