@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -28,6 +28,10 @@ export default function AuthPage() {
   const [registrationResult, setRegistrationResult] = useState<RegistrationResult>(null);
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get("next") ?? "";
+  // Only allow same-origin relative paths to prevent open redirect.
+  const nextPath = /^\/(?!\/)/.test(rawNext) ? rawNext : "/";
 
   // Phone OTP login state
   const [loginMode, setLoginMode] = useState<"email" | "phone">("email");
@@ -84,8 +88,8 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user) navigate("/");
-  }, [user, authLoading, navigate]);
+    if (!authLoading && user) navigate(nextPath);
+  }, [user, authLoading, navigate, nextPath]);
 
   // ─── GPS ─────────────────────────────────────────────
   const requestLocation = async () => {
@@ -150,7 +154,7 @@ export default function AuthPage() {
     const normalized = phoneNumber.startsWith("+") ? phoneNumber : `+39${phoneNumber}`;
     const { error } = await supabase.auth.verifyOtp({ phone: normalized, token: otpCode, type: "sms" });
     if (error) { toast.error(error.message); }
-    else { toast.success("Accesso effettuato!"); navigate("/"); }
+    else { toast.success("Accesso effettuato!"); navigate(nextPath); }
     setLoading(false);
   };
 
