@@ -158,6 +158,7 @@ const App = () => {
             <Route path="/" element={<WelcomeGate><HomePage /></WelcomeGate>} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/welcome" element={<WelcomeOnboardingPage />} />
