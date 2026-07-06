@@ -30,6 +30,7 @@ const RadioPage = lazy(() => import("./pages/RadioPage"));
 const ShopPage = lazy(() => import("./pages/ShopPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const WelcomeOnboardingPage = lazy(() => import("./pages/WelcomeOnboardingPage"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
