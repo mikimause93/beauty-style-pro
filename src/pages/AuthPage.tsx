@@ -417,7 +417,7 @@ export default function AuthPage() {
             onClick={async () => {
               setLoading(true);
               const result = await lovable.auth.signInWithOAuth("google", {
-                redirect_uri: window.location.origin,
+                redirect_uri: window.location.origin + nextPath,
               });
               if (result.error) {
                 toast.error("Errore con Google: " + (result.error instanceof Error ? result.error.message : "Riprova"));
@@ -426,7 +426,7 @@ export default function AuthPage() {
               }
               if (result.redirected) return;
               toast.success("Accesso con Google effettuato!");
-              navigate("/");
+              navigate(nextPath);
               setLoading(false);
             }}
             disabled={loading}
