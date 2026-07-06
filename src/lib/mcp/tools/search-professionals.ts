@@ -21,8 +21,8 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ category, city, limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
-    let q = sb(ctx).from("professionals").select("id,name,category,city,rating").limit(limit ?? 10);
-    if (category) q = q.eq("category", category);
+    let q = sb(ctx).from("professionals").select("id,business_name,specialty,city,rating,is_verified").limit(limit ?? 10);
+    if (category) q = q.ilike("specialty", `%${category}%`);
     if (city) q = q.ilike("city", `%${city}%`);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
