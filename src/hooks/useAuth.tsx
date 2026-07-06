@@ -137,7 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: { display_name: displayName, user_type: userType, gender: gender || null, color_theme: colorTheme || "female", ...extraMeta },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: (() => {
+          const sp = new URLSearchParams(window.location.search).get("next");
+          const safe = sp && /^\/(?!\/)/.test(sp) ? sp : "/";
+          return window.location.origin + safe;
+        })(),
       },
     });
     return { error, needsEmailVerification: !data.session };

@@ -30,6 +30,7 @@ const RadioPage = lazy(() => import("./pages/RadioPage"));
 const ShopPage = lazy(() => import("./pages/ShopPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const WelcomeOnboardingPage = lazy(() => import("./pages/WelcomeOnboardingPage"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
@@ -157,6 +158,7 @@ const App = () => {
             <Route path="/" element={<WelcomeGate><HomePage /></WelcomeGate>} />
             <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/welcome" element={<WelcomeOnboardingPage />} />
