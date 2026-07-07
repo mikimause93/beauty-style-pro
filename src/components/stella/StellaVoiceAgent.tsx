@@ -175,7 +175,16 @@ export default function StellaVoiceAgent() {
             drag
             dragConstraints={constraintsRef}
             dragElastic={0.1}
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              // Se il wake word non è partito (permesso microfono negato o non
+              // ancora concesso), il tap dell'utente lo autorizza e avvia
+              // subito l'ascolto continuo stile Siri.
+              if (isSupported && wakeWordActive && !isWakeWordListening && !isListening) {
+                toggleWakeWord();
+                setTimeout(() => toggleWakeWord(), 50);
+              }
+              setIsOpen(true);
+            }}
             className="fixed bottom-24 right-4 z-[9999] w-14 h-14 rounded-full gradient-primary shadow-glow flex items-center justify-center pointer-events-auto"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1, rotate: [0, 5, -5, 0] }}
@@ -189,6 +198,12 @@ export default function StellaVoiceAgent() {
             )}
             {speaking && (
               <span className="absolute -inset-0.5 rounded-full border-2 border-accent/60 animate-pulse" />
+            )}
+            {/* Badge persistente: mostra che Stella sta davvero ascoltando */}
+            {isSupported && isWakeWordListening && !isListening && (
+              <span className="absolute -top-1 -left-1 px-1.5 py-0.5 rounded-full bg-green-500 text-[9px] font-bold text-white shadow-lg whitespace-nowrap">
+                LIVE
+              </span>
             )}
           </motion.button>
         )}
