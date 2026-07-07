@@ -243,6 +243,19 @@ export function useStellaAgent() {
 
     wakeWordStartedRef.current = true;
     const timer = window.setTimeout(() => startWakeWordListening(), 800);
+    // First-time hint: tell the user Stella is listening globally,
+    // so they know they can say "Stella + comando" from ANY page.
+    try {
+      const KEY = 'stella_wake_hint_shown_v1';
+      if (typeof window !== 'undefined' && !window.localStorage.getItem(KEY)) {
+        window.setTimeout(() => {
+          toast.success('🌟 Stella è in ascolto — dì "Stella" + comando da qualsiasi pagina', {
+            duration: 6000,
+          });
+          try { window.localStorage.setItem(KEY, '1'); } catch {}
+        }, 1500);
+      }
+    } catch {}
     return () => {
       window.clearTimeout(timer);
       wakeWordStartedRef.current = false;
