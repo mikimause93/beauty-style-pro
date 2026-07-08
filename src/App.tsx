@@ -57,6 +57,7 @@ const JobDetailPage = lazy(() => import("./pages/JobDetailPage"));
 const MapSearchPage = lazy(() => import("./pages/MapSearchPage"));
 const HomeServicePage = lazy(() => import("./pages/HomeServicePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const CallAutoAnswerSettingsPage = lazy(() => import("./pages/CallAutoAnswerSettingsPage"));
 const ReviewPage = lazy(() => import("./pages/ReviewPage"));
 const ReferralPage = lazy(() => import("./pages/ReferralPage"));
 const AnalyticsDashboardPage = lazy(() => import("./pages/AnalyticsDashboardPage"));
