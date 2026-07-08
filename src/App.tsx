@@ -195,6 +195,7 @@ const App = () => {
             <Route path="/before-after" element={<P><BeforeAfterPage /></P>} />
             <Route path="/home-service/:id" element={<P><HomeServicePage /></P>} />
             <Route path="/settings" element={<P><SettingsPage /></P>} />
+            <Route path="/call-auto-answer" element={<P><CallAutoAnswerSettingsPage /></P>} />
             <Route path="/referral" element={<P><ReferralPage /></P>} />
             <Route path="/analytics" element={<P><AnalyticsDashboardPage /></P>} />
             <Route path="/installments" element={<P><InstallmentsPage /></P>} />
