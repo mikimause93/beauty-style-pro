@@ -834,6 +834,48 @@ export type Database = {
         }
         Relationships: []
       }
+      call_auto_answer_settings: {
+        Row: {
+          auto_book_enabled: boolean
+          created_at: string
+          greeting_text: string
+          greeting_voice: string
+          mode: string
+          schedule: Json
+          take_message_enabled: boolean
+          transfer_enabled: boolean
+          translation_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_book_enabled?: boolean
+          created_at?: string
+          greeting_text?: string
+          greeting_voice?: string
+          mode?: string
+          schedule?: Json
+          take_message_enabled?: boolean
+          transfer_enabled?: boolean
+          translation_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_book_enabled?: boolean
+          created_at?: string
+          greeting_text?: string
+          greeting_voice?: string
+          mode?: string
+          schedule?: Json
+          take_message_enabled?: boolean
+          transfer_enabled?: boolean
+          translation_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       call_signals: {
         Row: {
           call_id: string
@@ -3885,6 +3927,57 @@ export type Database = {
           target_id?: string | null
           target_type?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      stella_call_sessions: {
+        Row: {
+          booking_id: string | null
+          call_id: string
+          caller_name: string | null
+          caller_user_id: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          language: string | null
+          message_conversation_id: string | null
+          outcome: string
+          started_at: string
+          target_user_id: string
+          transcript: Json
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          call_id: string
+          caller_name?: string | null
+          caller_user_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          language?: string | null
+          message_conversation_id?: string | null
+          outcome?: string
+          started_at?: string
+          target_user_id: string
+          transcript?: Json
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          call_id?: string
+          caller_name?: string | null
+          caller_user_id?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          language?: string | null
+          message_conversation_id?: string | null
+          outcome?: string
+          started_at?: string
+          target_user_id?: string
+          transcript?: Json
+          updated_at?: string
         }
         Relationships: []
       }

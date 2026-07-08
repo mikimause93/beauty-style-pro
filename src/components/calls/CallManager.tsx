@@ -1,16 +1,118 @@
 import { useEffect, useRef, useState } from "react";
 import { useCall } from "@/contexts/CallContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, PhoneOff, Video, Mic, MicOff, VideoOff, Globe2, Volume2 } from "lucide-react";
+import { Phone, PhoneOff, Video, Mic, MicOff, VideoOff, Globe2, Volume2, Sparkles, Send, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function CallManager() {
   const {
     status, incoming, localStream, remoteStream, activeKind, peerName,
     acceptCall, rejectCall, endCall, toggleMic, toggleCamera,
+    stellaAnswering, dismissStellaAnswering,
   } = useCall();
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsPremium(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+      setIsPremium(!!data);
+    })();
+  }, [user]);
+
+  // ---- Stella answering session state (caller side) ----
+  const [stellaTranscript, setStellaTranscript] = useState<Array<{ role: "ai" | "caller"; text: string }>>([]);
+  const [stellaInput, setStellaInput] = useState("");
+  const [stellaBusy, setStellaBusy] = useState(false);
+  const stellaAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!stellaAnswering?.active) {
+      setStellaTranscript([]);
+      setStellaInput("");
+      stellaAudioRef.current?.pause();
+      stellaAudioRef.current = null;
+      return;
+    }
+    // Greeting
+    (async () => {
+      setStellaBusy(true);
+      try {
+        const { data } = await supabase.functions.invoke("stella-call-answer", {
+          body: {
+            callId: stellaAnswering.callId,
+            targetUserId: stellaAnswering.peerId,
+            action: "greet",
+            language: (navigator.language || "it").slice(0, 2),
+          },
+        });
+        if (data?.reply) {
+          setStellaTranscript([{ role: "ai", text: data.reply }]);
+          void speakStella(data.reply);
+        }
+      } catch { /* ignore */ }
+      setStellaBusy(false);
+    })();
+  }, [stellaAnswering?.active, stellaAnswering?.callId, stellaAnswering?.peerId]);
+
+  const speakStella = async (text: string) => {
+    try {
+      const { data } = await supabase.functions.invoke("elevenlabs-tts", {
+        body: { text, voiceId: "EXAVITQu4vr4xnSDxMaL" },
+      });
+      if (data?.audioContent) {
+        stellaAudioRef.current?.pause();
+        const audio = new Audio(`data:audio/mpeg;base64,${data.audioContent}`);
+        stellaAudioRef.current = audio;
+        void audio.play().catch(() => {});
+      }
+    } catch { /* silent */ }
+  };
+
+  const sendToStella = async () => {
+    const text = stellaInput.trim();
+    if (!text || !stellaAnswering) return;
+    setStellaInput("");
+    const newT = [...stellaTranscript, { role: "caller" as const, text }];
+    setStellaTranscript(newT);
+    setStellaBusy(true);
+    try {
+      const { data } = await supabase.functions.invoke("stella-call-answer", {
+        body: {
+          callId: stellaAnswering.callId,
+          targetUserId: stellaAnswering.peerId,
+          userSaid: text,
+          transcript: newT,
+          action: "reply",
+          language: (navigator.language || "it").slice(0, 2),
+        },
+      });
+      if (data?.reply) {
+        setStellaTranscript((p) => [...p, { role: "ai", text: data.reply }]);
+        void speakStella(data.reply);
+        if (data.action === "booking") toast.success("Appuntamento registrato ✅");
+        if (data.action === "message") toast.success("Messaggio inviato in chat 💬");
+        if (data.action === "end" || data.action === "transfer") {
+          setTimeout(() => dismissStellaAnswering?.(), 2500);
+        }
+      }
+    } catch {
+      toast.error("Stella non risponde");
+    } finally {
+      setStellaBusy(false);
+    }
+  };
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -253,15 +355,73 @@ export default function CallManager() {
             variant={speechRecRef.current ? "default" : "secondary"}
             className="rounded-full w-14 h-14 p-0"
             onClick={() => {
+              if (!isPremium) {
+                toast.info("Traduzione vocale live disponibile con abbonamento Pro", {
+                  action: { label: "Scopri", onClick: () => nav("/subscriptions") },
+                });
+                return;
+              }
               if (speechRecRef.current) stopLiveTranslation();
               else startLiveTranslation();
             }}
           >
-            {speechRecRef.current ? <Volume2 className="w-6 h-6" /> : <Globe2 className="w-6 h-6" />}
+            {!isPremium ? <Crown className="w-6 h-6 text-yellow-500" /> : speechRecRef.current ? <Volume2 className="w-6 h-6" /> : <Globe2 className="w-6 h-6" />}
           </Button>
 
           <Button size="lg" variant="destructive" className="rounded-full w-14 h-14 p-0" onClick={() => endCall(true)}>
             <PhoneOff className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (stellaAnswering?.active) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-background/95 backdrop-blur-md flex flex-col p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="text-sm font-bold">Stella AI risponde per {stellaAnswering.peerName}</div>
+              <div className="text-[11px] text-muted-foreground">Segreteria intelligente</div>
+            </div>
+          </div>
+          <Button type="button" aria-label="Chiudi" size="sm" variant="ghost" onClick={() => dismissStellaAnswering?.()}>
+            <PhoneOff className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-2 pb-4">
+          {stellaTranscript.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "caller" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                m.role === "caller" ? "bg-primary text-primary-foreground" : "bg-muted"
+              }`}>
+                {m.text}
+              </div>
+            </div>
+          ))}
+          {stellaBusy && (
+            <div className="flex justify-start">
+              <div className="bg-muted rounded-2xl px-3 py-2 text-xs text-muted-foreground animate-pulse">Stella sta scrivendo…</div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 items-end">
+          <textarea
+            value={stellaInput}
+            onChange={(e) => setStellaInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendToStella(); } }}
+            placeholder="Scrivi a Stella (info, appuntamento, messaggio)…"
+            rows={2}
+            className="flex-1 resize-none rounded-2xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <Button type="button" aria-label="Invia" onClick={sendToStella} disabled={stellaBusy || !stellaInput.trim()} className="rounded-full w-11 h-11 p-0">
+            <Send className="w-4 h-4" />
           </Button>
         </div>
       </div>

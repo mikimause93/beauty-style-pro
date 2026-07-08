@@ -39,6 +39,12 @@ export function useWebRTCCall() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [activeKind, setActiveKind] = useState<CallKind>("video");
   const [peerName, setPeerName] = useState<string>("");
+  const [stellaAnswering, setStellaAnswering] = useState<{
+    callId: string;
+    peerId: string;
+    peerName: string;
+    active: boolean;
+  } | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const callIdRef = useRef<string | null>(null);
@@ -178,6 +184,45 @@ export function useWebRTCCall() {
   }, []);
 
   const hydrateIncoming = useCallback(async (signal: SignalRow) => {
+    // Check auto-answer (segreteria Stella) settings first
+    try {
+      const { data: settings } = await supabase
+        .from("call_auto_answer_settings")
+        .select("mode, schedule")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (settings && settings.mode !== "off") {
+        let stellaShouldAnswer = settings.mode === "always";
+        if (settings.mode === "schedule" && settings.schedule) {
+          try {
+            const sch = settings.schedule as { days: number[]; from: string; to: string };
+            const now = new Date();
+            const day = now.getDay();
+            const mins = now.getHours() * 60 + now.getMinutes();
+            const [fh, fm] = sch.from.split(":").map(Number);
+            const [th, tm] = sch.to.split(":").map(Number);
+            const fromMin = fh * 60 + fm;
+            const toMin = th * 60 + tm;
+            const dayOk = sch.days?.includes(day) ?? false;
+            const inWindow =
+              fromMin <= toMin ? mins >= fromMin && mins <= toMin : mins >= fromMin || mins <= toMin;
+            stellaShouldAnswer = dayOk && inWindow;
+          } catch { /* ignore */ }
+        }
+        if (stellaShouldAnswer) {
+          await supabase.from("call_signals").insert({
+            call_id: signal.call_id,
+            from_user: user!.id,
+            to_user: signal.from_user,
+            signal_type: "reject",
+            payload: { reason: "stella_ai", targetUserId: user!.id },
+            call_kind: signal.call_kind,
+          });
+          return; // no ring, no UI on recipient side
+        }
+      }
+    } catch { /* fall through: ring normally */ }
+
     const { data: prof } = await supabase
       .from("profiles")
       .select("display_name, avatar_url")
@@ -390,7 +435,18 @@ export function useWebRTCCall() {
         }
 
         if (signal.signal_type === "reject") {
-          toast.info(signal.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
+          if (signal.payload?.reason === "stella_ai") {
+            // The callee's Stella AI is answering — switch caller UI to Stella session
+            const peerId = signal.payload?.targetUserId || peerIdRef.current || signal.from_user;
+            setStellaAnswering({
+              callId: signal.call_id,
+              peerId,
+              peerName: peerName || "Stella AI",
+              active: true,
+            });
+          } else {
+            toast.info(signal.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
+          }
           cleanupPeer();
           resetCallState();
           return;
@@ -470,5 +526,7 @@ export function useWebRTCCall() {
     endCall,
     toggleMic,
     toggleCamera,
+    stellaAnswering,
+    dismissStellaAnswering: () => setStellaAnswering(null),
   };
 }

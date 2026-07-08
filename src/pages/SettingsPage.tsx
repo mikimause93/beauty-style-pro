@@ -184,6 +184,7 @@ export default function SettingsPage() {
               <span className="flex-1 text-sm">Email Notifications</span>
               <Toggle value={emailNotif} onChange={() => setEmailNotif(!emailNotif)} />
             </div>
+            <SettingRow icon={Bell} label="Segreteria AI Stella (chiamate)" onClick={() => navigate("/call-auto-answer")} />
           </div>
         </section>
 
