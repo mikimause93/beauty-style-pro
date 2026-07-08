@@ -1,16 +1,118 @@
 import { useEffect, useRef, useState } from "react";
 import { useCall } from "@/contexts/CallContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, PhoneOff, Video, Mic, MicOff, VideoOff, Globe2, Volume2 } from "lucide-react";
+import { Phone, PhoneOff, Video, Mic, MicOff, VideoOff, Globe2, Volume2, Sparkles, Send, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function CallManager() {
   const {
     status, incoming, localStream, remoteStream, activeKind, peerName,
     acceptCall, rejectCall, endCall, toggleMic, toggleCamera,
+    stellaAnswering, dismissStellaAnswering,
   } = useCall();
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsPremium(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("user_subscriptions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+      setIsPremium(!!data);
+    })();
+  }, [user]);
+
+  // ---- Stella answering session state (caller side) ----
+  const [stellaTranscript, setStellaTranscript] = useState<Array<{ role: "ai" | "caller"; text: string }>>([]);
+  const [stellaInput, setStellaInput] = useState("");
+  const [stellaBusy, setStellaBusy] = useState(false);
+  const stellaAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!stellaAnswering?.active) {
+      setStellaTranscript([]);
+      setStellaInput("");
+      stellaAudioRef.current?.pause();
+      stellaAudioRef.current = null;
+      return;
+    }
+    // Greeting
+    (async () => {
+      setStellaBusy(true);
+      try {
+        const { data } = await supabase.functions.invoke("stella-call-answer", {
+          body: {
+            callId: stellaAnswering.callId,
+            targetUserId: stellaAnswering.peerId,
+            action: "greet",
+            language: (navigator.language || "it").slice(0, 2),
+          },
+        });
+        if (data?.reply) {
+          setStellaTranscript([{ role: "ai", text: data.reply }]);
+          void speakStella(data.reply);
+        }
+      } catch { /* ignore */ }
+      setStellaBusy(false);
+    })();
+  }, [stellaAnswering?.active, stellaAnswering?.callId, stellaAnswering?.peerId]);
+
+  const speakStella = async (text: string) => {
+    try {
+      const { data } = await supabase.functions.invoke("elevenlabs-tts", {
+        body: { text, voiceId: "EXAVITQu4vr4xnSDxMaL" },
+      });
+      if (data?.audioContent) {
+        stellaAudioRef.current?.pause();
+        const audio = new Audio(`data:audio/mpeg;base64,${data.audioContent}`);
+        stellaAudioRef.current = audio;
+        void audio.play().catch(() => {});
+      }
+    } catch { /* silent */ }
+  };
+
+  const sendToStella = async () => {
+    const text = stellaInput.trim();
+    if (!text || !stellaAnswering) return;
+    setStellaInput("");
+    const newT = [...stellaTranscript, { role: "caller" as const, text }];
+    setStellaTranscript(newT);
+    setStellaBusy(true);
+    try {
+      const { data } = await supabase.functions.invoke("stella-call-answer", {
+        body: {
+          callId: stellaAnswering.callId,
+          targetUserId: stellaAnswering.peerId,
+          userSaid: text,
+          transcript: newT,
+          action: "reply",
+          language: (navigator.language || "it").slice(0, 2),
+        },
+      });
+      if (data?.reply) {
+        setStellaTranscript((p) => [...p, { role: "ai", text: data.reply }]);
+        void speakStella(data.reply);
+        if (data.action === "booking") toast.success("Appuntamento registrato ✅");
+        if (data.action === "message") toast.success("Messaggio inviato in chat 💬");
+        if (data.action === "end" || data.action === "transfer") {
+          setTimeout(() => dismissStellaAnswering?.(), 2500);
+        }
+      }
+    } catch {
+      toast.error("Stella non risponde");
+    } finally {
+      setStellaBusy(false);
+    }
+  };
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
