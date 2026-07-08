@@ -39,6 +39,12 @@ export function useWebRTCCall() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [activeKind, setActiveKind] = useState<CallKind>("video");
   const [peerName, setPeerName] = useState<string>("");
+  const [stellaAnswering, setStellaAnswering] = useState<{
+    callId: string;
+    peerId: string;
+    peerName: string;
+    active: boolean;
+  } | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const callIdRef = useRef<string | null>(null);
@@ -470,5 +476,7 @@ export function useWebRTCCall() {
     endCall,
     toggleMic,
     toggleCamera,
+    stellaAnswering,
+    dismissStellaAnswering: () => setStellaAnswering(null),
   };
 }
