@@ -184,6 +184,45 @@ export function useWebRTCCall() {
   }, []);
 
   const hydrateIncoming = useCallback(async (signal: SignalRow) => {
+    // Check auto-answer (segreteria Stella) settings first
+    try {
+      const { data: settings } = await supabase
+        .from("call_auto_answer_settings")
+        .select("mode, schedule")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (settings && settings.mode !== "off") {
+        let stellaShouldAnswer = settings.mode === "always";
+        if (settings.mode === "schedule" && settings.schedule) {
+          try {
+            const sch = settings.schedule as { days: number[]; from: string; to: string };
+            const now = new Date();
+            const day = now.getDay();
+            const mins = now.getHours() * 60 + now.getMinutes();
+            const [fh, fm] = sch.from.split(":").map(Number);
+            const [th, tm] = sch.to.split(":").map(Number);
+            const fromMin = fh * 60 + fm;
+            const toMin = th * 60 + tm;
+            const dayOk = sch.days?.includes(day) ?? false;
+            const inWindow =
+              fromMin <= toMin ? mins >= fromMin && mins <= toMin : mins >= fromMin || mins <= toMin;
+            stellaShouldAnswer = dayOk && inWindow;
+          } catch { /* ignore */ }
+        }
+        if (stellaShouldAnswer) {
+          await supabase.from("call_signals").insert({
+            call_id: signal.call_id,
+            from_user: user!.id,
+            to_user: signal.from_user,
+            signal_type: "reject",
+            payload: { reason: "stella_ai", targetUserId: user!.id },
+            call_kind: signal.call_kind,
+          });
+          return; // no ring, no UI on recipient side
+        }
+      }
+    } catch { /* fall through: ring normally */ }
+
     const { data: prof } = await supabase
       .from("profiles")
       .select("display_name, avatar_url")
