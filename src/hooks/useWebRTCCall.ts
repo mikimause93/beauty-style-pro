@@ -435,7 +435,18 @@ export function useWebRTCCall() {
         }
 
         if (signal.signal_type === "reject") {
-          toast.info(signal.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
+          if (signal.payload?.reason === "stella_ai") {
+            // The callee's Stella AI is answering — switch caller UI to Stella session
+            const peerId = signal.payload?.targetUserId || peerIdRef.current || signal.from_user;
+            setStellaAnswering({
+              callId: signal.call_id,
+              peerId,
+              peerName: peerName || "Stella AI",
+              active: true,
+            });
+          } else {
+            toast.info(signal.payload?.reason === "busy" ? "Utente occupato" : "Chiamata rifiutata");
+          }
           cleanupPeer();
           resetCallState();
           return;
