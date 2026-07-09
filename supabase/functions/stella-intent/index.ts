@@ -64,6 +64,7 @@ Available actions and their parameters:
 - suggest: Proactively suggest what the user can do. params: { suggestion_type: "beauty" | "social" | "business" | "fun" }
 - find_nearby: Search for professionals/salons nearby or in a specific city. params: { city?: string, specialty?: string }. Use this when the user asks about professionals, salons, hairdressers, stylists in a city or nearby. ALWAYS prefer this over navigate when the user asks to FIND/SEARCH for professionals.
 - chat: General conversation (no app action needed). params: {}
+- unknown: Use ONLY when the user's request is unclear, ambiguous, unintelligible, or you're not confident about the action. Do NOT guess. Response MUST politely ask the user to repeat in their language (e.g. "Non ho capito, puoi ripetere per favore?" / "I didn't catch that, could you repeat?").
 
 IMPORTANT RULES:
 - Detect the language automatically and respond in the SAME language
@@ -92,7 +93,8 @@ IMPORTANT RULES:
 - Keep responses SHORT (max 2 sentences), energetic, and action-oriented
 - Use emoji in responses to feel modern and alive
 - Act like a best friend / personal assistant / beauty consultant
-- ONLY use "chat" intent if the user is genuinely asking a question with no possible app action`;
+- ONLY use "chat" intent if the user is genuinely asking a question with no possible app action
+- NEVER invent an action if the command is unclear — use "unknown" and ask the user to repeat. Do NOT give random or made-up answers.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -118,7 +120,7 @@ IMPORTANT RULES:
                 properties: {
                   intent: {
                     type: "string",
-                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "find_nearby", "chat"],
+                    enum: ["navigate", "search", "show_profile", "like", "comment", "follow", "unfollow", "send_message", "create_post", "book", "confirm_booking", "cancel_booking", "call", "scroll", "theme", "share", "refresh", "back", "info", "reminder", "suggest", "find_nearby", "chat", "unknown"],
                   },
                   params: {
                     type: "object",
