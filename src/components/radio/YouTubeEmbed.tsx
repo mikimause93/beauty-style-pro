@@ -49,10 +49,10 @@ export default function YouTubeEmbed() {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSearch()}
             placeholder="Cerca brano o artista..."
-            className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0000]/50"
+            className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-live/50"
           />
         </div>
-        <button onClick={handleSearch} className="h-10 px-4 rounded-xl bg-[#FF0000] text-white text-xs font-bold shrink-0">
+        <button onClick={handleSearch} className="h-10 px-4 rounded-xl bg-live text-white text-xs font-bold shrink-0">
           Cerca
         </button>
       </div>
@@ -79,8 +79,8 @@ export default function YouTubeEmbed() {
             onClick={() => playVideo(v.videoId)}
             className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${
               !isSearchMode && currentVideoId === v.videoId
-                ? "bg-[#FF0000] text-white"
-                : "bg-[#FF0000]/10 text-[#FF0000]"
+                ? "bg-live text-white"
+                : "bg-live/10 text-live"
             }`}
           >
             {v.name}
