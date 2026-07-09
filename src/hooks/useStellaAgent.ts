@@ -1558,7 +1558,28 @@ export function useStellaAgent() {
       if (!data) { console.error('Stella AI: empty response'); throw new Error('Empty AI response'); }
 
       const { intent, params, response: aiResponse } = data;
-      const displayResponse = aiResponse || 'Sono qui per aiutarti!';
+      const lang = (data?.detected_language || 'it').toLowerCase();
+      const notUnderstood: Record<string, string> = {
+        it: 'Non ho capito, puoi ripetere per favore?',
+        en: "Sorry, I didn't catch that. Could you repeat?",
+        es: 'No te he entendido, ¿puedes repetir?',
+        fr: "Je n'ai pas compris, tu peux répéter ?",
+        de: 'Ich habe dich nicht verstanden, kannst du das wiederholen?',
+        pt: 'Não entendi, pode repetir?',
+      };
+      if (intent === 'unknown') {
+        const msg = notUnderstood[lang] || notUnderstood.it;
+        addMessage({ role: 'stella', content: msg, type: 'text' });
+        stellaSpeak(msg);
+        setInlineStatus(msg);
+        completeStep(thinkId, 'error', msg);
+        scheduleStepsClear(5000);
+        // Re-open the mic quickly so the user can repeat hands-free
+        scheduleWakeWordResume(600);
+        setIsAIThinking(false);
+        return;
+      }
+      const displayResponse = aiResponse || notUnderstood[lang] || notUnderstood.it;
 
       addMessage({ role: 'stella', content: displayResponse, type: intent && intent !== 'chat' ? 'action_result' : 'text' });
       stellaSpeak(displayResponse.length > 200 ? displayResponse.substring(0, 200) + '...' : displayResponse);
