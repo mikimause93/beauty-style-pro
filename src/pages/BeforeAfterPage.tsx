@@ -64,10 +64,11 @@ export default function BeforeAfterPage() {
       items.forEach(item => { positions[item.id] = 50; });
       setSliderPositions(positions);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   const toggleLike = (id: string) => {
-    setLikedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setLikedIds(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
   };
 
   return (
@@ -78,9 +79,9 @@ export default function BeforeAfterPage() {
         </button>
         <div className="flex-1">
           <h1 className="text-lg font-display font-bold">Prima & Dopo</h1>
-          <p className="text-[10px] text-muted-foreground">Scopri e prenota le trasformazioni</p>
+          <p className="text-xs text-muted-foreground">Scopri e prenota le trasformazioni</p>
         </div>
-        <button onClick={() => navigate("/transformation-challenge")} className="px-3 py-1.5 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1">
+        <button onClick={() => navigate("/transformation-challenge")} className="px-3 py-1.5 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center gap-1">
           <Sparkles className="w-3 h-3" /> Challenge
         </button>
       </header>
@@ -103,10 +104,10 @@ export default function BeforeAfterPage() {
                   </div>
                 </div>
               </div>
-              <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Prima</div>
-              <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-[10px] font-bold">Dopo</div>
+              <div className="absolute top-3 left-3 px-2 py-1 rounded-full glass text-xs font-bold">Prima</div>
+              <div className="absolute top-3 right-3 px-2 py-1 rounded-full glass text-xs font-bold">Dopo</div>
               {item.replicable && (
-                <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-accent/20 text-accent text-[10px] font-bold flex items-center gap-1">
+                <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Replicabile
                 </div>
               )}
@@ -121,16 +122,16 @@ export default function BeforeAfterPage() {
                   <p className="text-xs text-muted-foreground">di {item.stylist}</p>
                 </div>
                 {item.style_name && (
-                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">{item.style_name}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">{item.style_name}</span>
                 )}
               </div>
 
               {/* Style Info */}
               {(item.price > 0 || item.duration) && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  {item.price > 0 && <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium">€{item.price}</span>}
-                  {item.duration && <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium">⏱ {item.duration}</span>}
-                  <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium capitalize">{item.category}</span>
+                  {item.price > 0 && <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium">€{item.price}</span>}
+                  {item.duration && <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium">⏱ {item.duration}</span>}
+                  <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium capitalize">{item.category}</span>
                 </div>
               )}
 
@@ -142,7 +143,7 @@ export default function BeforeAfterPage() {
                   <Heart className={`w-4 h-4 ${likedIds.has(item.id) ? "fill-primary text-primary" : ""}`} />
                   <span className="text-xs font-bold">{item.likes + (likedIds.has(item.id) ? 1 : 0)}</span>
                 </button>
-                <button onClick={() => setSavedIds(prev => { const n = new Set(prev); n.has(item.id) ? n.delete(item.id) : n.add(item.id); return n; })}
+                <button onClick={() => setSavedIds(prev => { const n = new Set(prev); if (n.has(item.id)) { n.delete(item.id); } else { n.add(item.id); } return n; })}
                   className={`p-2 rounded-xl ${savedIds.has(item.id) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   <Bookmark className={`w-4 h-4 ${savedIds.has(item.id) ? "fill-primary" : ""}`} />
                 </button>

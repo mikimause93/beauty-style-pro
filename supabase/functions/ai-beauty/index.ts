@@ -1,9 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireUser } from "../_shared/auth-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+function jsonResponse(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,13 +19,12 @@ serve(async (req) => {
   }
 
   try {
+    try { await requireUser(req); } catch (r) { if (r instanceof Response) return r; throw r; }
     const { action, data } = await req.json();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "AI non configurata" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "AI non configurata" }, 500);
     }
 
     let systemPrompt = "";
@@ -46,9 +53,7 @@ serve(async (req) => {
       }
 
       default:
-        return new Response(JSON.stringify({ error: "Azione non valida" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse({ error: "Azione non valida" }, 400);
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -68,6 +73,12 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      if (response.status === 429) return jsonResponse({ error: "Troppe richieste, riprova tra poco" }, 429);
+      console.error("ai-beauty AI gateway error:", response.status);
+      return jsonResponse({ error: "Servizio AI non disponibile" }, 502);
+    }
+
     const result = await response.json();
     const content = result.choices?.[0]?.message?.content || "";
 
@@ -80,13 +91,10 @@ serve(async (req) => {
       parsed = { text: content };
     }
 
-    return new Response(JSON.stringify({ success: true, data: parsed }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ success: true, data: parsed });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (error: unknown) {
+    console.error("ai-beauty error:", error);
+    return jsonResponse({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

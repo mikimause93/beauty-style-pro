@@ -86,6 +86,7 @@ export default function ShortsPage() {
   useEffect(() => {
     pauseRadio();
     loadShorts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadShorts = async () => {

@@ -48,7 +48,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         }`}
       >
         <p
-          className="text-[10px] tracking-[0.25em] uppercase"
+          className="text-xs tracking-[0.25em] uppercase"
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             color: "rgba(255,255,255,0.4)",
@@ -69,7 +69,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           Michele Peschechera
         </p>
         <p
-          className="text-[10px] mt-1"
+          className="text-xs mt-1"
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontStyle: "italic",
@@ -95,16 +95,17 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         />
 
         <h1
-          className={`text-4xl font-bold italic tracking-[0.08em] transition-all duration-500 ${
+          className={`text-5xl font-bold italic tracking-[0.06em] transition-all duration-500 ${
             phase !== "founder" && phase !== "logo"
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-4"
           }`}
           style={{
             fontFamily: "'Playfair Display', Georgia, serif",
-            background: "linear-gradient(135deg, #9b59b6, #8b5cf6, #a855f7)",
+            background: "linear-gradient(135deg, #a855f7, #8b5cf6, #d946ef, #f59e0b)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            filter: "drop-shadow(0 0 24px rgba(168,85,247,0.4))",
           }}
         >
           Style
@@ -122,7 +123,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
       {/* Footer signature */}
       <p
-        className={`absolute bottom-12 text-[10px] italic tracking-wide transition-all duration-500 ${
+        className={`absolute bottom-12 text-xs italic tracking-wide transition-all duration-500 ${
           phase === "text" || phase === "fade" ? "opacity-100" : "opacity-0"
         }`}
         style={{
@@ -134,11 +135,11 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       </p>
 
       {/* Subtle loading bar */}
-      <div className="absolute bottom-6 w-16 h-[2px] rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+      <div className="absolute bottom-6 w-20 h-[2px] rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
         <div
           className="h-full rounded-full"
           style={{
-            backgroundColor: "rgba(255,255,255,0.3)",
+            background: "linear-gradient(90deg, #8b5cf6, #d946ef, #f59e0b)",
             animation: "splash-load 5.7s ease-in-out forwards",
           }}
         />

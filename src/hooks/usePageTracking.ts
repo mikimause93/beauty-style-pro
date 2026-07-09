@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
+let runtimeSessionId: string | null = null;
+
 function getDeviceType(): string {
   const w = window.innerWidth;
   if (w < 768) return "mobile";
@@ -10,12 +12,11 @@ function getDeviceType(): string {
 }
 
 function getSessionId(): string {
-  let sid = sessionStorage.getItem("_sid");
-  if (!sid) {
-    sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    sessionStorage.setItem("_sid", sid);
+  if (!runtimeSessionId) {
+    runtimeSessionId = `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
   }
-  return sid;
+
+  return runtimeSessionId;
 }
 
 export function usePageTracking() {
@@ -27,9 +28,12 @@ export function usePageTracking() {
     if (path === lastPath.current) return;
     lastPath.current = path;
 
-    const track = async () => {
+    const timer = window.setTimeout(async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
         await (supabase.from("page_views") as any).insert({
           page_path: path,
           referrer: document.referrer || null,
@@ -41,9 +45,8 @@ export function usePageTracking() {
       } catch {
         // silent fail
       }
-    };
+    }, 1000);
 
-    // Delay to not block rendering
-    setTimeout(track, 1000);
+    return () => window.clearTimeout(timer);
   }, [location.pathname]);
 }

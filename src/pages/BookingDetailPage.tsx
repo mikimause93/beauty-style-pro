@@ -16,6 +16,7 @@ export default function BookingDetailPage() {
 
   useEffect(() => {
     if (id) fetchBooking();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchBooking = async () => {
@@ -23,7 +24,7 @@ export default function BookingDetailPage() {
       .from("bookings")
       .select("*, professionals(business_name, city, user_id), services(name, price, duration_minutes)")
       .eq("id", id!)
-      .single();
+      .maybeSingle();
     if (!error) setBooking(data);
     setLoading(false);
   };

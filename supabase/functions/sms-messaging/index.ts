@@ -14,6 +14,15 @@ serve(async (req) => {
   }
 
   try {
+    // Server-to-server auth
+    const secret = req.headers.get('x-internal-secret');
+    const expected = Deno.env.get('INTERNAL_SECRET');
+    if (!expected || secret !== expected) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
     const { phone, message, type = 'transactional' } = 
       await req.json() as SMSMessageRequest;
 

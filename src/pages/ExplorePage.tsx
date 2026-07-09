@@ -1,21 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import MobileLayout from "@/components/layout/MobileLayout";
 import PostCard from "@/components/feed/PostCard";
-import { Search, TrendingUp, MapPin, Star, Users, Crown, Sparkles, Film, ArrowLeft } from "lucide-react";
-import stylist1 from "@/assets/stylist-1.jpg";
-import stylist2 from "@/assets/stylist-2.jpg";
-import beauty1 from "@/assets/beauty-1.jpg";
-import beauty2 from "@/assets/beauty-2.jpg";
-import beauty3 from "@/assets/beauty-3.jpg";
+import { Search, TrendingUp, MapPin, Star, Users, Crown, Sparkles, Film, ArrowLeft, Navigation } from "lucide-react";
+import useGeolocation, { haversineDistance, getCoordsFromCity } from "@/hooks/useGeolocation";
 
 const tabs = ["Trending", "Vicini", "Creators", "Servizi"];
 
 export default function ExplorePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { coords } = useGeolocation();
   const [activeTab, setActiveTab] = useState("Trending");
   const [search, setSearch] = useState("");
   const [trendingPosts, setTrendingPosts] = useState<any[]>([]);
@@ -28,28 +25,28 @@ export default function ExplorePage() {
 
   const loadData = async () => {
     const [postsRes, creatorsRes, prosRes] = await Promise.all([
-      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type)").order("like_count", { ascending: false }).limit(20),
+      supabase.from("posts").select("*, profiles:user_id(display_name, avatar_url, user_type, verification_status)").order("like_count", { ascending: false }).limit(20),
       supabase.from("profiles").select("*").in("user_type", ["professional", "business"]).order("follower_count", { ascending: false }).limit(10),
-      supabase.from("professionals").select("*, profiles:user_id(display_name, avatar_url, city)").order("rating", { ascending: false }).limit(10),
+      supabase.from("professionals").select("*, profiles:user_id(display_name, avatar_url, city)").order("rating", { ascending: false }).limit(50),
     ]);
     if (postsRes.data) setTrendingPosts(postsRes.data.map((p: any) => ({ ...p, profileData: p.profiles })));
     if (creatorsRes.data) setTopCreators(creatorsRes.data);
     if (prosRes.data) setNearbyPros(prosRes.data);
   };
 
-  const fallbackPosts = [
-    { id: "e1", user_id: "", caption: "Trending balayage ✨", image_url: beauty1, video_url: null, like_count: 520, comment_count: 89, post_type: "image", created_at: new Date().toISOString(), profileData: { display_name: "Martina Rossi", avatar_url: stylist2, user_type: "professional" } },
-    { id: "e2", user_id: "", caption: "Summer vibes 🌊", image_url: beauty2, video_url: null, like_count: 340, comment_count: 56, post_type: "image", created_at: new Date().toISOString(), profileData: { display_name: "Sylvie Beauty", avatar_url: stylist1, user_type: "professional" } },
-  ];
+  const posts = trendingPosts;
+  const creators = topCreators;
 
-  const fallbackCreators = [
-    { user_id: "c1", display_name: "Martina Rossi", avatar_url: stylist2, follower_count: 12400, user_type: "professional" },
-    { user_id: "c2", display_name: "Sylvie Beauty", avatar_url: stylist1, follower_count: 8900, user_type: "professional" },
-    { user_id: "c3", display_name: "Marco Barber", avatar_url: beauty1, follower_count: 6200, user_type: "professional" },
-  ];
-
-  const posts = trendingPosts.length > 0 ? trendingPosts : fallbackPosts;
-  const creators = topCreators.length > 0 ? topCreators : fallbackCreators;
+  const nearbySorted = useMemo(() => {
+    return nearbyPros.map((pro: any) => {
+      const lat = pro.latitude ?? (pro.city ? getCoordsFromCity(pro.city)[0] : null);
+      const lng = pro.longitude ?? (pro.city ? getCoordsFromCity(pro.city)[1] : null);
+      const distance = lat != null && lng != null
+        ? Math.round(haversineDistance(coords[0], coords[1], lat, lng) * 10) / 10
+        : undefined;
+      return { ...pro, distance };
+    }).sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
+  }, [nearbyPros, coords]);
 
   return (
     <MobileLayout>
@@ -92,12 +89,15 @@ export default function ExplorePage() {
             </div>
             {/* Grid view */}
             <div className="grid grid-cols-3 gap-1 rounded-2xl overflow-hidden">
+              {posts.length === 0 && (
+                <p className="col-span-3 text-center text-xs text-muted-foreground py-8">Nessun post di tendenza al momento.</p>
+              )}
               {posts.slice(0, 9).map((post) => (
-                <button key={post.id} onClick={() => {}} className="aspect-square relative overflow-hidden">
-                  <img src={post.image_url || beauty3} alt="" className="w-full h-full object-cover" />
+                <button key={post.id} type="button" aria-label="Apri profilo autore" onClick={() => post.user_id && navigate(`/profile/${post.user_id}`)} className="aspect-square relative overflow-hidden">
+                  {post.image_url && <img src={post.image_url} alt="" className="w-full h-full object-cover" />}
                   <div className="absolute bottom-1 left-1 flex items-center gap-0.5 bg-black/50 rounded-full px-1.5 py-0.5">
                     <Star className="w-2.5 h-2.5 text-white" />
-                    <span className="text-[9px] text-white font-bold">{post.like_count}</span>
+                    <span className="text-xs text-white font-bold">{post.like_count}</span>
                   </div>
                 </button>
               ))}
@@ -110,13 +110,16 @@ export default function ExplorePage() {
                 <h2 className="text-sm font-bold">Top Creators</h2>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {creators.length === 0 && (
+                  <p className="text-xs text-muted-foreground py-4">Ancora nessun creator.</p>
+                )}
                 {creators.map((c) => (
                   <button key={c.user_id} onClick={() => navigate(`/profile/${c.user_id}`)}
                     className="flex flex-col items-center gap-2 min-w-[80px] flex-shrink-0">
                     <img src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.user_id}`}
                       alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
                     <p className="text-[11px] font-semibold truncate max-w-[80px]">{c.display_name}</p>
-                    <span className="text-[9px] text-muted-foreground">{(c.follower_count / 1000).toFixed(1)}K</span>
+                    <span className="text-xs text-muted-foreground">{((c.follower_count || 0) / 1000).toFixed(1)}K</span>
                   </button>
                 ))}
               </div>
@@ -131,21 +134,28 @@ export default function ExplorePage() {
               <MapPin className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold">Vicino a te</h2>
             </div>
-            {(nearbyPros.length > 0 ? nearbyPros : [
-              { id: "np1", business_name: "Martina Rossi", specialty: "Hairstylist", city: "Milano", rating: 4.9, profiles: { display_name: "Martina", avatar_url: stylist2, city: "Milano" } },
-              { id: "np2", business_name: "Marco Barber", specialty: "Barber", city: "Roma", rating: 4.8, profiles: { display_name: "Marco", avatar_url: beauty1, city: "Roma" } },
-            ]).map((pro: any) => (
+            {nearbySorted.length === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-8">Nessun professionista nelle vicinanze.</p>
+            )}
+            {nearbySorted.map((pro: any) => (
               <button key={pro.id} onClick={() => navigate(`/stylist/${pro.id}`)}
                 className="w-full flex items-center gap-3 p-3 rounded-2xl bg-card border border-border/50">
                 <img src={pro.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${pro.id}`}
                   alt="" className="w-12 h-12 rounded-xl object-cover" />
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm font-semibold truncate">{pro.profiles?.display_name || pro.business_name}</p>
-                  <p className="text-[11px] text-muted-foreground">{pro.specialty} · {pro.profiles?.city || pro.city}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {pro.specialty} · {pro.profiles?.city || pro.city}
+                    {pro.distance !== undefined && (
+                      <span className="ml-1 text-primary font-semibold inline-flex items-center gap-0.5">
+                        <Navigation className="w-2.5 h-2.5" />{pro.distance} km
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-primary fill-primary" />
-                  <span className="text-xs font-bold">{pro.rating}</span>
+                  <span className="text-xs font-bold">{pro.rating ?? "—"}</span>
                 </div>
               </button>
             ))}
@@ -191,7 +201,7 @@ export default function ExplorePage() {
                   <p className="text-sm font-semibold">{service}</p>
                   <p className="text-[11px] text-muted-foreground">Tendenza in crescita</p>
                 </div>
-                <span className="text-[10px] text-primary font-bold">+{Math.floor(Math.random() * 40 + 10)}%</span>
+                <span className="text-xs text-primary font-bold">+{Math.floor(Math.random() * 40 + 10)}%</span>
               </button>
             ))}
           </div>

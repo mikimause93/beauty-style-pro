@@ -37,6 +37,7 @@ export default function ManageProductsPage() {
   useEffect(() => {
     if (!user || !isSeller) { navigate("/profile"); return; }
     fetchProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isSeller]);
 
   const fetchProducts = async () => {
@@ -136,7 +137,7 @@ export default function ManageProductsPage() {
                   <p className="text-sm font-medium truncate">{product.name}</p>
                   <p className="text-xs text-muted-foreground">{product.category}</p>
                   <p className="text-sm font-bold text-primary mt-0.5">€{product.price}</p>
-                  {product.stock !== null && <p className="text-[10px] text-muted-foreground">Stock: {product.stock}</p>}
+                  {product.stock !== null && <p className="text-xs text-muted-foreground">Stock: {product.stock}</p>}
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   <button onClick={() => toggleActive(product)}

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireUser } from "../_shared/auth-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,11 +16,22 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { action, user_id, data: reqData } = await req.json();
+    let authedUserId: string;
+    try { const r = await requireUser(req); authedUserId = r.userId; } catch (r) { if (r instanceof Response) return r; throw r; }
+    const { action, data: reqData } = await req.json();
+    const user_id = authedUserId;
+
+    // Admin-only action
+    if (action === "admin_growth") {
+      const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: user_id, _role: "admin" });
+      if (!isAdmin) {
+        return jsonResponse({ error: "Forbidden" }, 403);
+      }
+    }
 
     // ===== ACTION: Personalized growth suggestions =====
     if (action === "user_suggestions") {
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user_id).maybeSingle();
       if (!profile) return jsonResponse({ suggestions: [] });
 
       const [prosRes, bookingRes, postRes, subRes, boostRes] = await Promise.all([
@@ -223,7 +235,7 @@ serve(async (req) => {
         ]});
       }
 
-      const { data: profile } = await supabase.from("profiles").select("user_type, city, bio").eq("user_id", user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_type, city, bio").eq("user_id", user_id).maybeSingle();
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -294,12 +306,9 @@ serve(async (req) => {
     }
 
     return jsonResponse({ error: "Unknown action" }, 400);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("ai-growth-engine error:", e);
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
 

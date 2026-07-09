@@ -32,6 +32,11 @@ export default function EditProfilePage() {
   const [bankHolderName, setBankHolderName] = useState(profile?.bank_holder_name || "");
   const [enableWithdrawals, setEnableWithdrawals] = useState(!!(profile?.iban));
   const [isPublicProfile, setIsPublicProfile] = useState(true);
+  const [whatsapp, setWhatsapp] = useState(profile?.whatsapp || "");
+  const [showWhatsapp, setShowWhatsapp] = useState(!!profile?.show_whatsapp);
+  const [showPhone, setShowPhone] = useState(!!profile?.show_phone);
+  const [showLocation, setShowLocation] = useState(!!profile?.show_location);
+  const [showCv, setShowCv] = useState(!!profile?.show_cv);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,6 +50,10 @@ export default function EditProfilePage() {
 
   const handleDetectLocation = async () => {
     setLocating(true);
+    if (!('geolocation' in navigator)) {
+      setLocating(false);
+      return;
+    }
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
@@ -105,9 +114,24 @@ export default function EditProfilePage() {
       display_name: displayName, bio, city, phone,
       user_type: userType, avatar_url: avatarUrl, skills,
       desired_categories: desiredCategories,
+      whatsapp,
+      show_whatsapp: showWhatsapp,
+      show_phone: showPhone,
+      show_location: showLocation,
+      show_cv: showCv,
+    }).eq("user_id", user.id);
+
+    // Save IBAN to profiles_private
+    const ibanData = {
       iban: enableWithdrawals ? (iban || null) : null,
       bank_holder_name: enableWithdrawals ? (bankHolderName || null) : null,
-    }).eq("user_id", user.id);
+    };
+    const { data: existingPrivate } = await supabase.from("profiles_private").select("id").eq("user_id", user.id).maybeSingle();
+    if (existingPrivate) {
+      await supabase.from("profiles_private").update(ibanData).eq("user_id", user.id);
+    } else if (enableWithdrawals && iban) {
+      await supabase.from("profiles_private").insert({ user_id: user.id, ...ibanData });
+    }
     if (error) {
       toast.error("Errore nel salvataggio");
     } else {
@@ -192,6 +216,11 @@ export default function EditProfilePage() {
                 className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
             </FieldWithHint>
 
+            <FieldWithHint hint="Numero WhatsApp (opzionale)">
+              <input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp" type="tel"
+                className="w-full h-11 rounded-xl bg-card border border-border/50 px-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30" />
+            </FieldWithHint>
+
             <FieldWithHint hint="Non modificabile">
               <div className="relative">
                 <input value={user.email || ""} disabled
@@ -256,7 +285,7 @@ export default function EditProfilePage() {
           <Collapsible>
             <CollapsibleTrigger className="w-full">
               <div className="flex items-center justify-between py-2">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1">Wallet e pagamenti</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">Wallet e pagamenti</p>
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </div>
             </CollapsibleTrigger>
@@ -305,15 +334,40 @@ export default function EditProfilePage() {
             </div>
           </div>
         </Section>
+
+        {/* Privacy contatti */}
+        <Section title="Privacy contatti">
+          <p className="text-[11px] text-muted-foreground/80 mb-2 px-1">
+            Scegli quali dati mostrare agli altri utenti. I dati che disattivi restano privati.
+          </p>
+          <div className="space-y-2">
+            <PrivacyRow label="Mostra WhatsApp" hint="Altri utenti possono aprirti WhatsApp" checked={showWhatsapp} onChange={setShowWhatsapp} />
+            <PrivacyRow label="Mostra telefono" hint="Numero visibile su profilo e prenotazioni" checked={showPhone} onChange={setShowPhone} />
+            <PrivacyRow label="Mostra posizione GPS" hint="Appari sulla mappa con distanza esatta" checked={showLocation} onChange={setShowLocation} />
+            <PrivacyRow label="Mostra CV / portfolio" hint="Link CV visibile a professionisti/HR" checked={showCv} onChange={setShowCv} />
+          </div>
+        </Section>
       </div>
     </MobileLayout>
+  );
+}
+
+function PrivacyRow({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/50">
+      <div className="flex-1 min-w-0 pr-3">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-[11px] text-muted-foreground">{hint}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5 px-1">{title}</p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2.5 px-1">{title}</p>
       {children}
     </section>
   );
