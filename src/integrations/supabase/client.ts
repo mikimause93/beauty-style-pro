@@ -3,12 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import safeStorage from '../../lib/safeStorage';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key';
-
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
-  console.warn('Supabase env vars are missing – running in offline/placeholder mode.');
-}
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://luafpyxqpfkvdjnmtbqh.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_8uaCD--EKiwsaPj-Hg6toA_jH6El1Ir';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
