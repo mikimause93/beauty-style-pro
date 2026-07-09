@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import useChatbot from "@/hooks/useChatbot";
 import { streamChat } from "@/lib/streamChat";
+import { supabase } from "@/integrations/supabase/client";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useStellaVoiceActions } from "@/hooks/useStellaVoiceActions";
 import { useVoiceSynthesis } from "@/hooks/useVoiceSynthesis";
@@ -72,59 +73,81 @@ export default function ChatbotWidget({ className = "" }: Props) {
   // Voice call state
   const [isVoiceCallActive, setIsVoiceCallActive] = useState(false);
   const [voicePhase, setVoicePhase] = useState<"listening" | "processing" | "speaking">("listening");
+  const processedVoiceCommandRef = useRef<string | null>(null);
   
   const { processVoiceCommand: executeVoiceCommand } = useStellaVoiceActions();
   const { speak, speaking: isSpeaking } = useVoiceSynthesis({ rate: 1.05, pitch: 1.05 });
 
-  // Wake word detection
   const {
     isListening: isVoiceListening,
     transcript: voiceTranscript,
     interimTranscript,
     isSupported: voiceSupported,
     isWakeWordListening,
-    startListening,
+    startListening: beginVoiceListening,
     stopListening,
     resetTranscript,
     startWakeWordListening,
     stopWakeWordListening,
   } = useVoiceRecognition({
-    continuous: true,
+    continuous: false,
     wakeWordEnabled: true,
     wakeWords: ['stella', 'hey stella', 'ehi stella', 'ciao stella', 'ok stella'],
-    onWakeWordDetected: () => {
-      // Wake word detected — activate voice call UI
+    onWakeWordDetected: (command) => {
       setIsVoiceCallActive(true);
+      if (command?.trim()) {
+        processedVoiceCommandRef.current = command.trim();
+        setVoicePhase("processing");
+        toast(`🎙️ Stella: "${command.trim()}"`, { duration: 2000 });
+        return;
+      }
+
       setVoicePhase("listening");
       toast("🎙️ Stella ti ascolta...", { duration: 2000 });
     },
   });
 
-  // Auto-start wake word listening when component mounts
-  useEffect(() => {
-    if (voiceSupported && user) {
-      const timer = setTimeout(() => {
-        try { startWakeWordListening(); } catch(e) { console.log('Wake word not available'); }
-      }, 3000);
-      return () => clearTimeout(timer);
+  const startListening = useCallback(() => {
+    if (!voiceSupported) {
+      toast.error("Il riconoscimento vocale non è disponibile su questo dispositivo.");
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceSupported, user]);
 
-  // Re-start wake word listening after voice call ends
+    setIsVoiceCallActive(true);
+    setVoicePhase("listening");
+    resetTranscript();
+    stopWakeWordListening();
+    window.setTimeout(() => {
+      beginVoiceListening();
+    }, 250);
+  }, [voiceSupported, beginVoiceListening, resetTranscript, stopWakeWordListening]);
+
   useEffect(() => {
-    if (!isVoiceCallActive && voiceSupported && user) {
-      const timer = setTimeout(() => {
-        try { startWakeWordListening(); } catch(e) { /* ignore */ }
-      }, 2500);
-      return () => clearTimeout(timer);
+    if (!voiceSupported) return;
+    const timer = window.setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [voiceSupported, startWakeWordListening]);
+
+  useEffect(() => {
+    if (isVoiceCallActive || !voiceSupported || isWakeWordListening) return;
+    const timer = window.setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [isVoiceCallActive, voiceSupported, isWakeWordListening, startWakeWordListening]);
+
+  useEffect(() => {
+    const directWakeWordCommand = processedVoiceCommandRef.current;
+
+    if (directWakeWordCommand) {
+      processedVoiceCommandRef.current = null;
+      processVoiceCommand(directWakeWordCommand);
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVoiceCallActive, voiceSupported, user]);
 
-  // Process voice command when transcript changes during call
-  useEffect(() => {
-    if (isVoiceCallActive && voiceTranscript && !isVoiceListening) {
+    if (isVoiceCallActive && voiceTranscript.trim() && !isVoiceListening) {
       processVoiceCommand(voiceTranscript.trim());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,87 +156,171 @@ export default function ChatbotWidget({ className = "" }: Props) {
   const processVoiceCommand = async (command: string) => {
     if (!command) return;
     setVoicePhase("processing");
-    
-    // Try voice action first (navigation, messages, etc.)
+
+    // 1. Try local pattern matching first (instant)
     const result = executeVoiceCommand(command);
-    
     if (result.matched) {
-      // Handle optional action field (e.g., theme change)
       if (result.action === "theme:light") setTheme("light");
       else if (result.action === "theme:dark") setTheme("dark");
       setVoicePhase("speaking");
-      // Speak the response aloud — hands-free
       speak(result.response);
-      toast.success(result.response);
-      // Auto-close after TTS completes (roughly 1.5s per 100 chars)
-      setTimeout(() => {
-        endVoiceCall();
-      }, Math.max(800, result.response.length * 15));
+      toast.success(`🌟 Stella: ${result.response}`);
+      setTimeout(() => endVoiceCall(), Math.max(800, result.response.length * 15));
       return;
     }
 
-    // If not a navigation command, send to AI
-    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
-    setChatMessages(prev => [...prev, userMsg]);
-    setIsMinimized(false);
-    setIsAILoading(true);
-    setVoicePhase("speaking");
-
-    const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    let assistantSoFar = "";
-
+    // 2. Call stella-intent AI for smart action parsing
     try {
-      await streamChat({
-        userId: user!.id,
-        messages: history as any,
-        onDelta: (chunk) => {
-          assistantSoFar += chunk;
-          const currentContent = assistantSoFar;
-          setChatMessages(prev => {
-            const last = prev[prev.length - 1];
-            if (last?.role === "assistant" && last.id === "streaming") {
-              return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
-            }
-            return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
-          });
-        },
-        onDone: () => {
-          setChatMessages(prev => prev.map(m =>
-            m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
-          ));
-          // Speak the full AI response aloud
-          if (assistantSoFar) {
-            // Truncate for TTS if very long
-            const ttsText = assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar;
-            speak(ttsText);
-          }
-          setIsAILoading(false);
-          endVoiceCall();
-        },
-        onError: (error) => {
-          speak("Mi dispiace, riprova tra poco!");
-          toast.error(error);
-          setIsAILoading(false);
-          endVoiceCall();
+      const { data, error } = await supabase.functions.invoke('stella-intent', {
+        body: {
+          text: command,
+          context: {
+            user_type: profile?.user_type || 'client',
+            user_name: profile?.display_name || 'User',
+            gender: (profile as any)?.gender || 'unknown',
+            color_theme: (profile as any)?.color_theme || 'female',
+            qr_coins: profile?.qr_coins || 0,
+            current_page: window.location.pathname,
+          },
         },
       });
+
+      if (error) throw error;
+
+      const { intent, params, response: aiResponse } = data || {};
+      const displayResponse = aiResponse || 'Sono qui per aiutarti!';
+
+      // Execute the AI-parsed intent
+      if (intent && intent !== 'chat') {
+        setVoicePhase("speaking");
+        speak(displayResponse.length > 200 ? displayResponse.substring(0, 200) : displayResponse);
+        toast.success(`🌟 Stella: ${displayResponse.substring(0, 100)}`);
+
+        switch (intent) {
+          case 'navigate':
+            if (params?.route) navigate(params.route);
+            break;
+          case 'search':
+            navigate(`/search?q=${encodeURIComponent(params?.query || command)}`);
+            break;
+          case 'show_profile':
+            if (params?.name) navigate(`/search?q=${encodeURIComponent(params.name)}`);
+            else navigate('/profile');
+            break;
+          case 'like':
+            toast.success('❤️ Like aggiunto!');
+            break;
+          case 'follow':
+            if (params?.target_name) navigate(`/search?q=${encodeURIComponent(params.target_name)}`);
+            break;
+          case 'send_message':
+            navigate('/chat');
+            break;
+          case 'book':
+            if (params?.target_name) navigate(`/search?q=${encodeURIComponent(params.target_name)}`);
+            else navigate('/stylists');
+            break;
+          case 'scroll':
+            if (params?.direction === 'up') window.scrollBy({ top: -400, behavior: 'smooth' });
+            else if (params?.direction === 'down') window.scrollBy({ top: 400, behavior: 'smooth' });
+            else if (params?.direction === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
+            else if (params?.direction === 'bottom') window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            break;
+          case 'theme':
+            if (params?.mode === 'dark') setTheme('dark');
+            else setTheme('light');
+            break;
+          case 'share':
+            if (navigator.share) navigator.share({ title: 'STYLE', url: window.location.href }).catch(() => {});
+            else navigator.clipboard.writeText(window.location.href);
+            break;
+          case 'refresh':
+            setTimeout(() => window.location.reload(), 500);
+            break;
+          case 'back':
+            window.history.back();
+            break;
+          case 'info':
+            if (params?.info_type === 'coins') toast.success(`💰 Hai ${profile?.qr_coins ?? 0} QR Coins`);
+            else if (params?.info_type === 'bookings') navigate('/my-bookings');
+            break;
+          default:
+            break;
+        }
+
+        // Add to chat for context
+        setChatMessages(prev => [
+          ...prev,
+          { id: Date.now().toString(), role: "user" as const, content: command },
+          { id: (Date.now() + 1).toString(), role: "assistant" as const, content: displayResponse },
+        ]);
+
+        setTimeout(() => endVoiceCall(), Math.max(800, displayResponse.length * 15));
+        return;
+      }
+
+      // 3. Pure chat intent — show in panel with streaming
+      setChatMessages(prev => [...prev, { id: Date.now().toString(), role: "user" as const, content: command }]);
+      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: "assistant" as const, content: displayResponse }]);
+      setVoicePhase("speaking");
+      speak(displayResponse.length > 300 ? displayResponse.slice(0, 300) + "..." : displayResponse);
+      setIsMinimized(false);
+      setTimeout(() => endVoiceCall(), Math.max(800, displayResponse.length * 15));
+
     } catch {
-      speak("Errore nella risposta. Riprova.");
-      setIsAILoading(false);
-      endVoiceCall();
+      // Fallback: stream chat if stella-intent fails
+      const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: command };
+      setChatMessages(prev => [...prev, userMsg]);
+      setIsMinimized(false);
+      setIsAILoading(true);
+      setVoicePhase("speaking");
+
+      const history = [...chatMessages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
+        role: m.role, content: m.content,
+      }));
+
+      let assistantSoFar = "";
+      try {
+        await streamChat({
+          userId: user?.id,
+          messages: history as any,
+          onDelta: (chunk) => {
+            assistantSoFar += chunk;
+            const currentContent = assistantSoFar;
+            setChatMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant" && last.id === "streaming") {
+                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: currentContent } : m);
+              }
+              return [...prev, { id: "streaming", role: "assistant" as const, content: currentContent }];
+            });
+          },
+          onDone: () => {
+            setChatMessages(prev => prev.map(m => m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m));
+            if (assistantSoFar) speak(assistantSoFar.length > 300 ? assistantSoFar.slice(0, 300) + "..." : assistantSoFar);
+            setIsAILoading(false);
+            endVoiceCall();
+          },
+          onError: () => { speak("Mi dispiace, riprova tra poco!"); setIsAILoading(false); endVoiceCall(); },
+        });
+      } catch {
+        speak("Errore nella risposta. Riprova.");
+        setIsAILoading(false);
+        endVoiceCall();
+      }
     }
   };
 
-  const endVoiceCall = () => {
+  const endVoiceCall = useCallback(() => {
+    processedVoiceCommandRef.current = null;
     stopListening();
     resetTranscript();
     setIsVoiceCallActive(false);
     setVoicePhase("listening");
-  };
+    window.setTimeout(() => {
+      try { startWakeWordListening(); } catch { /* ignore */ }
+    }, 700);
+  }, [stopListening, resetTranscript, startWakeWordListening]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -222,7 +329,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
   useEffect(() => {
     if (profile?.display_name) {
       setChatMessages(prev => prev.map(m => 
-        m.id === "welcome" 
+        m.id === "welcome"
           ? { ...m, content: `Ciao ${profile.display_name}! 👋 Sono Stella AI. Chiedimi qualsiasi cosa!` }
           : m
       ));
@@ -231,7 +338,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
   const sendMessage = useCallback(async () => {
     const text = chatInput.trim();
-    if (!text || isAILoading || !user) return;
+    if (!text || isAILoading) return;
 
     const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: text };
     setChatMessages(prev => [...prev, userMsg]);
@@ -259,11 +366,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
     try {
       await streamChat({
-        userId: user.id,
+        userId: user?.id,
         messages: history as any,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => {
-          setChatMessages(prev => prev.map(m => 
+          setChatMessages(prev => prev.map(m =>
             m.id === "streaming" ? { ...m, id: (Date.now() + 1).toString() } : m
           ));
           setIsAILoading(false);
@@ -320,7 +427,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-primary">Stella</p>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {isSpeaking && "🔊 Rispondo..."}
                   {!isSpeaking && voicePhase === "listening" && "🎤 Ti ascolto..."}
                   {!isSpeaking && voicePhase === "processing" && "⚡ Eseguo..."}
@@ -372,7 +479,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold">Stella AI</h4>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {isWakeWordListening ? '🎙️ Dì "Stella" per attivare' : "Assistente STYLE"}
                   </p>
                 </div>
@@ -465,11 +572,11 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
                     {chatMessages.length <= 2 && !isAILoading && (
                       <div className="pt-1">
-                        <p className="text-[10px] text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
+                        <p className="text-xs text-muted-foreground font-medium mb-1.5">Prova a chiedere:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {suggestedQuestions.map(q => (
                             <button key={q} onClick={() => setChatInput(q)}
-                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-[10px] hover:border-primary/40 transition-colors">
+                              className="px-2.5 py-1 rounded-full bg-muted/50 border border-border/30 text-xs hover:border-primary/40 transition-colors">
                               {q}
                             </button>
                           ))}
@@ -501,7 +608,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
 
               {activeTab === "actions" && (
                 <div className="flex-1 overflow-y-auto p-3">
-                  <p className="text-[10px] text-muted-foreground font-medium mb-3">Cosa vuoi fare?</p>
+                  <p className="text-xs text-muted-foreground font-medium mb-3">Cosa vuoi fare?</p>
                   <div className="grid grid-cols-2 gap-2">
                     {quickActions.map(action => (
                       <motion.button key={action.path} whileTap={{ scale: 0.97 }}
@@ -511,7 +618,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                           <action.icon className={`w-5 h-5 ${action.color}`} />
                         </div>
                         <span className="text-xs font-semibold">{action.label}</span>
-                        <span className="text-[9px] text-muted-foreground">{action.desc}</span>
+                        <span className="text-xs text-muted-foreground">{action.desc}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -524,7 +631,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                     <div className="text-center py-8">
                       <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                       <p className="text-xs text-muted-foreground">Nessun suggerimento al momento</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Continua a usare l'app!</p>
+                      <p className="text-xs text-muted-foreground mt-1">Continua a usare l'app!</p>
                     </div>
                   ) : (
                     suggestions.map((suggestion) => (
@@ -539,7 +646,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                                 handleSuggestionClick(suggestion, btn);
                                 if (btn.action === "navigate") setIsMinimized(true);
                               }}
-                              className={`px-3 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
+                              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
                                 btn.action === "dismiss"
                                   ? "bg-muted text-muted-foreground hover:bg-muted/80"
                                   : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -562,91 +669,40 @@ export default function ChatbotWidget({ className = "" }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Draggable FAB Button — Messenger style */}
+      {/* Single Stella AI Floating Button — Draggable */}
       {isMinimized && (
         <motion.button
           ref={fabRef}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: isDragging ? 1.1 : 1 }}
-          className="w-13 h-13 rounded-full gradient-primary shadow-glow flex items-center justify-center relative touch-none select-none"
-          style={{
-            width: 52,
-            height: 52,
-            position: "fixed",
-            right: fabPos.x === 0 ? 16 : undefined,
-            bottom: fabPos.y === 0 ? 80 : undefined,
-            left: fabPos.x !== 0 ? fabPos.x : undefined,
-            top: fabPos.y !== 0 ? fabPos.y : undefined,
-            zIndex: 9999,
-            transition: isDragging ? "none" : "transform 0.2s ease",
-          }}
-          onTouchStart={(e) => {
-            const touch = e.touches[0];
-            const rect = fabRef.current?.getBoundingClientRect();
-            if (!rect) return;
-            dragStartRef.current = {
-              x: touch.clientX,
-              y: touch.clientY,
-              posX: rect.left,
-              posY: rect.top,
-              moved: false,
-            };
-            setIsDragging(true);
-          }}
-          onTouchMove={(e) => {
-            if (!isDragging) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - dragStartRef.current.x;
-            const dy = touch.clientY - dragStartRef.current.y;
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-              dragStartRef.current.moved = true;
-            }
-            const newX = Math.max(0, Math.min(window.innerWidth - 56, dragStartRef.current.posX + dx));
-            const newY = Math.max(0, Math.min(window.innerHeight - 56, dragStartRef.current.posY + dy));
-            setFabPos({ x: newX, y: newY });
-          }}
-          onTouchEnd={() => {
-            setIsDragging(false);
-            if (!dragStartRef.current.moved) {
-              setIsMinimized(false);
-            }
-            // Snap to nearest edge
-            if (fabPos.x !== 0 || fabPos.y !== 0) {
-              const snapX = fabPos.x < window.innerWidth / 2 ? 8 : window.innerWidth - 60;
-              setFabPos(prev => ({ ...prev, x: snapX }));
-            }
-          }}
-          onMouseDown={(e) => {
-            const rect = fabRef.current?.getBoundingClientRect();
-            if (!rect) return;
-            dragStartRef.current = { x: e.clientX, y: e.clientY, posX: rect.left, posY: rect.top, moved: false };
-          }}
-          onClick={() => {
-            if (!dragStartRef.current.moved) {
-              setIsMinimized(false);
-            }
-          }}
+          type="button"
+          aria-label="Apri Stella AI"
+          drag
+          dragConstraints={{ left: -300, right: 0, top: -500, bottom: 0 }}
+          dragElastic={0.1}
+          whileDrag={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          onClick={() => setIsMinimized(false)}
+          className="fixed z-[9999] right-4 bottom-[88px] w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-glow cursor-grab active:cursor-grabbing"
         >
-          <Sparkles className="w-6 h-6 text-primary-foreground" />
-          {isWakeWordListening && (
-            <>
-              <span className="absolute -top-0.5 -left-0.5 w-3 h-3 rounded-full bg-accent border-2 border-background animate-pulse" />
-              <span className="absolute inset-0 rounded-full border-2 border-accent/40 animate-ping" style={{ animationDuration: "2.5s" }} />
-            </>
-          )}
+          {/* Rotating sparkle animation */}
+          <motion.div
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          >
+            <Sparkles className="w-6 h-6 text-primary-foreground" />
+          </motion.div>
+
+          {/* Pulse ring animation */}
+          <span className="absolute inset-0 rounded-full border-2 border-primary/40 animate-ping" style={{ animationDuration: "3s" }} />
+
+          {/* Suggestions badge */}
           {suggestions.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
               {suggestions.length}
             </span>
           )}
         </motion.button>
-      )}
-
-      {/* Wake word hint */}
-      {isMinimized && isWakeWordListening && fabPos.x === 0 && fabPos.y === 0 && (
-        <p className="text-center text-[9px] text-muted-foreground mt-1 font-medium" style={{ position: "fixed", bottom: 64, right: 8, zIndex: 9998 }}>
-          🎙️ Dì "Stella"
-        </p>
       )}
 
       {/* Voice commands help sheet */}
@@ -673,7 +729,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold">Comandi Vocali Stella</h3>
-                  <p className="text-[10px] text-muted-foreground">Parla senza toccare lo schermo</p>
+                  <p className="text-xs text-muted-foreground">Parla senza toccare lo schermo</p>
                 </div>
                 <button onClick={() => setShowVoiceHelp(false)} className="ml-auto w-7 h-7 rounded-full bg-muted flex items-center justify-center">
                   <X className="w-3.5 h-3.5" />
@@ -691,7 +747,7 @@ export default function ChatbotWidget({ className = "" }: Props) {
                   { title: "❓ AI libero", cmds: ['Dopo "Stella", fai qualsiasi domanda:', '"Quale taglio di capelli va di moda?"', '"Come funziona il wallet?"'] },
                 ].map(section => (
                   <div key={section.title}>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{section.title}</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{section.title}</p>
                     <div className="space-y-1">
                       {section.cmds.map(cmd => (
                         <div key={cmd} className="px-3 py-1.5 rounded-lg bg-muted/40 border border-border/30">

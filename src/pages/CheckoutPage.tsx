@@ -41,24 +41,30 @@ export default function CheckoutPage() {
   const handlePay = async () => {
     setProcessing(true);
     try {
-      // Stripe-based payments (card, paypal, klarna)
+      // Stripe-based payments (card, paypal, klarna) — webhook records receipt
       if (selected === "card" || selected === "paypal" || selected === "klarna") {
+        const successUrl =
+          type === "booking"
+            ? `${window.location.origin}/my-bookings?payment=success`
+            : `${window.location.origin}/wallet?payment=success`;
         const { data, error } = await supabase.functions.invoke("create-checkout", {
           body: {
-            priceId: null, // One-off payment
+            priceId: null,
             mode: "payment",
             amount: Math.round(amount * 100),
             description,
-            successUrl: `${window.location.origin}/wallet?payment=success`,
-            cancelUrl: `${window.location.origin}/checkout?amount=${amount}&desc=${description}&type=${type}&ref=${refId}`,
+            refId,
+            refType: type,
+            successUrl,
+            cancelUrl: `${window.location.origin}/checkout?amount=${amount}&desc=${encodeURIComponent(description)}&type=${type}&ref=${refId}`,
           },
         });
         if (error) throw error;
         if (data?.url) {
-          window.open(data.url, "_blank");
-          setProcessing(false);
+          window.location.href = data.url;
           return;
         }
+        throw new Error("Stripe URL non disponibile");
       }
 
       if (selected === "wallet") {
@@ -92,8 +98,9 @@ export default function CheckoutPage() {
         status: "paid",
       });
 
-      // Track platform commission (5%)
-      const commissionAmount = amount * 0.05;
+      // Track platform commission (15% - V7 Enterprise SaaS policy)
+      const COMMISSION_RATE = 15;
+      const commissionAmount = amount * (COMMISSION_RATE / 100);
       if (refId) {
         // Get seller id from product or booking
         let sellerId = null;
@@ -106,7 +113,7 @@ export default function CheckoutPage() {
             seller_id: sellerId,
             buyer_id: user.id,
             order_amount: amount,
-            commission_rate: 5,
+            commission_rate: COMMISSION_RATE,
             commission_amount: commissionAmount,
             commission_type: type === "product" ? "product" : "service",
           });

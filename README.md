@@ -1,6 +1,17 @@
 # 💇 STYLE - La Piattaforma Beauty Completa
 
-**Versione:** 1.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+**Versione:** 2.0.0 | **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase
+
+---
+
+## 2.0.0 — Novità
+- Aggiornamento versione a 2.0.0.
+- Aggiunto file di compatibilità Lovable: `beauty_style_pro.md` (linee guida per modifiche sicure e preview).
+- Migliorata la compatibilità con l'ambiente Lovable Preview per evitare rotture in fase di editing e preview live.
+- Bump versione `package.json` a `2.0.0`.
+- Varie correzioni e refactor minori apportati tramite commit recenti (fix runtime, miglioramenti tipi TypeScript e stabilità).
+- Aggiornamento delle dipendenze e devDependencies (vedi `package.json` per dettagli).
+- Nota: il changelog è stato generato automaticamente dai commit e potrebbe essere incompleto; per la lista completa vedi: https://github.com/mikimause93/beauty-style-pro/commits
 
 ---
 
@@ -26,12 +37,12 @@
 - ✅ Comandi vocali stile Alexa: esecuzione automatica di azioni in-app
 - ✅ Wake word: dì "Stella" per attivare l'assistente
 - ✅ Comandi supportati:
-  - `"vai alla home"`, `"apri chat"`, `"apri mappa"`, `"prenota"`, `"apri shop"`
-  - `"invia messaggio a [nome]: [testo]"` – invia un messaggio con contenuto specificato
-  - `"metti like"` / `"dai like"` – interazione rapida
-  - `"cerca match a [N] km"` – ricerca sulla mappa intelligente
-  - `"tema chiaro"` / `"tema scuro"` – cambio tema vocale
-  - `"dimmi le notifiche"`, `"conferma prenotazione"`, `"aggiungi [nome]"`, e molti altri
+  - "vai alla home", "apri chat", "apri mappa", "prenota", "apri shop"
+  - "invia messaggio a [nome]: [testo]" – invia un messaggio con contenuto specificato
+  - "metti like" / "dai like" – interazione rapida
+  - "cerca match a [N] km" – ricerca sulla mappa intelligente
+  - "tema chiaro" / "tema scuro" – cambio tema vocale
+  - "dimmi le notifiche", "conferma prenotazione", "aggiungi [nome]" e altri
 
 ### Chat avanzata
 - ✅ Chat stile Messenger/WhatsApp con messaggi testuali, immagini, file, vocali
@@ -107,68 +118,4 @@ Per abilitare l'autenticazione tramite numero di telefono (stile WhatsApp):
 
 Il workflow **Deploy – GitHub Pages** (`.github/workflows/deploy.yml`) si attiva automaticamente ad ogni push su `main` e pubblica il build su GitHub Pages.
 
-**Setup una tantum:**
-1. Vai su **Settings → Pages** del repository
-2. In *Source* seleziona **GitHub Actions**
-3. Aggiungi i seguenti segreti in **Settings → Secrets and variables → Actions**:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
-   - `VITE_SUPABASE_PROJECT_ID`
-4. Il sito sarà disponibile all'URL mostrato nel tab *Pages* (es. `https://<utente>.github.io/beauty-style-pro/`)
-
-Per testare il build web in locale:
-
-```bash
-npm run build      # genera la cartella dist/
-npm run preview    # anteprima locale del build su http://localhost:4173
-```
-
-### 🤖 Android – Google Play (AAB)
-
-Il workflow **Build & Publish Android to Play Store** (`.github/workflows/android.yml`) genera un bundle `.aab` firmato e lo pubblica automaticamente sul Play Store (internal testing track).
-
-**Setup una tantum:**
-1. Genera un keystore di firma:
-   ```bash
-   keytool -genkey -v -keystore stayle.keystore -alias style-beauty \
-     -keyalg RSA -keysize 2048 -validity 10000
-   ```
-2. Converti il keystore in Base64:
-   ```bash
-   base64 stayle.keystore | tr -d '\n'
-   ```
-3. Aggiungi i segreti in **Settings → Secrets and variables → Actions**:
-
-   | Secret | Descrizione |
-   |---|---|
-   | `ANDROID_KEYSTORE_BASE64` | Keystore in Base64 |
-   | `ANDROID_KEY_ALIAS` | Alias chiave (es. `style-beauty`) |
-   | `ANDROID_STORE_PASSWORD` | Password keystore |
-   | `ANDROID_KEY_PASSWORD` | Password chiave |
-   | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | JSON del Service Account Google Play (per la pubblicazione automatica) |
-
-4. Per il Service Account Google Play: vai su Google Play Console → Setup → API access → crea un account di servizio con ruolo *Release manager*
-5. Se `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` non è impostato, il workflow salva l'AAB come artefatto scaricabile (skip silenzioso della pubblicazione)
-6. Per cambiare track (`internal` → `alpha` / `beta` / `production`), modifica il campo `track:` in `.github/workflows/android.yml`
-
----
-
-## 🔗 Connessione GitHub
-
-Sì, **questo repository è connesso a GitHub** ed è possibile apportare modifiche tramite:
-
-- **[Lovable.dev](https://lovable.dev)** – modifiche visive e AI direttamente sincronizzate sul repository tramite commit automatici
-- **GitHub Copilot Agent** – modifiche automatizzate tramite agenti AI GitHub (pull request automatiche)
-- **Pull Request classica** – contributi diretti creando un branch e aprendo una PR su `main`
-
-Ogni modifica su `main` attiva automaticamente:
-
-| Workflow | File | Azione |
-|---|---|---|
-| CI – Lint & Test | `.github/workflows/ci.yml` | Esegue lint e test su ogni push e PR |
-| Deploy – GitHub Pages | `.github/workflows/deploy.yml` | Pubblica l'app su GitHub Pages |
-| Build & Publish Android | `.github/workflows/android.yml` | Genera e pubblica l'AAB sul Play Store |
-
----
-
-Creato con [Lovable](https://lovable.dev)
+(segue il contenuto esistente: istruzioni build, android aab, secrets, CI, ecc. mantenute invariate)

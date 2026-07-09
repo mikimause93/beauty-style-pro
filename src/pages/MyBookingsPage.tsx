@@ -106,7 +106,7 @@ export default function MyBookingsPage() {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusColors[b.status] || statusColors.pending}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${statusColors[b.status] || statusColors.pending}`}>
                   {b.status}
                 </span>
                 <span className="text-sm font-bold text-primary">€{b.total_price || b.services?.price || 0}</span>

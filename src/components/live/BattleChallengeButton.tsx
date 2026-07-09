@@ -100,7 +100,7 @@ export default function BattleChallengeButton({ streamId, currentProfessionalId,
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate">{pro.business_name}</p>
-                    <p className="text-[10px] text-muted-foreground">{pro.city || "Italia"} · {pro.rating || 0}</p>
+                    <p className="text-xs text-muted-foreground">{pro.city || "Italia"} · {pro.rating || 0}</p>
                   </div>
                   <span className="text-xs font-bold text-destructive flex items-center gap-1"><Swords className="w-3 h-3" /> Sfida</span>
                 </button>

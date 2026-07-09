@@ -20,7 +20,8 @@ async function registerPushNotifications(userId?: string) {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;
     
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
 
     // Try to subscribe to Web Push (VAPID) for background notifications
     // This enables push even when the app is completely closed (like Facebook/TikTok)

@@ -195,17 +195,17 @@ export default function QuizLivePage() {
             <div className="rounded-2xl bg-card border border-border/50 p-3 text-center">
               <Target className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-lg font-bold">{quizQuestions.length}</p>
-              <p className="text-[10px] text-muted-foreground">Domande</p>
+              <p className="text-xs text-muted-foreground">Domande</p>
             </div>
             <div className="rounded-2xl bg-card border border-border/50 p-3 text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-lg font-bold">{participants}</p>
-              <p className="text-[10px] text-muted-foreground">Partecipanti</p>
+              <p className="text-xs text-muted-foreground">Partecipanti</p>
             </div>
             <div className="rounded-2xl bg-card border border-border/50 p-3 text-center">
               <Trophy className="w-5 h-5 text-accent mx-auto mb-1" />
               <p className="text-lg font-bold">5K</p>
-              <p className="text-[10px] text-muted-foreground">QRC in palio</p>
+              <p className="text-xs text-muted-foreground">QRC in palio</p>
             </div>
           </div>
 
@@ -341,13 +341,13 @@ export default function QuizLivePage() {
           {/* Question */}
           <div className="rounded-2xl gradient-card border border-border/50 p-5 mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                 question.difficulty === "facile" ? "bg-green-500/20 text-green-400" :
                 question.difficulty === "medio" ? "bg-accent/20 text-accent" :
                 "bg-destructive/20 text-destructive"
               }`}>{question.difficulty}</span>
-              <span className="text-[10px] text-muted-foreground">{question.category}</span>
-              <span className="ml-auto text-[10px] text-primary font-semibold">+{question.reward * (streak >= 3 ? 2 : 1)} QRC</span>
+              <span className="text-xs text-muted-foreground">{question.category}</span>
+              <span className="ml-auto text-xs text-primary font-semibold">+{question.reward * (streak >= 3 ? 2 : 1)} QRC</span>
             </div>
             <h2 className="text-lg font-display font-bold leading-tight">{question.question}</h2>
           </div>
@@ -404,7 +404,7 @@ export default function QuizLivePage() {
                     used ? "bg-muted/30 opacity-40" : "glass hover:bg-primary/10"
                   }`}>
                   <l.icon className={`w-5 h-5 ${used ? "text-muted-foreground" : "text-primary"}`} />
-                  <span className="text-[10px] font-semibold">{l.label}</span>
+                  <span className="text-xs font-semibold">{l.label}</span>
                 </button>
               );
             })}

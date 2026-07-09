@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireUser } from "../_shared/auth-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,7 @@ serve(async (req) => {
   }
 
   try {
+    try { await requireUser(req); } catch (r) { if (r instanceof Response) return r; throw r; }
     const { action, data } = await req.json();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
 

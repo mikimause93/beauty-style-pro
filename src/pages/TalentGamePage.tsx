@@ -152,7 +152,7 @@ export default function TalentGamePage() {
                 <button key={amount} onClick={() => handleSuperVote(selectedContestant, amount)}
                   className="py-3 rounded-xl glass border border-primary/20 text-center hover:bg-primary/10 transition-all">
                   <p className="text-sm font-bold text-primary">x{amount}</p>
-                  <p className="text-[10px] text-muted-foreground">{amount * 10} QRC</p>
+                  <p className="text-xs text-muted-foreground">{amount * 10} QRC</p>
                 </button>
               ))}
             </div>
@@ -233,7 +233,7 @@ export default function TalentGamePage() {
               </div>
               <div className="flex-1">
                 <p className="text-xs font-semibold">{p.rank}° Posto</p>
-                <p className="text-[10px] text-muted-foreground">{p.prize}</p>
+                <p className="text-xs text-muted-foreground">{p.prize}</p>
               </div>
             </div>
           ))}
@@ -251,16 +251,16 @@ export default function TalentGamePage() {
                   className="min-w-[160px] rounded-2xl bg-card border border-border/50 overflow-hidden shrink-0 text-left hover:border-primary/30 transition-all">
                   <div className="relative aspect-[4/3]">
                     <img src={c.thumbnail} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold">
+                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
                       <span className="w-1.5 h-1.5 rounded-full bg-destructive-foreground animate-pulse" /> LIVE
                     </div>
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full glass text-[9px]">
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full glass text-xs">
                       <Eye className="w-3 h-3" /> {c.votes}
                     </div>
                   </div>
                   <div className="p-3">
                     <p className="text-xs font-semibold truncate">{c.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{c.category}</p>
+                    <p className="text-xs text-muted-foreground">{c.category}</p>
                   </div>
                 </button>
               ))}
@@ -292,10 +292,10 @@ export default function TalentGamePage() {
                 </div>
                 <p className="text-[11px] text-muted-foreground">{c.category}</p>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5">
+                  <span className="text-xs text-primary font-semibold flex items-center gap-0.5">
                     <Trophy className="w-3 h-3" /> {c.score}
                   </span>
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                     <Heart className="w-3 h-3" /> {c.votes}
                   </span>
                 </div>
